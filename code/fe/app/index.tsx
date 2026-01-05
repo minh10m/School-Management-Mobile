@@ -47,7 +47,7 @@ export default function OnboardingScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
+      <StatusBar hidden />
       <View className="flex-1 justify-between py-4">
         {/* Header - Skip Button */}
         <View className="flex-row justify-end pt-4 px-6">

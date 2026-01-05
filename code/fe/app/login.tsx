@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Link, router } from 'expo-router';
+import { Link, router, Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 
@@ -10,7 +10,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
+      <StatusBar hidden />
       <View className="flex-1 px-6 justify-center">
         
         {/* Illustration */}
@@ -65,7 +65,10 @@ export default function LoginScreen() {
         </View>
 
         {/* Log In Button */}
-        <TouchableOpacity className="bg-bright-blue w-full py-4 rounded-xl items-center active:opacity-90 mb-4">
+        <TouchableOpacity 
+            className="bg-bright-blue w-full py-4 rounded-xl items-center active:opacity-90 mb-4"
+            onPress={() => router.replace('/home' as Href)}
+        >
             <Text className="text-white font-poppins-semibold text-lg">Log in</Text>
         </TouchableOpacity>
 
