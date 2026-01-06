@@ -4,9 +4,43 @@ import { StatusBar } from 'expo-status-bar';
 import { Link, router, Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, database } from '../config/firebase';
+import { registerForPushNotificationsAsync } from '../utils/notifications';
 
 export default function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Please enter both email and password");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      
+      // Register for Push Notifications
+      const token = await registerForPushNotificationsAsync();
+      if (token) {
+        await setDoc(doc(database, 'users', email.toLowerCase()), {
+            pushToken: token
+        }, { merge: true });
+      }
+
+      router.replace('/home' as Href);
+    } catch (error: any) {
+      console.error(error);
+      alert("Login failed: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -34,6 +68,10 @@ export default function LoginScreen() {
                     placeholder="Email id or Phone number"
                     placeholderTextColor="#9CA3AF"
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 font-poppins text-base"
+                    value={email}
+                    onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
                 />
             </View>
             
@@ -43,6 +81,8 @@ export default function LoginScreen() {
                     placeholderTextColor="#9CA3AF"
                     secureTextEntry={!passwordVisible}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 font-poppins text-base pr-12"
+                    value={password}
+                    onChangeText={setPassword}
                 />
                 <TouchableOpacity 
                     className="absolute right-4"
@@ -66,10 +106,13 @@ export default function LoginScreen() {
 
         {/* Log In Button */}
         <TouchableOpacity 
-            className="bg-bright-blue w-full py-4 rounded-xl items-center active:opacity-90 mb-4"
-            onPress={() => router.replace('/home' as Href)}
+            className={`bg-bright-blue w-full py-4 rounded-xl items-center active:opacity-90 mb-4 ${loading ? 'opacity-70' : ''}`}
+            onPress={handleLogin}
+            disabled={loading}
         >
-            <Text className="text-white font-poppins-semibold text-lg">Log in</Text>
+            <Text className="text-white font-poppins-semibold text-lg">
+                {loading ? 'Logging in...' : 'Log in'}
+            </Text>
         </TouchableOpacity>
 
         {/* Sign Up Link */}
