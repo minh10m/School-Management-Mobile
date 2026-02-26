@@ -34,3 +34,35 @@ coverage/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# =========================
+# .NET / ASP.NET Core
+# =========================
+
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+
+# Logs
+*.log
+
+# Test results
+TestResults/
+
+# NuGet
+*.nupkg
+*.snupkg
+
+# ASP.NET Core Scaffolding
+ScaffoldingReadMe.txt
+
+# Local secrets
+appsettings.Development.json
