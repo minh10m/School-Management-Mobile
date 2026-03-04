@@ -19,6 +19,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("NeonConnectionString")));
 
+// Configure identity services
 builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>().
     AddEntityFrameworkStores<ApplicationDbContext>();
 
