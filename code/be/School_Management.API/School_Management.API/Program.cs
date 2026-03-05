@@ -15,15 +15,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configurate IdentityDbContext
+// Configure IdentityDbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("NeonConnectionString")));
 
 // Configure identity services
-builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>().
-    AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentityCore<AppUser>()
+    .AddRoles<IdentityRole<Guid>>()
+    .AddTokenProvider<DataProtectorTokenProvider<AppUser>>("SchoolManager")
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
-// Configurate JWT authentication
+// Configure JWT authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
     AddJwtBearer(options =>
     options.TokenValidationParameters = new TokenValidationParameters
@@ -37,7 +40,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     });
+
+// Configure Identity options (password and lockout policy)
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Password policy
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 8;
+    options.Password.RequiredUniqueChars = 1;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+
+    // Lockout policy
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
+    options.Lockout.AllowedForNewUsers = true;
+
+});
+
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
