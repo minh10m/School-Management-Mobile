@@ -1,17 +1,13 @@
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Dimensions } from 'react-native';
-import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import TimetableView from '../../components/calendar/TimetableView';
 import AttendanceView from '../../components/calendar/AttendanceView';
 import EventsView from '../../components/calendar/EventsView';
 
 const TABS = ['Attendance', 'Timetable', 'Events'];
-
-
-
-
 
 export default function CalendarScreen() {
   const { tab } = useLocalSearchParams();
@@ -29,14 +25,17 @@ export default function CalendarScreen() {
        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
             {/* custom tab selector */}
             <View className="flex-row justify-between mb-6 mx-6 mt-4 bg-white rounded-xl">
-                {TABS.map((tab) => (
+                {TABS.map((t) => (
                     <TouchableOpacity 
-                        key={tab} 
-                        onPress={() => setActiveTab(tab)}
-                        className={`flex-1 py-3 items-center border-b-2 ${activeTab === tab ? 'border-blue-500' : 'border-transparent'}`}
+                        key={t} 
+                        onPress={() => setActiveTab(t)}
+                        className={`flex-1 py-3 items-center border-b-2 ${activeTab === t ? 'border-blue-500' : 'border-transparent'}`}
                     >
-                        <Text className={`font-poppins-bold text-sm ${activeTab === tab ? 'text-blue-500' : 'text-gray-400'}`}>
-                            {tab}
+                        <Text
+                            className={`text-sm ${activeTab === t ? 'text-blue-500' : 'text-gray-400'}`}
+                            style={{ fontFamily: activeTab === t ? 'Poppins-Bold' : 'Poppins-Regular' }}
+                        >
+                            {t}
                         </Text>
                     </TouchableOpacity>
                 ))}

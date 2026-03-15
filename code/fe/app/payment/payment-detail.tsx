@@ -1,4 +1,5 @@
-import { View, Text, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -26,7 +27,7 @@ export default function PaymentDetailScreen() {
               <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex-1 items-center">
-              <Text className="text-black font-poppins-bold text-lg">Payment Review</Text>
+              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Payment Review</Text>
           </View>
           <View className="w-10" /> 
       </View>
@@ -67,21 +68,21 @@ export default function PaymentDetailScreen() {
 
               {/* Your Pending Payment */}
               <View className="items-center mb-10">
-                  <Text className="text-black font-poppins-medium text-base mb-2">Your Pending Payment</Text>
-                  <Text className="text-[#136ADA] font-poppins-bold text-3xl">₹ {totalAmount}</Text>
+                  <Text className="text-black text-base mb-2" style={{ fontFamily: 'Poppins-Medium' }}>Your Pending Payment</Text>
+                  <Text className="text-[#136ADA] text-3xl" style={{ fontFamily: 'Poppins-Bold' }}>₹ {totalAmount}</Text>
               </View>
 
               {/* Fee Details List */}
               <View className="px-6">
-                  <Text className="text-black font-poppins-bold text-lg mb-6">Fees Details</Text>
+                  <Text className="text-black text-lg mb-6" style={{ fontFamily: 'Poppins-Bold' }}>Fees Details</Text>
                   
                   <View className="space-y-5 gap-5">
                       {feeDetails.map((item, index) => (
                           <View key={index} className="flex-row justify-between items-center">
-                               <Text className="text-black font-poppins text-base text-gray-700">{item.label}</Text>
+                               <Text className="text-gray-700 text-base" style={{ fontFamily: 'Poppins-Regular' }}>{item.label}</Text>
                                <View className="flex-row items-center">
-                                  <Text className="text-black font-poppins-bold text-base mr-1">₹</Text>
-                                  <Text className="text-black font-poppins text-base text-gray-600">{item.amount}</Text>
+                                  <Text className="text-black text-base mr-1" style={{ fontFamily: 'Poppins-Bold' }}>₹</Text>
+                                  <Text className="text-gray-600 text-base" style={{ fontFamily: 'Poppins-Regular' }}>{item.amount}</Text>
                                </View>
                           </View>
                       ))}
@@ -91,8 +92,8 @@ export default function PaymentDetailScreen() {
 
                       {/* Total Fees */}
                       <View className="flex-row justify-between items-center">
-                           <Text className="text-black font-poppins-bold text-lg">Total Fees</Text>
-                           <Text className="text-[#136ADA] font-poppins-bold text-lg">₹ {totalAmount}</Text>
+                           <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Total Fees</Text>
+                           <Text className="text-[#136ADA] text-lg" style={{ fontFamily: 'Poppins-Bold' }}>₹ {totalAmount}</Text>
                       </View>
                   </View>
               </View>
@@ -105,7 +106,7 @@ export default function PaymentDetailScreen() {
                   className="bg-[#136ADA] py-4 rounded-xl items-center shadow-md shadow-blue-200"
                   onPress={() => router.push('/payment/success' as any)}
               >
-                  <Text className="text-white font-poppins-bold text-base">Pay Now</Text>
+                  <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Pay Now</Text>
               </TouchableOpacity>
           </View>
       </View>

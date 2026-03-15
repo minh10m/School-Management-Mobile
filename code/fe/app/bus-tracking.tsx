@@ -1,4 +1,5 @@
-import { View, Text, SafeAreaView, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -29,7 +30,7 @@ export default function BusTrackingScreen() {
                   <Ionicons name="arrow-back" size={24} color="black" />
              </TouchableOpacity>
              <View className="bg-white px-4 py-2 rounded-full shadow-sm">
-                  <Text className="text-black font-poppins-bold text-sm">Bus Tracking</Text>
+                  <Text className="text-black text-sm" style={{ fontFamily: 'Poppins-Bold' }}>Bus Tracking</Text>
              </View>
              <View className="w-10" /> 
           </View>
@@ -41,7 +42,7 @@ export default function BusTrackingScreen() {
                     <Ionicons name="bus" size={20} color="white" />
                </View>
                <View className="bg-white px-2 py-1 rounded-md absolute -top-8 -left-4 shadow-sm">
-                    <Text className="text-xs font-poppins-bold text-[#136ADA]">TN 01 AB 1234</Text>
+                    <Text className="text-xs text-[#136ADA]" style={{ fontFamily: 'Poppins-Bold' }}>TN 01 AB 1234</Text>
                </View>
            </View>
 
@@ -65,10 +66,10 @@ export default function BusTrackingScreen() {
                      <Image source={{ uri: 'https://via.placeholder.com/100' }} className="w-full h-full" />
                   </View>
                   <View>
-                      <Text className="text-black font-poppins-bold text-lg">Mr. Ramachandran</Text>
+                      <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Mr. Ramachandran</Text>
                       <View className="flex-row items-center gap-1">
                           <Ionicons name="star" size={14} color="#FFD700" />
-                          <Text className="text-gray-500 font-poppins text-xs">4.8 (Driver)</Text>
+                          <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>4.8 (Driver)</Text>
                       </View>
                   </View>
               </View>
@@ -91,8 +92,8 @@ export default function BusTrackingScreen() {
                        <View className="w-[2px] h-8 bg-gray-300 my-1" />
                   </View>
                   <View>
-                      <Text className="text-gray-400 font-poppins text-sm">School Campus</Text>
-                      <Text className="text-gray-300 font-poppins text-xs">Started at 3:10 PM</Text>
+                      <Text className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins-Regular' }}>School Campus</Text>
+                      <Text className="text-gray-300 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>Started at 3:10 PM</Text>
                   </View>
               </View>
                
@@ -103,8 +104,8 @@ export default function BusTrackingScreen() {
                        <View className="w-[2px] h-8 bg-gray-300 my-1" />
                   </View>
                   <View>
-                      <Text className="text-black font-poppins-bold text-base">Nethaji Street</Text>
-                      <Text className="text-[#136ADA] font-poppins-medium text-xs">Arriving in 5 mins</Text>
+                      <Text className="text-black text-base" style={{ fontFamily: 'Poppins-Bold' }}>Nethaji Street</Text>
+                      <Text className="text-[#136ADA] text-xs" style={{ fontFamily: 'Poppins-Medium' }}>Arriving in 5 mins</Text>
                   </View>
               </View>
 
@@ -114,7 +115,7 @@ export default function BusTrackingScreen() {
                        <View className="w-4 h-4 rounded-full border-2 border-gray-300 bg-white" />
                   </View>
                   <View>
-                      <Text className="text-gray-500 font-poppins text-sm">Home</Text>
+                      <Text className="text-gray-500 text-sm" style={{ fontFamily: 'Poppins-Regular' }}>Home</Text>
                   </View>
               </View>
           </View>
