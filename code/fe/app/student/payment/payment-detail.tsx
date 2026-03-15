@@ -104,7 +104,7 @@ export default function PaymentDetailScreen() {
           <View className="absolute bottom-10 left-6 right-6">
               <TouchableOpacity 
                   className="bg-[#136ADA] py-4 rounded-xl items-center shadow-md shadow-blue-200"
-                  onPress={() => router.push('/payment/success' as any)}
+                  onPress={() => router.push('/student/payment/success' as any)}
               >
                   <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Pay Now</Text>
               </TouchableOpacity>

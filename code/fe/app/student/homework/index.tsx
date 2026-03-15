@@ -202,7 +202,7 @@ export default function HomeworkScreen() {
                     <View className="items-end">
                         <TouchableOpacity 
                             className="bg-bright-blue px-6 py-3 rounded-lg"
-                            onPress={() => router.push({ pathname: '/homework/homework-detail', params: { subject: item.subject } } as any)}
+                            onPress={() => router.push({ pathname: '/student/homework/homework-detail', params: { subject: item.subject } } as any)}
                         >
                             <Text className="text-white text-sm" style={{ fontFamily: 'Poppins-SemiBold' }}>Continue</Text>
                         </TouchableOpacity>

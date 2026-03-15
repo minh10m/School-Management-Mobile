@@ -83,7 +83,7 @@ export default function FeeScreen() {
           <View className="absolute bottom-10 left-6 right-6">
               <TouchableOpacity 
                   className="bg-[#136ADA] py-4 rounded-xl items-center shadow-md shadow-blue-200"
-                  onPress={() => router.push('/payment/payment-detail' as any)}
+                  onPress={() => router.push('/student/payment/payment-detail' as any)}
               >
                   <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Payment Details</Text>
               </TouchableOpacity>
