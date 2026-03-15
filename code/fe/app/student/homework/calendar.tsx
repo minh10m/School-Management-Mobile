@@ -4,9 +4,9 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import TimetableView from '../../components/calendar/TimetableView';
-import AttendanceView from '../../components/calendar/AttendanceView';
-import EventsView from '../../components/calendar/EventsView';
+import TimetableView from '../../../components/calendar/TimetableView';
+import AttendanceView from '../../../components/calendar/AttendanceView';
+import EventsView from '../../../components/calendar/EventsView';
 
 const TABS = ['Attendance', 'Timetable', 'Events'];
 

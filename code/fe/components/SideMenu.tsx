@@ -25,11 +25,12 @@ interface SideMenuProps {
 }
 
 const MENU_ITEMS = [
-    { icon: 'swap-horizontal-outline', label: 'Switch Profile' },
-    { icon: 'person-add-outline', label: 'Add Account' },
-    { icon: 'school-outline', label: 'Teacher info' },
-    { icon: 'card-outline', label: 'Payment History' },
-    { icon: 'settings-outline', label: 'Setting' },
+    { icon: 'shield-checkmark-outline', label: 'Admin Panel', route: '/admin' },
+    { icon: 'school-outline', label: 'Teacher Panel', route: '/teacher/edit-profile' },
+    { icon: 'swap-horizontal-outline', label: 'Switch Profile', route: null },
+    { icon: 'person-add-outline', label: 'Add Account', route: null },
+    { icon: 'card-outline', label: 'Payment History', route: null },
+    { icon: 'settings-outline', label: 'Setting', route: '/settings' },
 ];
 
 export default function SideMenu({ visible, onClose }: SideMenuProps) {
@@ -80,10 +81,17 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
 
                     {/* Menu Items */}
                     <View className="flex-1 px-6 py-6">
-                        {MENU_ITEMS.map((item, index) => (
-                            <TouchableOpacity key={index} className="flex-row items-center justify-between py-4 active:bg-gray-50 rounded-xl px-2">
+                    {MENU_ITEMS.map((item, index) => (
+                            <TouchableOpacity key={index} className="flex-row items-center justify-between py-4 active:bg-gray-50 rounded-xl px-2"
+                                onPress={() => {
+                                    if (item.route) {
+                                        onClose();
+                                        router.push(item.route as any);
+                                    }
+                                }}
+                            >
                                  <View className="flex-row items-center gap-4">
-                                    <Ionicons name={item.icon as any} size={22} color="#6B7280" />
+                                    <Ionicons name={item.icon as any} size={22} color={item.label === 'Admin Panel' ? '#136ADA' : '#6B7280'} />
                                     <Text className="text-gray-600 text-base" style={{ fontFamily: 'Poppins-Medium' }}>{item.label}</Text>
                                  </View>
                                  <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />

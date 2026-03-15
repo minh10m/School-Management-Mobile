@@ -62,7 +62,7 @@ export default function PaymentSuccessScreen() {
                   Ideally, this should be the card illustration from the design.
                 */}
                 <Image 
-                    source={require('../../assets/images/on-boarding-1.png')} 
+                    source={require('../../../assets/images/on-boarding-1.png')} 
                     style={{ width: '100%', height: '100%' }}
                     resizeMode="contain"
                 />

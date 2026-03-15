@@ -40,7 +40,7 @@ export default function HomeScreen() {
             <Ionicons name="book" size={24} color="#136ADA" />
             <Text className="text-bright-blue text-xl" style={{ fontFamily: 'Poppins-Bold' }}>School EDU</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push('/notifications' as any)}>
+          <TouchableOpacity onPress={() => router.push('/student/notifications' as any)}>
             <Ionicons name="notifications-outline" size={28} color="black" />
           </TouchableOpacity>
         </View>
@@ -88,19 +88,19 @@ export default function HomeScreen() {
                         className={`${item.color} w-[31%] py-6 rounded-2xl items-center justify-center gap-2`}
                         onPress={() => {
                             if (item.title === 'Home Work') {
-                                router.push('/homework' as any);
+                                router.push('/student/homework' as any);
                             } else if (item.title === 'Exams') {
-                                router.push('/exam-schedule' as any);
+                                router.push('/student/exam-schedule' as any);
                             } else if (item.title === 'Fee') {
-                                router.push('/payment' as any);
+                                router.push('/student/payment' as any);
                             } else if (item.title === 'Results') {
-                                router.push('/results' as any);
+                                router.push('/student/results' as any);
                             } else if (item.title === 'Timetable') {
                                 router.push({ pathname: '/(tabs)/calendar', params: { tab: 'Timetable' } } as any);
                             } else if (item.title === 'Attendance') {
                                 router.push({ pathname: '/(tabs)/calendar', params: { tab: 'Attendance' } } as any);
                             } else if (item.title === 'Bus Tracking') {
-                                router.push('/bus-tracking' as any);
+                                router.push('/student/bus-tracking' as any);
                             }
                         }}
                     >

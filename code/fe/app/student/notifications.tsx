@@ -17,7 +17,7 @@ const NOTIFICATIONS = [
         message: 'Lorem ipsum dolor sit amet, consectetur',
         time: '15 Min',
         unread: true,
-        avatar: require('../assets/images/on-boarding-1.png'), // Placeholder
+        avatar: require('../../assets/images/on-boarding-1.png'),
       },
       {
         id: '2',
@@ -25,7 +25,7 @@ const NOTIFICATIONS = [
         message: 'Lorem ipsum dolor sit amet, consectetur',
         time: '2 hr ago',
         unread: true,
-        avatar: require('../assets/images/on-boarding-2.png'), // Placeholder
+        avatar: require('../../assets/images/on-boarding-2.png'),
       },
     ],
   },
@@ -38,7 +38,7 @@ const NOTIFICATIONS = [
         message: 'Lorem ipsum dolor sit amet, consectetur',
         time: '09/03',
         unread: false,
-        avatar: require('../assets/images/on-boarding-3.png'), // Placeholder
+        avatar: require('../../assets/images/on-boarding-3.png'),
       },
       {
         id: '4',
@@ -46,7 +46,7 @@ const NOTIFICATIONS = [
         message: 'Lorem ipsum dolor sit amet, consectetur',
         time: '08/03',
         unread: false,
-        avatar: require('../assets/images/on-boarding-1.png'), // Placeholder
+        avatar: require('../../assets/images/on-boarding-1.png'),
       },
       {
         id: '5',
@@ -54,7 +54,7 @@ const NOTIFICATIONS = [
         message: 'Lorem ipsum dolor sit amet, consectetur',
         time: '05/03',
         unread: false,
-        avatar: require('../assets/images/on-boarding-2.png'), // Placeholder
+        avatar: require('../../assets/images/on-boarding-2.png'),
       },
       {
         id: '6',
@@ -62,7 +62,7 @@ const NOTIFICATIONS = [
         message: 'Lorem ipsum dolor sit amet, consectetur',
         time: '03/03',
         unread: false,
-        avatar: require('../assets/images/on-boarding-3.png'), // Placeholder
+        avatar: require('../../assets/images/on-boarding-3.png'),
       },
       {
         id: '7',
@@ -70,7 +70,7 @@ const NOTIFICATIONS = [
         message: 'Lorem ipsum dolor sit amet, consectetur',
         time: '27/02',
         unread: false,
-        avatar: require('../assets/images/on-boarding-2.png'), // Placeholder
+        avatar: require('../../assets/images/on-boarding-2.png'),
       },
     ],
   },
