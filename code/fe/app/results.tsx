@@ -1,4 +1,5 @@
-import { View, Text, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -24,7 +25,7 @@ export default function ResultsScreen() {
               <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex-1 items-center">
-              <Text className="text-black font-poppins-bold text-lg">Result</Text>
+              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Result</Text>
           </View>
           <View className="w-10" /> 
       </View>
@@ -33,7 +34,7 @@ export default function ResultsScreen() {
           {/* Dropdown Placeholder */}
           <View className="px-6 mb-6">
               <View className="bg-white rounded-xl border border-gray-100 p-4 flex-row justify-between items-center shadow-sm">
-                  <Text className="text-black font-poppins-medium text-sm">Quaterly Exam</Text>
+                  <Text className="text-black text-sm" style={{ fontFamily: 'Poppins-Medium' }}>Quaterly Exam</Text>
                   <Ionicons name="chevron-down" size={20} color="black" />
               </View>
           </View>
@@ -45,14 +46,14 @@ export default function ResultsScreen() {
                   {/* Faded track imitation (partial) - simplistic approach */}
                   <View className="absolute w-24 h-24 rounded-full border-8 border-[#136ADA]/10 top-[-8] left-[-8]" />
                   <View className="items-center">
-                      <Text className="text-black font-poppins-bold text-xl">95%</Text>
-                      <Text className="text-gray-400 font-poppins text-[10px]">Overall %</Text>
+                      <Text className="text-black text-xl" style={{ fontFamily: 'Poppins-Bold' }}>95%</Text>
+                      <Text className="text-gray-400 text-[10px]" style={{ fontFamily: 'Poppins-Regular' }}>Overall %</Text>
                   </View>
               </View>
 
               <View>
-                  <Text className="text-black font-poppins-bold text-base mb-1">Name : Dinesh Kumar</Text>
-                  <Text className="text-black font-poppins-bold text-base">Grade : A</Text>
+                  <Text className="text-black text-base mb-1" style={{ fontFamily: 'Poppins-Bold' }}>Name : Dinesh Kumar</Text>
+                  <Text className="text-black text-base" style={{ fontFamily: 'Poppins-Bold' }}>Grade : A</Text>
               </View>
           </View>
 
@@ -69,9 +70,9 @@ export default function ResultsScreen() {
 
               {/* Total Score Bubble */}
               <View className="items-center flex-row justify-between">
-                   <Text className="text-black font-poppins-bold text-lg">Total</Text>
+                   <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Total</Text>
                    <View className="w-20 h-20 bg-[#136ADA] rounded-full items-center justify-center shadow-lg shadow-blue-200">
-                      <Text className="text-white font-poppins-bold text-xl">477</Text>
+                      <Text className="text-white text-xl" style={{ fontFamily: 'Poppins-Bold' }}>477</Text>
                    </View>
               </View>
           </View>
@@ -91,14 +92,14 @@ function ResultItem({ data }: { data: any }) {
             
             {/* Subject Name and Dotted Line */}
             <View className="flex-1 flex-row items-center gap-2">
-                 <Text className="text-black font-poppins-medium text-base w-20">{data.subject}</Text>
+                 <Text className="text-black text-base w-20" style={{ fontFamily: 'Poppins-Medium' }}>{data.subject}</Text>
                  {/* Dotted Line */}
                  <View className="flex-1 h-[1px] border-t border-gray-300 border-dashed" style={{ borderStyle: 'dotted' }} />
             </View>
 
             {/* Mark */}
             <View className="w-10 h-10 bg-[#136ADA] rounded-full items-center justify-center ml-4">
-                 <Text className="text-white font-poppins-bold text-sm">{data.mark}</Text>
+                 <Text className="text-white text-sm" style={{ fontFamily: 'Poppins-Bold' }}>{data.mark}</Text>
             </View>
         </View>
     );

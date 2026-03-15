@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Dimensions, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -111,7 +112,7 @@ export default function HomeworkScreen() {
             <TouchableOpacity className="p-2" onPress={() => changeMonth(-1)}>
                  <Ionicons name="chevron-back" size={20} color="black" />
             </TouchableOpacity>
-            <Text className="text-black font-poppins-bold text-base">
+            <Text className="text-black text-base" style={{ fontFamily: 'Poppins-Bold' }}>
                 {currentDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
             </Text>
             <TouchableOpacity className="p-2" onPress={() => changeMonth(1)}>
@@ -141,10 +142,16 @@ export default function HomeworkScreen() {
                             onPress={() => setSelectedDate(item.date)}
                             className={`items-center justify-center w-14 h-20 rounded-2xl ${selected ? 'bg-bright-blue' : 'bg-white border border-gray-100'}`}
                         >
-                            <Text className={`font-poppins-medium text-base mb-1 ${selected ? 'text-white' : 'text-black'}`}>
+                            <Text
+                                className={`text-base mb-1 ${selected ? 'text-white' : 'text-black'}`}
+                                style={{ fontFamily: 'Poppins-Medium' }}
+                            >
                                 {item.day}
                             </Text>
-                            <Text className={`font-poppins text-xs ${selected ? 'text-white' : 'text-gray-400'}`}>
+                            <Text
+                                className={`text-xs ${selected ? 'text-white' : 'text-gray-400'}`}
+                                style={{ fontFamily: 'Poppins-Regular' }}
+                            >
                                 {item.dow}
                             </Text>
                         </TouchableOpacity>
@@ -163,10 +170,10 @@ export default function HomeworkScreen() {
                                 <Ionicons name="clipboard-outline" size={24} color="white" />
                             </View>
                             <View>
-                                <Text className="text-black font-poppins-bold text-lg">{item.subject}</Text>
+                                <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>{item.subject}</Text>
                                 <View className="flex-row items-center gap-1">
                                     <Ionicons name="time-outline" size={14} color="gray" />
-                                    <Text className="text-gray-400 font-poppins text-xs">{item.timeLeft}</Text>
+                                    <Text className="text-gray-400 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>{item.timeLeft}</Text>
                                 </View>
                             </View>
                         </View>
@@ -184,11 +191,11 @@ export default function HomeworkScreen() {
                                     transform: [{ rotate: '45deg' }]
                                 }} 
                              />
-                             <Text className="text-black font-poppins-bold text-xs">{item.progress}%</Text>
+                             <Text className="text-black text-xs" style={{ fontFamily: 'Poppins-Bold' }}>{item.progress}%</Text>
                          </View>
                     </View>
 
-                    <Text className="text-gray-500 font-poppins text-base mb-6">
+                    <Text className="text-gray-500 text-base mb-6" style={{ fontFamily: 'Poppins-Regular' }}>
                         {item.task}
                     </Text>
 
@@ -197,7 +204,7 @@ export default function HomeworkScreen() {
                             className="bg-bright-blue px-6 py-3 rounded-lg"
                             onPress={() => router.push({ pathname: '/homework/homework-detail', params: { subject: item.subject } } as any)}
                         >
-                            <Text className="text-white font-poppins-semibold text-sm">Continue</Text>
+                            <Text className="text-white text-sm" style={{ fontFamily: 'Poppins-SemiBold' }}>Continue</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

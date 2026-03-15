@@ -1,4 +1,5 @@
-import { View, Text, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -33,7 +34,7 @@ export default function ExamScheduleScreen() {
               <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex-1 items-center">
-              <Text className="text-black font-poppins-bold text-lg">Exam Schedule</Text>
+              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Exam Schedule</Text>
           </View>
           <View className="w-10" /> 
       </View>
@@ -57,22 +58,22 @@ function ExamCard({ data }: { data: ExamData }) {
             <View className="flex-1 p-5 pl-4">
                 {/* Header Row: Subject and Date */}
                 <View className="flex-row justify-between items-center mb-1">
-                    <Text className="text-black font-poppins-bold text-lg">{data.subject}</Text>
-                    <Text className="text-red-500 font-poppins-bold text-sm">{data.date}</Text>
+                    <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>{data.subject}</Text>
+                    <Text className="text-red-500 text-sm" style={{ fontFamily: 'Poppins-Bold' }}>{data.date}</Text>
                 </View>
 
                 {/* Time */}
-                <Text className="text-gray-400 font-poppins text-xs mb-3">{data.time}</Text>
+                <Text className="text-gray-400 text-xs mb-3" style={{ fontFamily: 'Poppins-Regular' }}>{data.time}</Text>
 
                 {/* Divider */}
                 <View className="h-[1px] bg-gray-200 w-full mb-3" />
 
                 {/* Marks Row */}
                 <View className="flex-row justify-between items-center">
-                    <Text className="text-gray-600 font-poppins text-xs">
+                    <Text className="text-gray-600 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>
                         Total Mark : <Text className="text-black">{data.totalMark}</Text>
                     </Text>
-                    <Text className="text-gray-600 font-poppins text-xs">
+                    <Text className="text-gray-600 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>
                         Pass Mark : <Text className="text-black">{data.passMark}</Text>
                     </Text>
                 </View>

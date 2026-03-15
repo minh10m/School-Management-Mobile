@@ -1,4 +1,5 @@
-import { View, Text, SectionList, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, SectionList, TouchableOpacity, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -122,10 +123,10 @@ export default function NotificationScreen() {
             {/* Content */}
             <View className="flex-1">
                 <View className="flex-row justify-between items-start">
-                    <Text className="text-black font-poppins-bold text-base">{item.title}</Text>
-                    <Text className="text-gray-400 font-poppins text-xs">{item.time}</Text>
+                    <Text className="text-black text-base" style={{ fontFamily: 'Poppins-Bold' }}>{item.title}</Text>
+                    <Text className="text-gray-400 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>{item.time}</Text>
                 </View>
-                <Text className="text-gray-400 font-poppins text-sm pr-4 mt-1" numberOfLines={2}>
+                <Text className="text-gray-400 text-sm pr-4 mt-1" style={{ fontFamily: 'Poppins-Regular' }} numberOfLines={2}>
                     {item.message}
                 </Text>
             </View>
@@ -133,7 +134,7 @@ export default function NotificationScreen() {
         )}
         renderSectionHeader={({ section: { title } }) => (
           <View className="px-6 py-2 bg-white mt-4">
-            <Text className="text-black font-poppins-medium text-lg">{title}</Text>
+            <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Medium' }}>{title}</Text>
           </View>
         )}
         stickySectionHeadersEnabled={false}

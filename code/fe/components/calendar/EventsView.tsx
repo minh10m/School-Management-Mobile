@@ -11,11 +11,11 @@ export default function EventsView() {
         <View className="px-6">
              {/* Select Month Dropdown (Visual Only) */}
             <View className="bg-white border border-gray-100 rounded-2xl p-4 mb-4 flex-row justify-between items-center">
-                <Text className="text-black font-poppins-bold text-sm">Select Month</Text>
+                <Text className="text-black text-sm" style={{ fontFamily: 'Poppins-Bold' }}>Select Month</Text>
                 <Ionicons name="chevron-down" size={20} color="black" />
             </View>
 
-            <Text className="text-black font-poppins-medium text-sm mb-4">July , 2024</Text>
+            <Text className="text-black text-sm mb-4" style={{ fontFamily: 'Poppins-Medium' }}>July , 2024</Text>
 
             {/* Events List */}
             <View className="pb-10">
@@ -27,8 +27,8 @@ export default function EventsView() {
                         </View>
                         
                         <View className="flex-1">
-                            <Text className="text-black font-poppins-bold text-base mb-1">{event.title}</Text>
-                            <Text className="text-gray-500 font-poppins text-xs">{event.date}</Text>
+                            <Text className="text-black text-base mb-1" style={{ fontFamily: 'Poppins-Bold' }}>{event.title}</Text>
+                            <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>{event.date}</Text>
                         </View>
                     </View>
                 ))}

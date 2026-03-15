@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -35,7 +36,10 @@ export default function CalendarScreen() {
                         onPress={() => setActiveTab(tab)}
                         className={`flex-1 py-3 items-center border-b-2 ${activeTab === tab ? 'border-blue-500' : 'border-transparent'}`}
                     >
-                        <Text className={`font-poppins-bold text-sm ${activeTab === tab ? 'text-blue-500' : 'text-gray-400'}`}>
+                        <Text
+                            className={`text-sm ${activeTab === tab ? 'text-blue-500' : 'text-gray-400'}`}
+                            style={{ fontFamily: activeTab === tab ? 'Poppins-Bold' : 'Poppins-Regular' }}
+                        >
                             {tab}
                         </Text>
                     </TouchableOpacity>

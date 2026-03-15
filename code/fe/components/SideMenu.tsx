@@ -70,9 +70,9 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                                 </View>
                             </View>
                             <View>
-                                <Text className="text-black font-poppins-bold text-lg">Dinesh Kumar</Text>
+                                <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Dinesh Kumar</Text>
                                 <TouchableOpacity>
-                                    <Text className="text-gray-400 font-poppins text-sm">View Profile</Text>
+                                    <Text className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins-Regular' }}>View Profile</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -84,7 +84,7 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                             <TouchableOpacity key={index} className="flex-row items-center justify-between py-4 active:bg-gray-50 rounded-xl px-2">
                                  <View className="flex-row items-center gap-4">
                                     <Ionicons name={item.icon as any} size={22} color="#6B7280" />
-                                    <Text className="text-gray-600 font-poppins-medium text-base">{item.label}</Text>
+                                    <Text className="text-gray-600 text-base" style={{ fontFamily: 'Poppins-Medium' }}>{item.label}</Text>
                                  </View>
                                  <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
                             </TouchableOpacity>
@@ -101,7 +101,7 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                                 <View className="w-8 h-8 items-center justify-center rounded-lg border border-black">
                                     <Ionicons name="log-out-outline" size={18} color="black" />
                                 </View>
-                                <Text className="text-black font-poppins-medium text-base">Log Out</Text>
+                                <Text className="text-black text-base" style={{ fontFamily: 'Poppins-Medium' }}>Log Out</Text>
                             </View>
                             <Ionicons name="chevron-forward" size={20} color="black" />
                          </TouchableOpacity>

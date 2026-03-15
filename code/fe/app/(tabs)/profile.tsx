@@ -1,4 +1,5 @@
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -16,7 +17,7 @@ export default function ProfileScreen() {
               <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex-1 items-center">
-              <Text className="text-black font-poppins-bold text-lg">Profile</Text>
+              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Profile</Text>
           </View>
           {/* Empty view to balance the header */}
           <View className="w-10" /> 
@@ -34,9 +35,9 @@ export default function ProfileScreen() {
               </View>
 
               <View>
-                  <Text className="text-black font-poppins-bold text-lg mb-1">Name : Nhat Minh</Text>
-                  <Text className="text-gray-600 font-poppins text-sm mb-1">Class : IX - A</Text>
-                  <Text className="text-gray-600 font-poppins text-sm">Roll no : 19</Text>
+                  <Text className="text-black text-lg mb-1" style={{ fontFamily: 'Poppins-Bold' }}>Name : Nhat Minh</Text>
+                  <Text className="text-gray-600 text-sm mb-1" style={{ fontFamily: 'Poppins-Regular' }}>Class : IX - A</Text>
+                  <Text className="text-gray-600 text-sm" style={{ fontFamily: 'Poppins-Regular' }}>Roll no : 19</Text>
               </View>
           </View>
 
@@ -60,9 +61,12 @@ function DetailField({ label, value, multiline = false }: { label: string, value
     return (
         <View className="relative border border-gray-300 rounded-xl p-4 pt-5">
             <View className="absolute -top-3 left-4 bg-white px-1">
-                <Text className="text-gray-400 font-poppins text-xs">{label}</Text>
+                <Text className="text-gray-400 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>{label}</Text>
             </View>
-            <Text className={`text-black font-poppins-medium text-sm ${multiline ? 'leading-5' : ''}`}>
+            <Text
+                className={`text-black text-sm ${multiline ? 'leading-5' : ''}`}
+                style={{ fontFamily: 'Poppins-Medium' }}
+            >
                 {value}
             </Text>
         </View>

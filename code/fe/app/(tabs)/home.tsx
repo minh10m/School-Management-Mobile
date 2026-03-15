@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
-import { View, Text, ScrollView, TouchableOpacity, FlatList, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -37,7 +38,7 @@ export default function HomeScreen() {
           <View className="flex-row items-center gap-2">
              {/* Logo Placeholder - Text for now */}
             <Ionicons name="book" size={24} color="#136ADA" />
-            <Text className="text-bright-blue font-poppins-bold text-xl">School EDU</Text>
+            <Text className="text-bright-blue text-xl" style={{ fontFamily: 'Poppins-Bold' }}>School EDU</Text>
           </View>
           <TouchableOpacity onPress={() => router.push('/notifications' as any)}>
             <Ionicons name="notifications-outline" size={28} color="black" />
@@ -46,17 +47,17 @@ export default function HomeScreen() {
 
         {/* Greeting & Student Card */}
         <View className="px-6 mb-8">
-            <Text className="text-black font-poppins-semibold text-lg mb-4">Hi, Welcome,</Text>
+            <Text className="text-black text-lg mb-4" style={{ fontFamily: 'Poppins-SemiBold' }}>Hi, Welcome,</Text>
             
             <View className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
                 <View className="flex-row justify-between items-start mb-4">
                     <View>
-                        <Text className="text-black font-poppins-bold text-lg">Nhật Minh</Text>
+                        <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Nhật Minh</Text>
                         <View className="flex-row items-center mt-1 gap-3">
                              <View className="bg-blue-100 px-3 py-1 rounded-full">
-                                <Text className="text-bright-blue font-poppins-medium text-xs">Class : 8 - A</Text>
+                                <Text className="text-bright-blue text-xs" style={{ fontFamily: 'Poppins-Medium' }}>Class : 8 - A</Text>
                              </View>
-                             <Text className="text-gray-500 font-poppins text-xs">Roll No : 19</Text>
+                             <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>Roll No : 19</Text>
                         </View>
                     </View>
                      <View className="w-16 h-16 bg-gray-200 rounded-full overflow-hidden">
@@ -67,8 +68,8 @@ export default function HomeScreen() {
                 {/* Attendance Bar */}
                 <View>
                     <View className="flex-row justify-between mb-2">
-                         <Text className="text-gray-500 font-poppins-medium text-xs">Attendance</Text>
-                         <Text className="text-bright-blue font-poppins-bold text-xs">53%</Text>
+                         <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Poppins-Medium' }}>Attendance</Text>
+                         <Text className="text-bright-blue text-xs" style={{ fontFamily: 'Poppins-Bold' }}>53%</Text>
                     </View>
                     <View className="h-3 bg-gray-100 rounded-full w-full overflow-hidden">
                         <View className="h-full bg-bright-blue rounded-full" style={{ width: '53%' }} />
@@ -79,7 +80,7 @@ export default function HomeScreen() {
 
         {/* Academics Grid */}
         <View className="px-6 mb-8">
-            <Text className="text-black font-poppins-medium text-base mb-4">Academics</Text>
+            <Text className="text-black text-base mb-4" style={{ fontFamily: 'Poppins-Medium' }}>Academics</Text>
             <View className="flex-row flex-wrap justify-between gap-y-4">
                 {academicsData.map((item) => (
                     <TouchableOpacity 
@@ -106,7 +107,7 @@ export default function HomeScreen() {
                         <View className="w-10 h-10 bg-white/50 rounded-full items-center justify-center">
                               <Ionicons name={item.icon as any} size={20} color={item.iconColor} />
                         </View>
-                        <Text className="text-black font-poppins-medium text-xs text-center">{item.title}</Text>
+                        <Text className="text-black text-xs text-center" style={{ fontFamily: 'Poppins-Medium' }}>{item.title}</Text>
                     </TouchableOpacity>
                 ))}
             </View>
@@ -115,9 +116,9 @@ export default function HomeScreen() {
         {/* Homeworks */}
         <View className="mb-8">
              <View className="flex-row justify-between items-center px-6 mb-4">
-                <Text className="text-black font-poppins-medium text-base">Homeworks</Text>
+                <Text className="text-black text-base" style={{ fontFamily: 'Poppins-Medium' }}>Homeworks</Text>
                 <TouchableOpacity onPress={() => router.push('/homework' as any)}>
-                    <Text className="text-bright-blue font-poppins-medium text-sm">View all</Text>
+                    <Text className="text-bright-blue text-sm" style={{ fontFamily: 'Poppins-Medium' }}>View all</Text>
                 </TouchableOpacity>
              </View>
              
@@ -134,25 +135,25 @@ export default function HomeScreen() {
                                     <View className="bg-white/20 p-2 rounded-lg">
                                          <Ionicons name="clipboard-outline" size={20} color="white" />
                                     </View>
-                                    <Text className="text-white font-poppins-bold text-lg">{item.subject}</Text>
+                                    <Text className="text-white text-lg" style={{ fontFamily: 'Poppins-Bold' }}>{item.subject}</Text>
                                 </View>
                                  <View className="flex-row items-center gap-1">
                                     <Ionicons name="time-outline" size={14} color="white" />
-                                    <Text className="text-white/80 font-poppins text-xs">{item.daysLeft}</Text>
+                                    <Text className="text-white/80 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>{item.daysLeft}</Text>
                                 </View>
                             </View>
                             
                             {/* Circular Progress Placeholder */}
                             <View className="w-12 h-12 rounded-full border-4 border-white/30 items-center justify-center">
-                                <Text className="text-white font-poppins-bold text-[10px]">{item.progress}%</Text>
+                                <Text className="text-white text-[10px]" style={{ fontFamily: 'Poppins-Bold' }}>{item.progress}%</Text>
                             </View>
                         </View>
 
-                        <Text className="text-white font-poppins-medium text-base mb-4">{item.task}</Text>
+                        <Text className="text-white text-base mb-4" style={{ fontFamily: 'Poppins-Medium' }}>{item.task}</Text>
 
                         <View className="items-end">
                             <TouchableOpacity className="bg-white px-4 py-2 rounded-lg">
-                                <Text className="text-bright-blue font-poppins-semibold text-xs">Continue</Text>
+                                <Text className="text-bright-blue text-xs" style={{ fontFamily: 'Poppins-SemiBold' }}>Continue</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -163,15 +164,15 @@ export default function HomeScreen() {
 
         {/* Calendar / Event Updates Part (Simplified) */}
          <View className="px-6 pb-20">
-            <Text className="text-black font-poppins-medium text-base mb-4">Event updates</Text>
+            <Text className="text-black text-base mb-4" style={{ fontFamily: 'Poppins-Medium' }}>Event updates</Text>
             <View className="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm overflow-hidden relative">
                  {/* Decorations/Placeholders for Sports Theme */}
                  {/* Right side decoration */}
                  <View className="absolute right-0 top-10 w-24 h-24 bg-bright-blue/10 rounded-full -mr-10" />
                  
-                 <Text className="text-bright-blue font-poppins-bold text-sm mb-1">03, Nov, 2023 | Saturday</Text>
-                 <Text className="text-bright-blue font-poppins-bold text-4xl mb-6">Sports</Text>
-                 <Text className="text-bright-blue font-poppins-bold text-3xl ml-20">Day</Text>
+                 <Text className="text-bright-blue text-sm mb-1" style={{ fontFamily: 'Poppins-Bold' }}>03, Nov, 2023 | Saturday</Text>
+                 <Text className="text-bright-blue text-4xl mb-6" style={{ fontFamily: 'Poppins-Bold' }}>Sports</Text>
+                 <Text className="text-bright-blue text-3xl ml-20" style={{ fontFamily: 'Poppins-Bold' }}>Day</Text>
 
                  {/* Icons to simulate the illustration */}
                  <View className="absolute right-4 bottom-4">

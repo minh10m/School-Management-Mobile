@@ -1,4 +1,5 @@
-import { View, Text, SafeAreaView, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -30,7 +31,7 @@ export default function FeeScreen() {
               <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex-1 items-center">
-              <Text className="text-black font-poppins-bold text-lg">Fee Payment</Text>
+              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Fee Payment</Text>
           </View>
           <View className="w-10" /> 
       </View>
@@ -84,7 +85,7 @@ export default function FeeScreen() {
                   className="bg-[#136ADA] py-4 rounded-xl items-center shadow-md shadow-blue-200"
                   onPress={() => router.push('/payment/payment-detail' as any)}
               >
-                  <Text className="text-white font-poppins-bold text-base">Payment Details</Text>
+                  <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Payment Details</Text>
               </TouchableOpacity>
           </View>
       </View>
@@ -100,13 +101,13 @@ function FeeCard({ data }: { data: FeeData }) {
     return (
         <View className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-4 p-5">
             <View className="flex-row justify-between items-center mb-3">
-                <Text className="text-black font-poppins-bold text-base">{data.title}</Text>
-                <Text className={`${amountColor} font-poppins-bold text-base`}>₹ {data.amount}</Text>
+                <Text className="text-black text-base" style={{ fontFamily: 'Poppins-Bold' }}>{data.title}</Text>
+                <Text className={`${amountColor} text-base`} style={{ fontFamily: 'Poppins-Bold' }}>₹ {data.amount}</Text>
             </View>
             <View className="h-[1px] bg-gray-200 w-full mb-3" />
             <View className="flex-row justify-between items-center">
-                <Text className="text-black font-poppins text-xs">{statusText}</Text>
-                <Text className="text-black font-poppins-medium text-xs">{data.date}</Text>
+                <Text className="text-black text-xs" style={{ fontFamily: 'Poppins-Regular' }}>{statusText}</Text>
+                <Text className="text-black text-xs" style={{ fontFamily: 'Poppins-Medium' }}>{data.date}</Text>
             </View>
         </View>
     );

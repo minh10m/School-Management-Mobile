@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -64,7 +65,7 @@ export default function HomeworkDetailScreen() {
                     
                     <View className="flex-1 p-4">
                         <View className="flex-row justify-between items-start mb-2">
-                             <Text className="text-black font-poppins-medium text-sm flex-1 mr-2 leading-6">
+                             <Text className="text-black text-sm flex-1 mr-2 leading-6" style={{ fontFamily: 'Poppins-Medium' }}>
                                 {item.question}
                              </Text>
                              <TouchableOpacity onPress={() => toggleProblem(item.id)}>
@@ -76,13 +77,13 @@ export default function HomeworkDetailScreen() {
                              </TouchableOpacity>
                         </View>
                         
-                        <Text className="text-gray-400 font-poppins text-xs mb-3">{item.topic}</Text>
+                        <Text className="text-gray-400 text-xs mb-3" style={{ fontFamily: 'Poppins-Regular' }}>{item.topic}</Text>
                         
                         <View className="h-[1px] bg-gray-100 w-full mb-3" />
 
                         <View className="flex-row justify-between items-center">
-                            <Text className="text-black font-poppins text-xs">{item.problemId}</Text>
-                            <Text className="text-black font-poppins text-xs">Deadline : {item.deadline}</Text>
+                            <Text className="text-black text-xs" style={{ fontFamily: 'Poppins-Regular' }}>{item.problemId}</Text>
+                            <Text className="text-black text-xs" style={{ fontFamily: 'Poppins-Regular' }}>Deadline : {item.deadline}</Text>
                         </View>
                     </View>
                 </View>
@@ -90,7 +91,7 @@ export default function HomeworkDetailScreen() {
         </ScrollView>
 
         <TouchableOpacity className="bg-bright-blue w-full py-4 rounded-xl items-center active:opacity-90">
-             <Text className="text-white font-poppins-semibold text-lg">Submit</Text>
+             <Text className="text-white text-lg" style={{ fontFamily: 'Poppins-SemiBold' }}>Submit</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
