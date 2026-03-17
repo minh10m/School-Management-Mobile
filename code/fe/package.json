@@ -1,5 +1,5 @@
 {
-  "name": "school-management-app",
+  "name": "edumanage",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
