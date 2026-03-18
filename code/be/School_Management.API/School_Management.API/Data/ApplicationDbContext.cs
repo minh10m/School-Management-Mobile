@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Models.Domain;
+using System.Reflection.Emit;
 
 namespace School_Management.API.Data
 {
@@ -54,6 +55,20 @@ namespace School_Management.API.Data
             };
 
             builder.Entity<IdentityRole<Guid>>().HasData(roles);
+
+            // Configure datetime datatype with timestamp without time zone
+            foreach (var entityType in builder.Model.GetEntityTypes())
+            {
+                var properties = entityType.GetProperties()
+                    .Where(p => p.ClrType == typeof(DateTime) || p.ClrType == typeof(DateTime?));
+
+                foreach (var property in properties)
+                {
+                    property.SetColumnType("timestamp without time zone");
+                }
+            }
+
+            builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
     }
 }
