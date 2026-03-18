@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/features/auth/store/authStore";
 import { Users, BookOpen, GraduationCap, TrendingUp } from "lucide-react";
 
 export default function DashboardPage() {
