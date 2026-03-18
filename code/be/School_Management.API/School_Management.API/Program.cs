@@ -5,6 +5,8 @@ using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Serilog;
+using School_Management.API.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,16 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add logger into our project
+var logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/School_Management.txt", rollingInterval: RollingInterval.Minute)
+    .MinimumLevel.Debug()
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
 // Configure IdentityDbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -69,6 +81,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlerMiddlewares>();
 
 app.UseHttpsRedirection();
 
