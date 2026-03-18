@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
 using School_Management.API.Middlewares;
+using School_Management.API.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//Add auto mapper
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
