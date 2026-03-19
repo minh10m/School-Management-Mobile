@@ -8,6 +8,7 @@ using System.Text;
 using Serilog;
 using School_Management.API.Middlewares;
 using School_Management.API.Mappings;
+using School_Management.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,9 @@ builder.Services.AddSwaggerGen();
 
 //Add auto mapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
+
+//Dependency Injection
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
