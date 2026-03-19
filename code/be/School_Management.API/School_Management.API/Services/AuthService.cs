@@ -41,7 +41,7 @@ namespace School_Management.API.Services
                         throw new ForbiddenException("Your account is locked out by admin!");
                     }
 
-                    var time = lockoutEnd.Value - DateTime.UtcNow;
+                    var time = lockoutEnd.Value - DateTimeOffset.UtcNow;
                     var secondLeft = Math.Ceiling(time.TotalSeconds);
                     throw new ForbiddenException($"Your password is wrong too many time! Please wait {secondLeft.ToString()} seconds to login again");
                 }
@@ -70,7 +70,7 @@ namespace School_Management.API.Services
                 UserId = user.Id,
                 IsRevoked = false,
                 TokenHash = refreshToken,
-                ExpiresAt = DateTime.UtcNow.AddDays(7)
+                ExpiresAt = DateTimeOffset.UtcNow.AddDays(7)
             };
 
             // Call insert RToken method
@@ -80,7 +80,7 @@ namespace School_Management.API.Services
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                AccessTokenExpireTime = DateTime.UtcNow.AddMinutes(15),
+                AccessTokenExpireTime = DateTimeOffset.UtcNow.AddMinutes(15),
                 Role = roles.FirstOrDefault(),
                 FullName = user.FullName,
                 Email = user.Email,
@@ -93,9 +93,61 @@ namespace School_Management.API.Services
             throw new NotImplementedException();
         }
 
-        public Task<AuthResponse> RefreshTokenAsync(string refreshToken)
+        public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
         {
-            throw new NotImplementedException();
+            // Check token exist
+            var rToken = await authRepository.GetRefreshTokenByValue(refreshToken);
+            if (rToken == null) throw new UnauthorizedException("RefreshToken is invalid");
+
+            // Check isRevoked
+            if(rToken.IsRevoked)
+            {
+                await authRepository.RevokeAllUserToken(rToken.UserId);
+                throw new ForbiddenException("RefreshToken is revoked! Please login again");
+            }
+
+            // Check expiretime
+            if(rToken.ExpiresAt < DateTimeOffset.UtcNow)
+            {
+                throw new UnauthorizedException("RefreshToken is expired");
+            }
+
+            // Check user of this token
+            var user = await userManager.FindByIdAsync(rToken.UserId.ToString());
+            if (user == null) throw new UnauthorizedException("User is invalid");
+
+            //Create new token
+            var roles = await userManager.GetRolesAsync(user);
+            var accessToken = tokenService.GenerateAccessToken(user, roles);
+            var nRefreshToken = tokenService.GenerateRefreshToken();
+
+            //Revoke old token
+            rToken.IsRevoked = true;
+            await authRepository.UpdateRefreshToken(rToken);
+
+            //Insert new RToken into DB
+            var RToken = new RefreshToken
+            {
+                UserId = user.Id,
+                IsRevoked = false,
+                TokenHash = nRefreshToken,
+                ExpiresAt = DateTimeOffset.UtcNow.AddDays(7)
+            };
+
+            // Call insert RToken method
+            await authRepository.AddRefreshToken(RToken);
+
+            return new AuthResponse
+            {
+                AccessToken = accessToken,
+                RefreshToken = nRefreshToken,
+                AccessTokenExpireTime = DateTimeOffset.UtcNow.AddMinutes(15),
+                Role = roles.FirstOrDefault(),
+                FullName = user.FullName,
+                Email = user.Email,
+                UserId = user.Id
+            };
+
         }
     }
 }

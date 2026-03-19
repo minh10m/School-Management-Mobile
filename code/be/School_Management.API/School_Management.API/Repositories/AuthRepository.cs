@@ -27,6 +27,12 @@ namespace School_Management.API.Repositories
             await context.SaveChangesAsync();
         }
 
+        public async Task<RefreshToken?> GetRefreshTokenByValue(string refreshToken)
+        {
+            return await context.RefreshTokens
+                .FirstOrDefaultAsync(t => t.TokenHash == refreshToken);
+        }
+
         public async Task RevokeAllUserToken(Guid userId)
         {
             var tokens = await context.RefreshTokens
@@ -37,6 +43,12 @@ namespace School_Management.API.Repositories
                 token.IsRevoked = true;
             }
 
+            await context.SaveChangesAsync();
+        }
+
+        public async Task UpdateRefreshToken(RefreshToken refreshToken)
+        {
+            context.RefreshTokens.Update(refreshToken);
             await context.SaveChangesAsync();
         }
     }

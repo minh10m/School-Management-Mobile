@@ -25,5 +25,13 @@ namespace School_Management.API.Controllers
             var result = await authService.LoginAsync(loginRequest);
             return Ok(result);
         }
+
+        [HttpPost]
+        [Route("refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        {
+            var result = await authService.RefreshTokenAsync(refreshToken);
+            return Ok(result);
+        }
     }
 }
