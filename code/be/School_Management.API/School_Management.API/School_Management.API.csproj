@@ -30,11 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Models\DTO\" />
     <Folder Include="Logs\" />
-    <Folder Include="Repositories\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

@@ -21,7 +21,7 @@ namespace School_Management.API.Middlewares
             {
                 await next(httpContext);
             }
-            catch(AppException ex)
+            catch(Exceptions.ApplicationException ex)
             {
                 var errorId = Guid.NewGuid();
 

@@ -9,6 +9,7 @@ using Serilog;
 using School_Management.API.Middlewares;
 using School_Management.API.Mappings;
 using School_Management.API.Services;
+using School_Management.API.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
 //Dependency Injection
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()

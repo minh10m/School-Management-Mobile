@@ -1,0 +1,101 @@
+﻿using Microsoft.AspNetCore.Identity;
+using School_Management.API.Exceptions;
+using School_Management.API.Models.Domain;
+using School_Management.API.Models.DTO;
+using School_Management.API.Repositories;
+using ApplicationException = School_Management.API.Exceptions.ApplicationException;
+
+namespace School_Management.API.Services
+{
+    public class AuthService : IAuthService
+    {
+        private readonly UserManager<AppUser> userManager;
+        private readonly ITokenService tokenService;
+        private readonly IAuthRepository authRepository;
+
+        public AuthService(UserManager<AppUser> userManager, ITokenService tokenService, IAuthRepository authRepository)
+        {
+            this.userManager = userManager;
+            this.tokenService = tokenService;
+            this.authRepository = authRepository;
+        }
+        public Task ChangePassword(ChangePasswordRequestDTO changePasswordRequest)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<AuthResponse> LoginAsync(LoginRequestDTO loginRequest)
+        {
+            // Check username
+            var user = await userManager.FindByNameAsync(loginRequest.UserName);
+            if (user == null) throw new UnauthorizedException("Username or password is invalid!");
+
+            // Check lock out
+            if(await userManager.IsLockedOutAsync(user))
+            {
+                var lockoutEnd = await userManager.GetLockoutEndDateAsync(user);
+                if(lockoutEnd.HasValue)
+                {
+                    if(lockoutEnd.Value.Year > 2090)
+                    {
+                        throw new ForbiddenException("Your account is locked out by admin!");
+                    }
+
+                    var time = lockoutEnd.Value - DateTime.UtcNow;
+                    var secondLeft = Math.Ceiling(time.TotalSeconds);
+                    throw new ForbiddenException($"Your password is wrong too many time! Please wait {secondLeft.ToString()} seconds to login again");
+                }
+            }
+
+            // Check password
+            if(!await userManager.CheckPasswordAsync(user, loginRequest.PassWord))
+            {
+                await userManager.AccessFailedAsync(user);
+                throw new UnauthorizedException("Username or password is invalid!");
+            }
+
+            await userManager.ResetAccessFailedCountAsync(user);
+
+            // Success login
+            var roles = await userManager.GetRolesAsync(user);
+            var accessToken = tokenService.GenerateAccessToken(user, roles);
+            var refreshToken = tokenService.GenerateRefreshToken();
+
+            //Revoke all old refreshToken
+            await authRepository.RevokeAllUserToken(user.Id);
+            
+            //Insert new RToken into DB
+            var RToken = new RefreshToken
+            {
+                UserId = user.Id,
+                IsRevoked = false,
+                TokenHash = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            };
+
+            // Call insert RToken method
+            await authRepository.AddRefreshToken(RToken);
+
+            return new AuthResponse
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                AccessTokenExpireTime = DateTime.UtcNow.AddMinutes(15),
+                Role = roles.FirstOrDefault(),
+                FullName = user.FullName,
+                Email = user.Email,
+                UserId = user.Id
+            };
+        }
+
+        public Task LogoutAsync(string refreshToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<AuthResponse> RefreshTokenAsync(string refreshToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

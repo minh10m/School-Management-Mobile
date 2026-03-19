@@ -15,7 +15,7 @@ namespace School_Management.API.Services
         {
             this.configuration = configuration;
         }
-        public string GenerateAccessToken(AppUser user, List<string> Roles)
+        public string GenerateAccessToken(AppUser user, IList<string> Roles)
         {
             var claims = new List<Claim>
             {

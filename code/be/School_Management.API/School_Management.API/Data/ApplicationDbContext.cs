@@ -64,7 +64,7 @@ namespace School_Management.API.Data
 
                 foreach (var property in properties)
                 {
-                    property.SetColumnType("timestamp without time zone");
+                    property.SetColumnType("timestamp with time zone");
                 }
             }
 
