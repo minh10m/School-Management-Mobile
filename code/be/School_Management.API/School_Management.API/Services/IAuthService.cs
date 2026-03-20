@@ -5,8 +5,8 @@ namespace School_Management.API.Services
     public interface IAuthService
     {
         public Task<AuthResponse> LoginAsync(LoginRequestDTO loginRequest);
-        public Task<AuthResponse> RefreshTokenAsync(string refreshToken);
-        public Task LogoutAsync(string refreshToken);
-        public Task ChangePassword(ChangePasswordRequestDTO changePasswordRequest);
+        public Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequestDTO refreshTokenRequest);
+        public Task LogoutAsync(RefreshTokenRequestDTO refreshTokenRequest);
+        public Task ChangePasswordAsync(ChangePasswordRequestDTO changePasswordRequest);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
 using School_Management.API.Models.DTO;
@@ -28,10 +29,22 @@ namespace School_Management.API.Controllers
 
         [HttpPost]
         [Route("refresh")]
-        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        [Authorize]
+        [ValidateModel]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDTO refreshTokenRequest)
         {
-            var result = await authService.RefreshTokenAsync(refreshToken);
+            var result = await authService.RefreshTokenAsync(refreshTokenRequest);
             return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("logout")]
+        [Authorize]
+        [ValidateModel]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDTO refreshTokenRequest)
+        {
+            await authService.LogoutAsync(refreshTokenRequest);
+            return Ok(new { message = "Logged out successfully" });
         }
     }
 }

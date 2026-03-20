@@ -19,7 +19,7 @@ namespace School_Management.API.Services
             this.tokenService = tokenService;
             this.authRepository = authRepository;
         }
-        public Task ChangePassword(ChangePasswordRequestDTO changePasswordRequest)
+        public Task ChangePasswordAsync(ChangePasswordRequestDTO changePasswordRequest)
         {
             throw new NotImplementedException();
         }
@@ -88,15 +88,22 @@ namespace School_Management.API.Services
             };
         }
 
-        public Task LogoutAsync(string refreshToken)
+        public async Task LogoutAsync(RefreshTokenRequestDTO refreshTokenRequest)
         {
-            throw new NotImplementedException();
+            var token = await authRepository.GetRefreshTokenByValue(refreshTokenRequest.RefreshToken);
+            if (token != null)
+            {
+                token.IsRevoked = true;
+                await authRepository.UpdateRefreshToken(token);
+            }    
+
+            
         }
 
-        public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
+        public async Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequestDTO refreshTokenRequest)
         {
             // Check token exist
-            var rToken = await authRepository.GetRefreshTokenByValue(refreshToken);
+            var rToken = await authRepository.GetRefreshTokenByValue(refreshTokenRequest.RefreshToken);
             if (rToken == null) throw new UnauthorizedException("RefreshToken is invalid");
 
             // Check isRevoked
