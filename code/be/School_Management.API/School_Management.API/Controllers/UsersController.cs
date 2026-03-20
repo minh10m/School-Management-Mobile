@@ -39,12 +39,23 @@ namespace School_Management.API.Controllers
             return Ok(result);
         }
 
+        //
         [HttpGet]
         [Route("{userId}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetUserById([FromRoute] Guid userId)
         {
             var result = await userService.GetUserById(userId.ToString());
+            return Ok(result);
+        }
+
+        [HttpPatch]
+        [Route("{userId}")]
+        [ValidateModel]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest updateUserRequest, [FromRoute] Guid userId)
+        {
+            var result = await userService.UpdateUser(updateUserRequest, userId.ToString());
             return Ok(result);
         }
     }

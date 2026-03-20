@@ -83,5 +83,48 @@ namespace School_Management.API.Services
             // Log out this account in other devices
             await userManager.UpdateSecurityStampAsync(user);
         }
+
+        public async Task<UserInfoResponse> UpdateUser(UpdateUserRequest updateUserRequest, string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null) throw new NotFoundException("User is invalid!");
+
+            if(updateUserRequest.Email != null)
+            {
+                var eResult = await userManager.SetEmailAsync(user, updateUserRequest.Email);
+                if (!eResult.Succeeded) throw new BadRequestException("Update email failed!");
+            }
+
+            user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
+            user.Address = updateUserRequest.Address ?? user.Address;
+            if(updateUserRequest.Birthday != null)
+            {
+                user.Birthday = DateTimeOffset.Parse(updateUserRequest.Birthday).ToUniversalTime();
+            }    
+            user.FullName = updateUserRequest.FullName ?? user.FullName;
+
+            if(updateUserRequest.Role != null)
+            {
+                var currentRole = await userManager.GetRolesAsync(user);
+                await userManager.RemoveFromRolesAsync(user, currentRole);
+                await userManager.AddToRoleAsync(user, updateUserRequest.Role);
+            }
+
+            var result = await userManager.UpdateAsync(user);
+            if (!result.Succeeded) throw new BadRequestException("Update failed!");
+            var role = await userManager.GetRolesAsync(user);
+            return new UserInfoResponse
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                Address = user.Address,
+                Birthday = user.Birthday,
+                Email = user.Email,
+                FullName = user.FullName,
+                LockoutEnd = user.LockoutEnd,
+                PhoneNumber = user.PhoneNumber,
+                Role = role.FirstOrDefault()
+            };
+        }
     }
 }
