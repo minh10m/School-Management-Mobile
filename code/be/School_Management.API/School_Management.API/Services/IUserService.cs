@@ -8,6 +8,8 @@ namespace School_Management.API.Services
 
         //Lock or unlock ones account
         public Task<UserStatusResponse> ChangeStatusOfAccount(string userId);
+
+        public Task<UserInfoResponse> GetUserById(string UserId);
         
     }
 }

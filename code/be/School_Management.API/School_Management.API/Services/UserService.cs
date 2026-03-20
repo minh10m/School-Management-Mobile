@@ -46,6 +46,25 @@ namespace School_Management.API.Services
 
         }
 
+        public async Task<UserInfoResponse> GetUserById(string UserId)
+        {
+            var user = await userManager.FindByIdAsync(UserId);
+            if (user == null) throw new NotFoundException("User is invalid!");
+
+            var role = await userManager.GetRolesAsync(user);
+            return new UserInfoResponse
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                FullName = user.FullName,
+                Address = user.Address,
+                Birthday = user.Birthday,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Role = role.FirstOrDefault()
+            };
+        }
+
         public async Task ResetPassword(ResetPasswordRequest resetPasswordRequest, string userId)
         {
             //Find user by id

@@ -38,5 +38,14 @@ namespace School_Management.API.Controllers
             var result = await userService.ChangeStatusOfAccount(userId.ToString());
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("{userId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetUserById([FromRoute] Guid userId)
+        {
+            var result = await userService.GetUserById(userId.ToString());
+            return Ok(result);
+        }
     }
 }
