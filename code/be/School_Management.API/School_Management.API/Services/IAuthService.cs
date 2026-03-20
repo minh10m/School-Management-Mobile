@@ -1,4 +1,5 @@
-﻿using School_Management.API.Models.DTO;
+﻿using School_Management.API.Models.Domain;
+using School_Management.API.Models.DTO;
 
 namespace School_Management.API.Services
 {
@@ -7,6 +8,6 @@ namespace School_Management.API.Services
         public Task<AuthResponse> LoginAsync(LoginRequestDTO loginRequest);
         public Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequestDTO refreshTokenRequest);
         public Task LogoutAsync(RefreshTokenRequestDTO refreshTokenRequest);
-        public Task ChangePasswordAsync(ChangePasswordRequestDTO changePasswordRequest);
+        public Task ChangePasswordAsync(ChangePasswordRequestDTO changePasswordRequest, string? UserId);
     }
 }

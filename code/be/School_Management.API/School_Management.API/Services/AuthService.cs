@@ -19,9 +19,23 @@ namespace School_Management.API.Services
             this.tokenService = tokenService;
             this.authRepository = authRepository;
         }
-        public Task ChangePasswordAsync(ChangePasswordRequestDTO changePasswordRequest)
+        public async Task ChangePasswordAsync(ChangePasswordRequestDTO changePasswordRequest, string? UserId)
         {
-            throw new NotImplementedException();
+            AppUser user = await userManager.FindByIdAsync(UserId);
+            if (user == null) throw new NotFoundException("User is invalid!");
+
+            var result = await userManager.ChangePasswordAsync(user, changePasswordRequest.OldPassword, changePasswordRequest.NewPassword);
+            if(!result.Succeeded)
+            {
+                var error = result.Errors.FirstOrDefault();
+
+                if (error?.Code == "PasswordMismatch")
+                {
+                    throw new BadRequestException("OldPassword is incorrect!");
+                }
+
+                throw new BadRequestException(error?.Description ?? "ChangePassword failed");
+            }
         }
 
         public async Task<AuthResponse> LoginAsync(LoginRequestDTO loginRequest)

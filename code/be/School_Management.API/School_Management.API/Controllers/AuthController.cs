@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
+using System.Security.Claims;
 
 namespace School_Management.API.Controllers
 {
@@ -45,6 +46,19 @@ namespace School_Management.API.Controllers
         {
             await authService.LogoutAsync(refreshTokenRequest);
             return Ok(new { message = "Logged out successfully" });
+        }
+
+        [HttpPatch]
+        [Route("change-password")]
+        [Authorize]
+        [ValidateModel]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDTO changePasswordRequest)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized("Session is expired or revoked");
+            
+            await authService.ChangePasswordAsync(changePasswordRequest, userId.ToString());
+            return Ok(new { Message = "Change password successfully!" });
         }
     }
 }
