@@ -17,15 +17,26 @@ namespace School_Management.API.Controllers
         {
             this.userService = userService;
         }
-
+        
+        //Reset password
         [HttpPatch]
         [Route("{userId}/reset-password")]
         [ValidateModel]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AdminResetPassword([FromBody] ResetPasswordRequestDTO resetPasswordRequest, [FromRoute] Guid userId)
+        public async Task<IActionResult> AdminResetPassword([FromBody] ResetPasswordRequest resetPasswordRequest, [FromRoute] Guid userId)
         {
             await userService.ResetPassword(resetPasswordRequest, userId.ToString());
             return Ok(new { message = "Reset password successfully!"});
+        }
+
+        //Change status of ones account
+        [HttpPatch]
+        [Route("{userId}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ChangeStatusOfAccount([FromRoute] Guid userId)
+        {
+            var result = await userService.ChangeStatusOfAccount(userId.ToString());
+            return Ok(result);
         }
     }
 }

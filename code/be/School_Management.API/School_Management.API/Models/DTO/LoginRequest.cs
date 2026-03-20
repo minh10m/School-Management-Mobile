@@ -2,7 +2,7 @@
 
 namespace School_Management.API.Models.DTO
 {
-    public class LoginRequestDTO
+    public class LoginRequest
     {
         [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
         public string UserName { get; set; } = string.Empty;
