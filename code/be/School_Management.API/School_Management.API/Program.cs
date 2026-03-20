@@ -27,6 +27,7 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()

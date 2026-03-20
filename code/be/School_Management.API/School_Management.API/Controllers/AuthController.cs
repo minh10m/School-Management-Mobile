@@ -19,6 +19,7 @@ namespace School_Management.API.Controllers
             this.authService = authService;
         }
 
+        //login
         [HttpPost]
         [Route("login")]
         [ValidateModel]
@@ -28,6 +29,7 @@ namespace School_Management.API.Controllers
             return Ok(result);
         }
 
+        //refreshToken
         [HttpPost]
         [Route("refresh")]
         [Authorize]
@@ -38,6 +40,7 @@ namespace School_Management.API.Controllers
             return Ok(result);
         }
 
+        //Log out
         [HttpPost]
         [Route("logout")]
         [Authorize]
@@ -48,6 +51,7 @@ namespace School_Management.API.Controllers
             return Ok(new { message = "Logged out successfully" });
         }
 
+        // Change password
         [HttpPatch]
         [Route("change-password")]
         [Authorize]
