@@ -1,4 +1,6 @@
-﻿namespace School_Management.API.Models.DTO
+﻿using School_Management.API.Models.Domain;
+
+namespace School_Management.API.Models.DTO
 {
     public class UserInfoResponse
     {
@@ -12,6 +14,7 @@
         public string? Role { get; set; }
         public DateTimeOffset? LockoutEnd { get; set; }
         public bool IsLocked => LockoutEnd.HasValue && LockoutEnd > DateTimeOffset.UtcNow;
+
 
     }
 }

@@ -53,17 +53,7 @@ namespace School_Management.API.Services
             if (user == null) throw new NotFoundException("User is invalid!");
 
             var role = await userManager.GetRolesAsync(user);
-            return new UserInfoResponse
-            {
-                UserId = user.Id,
-                UserName = user.UserName,
-                FullName = user.FullName,
-                Address = user.Address,
-                Birthday = user.Birthday,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Role = role.FirstOrDefault()
-            };
+            return ReturnData(user, role.FirstOrDefault());
         }
 
         public async Task<UserInfoResponse> GetUserById(string UserId)
@@ -72,17 +62,7 @@ namespace School_Management.API.Services
             if (user == null) throw new NotFoundException("User is invalid!");
 
             var role = await userManager.GetRolesAsync(user);
-            return new UserInfoResponse
-            {
-                UserId = user.Id,
-                UserName = user.UserName,
-                FullName = user.FullName,
-                Address = user.Address,
-                Birthday = user.Birthday,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Role = role.FirstOrDefault()
-            };
+            return ReturnData(user, role.FirstOrDefault());
         }
 
         public async Task ResetPassword(ResetPasswordRequest resetPasswordRequest, string userId)
@@ -129,19 +109,31 @@ namespace School_Management.API.Services
 
             var role = await userManager.GetRolesAsync(user);
 
-            return new UserInfoResponse
-            {
-                UserId = user.Id,
-                UserName = user.UserName,
-                Address = user.Address,
-                Birthday = user.Birthday,
-                Email = user.Email,
-                FullName = user.FullName,
-                LockoutEnd = user.LockoutEnd,
-                PhoneNumber = user.PhoneNumber,
-                Role = role.FirstOrDefault()
-            };
+            return ReturnData(user, role.FirstOrDefault());
 
+        }
+
+        public async Task<UserInfoResponse> UpdateRoleForUser(UpdateRoleRequest updateRoleRequest, string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null) throw new NotFoundException("User is invalid");
+
+            var currentRole = await userManager.GetRolesAsync(user);
+            if(updateRoleRequest.Role != null && currentRole.Contains(updateRoleRequest.Role.Trim()))
+            {
+                return ReturnData(user, currentRole.FirstOrDefault());
+            }
+
+            await userManager.RemoveFromRolesAsync(user, currentRole);
+            if(updateRoleRequest.Role != null)
+            {
+                var result = await userManager.AddToRoleAsync(user, updateRoleRequest.Role);
+                if (!result.Succeeded)
+                    throw new BadRequestException("Update role failed");
+            }
+
+
+            return ReturnData(user, updateRoleRequest.Role);
         }
 
         public async Task<UserInfoResponse> UpdateUser(UpdateUserRequest updateUserRequest, string userId)
@@ -163,18 +155,18 @@ namespace School_Management.API.Services
             }    
             user.FullName = updateUserRequest.FullName ?? user.FullName;
 
-            if(updateUserRequest.Role != null)
-            {
-                var currentRole = await userManager.GetRolesAsync(user);
-                await userManager.RemoveFromRolesAsync(user, currentRole);
-                await userManager.AddToRoleAsync(user, updateUserRequest.Role);
-            }
-
             var result = await userManager.UpdateAsync(user);
             if (!result.Succeeded) throw new BadRequestException("Update failed!");
             var role = await userManager.GetRolesAsync(user);
+            return ReturnData(user, role.FirstOrDefault());
+        }
+
+        //Method in order to map data
+        public UserInfoResponse ReturnData(AppUser user, string? role)
+        {
             return new UserInfoResponse
             {
+
                 UserId = user.Id,
                 UserName = user.UserName,
                 Address = user.Address,
@@ -183,8 +175,9 @@ namespace School_Management.API.Services
                 FullName = user.FullName,
                 LockoutEnd = user.LockoutEnd,
                 PhoneNumber = user.PhoneNumber,
-                Role = role.FirstOrDefault()
+                Role = role
             };
+
         }
     }
 }

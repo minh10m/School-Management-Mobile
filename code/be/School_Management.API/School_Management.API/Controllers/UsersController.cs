@@ -66,7 +66,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetMyProfileForAdmin()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized("Session is expired or revoked");
+            if (userId == null) return Unauthorized(new { Message = "Session is expired or revoked" });
 
             var result = await userService.GetMyProfileForAdmin(userId);
             return Ok(result);
@@ -79,9 +79,25 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> UpdateMyProfileForAdmin([FromBody] UpdateAdminRequest updateAdminRequest)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized("Session is expired or revoked");
+            if (userId == null) return Unauthorized(new { Message = "Session is expired or revoked" });
 
             var result = await userService.UpdateMyProfileForAdmin(updateAdminRequest, userId.ToString());
+            return Ok(result);
+        }
+
+        [HttpPatch]
+        [Route("{userId}/role")]
+        [ValidateModel]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateRoleForUser([FromBody] UpdateRoleRequest updateRoleRequest, [FromRoute] Guid userId)
+        {
+            var userIdOfAdmin = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdOfAdmin != null && userIdOfAdmin.Trim() == userId.ToString().Trim())
+            {
+                return BadRequest(new { Message = "The role can not be changed by yourself, Admin" });
+            }
+
+            var result = await userService.UpdateRoleForUser(updateRoleRequest, userId.ToString());
             return Ok(result);
         }
     }
