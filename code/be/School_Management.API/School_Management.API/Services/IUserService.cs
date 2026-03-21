@@ -22,8 +22,10 @@ namespace School_Management.API.Services
 
         public Task<UserInfoResponse> UpdateRoleForUser(UpdateRoleRequest updateRoleRequest, string userId);
 
+        public Task<PagedResponse<UserListResponse>> GetAllUser(string? filterOn = null, string? filterQuery = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1, int pageSize = 10);
         //Method in order to map data
         public UserInfoResponse ReturnData(AppUser user, string? role);
+        public UserListResponse ReturnListData(AppUser user);
 
     }
 }

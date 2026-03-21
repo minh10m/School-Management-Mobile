@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -178,6 +179,83 @@ namespace School_Management.API.Services
                 Role = role
             };
 
+        }
+
+        public UserListResponse ReturnListData(AppUser user)
+        {
+            return new UserListResponse
+            {
+
+                UserId = user.Id,
+                UserName = user.UserName,
+                FullName = user.FullName,
+                LockoutEnd = user.LockoutEnd,
+            };
+        }
+
+        public async Task<PagedResponse<UserListResponse>> GetAllUser(string? filterOn = null, string? filterQuery = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1, int pageSize = 10)
+        {
+            var query = userManager.Users.AsQueryable();
+
+            // Filtering
+            if(!string.IsNullOrWhiteSpace(filterOn) && !string.IsNullOrWhiteSpace(filterQuery))
+            {
+                if(filterOn.Equals("FullName", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Where(x => x.FullName.Contains(filterQuery));
+                }
+                else if(filterOn.Equals("Email", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Where(x => x.Email.Contains(filterQuery));
+                }
+                else if(filterOn.Equals("Address", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Where(x => x.Address.Contains(filterQuery));
+                }
+                else if(filterOn.Equals("Role", StringComparison.OrdinalIgnoreCase))
+                {
+                    var userInRoles = await userManager.GetUsersInRoleAsync(filterQuery);
+                    var userId = userInRoles.Select(x => x.Id).ToList();
+
+                    query = query.Where(x => userId.Contains(x.Id));
+                }
+            }
+
+            //Sorting
+            if(!string.IsNullOrWhiteSpace(sortBy))
+            {
+                if(sortBy.Equals("FullName", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = isAscending ? query.OrderBy(x => x.FullName) : query.OrderByDescending(x => x.FullName);
+                }
+                else if(sortBy.Equals("Address", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = isAscending ? query.OrderBy(x => x.Address) : query.OrderByDescending(x => x.Address);
+                }
+                else if(sortBy.Equals("Email", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = isAscending ? query.OrderBy(x => x.Email) : query.OrderByDescending(x => x.Email);
+                }
+                else if(sortBy.Equals("Birthday", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = isAscending ? query.OrderBy(x => x.Birthday) : query.OrderByDescending(x => x.Birthday);
+                }
+            }
+            var totalCount = await query.CountAsync();
+
+            //Pagination
+            var skipResults = (pageNumber - 1) * pageSize;
+            var result = await query.Skip(skipResults).Take(pageSize).ToListAsync();
+
+            return new PagedResponse<UserListResponse>
+            {
+                Items = result.Select(x => ReturnListData(x)).ToList(),
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            };
+                
+            
         }
     }
 }
