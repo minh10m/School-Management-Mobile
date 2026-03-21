@@ -2,6 +2,7 @@
 using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using System.Data;
 
 namespace School_Management.API.Services
 {
@@ -46,6 +47,25 @@ namespace School_Management.API.Services
 
         }
 
+        public async Task<UserInfoResponse> GetMyProfileForAdmin(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null) throw new NotFoundException("User is invalid!");
+
+            var role = await userManager.GetRolesAsync(user);
+            return new UserInfoResponse
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                FullName = user.FullName,
+                Address = user.Address,
+                Birthday = user.Birthday,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Role = role.FirstOrDefault()
+            };
+        }
+
         public async Task<UserInfoResponse> GetUserById(string UserId)
         {
             var user = await userManager.FindByIdAsync(UserId);
@@ -82,6 +102,46 @@ namespace School_Management.API.Services
 
             // Log out this account in other devices
             await userManager.UpdateSecurityStampAsync(user);
+        }
+
+        public async Task<UserInfoResponse> UpdateMyProfileForAdmin(UpdateAdminRequest updateAdminRequest, string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null) throw new NotFoundException("User is invalid");
+
+            if(updateAdminRequest.Email != null)
+            {
+                var eResult = await userManager.SetEmailAsync(user, updateAdminRequest.Email);
+                if (!eResult.Succeeded) throw new BadRequestException("Update email failed");
+            }
+
+            user.PhoneNumber = updateAdminRequest.PhoneNumber ?? user.PhoneNumber;
+            user.FullName = updateAdminRequest.FullName ?? user.FullName;
+            
+            if(updateAdminRequest.Birthday != null)
+            {
+                user.Birthday = DateTimeOffset.Parse(updateAdminRequest.Birthday).ToUniversalTime();
+            }
+            user.Address = updateAdminRequest.Address ?? user.Address;
+
+            var result = await userManager.UpdateAsync(user);
+            if (!result.Succeeded) throw new BadRequestException("Update failed");
+
+            var role = await userManager.GetRolesAsync(user);
+
+            return new UserInfoResponse
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                Address = user.Address,
+                Birthday = user.Birthday,
+                Email = user.Email,
+                FullName = user.FullName,
+                LockoutEnd = user.LockoutEnd,
+                PhoneNumber = user.PhoneNumber,
+                Role = role.FirstOrDefault()
+            };
+
         }
 
         public async Task<UserInfoResponse> UpdateUser(UpdateUserRequest updateUserRequest, string userId)

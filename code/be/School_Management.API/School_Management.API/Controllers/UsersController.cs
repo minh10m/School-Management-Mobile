@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
+using System.Security.Claims;
 
 namespace School_Management.API.Controllers
 {
@@ -56,6 +57,31 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest updateUserRequest, [FromRoute] Guid userId)
         {
             var result = await userService.UpdateUser(updateUserRequest, userId.ToString());
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("me")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetMyProfileForAdmin()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized("Session is expired or revoked");
+
+            var result = await userService.GetMyProfileForAdmin(userId);
+            return Ok(result);
+        }
+
+        [HttpPatch]
+        [Route("me")]
+        [ValidateModel]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateMyProfileForAdmin([FromBody] UpdateAdminRequest updateAdminRequest)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized("Session is expired or revoked");
+
+            var result = await userService.UpdateMyProfileForAdmin(updateAdminRequest, userId.ToString());
             return Ok(result);
         }
     }

@@ -14,6 +14,10 @@ namespace School_Management.API.Services
         public Task<UserInfoResponse> GetUserById(string UserId);
 
         public Task<UserInfoResponse> UpdateUser(UpdateUserRequest updateUserRequest, string userId);
+
+        public Task<UserInfoResponse> GetMyProfileForAdmin(string userId);
+
+        public Task<UserInfoResponse> UpdateMyProfileForAdmin(UpdateAdminRequest updateAdminRequest, string userId);
         
     }
 }
