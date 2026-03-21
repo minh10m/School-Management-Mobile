@@ -23,8 +23,5 @@ namespace School_Management.API.Models.DTO
 
         [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Birthday must be YYYY-MM-DD")]
         public string? Birthday { get; set; }
-
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Role cannot be empty")]
-        public string? Role { get; set; }
     }
 }
