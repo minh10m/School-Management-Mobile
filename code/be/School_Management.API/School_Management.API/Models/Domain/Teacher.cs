@@ -1,13 +1,20 @@
-﻿namespace School_Management.API.Models.Domain
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace School_Management.API.Models.Domain
 {
     public class Teacher
     {
+        [Key]
         public Guid Id { get; set; }
         
         // FK
         public Guid UserId { get; set; }
 
         // Navigation property
-        public AppUser User { get; set; }
+        [ForeignKey("UserId")]
+        public AppUser? User { get; set; }
+
+        public ClassYear? ClassYear { get; set; }
     }
 }

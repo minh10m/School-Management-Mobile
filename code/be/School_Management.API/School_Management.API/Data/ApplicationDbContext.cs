@@ -16,6 +16,8 @@ namespace School_Management.API.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Teacher> Teacher { get; set; }
         public DbSet<Student> Student { get; set; }
+        public DbSet<ClassYear> ClassYear { get; set; }
+        public DbSet<StudentClassYear> StudentClassYear { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
