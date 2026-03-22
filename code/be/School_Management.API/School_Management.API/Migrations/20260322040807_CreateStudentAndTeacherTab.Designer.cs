@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using School_Management.API.Data;
@@ -11,9 +12,11 @@ using School_Management.API.Data;
 namespace School_Management.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260322040807_CreateStudentAndTeacherTab")]
+    partial class CreateStudentAndTeacherTab
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -263,42 +266,6 @@ namespace School_Management.API.Migrations
                     b.ToTable("User", (string)null);
                 });
 
-            modelBuilder.Entity("School_Management.API.Models.Domain.ClassYear", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ClassName")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<int>("Grade")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("HomeRoomId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("SchoolYear")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HomeRoomId")
-                        .IsUnique();
-
-                    b.HasIndex("SchoolYear", "ClassName")
-                        .IsUnique()
-                        .HasDatabaseName("UX_ClassYear_Name_Year");
-
-                    b.ToTable("ClassYear", t =>
-                        {
-                            t.HasCheckConstraint("CK_ClassYear_Grade", "\"Grade\" >= 10 AND \"Grade\" <= 12");
-                        });
-                });
-
             modelBuilder.Entity("School_Management.API.Models.Domain.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -357,32 +324,9 @@ namespace School_Management.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Student");
-                });
-
-            modelBuilder.Entity("School_Management.API.Models.Domain.StudentClassYear", b =>
-                {
-                    b.Property<Guid>("StudentClassYearId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ClassYearId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("StudentClassYearId");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("ClassYearId", "StudentId")
-                        .IsUnique();
-
-                    b.ToTable("StudentClassYear");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Teacher", b =>
@@ -396,8 +340,7 @@ namespace School_Management.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Teacher");
                 });
@@ -453,15 +396,6 @@ namespace School_Management.API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("School_Management.API.Models.Domain.ClassYear", b =>
-                {
-                    b.HasOne("School_Management.API.Models.Domain.Teacher", "teacher")
-                        .WithOne("ClassYear")
-                        .HasForeignKey("School_Management.API.Models.Domain.ClassYear", "HomeRoomId");
-
-                    b.Navigation("teacher");
-                });
-
             modelBuilder.Entity("School_Management.API.Models.Domain.RefreshToken", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.AppUser", "User")
@@ -476,38 +410,19 @@ namespace School_Management.API.Migrations
             modelBuilder.Entity("School_Management.API.Models.Domain.Student", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.AppUser", "User")
-                        .WithOne("Student")
-                        .HasForeignKey("School_Management.API.Models.Domain.Student", "UserId")
+                        .WithMany("Students")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("School_Management.API.Models.Domain.StudentClassYear", b =>
-                {
-                    b.HasOne("School_Management.API.Models.Domain.ClassYear", "ClassYear")
-                        .WithMany("StudentClassYears")
-                        .HasForeignKey("ClassYearId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("School_Management.API.Models.Domain.Student", "Student")
-                        .WithMany("StudentClassYears")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClassYear");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("School_Management.API.Models.Domain.Teacher", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.AppUser", "User")
-                        .WithOne("Teacher")
-                        .HasForeignKey("School_Management.API.Models.Domain.Teacher", "UserId")
+                        .WithMany("Teachers")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -518,24 +433,9 @@ namespace School_Management.API.Migrations
                 {
                     b.Navigation("RefreshTokens");
 
-                    b.Navigation("Student");
+                    b.Navigation("Students");
 
-                    b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("School_Management.API.Models.Domain.ClassYear", b =>
-                {
-                    b.Navigation("StudentClassYears");
-                });
-
-            modelBuilder.Entity("School_Management.API.Models.Domain.Student", b =>
-                {
-                    b.Navigation("StudentClassYears");
-                });
-
-            modelBuilder.Entity("School_Management.API.Models.Domain.Teacher", b =>
-                {
-                    b.Navigation("ClassYear");
+                    b.Navigation("Teachers");
                 });
 #pragma warning restore 612, 618
         }

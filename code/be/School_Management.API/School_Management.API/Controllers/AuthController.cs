@@ -23,7 +23,7 @@ namespace School_Management.API.Controllers
         [HttpPost]
         [Route("login")]
         [ValidateModel]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequest)
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             var result = await authService.LoginAsync(loginRequest);
             return Ok(result);
@@ -34,7 +34,7 @@ namespace School_Management.API.Controllers
         [Route("refresh")]
         [Authorize]
         [ValidateModel]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDTO refreshTokenRequest)
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest refreshTokenRequest)
         {
             var result = await authService.RefreshTokenAsync(refreshTokenRequest);
             return Ok(result);
@@ -45,7 +45,7 @@ namespace School_Management.API.Controllers
         [Route("logout")]
         [Authorize]
         [ValidateModel]
-        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDTO refreshTokenRequest)
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest refreshTokenRequest)
         {
             await authService.LogoutAsync(refreshTokenRequest);
             return Ok(new { message = "Logged out successfully" });
@@ -56,7 +56,7 @@ namespace School_Management.API.Controllers
         [Route("change-password")]
         [Authorize]
         [ValidateModel]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDTO changePasswordRequest)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized("Session is expired or revoked");

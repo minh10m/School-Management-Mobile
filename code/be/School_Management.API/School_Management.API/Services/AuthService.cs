@@ -19,7 +19,7 @@ namespace School_Management.API.Services
             this.tokenService = tokenService;
             this.authRepository = authRepository;
         }
-        public async Task ChangePasswordAsync(ChangePasswordRequestDTO changePasswordRequest, string? UserId)
+        public async Task ChangePasswordAsync(ChangePasswordRequest changePasswordRequest, string? UserId)
         {
             AppUser user = await userManager.FindByIdAsync(UserId);
             if (user == null) throw new NotFoundException("User is invalid!");
@@ -38,7 +38,7 @@ namespace School_Management.API.Services
             }
         }
 
-        public async Task<AuthResponse> LoginAsync(LoginRequestDTO loginRequest)
+        public async Task<AuthResponse> LoginAsync(LoginRequest loginRequest)
         {
             // Check username
             var user = await userManager.FindByNameAsync(loginRequest.UserName);
@@ -102,7 +102,7 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task LogoutAsync(RefreshTokenRequestDTO refreshTokenRequest)
+        public async Task LogoutAsync(RefreshTokenRequest refreshTokenRequest)
         {
             var token = await authRepository.GetRefreshTokenByValue(refreshTokenRequest.RefreshToken);
             if (token != null)
@@ -110,11 +110,10 @@ namespace School_Management.API.Services
                 token.IsRevoked = true;
                 await authRepository.UpdateRefreshToken(token);
             }    
-
             
         }
 
-        public async Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequestDTO refreshTokenRequest)
+        public async Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
         {
             // Check token exist
             var rToken = await authRepository.GetRefreshTokenByValue(refreshTokenRequest.RefreshToken);
