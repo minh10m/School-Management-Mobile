@@ -1,0 +1,104 @@
+﻿using Microsoft.EntityFrameworkCore;
+using School_Management.API.Data;
+using School_Management.API.Models.DTO;
+
+namespace School_Management.API.Repositories
+{
+    public class StudentRepository : IStudentRepository
+    {
+        private readonly ApplicationDbContext context;
+
+        public StudentRepository(ApplicationDbContext context)
+        {
+            this.context = context;
+        }
+        public async Task<PagedResponse<StudentListResponse>> GetAllStudent(string? filterOn, string? filterQuery, string? sortBy, bool? isAscending, int pageNumber, int pageSize)
+        {
+            var query = context.Student.AsQueryable();
+
+            //Filtering
+            if(!string.IsNullOrWhiteSpace(filterOn) && !string.IsNullOrWhiteSpace(filterQuery))
+            {
+                if(filterOn.Equals("FullName", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Where(x => x.User.FullName.Contains(filterQuery));
+                }
+                else if (filterOn.Equals("ClassName", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.ClassName.Contains(filterQuery)));
+                }
+                else if (filterOn.Equals("Grade", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (int.TryParse(filterQuery, out var gradeValue))
+                    {
+                        query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.Grade == gradeValue));
+                    }
+                }
+            }
+
+            //Sorting
+            if(!string.IsNullOrWhiteSpace(sortBy))
+            {
+                if (sortBy.Equals("FullName", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = (isAscending ?? true)
+                        ? query.OrderBy(x => x.User.FullName)
+                        : query.OrderByDescending(x => x.User.FullName);
+                }
+                else if (sortBy.Equals("ClassName", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = (isAscending ?? true)
+                        ? query.OrderBy(x => x.StudentClassYears
+                            .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+                            .Select(scy => scy.ClassYear.ClassName)
+                            .FirstOrDefault())
+                        : query.OrderByDescending(x => x.StudentClassYears
+                            .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+                            .Select(scy => scy.ClassYear.ClassName)
+                            .FirstOrDefault());
+                }
+                else if (sortBy.Equals("Grade", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = (isAscending ?? true)
+                        ? query.OrderBy(x => x.StudentClassYears
+                            .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+                            .Select(scy => scy.ClassYear.Grade)
+                            .FirstOrDefault())
+                        : query.OrderByDescending(x => x.StudentClassYears
+                            .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+                            .Select(scy => scy.ClassYear.Grade)
+                            .FirstOrDefault());
+                }
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var ListStudent = await query.Select(x => new StudentListResponse
+            {
+                StudentId = x.Id,
+                UserId = x.User.Id,
+                FullName = x.User.FullName,
+                ClassName = x.StudentClassYears
+                             .OrderByDescending(x => x.ClassYear.SchoolYear)
+                             .Select(x => x.ClassYear.ClassName)
+                             .FirstOrDefault(),
+                Grade = x.StudentClassYears
+                             .OrderByDescending(x => x.ClassYear.SchoolYear)
+                             .Select(x => x.ClassYear.Grade)
+                             .FirstOrDefault()
+
+            }).Skip((pageNumber - 1) * pageSize)
+              .Take(pageSize)
+              .ToListAsync();
+
+            return new PagedResponse<StudentListResponse>
+            {
+                Items = ListStudent,
+                PageSize = pageSize,
+                PageNumber = pageNumber,
+                TotalCount = totalCount
+            };
+            
+        }
+    }
+}
