@@ -6,6 +6,8 @@ namespace School_Management.API.Services
     public interface IRoleService
     {
         public Task<PagedResponse<RoleInfoResponse>> GetAllRoles(string? filterOn, string? filterQuery, string? sortBy, bool? isAscending, int pageNumber, int pageSize);
-        public RoleInfoResponse ReturnListData(IdentityRole<Guid> role);
+        public RoleInfoResponse ReturnData(IdentityRole<Guid> role);
+
+        public Task<RoleInfoResponse> GetRoleById(string roleId);
     }
 }

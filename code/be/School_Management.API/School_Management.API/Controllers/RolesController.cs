@@ -24,5 +24,14 @@ namespace School_Management.API.Controllers
             var result = await roleService.GetAllRoles(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("{roleId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetRoleById([FromRoute] Guid roleId)
+        {
+            var result = await roleService.GetRoleById(roleId.ToString());
+            return Ok(result);
+        }
     }
 }

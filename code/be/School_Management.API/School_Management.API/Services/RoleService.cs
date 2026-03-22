@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 
@@ -44,7 +45,7 @@ namespace School_Management.API.Services
 
             return new PagedResponse<RoleInfoResponse>
             {
-                Items = result.Select(x => ReturnListData(x)).ToList(),
+                Items = result.Select(x => ReturnData(x)).ToList(),
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 TotalCount = totalCount
@@ -52,7 +53,15 @@ namespace School_Management.API.Services
 
         }
 
-        public RoleInfoResponse ReturnListData(IdentityRole<Guid> role)
+        public async Task<RoleInfoResponse> GetRoleById(string roleId)
+        {
+            var role = await roleManager.FindByIdAsync(roleId);
+            if (role == null) throw new NotFoundException("Role is invalid");
+
+            return ReturnData(role);
+        }
+
+        public RoleInfoResponse ReturnData(IdentityRole<Guid> role)
         {
             return new RoleInfoResponse
             {
