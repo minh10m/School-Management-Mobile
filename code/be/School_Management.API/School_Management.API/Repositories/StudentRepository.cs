@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
+using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 
 namespace School_Management.API.Repositories
@@ -99,6 +100,58 @@ namespace School_Management.API.Repositories
                 TotalCount = totalCount
             };
             
+        }
+
+        public async Task<StudentInfoResponse> GetMyProfileForStudent(Guid userId)
+        {
+            var result = await context.Student
+                .Where(x => x.UserId == userId)
+                .Select(x => new StudentInfoResponse
+                {
+                    StudentId = x.Id,
+                    UserId = x.User.Id,
+                    Birthday = x.User.Birthday,
+                    Email = x.User.Email,
+                    FullName = x.User.FullName,
+                    PhoneNumber = x.User.PhoneNumber,
+                    ClassYearSub = x.StudentClassYears
+                                    .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+                                    .Select(scy => new ClassYearSub
+                                    {
+                                        ClassName = scy.ClassYear.ClassName,
+                                        Grade = scy.ClassYear.Grade,
+                                        SchoolYear = scy.ClassYear.SchoolYear
+                                    }).ToList()
+
+                }).FirstOrDefaultAsync();
+
+            return result;
+        }
+
+        public async Task<StudentInfoResponse> GetStudentById(Guid studentId)
+        {
+            var result = await context.Student
+                .Where(x => x.Id == studentId)
+                .Select(x => new StudentInfoResponse
+                {
+                    StudentId = studentId,
+                    UserId = x.User.Id,
+                    Birthday = x.User.Birthday,
+                    Email = x.User.Email,
+                    FullName = x.User.FullName,
+                    PhoneNumber = x.User.PhoneNumber,
+                    ClassYearSub = x.StudentClassYears
+                                    .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+                                    .Select(scy => new ClassYearSub
+                                    {
+                                        ClassName = scy.ClassYear.ClassName,
+                                        Grade = scy.ClassYear.Grade,
+                                        SchoolYear = scy.ClassYear.SchoolYear
+                                    }).ToList()
+
+                }).FirstOrDefaultAsync();
+
+            return result;
         }
     }
 }
