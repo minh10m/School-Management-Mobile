@@ -14,6 +14,8 @@ namespace School_Management.API.Data
         }
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Teacher> Teacher { get; set; }
+        public DbSet<Student> Student { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -55,6 +57,7 @@ namespace School_Management.API.Data
             };
 
             builder.Entity<IdentityRole<Guid>>().HasData(roles);
+            
 
             // Configure datetime datatype with timestamp without time zone
             foreach (var entityType in builder.Model.GetEntityTypes())

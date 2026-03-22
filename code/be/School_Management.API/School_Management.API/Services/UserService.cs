@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using School_Management.API.Data;
 using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -10,10 +11,12 @@ namespace School_Management.API.Services
     public class UserService : IUserService
     {
         private readonly UserManager<AppUser> userManager;
+        private readonly ApplicationDbContext context;
 
-        public UserService(UserManager<AppUser> userManager)
+        public UserService(UserManager<AppUser> userManager, ApplicationDbContext context)
         {
             this.userManager = userManager;
+            this.context = context;
         }
 
         public async Task<UserStatusResponse> ChangeStatusOfAccount(string userId)
@@ -114,7 +117,7 @@ namespace School_Management.API.Services
 
         }
 
-        public async Task<UserInfoResponse> UpdateRoleForUser(UpdateRoleRequest updateRoleRequest, string userId)
+        public async Task<UserInfoResponse> UpdateRoleForUser(ChangeRoleRequest updateRoleRequest, string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
             if (user == null) throw new NotFoundException("User is invalid");
@@ -132,7 +135,6 @@ namespace School_Management.API.Services
                 if (!result.Succeeded)
                     throw new BadRequestException("Update role failed");
             }
-
 
             return ReturnData(user, updateRoleRequest.Role);
         }
@@ -256,6 +258,58 @@ namespace School_Management.API.Services
             };
                 
             
+        }
+
+        public async Task<UserInfoResponse> CreateUser(CreateUserRequest createUserRequest)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                //User
+                var user = new AppUser
+                {
+                    UserName = createUserRequest.Username,
+                    Address = createUserRequest.Address,
+                    PhoneNumber = createUserRequest.PhoneNumber,
+                    Birthday = DateTimeOffset.Parse(createUserRequest.Birthday).ToUniversalTime(),
+                    FullName = createUserRequest.FullName,
+                    Email = createUserRequest.Email,
+                    EmailConfirmed = true
+                };
+                var cResult = await userManager.CreateAsync(user, createUserRequest.Password);
+                if(!cResult.Succeeded)
+                {
+                    var error = cResult.Errors.FirstOrDefault().Description ?? "Create failed";
+                    throw new BadRequestException(error);
+                }
+                
+                //Role
+                var rResult = await userManager.AddToRoleAsync(user, createUserRequest.Role);
+                if(!rResult.Succeeded)
+                {
+                    var error = rResult.Errors.FirstOrDefault().Description ?? "Creat failed";
+                    throw new BadRequestException(error);
+                }
+
+                if(createUserRequest.Role.Equals("Teacher", StringComparison.OrdinalIgnoreCase))
+                {
+                    await context.Teacher.AddAsync(new Teacher { UserId = user.Id });
+                }
+                if (createUserRequest.Role.Equals("Student", StringComparison.OrdinalIgnoreCase))
+                {
+                    await context.Student.AddAsync(new Student { UserId = user.Id });
+                }
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return ReturnData(user, createUserRequest.Role);
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
     }
 }

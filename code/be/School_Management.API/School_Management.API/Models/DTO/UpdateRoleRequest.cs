@@ -4,7 +4,8 @@ namespace School_Management.API.Models.DTO
 {
     public class UpdateRoleRequest
     {
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Role cannot be empty")]
-        public string? Role { get; set; }
+        [MaxLength(100, ErrorMessage = "FullName is too long")]
+        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 ]+$", ErrorMessage = "Name cannot contain special characters or be only whitespace")]
+        public string? Name { get; set; }
     }
 }

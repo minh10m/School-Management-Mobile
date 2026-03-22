@@ -12,5 +12,7 @@ namespace School_Management.API.Models.Domain
 
         // Navigation properties
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+        public ICollection<Student> Students { get; set; } = new List<Student>();
+        public ICollection<Teacher> Teachers { get; set; } = new List<Teacher>();
     }
 }

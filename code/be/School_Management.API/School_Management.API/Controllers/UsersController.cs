@@ -89,7 +89,7 @@ namespace School_Management.API.Controllers
         [Route("{userId}/role")]
         [ValidateModel]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateRoleForUser([FromBody] UpdateRoleRequest updateRoleRequest, [FromRoute] Guid userId)
+        public async Task<IActionResult> UpdateRoleForUser([FromBody] ChangeRoleRequest updateRoleRequest, [FromRoute] Guid userId)
         {
             var userIdOfAdmin = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userIdOfAdmin != null && userIdOfAdmin.Trim() == userId.ToString().Trim())
@@ -110,6 +110,15 @@ namespace School_Management.API.Controllers
         {
             var result = await userService.GetAllUser(filterOn, filterQuery, sortBy, isAscending ?? true, pageNumber, pageSize);
             return Ok(result);
+        }
+
+        [HttpPost]
+        [ValidateModel]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest createUserRequest)
+        {
+            var result = await userService.CreateUser(createUserRequest);
+            return StatusCode(201, result);
         }
     }
 }
