@@ -43,7 +43,15 @@ export default function LoginScreen() {
     //   setLoading(false);
     // }
 
-    router.replace("/home" as Href);
+    if (username.toLowerCase() === 'admin') {
+      router.replace("/admin" as Href);
+    } else if (username.toLowerCase() === 'teacher') {
+      router.replace("/teacher" as Href);
+    } else if (username.toLowerCase() === 'student') {
+      router.replace("/student" as Href);
+    } else {
+      router.replace("/home" as Href);
+    }
   };
 
   return (
