@@ -1,0 +1,24 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace School_Management.API.Models.Domain
+{
+    public class ClassYear
+    {
+        [Key]
+        public Guid Id { get; set; }
+        public int Grade { get; set; }
+        public string? ClassName { get; set; }
+        public string? SchoolYear { get; set; }
+
+        //FK
+        public Guid? HomeRoomId { get; set; }
+
+        //Navigation properties
+        [ForeignKey("HomeRoomId")]
+        public Teacher? teacher { get; set; }
+
+        public ICollection<StudentClassYear> StudentClassYears { get; set; } = new List<StudentClassYear>();
+
+    }
+}
