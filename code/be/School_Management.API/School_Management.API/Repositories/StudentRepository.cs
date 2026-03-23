@@ -102,6 +102,23 @@ namespace School_Management.API.Repositories
             
         }
 
+        public async Task<StudentClassYear?> GetClassRelationByStudentId(Guid studentId)
+        {
+            return await context.StudentClassYear
+                                .Where(x => x.StudentId == studentId)
+                                .OrderByDescending(x => x.ClassYear.SchoolYear)
+                                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Guid?> GetHomeRoomId(Guid studentId)
+        {
+            return await context.StudentClassYear
+                                        .Where(x => x.StudentId == studentId)
+                                        .OrderByDescending(x => x.ClassYear.SchoolYear)
+                                        .Select(x => x.ClassYear.HomeRoomId)
+                                        .FirstOrDefaultAsync();
+        }
+
         public async Task<StudentInfoResponse> GetMyProfileForStudent(Guid userId)
         {
             var result = await context.Student
@@ -112,6 +129,7 @@ namespace School_Management.API.Repositories
                     UserId = x.User.Id,
                     Birthday = x.User.Birthday,
                     Email = x.User.Email,
+                    Address = x.User.Address,
                     FullName = x.User.FullName,
                     PhoneNumber = x.User.PhoneNumber,
                     ClassYearSub = x.StudentClassYears
@@ -139,6 +157,7 @@ namespace School_Management.API.Repositories
                     Birthday = x.User.Birthday,
                     Email = x.User.Email,
                     FullName = x.User.FullName,
+                    Address = x.User.Address,
                     PhoneNumber = x.User.PhoneNumber,
                     ClassYearSub = x.StudentClassYears
                                     .OrderByDescending(scy => scy.ClassYear.SchoolYear)
@@ -152,6 +171,22 @@ namespace School_Management.API.Repositories
                 }).FirstOrDefaultAsync();
 
             return result;
+        }
+
+        public async Task<Guid> GetStudentIdByUserId(Guid userId)
+        {
+            return await context.Student
+                                .Where(x => x.User.Id == userId)
+                                .Select(x => x.Id)
+                                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Guid> GetUserIdByStudentId(Guid studentId)
+        {
+            var userId = await context.Student.Where(x => x.Id == studentId)
+                                        .Select(re => re.User.Id)
+                                        .FirstOrDefaultAsync();
+            return userId;
         }
     }
 }

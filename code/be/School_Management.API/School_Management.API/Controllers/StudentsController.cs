@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using School_Management.API.CustomActionFilter;
 using School_Management.API.Models.Domain;
+using School_Management.API.Models.DTO;
 using School_Management.API.Services;
 using System.Security.Claims;
 
@@ -53,5 +55,37 @@ namespace School_Management.API.Controllers
             return Ok(result);
         }
 
+        [HttpPatch]
+        [Route("{studentId}")]
+        [ValidateModel]
+        [Authorize(Roles = "Admin,Teacher")]
+        public async Task<IActionResult> UpdateStudentByAdminOrTeacher([FromRoute] Guid studentId, UpdateUserRequest updateUserRequest)
+        {
+            var result = await studentService.UpdateStudentByAdminOrTeacher(updateUserRequest, studentId, User);
+            return Ok(result);
+        }
+
+        [HttpPatch]
+        [Route("me")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new {Message = "Session is expired or revoked"});
+
+
+            var result = await studentService.UpdateMyProfileForStudent(request, Guid.Parse(userId));
+            return Ok(result);
+        }
+
+        [HttpPatch]
+        [Route("{studentId}/classYear")]
+        [ValidateModel]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ChangeClass([FromRoute] Guid studentId, [FromBody] ChangeClassRequest request)
+        {
+            var result = await studentService.ChangeClassForStudent(request, studentId);
+            return Ok(result);
+        }
     }
 }
