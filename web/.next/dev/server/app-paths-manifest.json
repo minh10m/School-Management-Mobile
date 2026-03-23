@@ -1,8 +1,0 @@
-{
-  "/(admin)/classes/page": "app/(admin)/classes/page.js",
-  "/(admin)/courses-approval/page": "app/(admin)/courses-approval/page.js",
-  "/(admin)/page": "app/(admin)/page.js",
-  "/(admin)/people/page": "app/(admin)/people/page.js",
-  "/(admin)/schedules/page": "app/(admin)/schedules/page.js",
-  "/login/page": "app/login/page.js"
-}
