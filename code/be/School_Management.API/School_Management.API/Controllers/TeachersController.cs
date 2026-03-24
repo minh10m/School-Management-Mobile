@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.Services;
+using System.Security.Claims;
 
 namespace School_Management.API.Controllers
 {
@@ -17,7 +18,7 @@ namespace School_Management.API.Controllers
         }
 
         [HttpGet]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetAllTeacher(
             [FromQuery] string? filterOn, [FromQuery] string? filterQuery,
             [FromQuery] string? sortBy = "FullName", [FromQuery] bool? isAscending = true,
@@ -29,10 +30,21 @@ namespace School_Management.API.Controllers
 
         [HttpGet]
         [Route("{teacherId}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetTeacherById([FromRoute] Guid teacherId)
         {
             var result = await teacherService.GetTeacherById(teacherId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("me")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetMyProfileForTeacher()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { message = "Session is expired or revoked" });
+            var result = await teacherService.GetMyProfileForTeacher(Guid.Parse(userId));
             return Ok(result);
         }
     }

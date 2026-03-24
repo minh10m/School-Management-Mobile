@@ -19,7 +19,9 @@ namespace School_Management.API.Services
 
         public async Task<TeacherInfoResponse> GetMyProfileForTeacher(Guid userId)
         {
-            throw new NotImplementedException();
+            var result = await teacherRepository.GetMyProfileForTeacher(userId);
+            if (result == null) throw new NotFoundException("Teacher is invalid");
+            return result;
         }
 
         public async Task<TeacherInfoResponse> GetTeacherById(Guid teacherId)
