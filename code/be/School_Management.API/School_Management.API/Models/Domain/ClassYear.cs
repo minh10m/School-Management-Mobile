@@ -9,7 +9,7 @@ namespace School_Management.API.Models.Domain
         public Guid Id { get; set; }
         public int Grade { get; set; }
         public string? ClassName { get; set; }
-        public string? SchoolYear { get; set; }
+        public int SchoolYear { get; set; }
 
         //FK
         public Guid? HomeRoomId { get; set; }

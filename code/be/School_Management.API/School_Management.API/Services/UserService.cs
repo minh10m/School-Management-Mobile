@@ -104,7 +104,8 @@ namespace School_Management.API.Services
             
             if(updateAdminRequest.Birthday != null)
             {
-                user.Birthday = DateTimeOffset.Parse(updateAdminRequest.Birthday).ToUniversalTime();
+                if (DateTimeOffset.TryParse(updateAdminRequest.Birthday, out var date))
+                    user.Birthday = date.ToUniversalTime();
             }
             user.Address = updateAdminRequest.Address ?? user.Address;
 
@@ -154,7 +155,8 @@ namespace School_Management.API.Services
             user.Address = updateUserRequest.Address ?? user.Address;
             if(updateUserRequest.Birthday != null)
             {
-                user.Birthday = DateTimeOffset.Parse(updateUserRequest.Birthday).ToUniversalTime();
+                if (DateTimeOffset.TryParse(updateUserRequest.Birthday, out var date))
+                    user.Birthday = date.ToUniversalTime();
             }    
             user.FullName = updateUserRequest.FullName ?? user.FullName;
 
