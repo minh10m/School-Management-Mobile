@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
+using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 
 namespace School_Management.API.Repositories
@@ -104,6 +105,40 @@ namespace School_Management.API.Repositories
                                                    .ToList()
                                 }).FirstOrDefaultAsync();
             return result;
+        }
+
+        public async Task<Guid> GetTeacherIdByUserId(Guid userId)
+        {
+            return await context.Teacher
+                                .Where(x => x.UserId == userId)
+                                .Select(x => x.Id)
+                                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Guid> GetUserIdByTeacherid(Guid teacherId)
+        {
+            return await context.Teacher
+                                .Where(x => x.Id == teacherId)
+                                .Select(x => x.UserId)
+                                .FirstOrDefaultAsync();
+        }
+
+        public async Task<TeacherInfoResponse> ReturnData(AppUser user, Guid teacherId)
+        {
+            return new TeacherInfoResponse
+            {
+                Address = user.Address,
+                Birthday = user.Birthday,
+                Email = user.Email,
+                FullName = user.FullName,
+                PhoneNumber = user.PhoneNumber,
+                TeacherId = teacherId,
+                UserId = user.Id,
+                SubjectNames =  await context.TeacherSubject
+                                      .Where(x => x.TeacherId == teacherId)
+                                      .Select(ts => ts.Subject.SubjectName)
+                                      .ToListAsync()
+            };
         }
     }
 }

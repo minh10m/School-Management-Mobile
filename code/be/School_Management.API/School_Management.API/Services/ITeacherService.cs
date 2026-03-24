@@ -7,5 +7,7 @@ namespace School_Management.API.Services
         public Task<PagedResponse<TeacherListResponse>> GetAllTeacher(string? filterOn, string? filterQuery, string? sortBy, bool isAscending, int pageNumber, int pageSize);
         public Task<TeacherInfoResponse> GetTeacherById(Guid teacherId);
         public Task<TeacherInfoResponse> GetMyProfileForTeacher(Guid userId);
+        public Task<TeacherInfoResponse> UpdateTeacherForAdmin(UpdateUserRequest updateUserRequest, Guid teacherId);
+        public Task<TeacherInfoResponse> UpdateMyProfileForTeacher(UpdateUserRequest updateUserRequest, Guid userId);
     }
 }

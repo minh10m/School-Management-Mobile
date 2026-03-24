@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using School_Management.API.CustomActionFilter;
+using School_Management.API.Models.DTO;
 using School_Management.API.Services;
 using System.Security.Claims;
 
@@ -45,6 +47,28 @@ namespace School_Management.API.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized(new { message = "Session is expired or revoked" });
             var result = await teacherService.GetMyProfileForTeacher(Guid.Parse(userId));
+            return Ok(result);
+        }
+
+        [HttpPatch]
+        [Route("{teacherId}")]
+        [Authorize(Roles = "Admin")]
+        [ValidateModel]
+        public async Task<IActionResult> UpdateTeacherForAdmin([FromRoute] Guid teacherId, [FromBody] UpdateUserRequest request)
+        {
+            var result = await teacherService.UpdateTeacherForAdmin(request, teacherId);
+            return Ok(result);
+        }
+
+        [HttpPatch]
+        [Route("me")]
+        [Authorize(Roles = "Teacher")]
+        [ValidateModel]
+        public async Task<IActionResult> UpdateProfileForTeacher([FromBody] UpdateUserRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { message = "Session is expired or revoked" });
+            var result = await teacherService.UpdateMyProfileForTeacher(request, Guid.Parse(userId));
             return Ok(result);
         }
     }
