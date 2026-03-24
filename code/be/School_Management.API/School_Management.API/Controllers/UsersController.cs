@@ -105,7 +105,7 @@ namespace School_Management.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllUsers(
             [FromQuery] string? filterOn, [FromQuery] string? filterQuery,
-            [FromQuery] string? sortBy, [FromQuery] bool? isAscending, 
+            [FromQuery] string? sortBy = "FullName", [FromQuery] bool? isAscending = true, 
             [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var result = await userService.GetAllUser(filterOn, filterQuery, sortBy, isAscending ?? true, pageNumber, pageSize);
