@@ -5,7 +5,7 @@ namespace School_Management.API.Models.Domain
 {
     public class StudentClassYear
     {
-        //FK
+        
         [Key]
         public Guid StudentClassYearId { get; set; }
         public Guid StudentId { get; set; }

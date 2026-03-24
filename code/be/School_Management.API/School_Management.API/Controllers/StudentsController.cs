@@ -27,7 +27,7 @@ namespace School_Management.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetAllStudent(
             [FromQuery] string? filterOn, [FromQuery] string? filterQuery,
-            [FromQuery] string? sortBy, [FromQuery] bool? isAscending,
+            [FromQuery] string? sortBy = "FullName", [FromQuery] bool? isAscending = true,
             [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var result = await studentService.GetAllStudent(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
@@ -68,6 +68,7 @@ namespace School_Management.API.Controllers
         [HttpPatch]
         [Route("me")]
         [Authorize(Roles = "Student")]
+
         public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

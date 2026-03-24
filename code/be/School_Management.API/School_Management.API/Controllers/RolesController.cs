@@ -18,7 +18,7 @@ namespace School_Management.API.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllRoles([FromQuery] string? filterOn, [FromQuery] string? filterQuery, [FromQuery] string? sortBy, [FromQuery] bool? isAscending = true,
+        public async Task<IActionResult> GetAllRoles([FromQuery] string? filterOn, [FromQuery] string? filterQuery, [FromQuery] string? sortBy = "Name", [FromQuery] bool? isAscending = true,
             [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 15)
         {
             var result = await roleService.GetAllRoles(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);

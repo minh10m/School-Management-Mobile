@@ -74,7 +74,10 @@ namespace School_Management.API.Repositories
 
             var totalCount = await query.CountAsync();
 
-            var ListStudent = await query.Select(x => new StudentListResponse
+            var ListStudent = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => new StudentListResponse
             {
                 StudentId = x.Id,
                 UserId = x.User.Id,
@@ -88,9 +91,7 @@ namespace School_Management.API.Repositories
                              .Select(x => x.ClassYear.Grade)
                              .FirstOrDefault()
 
-            }).Skip((pageNumber - 1) * pageSize)
-              .Take(pageSize)
-              .ToListAsync();
+            }).ToListAsync();
 
             return new PagedResponse<StudentListResponse>
             {
