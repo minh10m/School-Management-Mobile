@@ -12,6 +12,7 @@ namespace School_Management.API.Repositories
         public Task<Guid> GetStudentIdByUserId(Guid userId);
         public Task<Guid?> GetHomeRoomId(Guid studentId);
         public Task<StudentClassYear?> GetClassRelationByStudentId(Guid studentId);
+        public Task<Guid?> GetTeacherIdByUserId(Guid userId);
 
     }
 }

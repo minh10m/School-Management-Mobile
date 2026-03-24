@@ -129,14 +129,15 @@ namespace School_Management.API.Services
 
         public async Task<StudentInfoResponse> UpdateStudentByAdminOrTeacher(UpdateUserRequest updateUserRequest, Guid studentId, ClaimsPrincipal currentUser)
         {
-            var userId = studentRepository.GetUserIdByStudentId(studentId);
-            if (userId == null) throw new NotFoundException("Student is invalid");
+            var userId = await studentRepository.GetUserIdByStudentId(studentId);
+            if (userId == Guid.Empty) throw new NotFoundException("Student is invalid");
 
             var user = await userManager.FindByIdAsync(userId.ToString());
 
             if(currentUser.IsInRole("Teacher"))
             {
-                var teacherId = Guid.Parse(currentUser.FindFirstValue(ClaimTypes.NameIdentifier));
+                var userOfTeacherId = Guid.Parse(currentUser.FindFirstValue(ClaimTypes.NameIdentifier));
+                var teacherId = await studentRepository.GetTeacherIdByUserId(userOfTeacherId);
                 var homeRoomId = await studentRepository.GetHomeRoomId(studentId);
                 if (teacherId != homeRoomId) throw new ForbiddenException("You are not the homeroom teacher of this student");
             }

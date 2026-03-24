@@ -181,6 +181,14 @@ namespace School_Management.API.Repositories
                                 .FirstOrDefaultAsync();
         }
 
+        public async Task<Guid?> GetTeacherIdByUserId(Guid userId)
+        {
+            return await context.Teacher
+                                       .Where(x => x.UserId == userId)
+                                       .Select(x => x.Id)
+                                       .FirstOrDefaultAsync();
+        }
+
         public async Task<Guid> GetUserIdByStudentId(Guid studentId)
         {
             var userId = await context.Student.Where(x => x.Id == studentId)
