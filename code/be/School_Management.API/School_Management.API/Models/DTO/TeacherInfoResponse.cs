@@ -9,6 +9,6 @@
         public string? PhoneNumber { get; set; }
         public DateTimeOffset? Birthday { get; set; }
         public string? Address { get; set; }
-        public List<string>? SubjectName { get; set; }
+        public List<string>? SubjectNames { get; set; }
     }
 }

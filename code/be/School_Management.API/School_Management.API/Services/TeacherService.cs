@@ -1,4 +1,5 @@
-﻿using School_Management.API.Models.DTO;
+﻿using School_Management.API.Exceptions;
+using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
 
 namespace School_Management.API.Services
@@ -16,14 +17,16 @@ namespace School_Management.API.Services
             return await teacherRepository.GetAllTeacher(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
         }
 
-        public Task<TeacherInfoResponse> GetMyProfileForTeacher(Guid userId)
+        public async Task<TeacherInfoResponse> GetMyProfileForTeacher(Guid userId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<TeacherInfoResponse> GetTeacherById(Guid teacherId)
+        public async Task<TeacherInfoResponse> GetTeacherById(Guid teacherId)
         {
-            throw new NotImplementedException();
+            var result = await teacherRepository.GetTeacherById(teacherId);
+            if (result == null) throw new NotFoundException("Teacher is invalid");
+            return result;
         }
     }
 }

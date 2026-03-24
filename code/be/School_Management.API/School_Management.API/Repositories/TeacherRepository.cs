@@ -63,5 +63,31 @@ namespace School_Management.API.Repositories
                 TotalCount = totalCount
             };
         }
+
+        public Task<TeacherInfoResponse> GetMyProfileForTeacher(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<TeacherInfoResponse> GetTeacherById(Guid teacherId)
+        {
+            var result = await context.Teacher
+                                .AsNoTracking()
+                                .Where(x => x.Id == teacherId)
+                                .Select(x => new TeacherInfoResponse
+                                {
+                                    UserId = x.User.Id,
+                                    Address = x.User.Address,
+                                    Birthday = x.User.Birthday,
+                                    Email = x.User.Email,
+                                    FullName = x.User.FullName,
+                                    PhoneNumber = x.User.PhoneNumber,
+                                    TeacherId = x.Id,
+                                    SubjectNames = x.TeacherSubjects
+                                                   .Select(ts => ts.Subject.SubjectName)
+                                                   .ToList()
+                                }).FirstOrDefaultAsync();
+            return result;
+        }
     }
 }

@@ -17,13 +17,22 @@ namespace School_Management.API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetAllTeacher(
             [FromQuery] string? filterOn, [FromQuery] string? filterQuery,
             [FromQuery] string? sortBy = "FullName", [FromQuery] bool? isAscending = true,
             [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var result = await teacherService.GetAllTeacher(filterOn, filterQuery, sortBy, isAscending ?? true, pageNumber, pageSize);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("{teacherId}")]
+        //[Authorize]
+        public async Task<IActionResult> GetTeacherById([FromRoute] Guid teacherId)
+        {
+            var result = await teacherService.GetTeacherById(teacherId);
             return Ok(result);
         }
     }
