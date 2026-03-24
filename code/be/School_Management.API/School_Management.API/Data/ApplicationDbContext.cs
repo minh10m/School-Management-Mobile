@@ -18,6 +18,8 @@ namespace School_Management.API.Data
         public DbSet<Student> Student { get; set; }
         public DbSet<ClassYear> ClassYear { get; set; }
         public DbSet<StudentClassYear> StudentClassYear { get; set; }
+        public DbSet<TeacherSubject> TeacherSubject { get; set; }
+        public DbSet<Subject> Subject { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

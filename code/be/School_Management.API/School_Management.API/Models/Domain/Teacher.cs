@@ -12,9 +12,11 @@ namespace School_Management.API.Models.Domain
         public Guid UserId { get; set; }
 
         // Navigation property
+
         [ForeignKey("UserId")]
         public AppUser? User { get; set; }
-
         public ClassYear? ClassYear { get; set; }
+        public ICollection<TeacherSubject> TeacherSubjects { get; set; } = new List<TeacherSubject>();
+
     }
 }

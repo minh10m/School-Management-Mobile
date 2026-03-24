@@ -68,6 +68,7 @@ namespace School_Management.API.Controllers
         [HttpPatch]
         [Route("me")]
         [Authorize(Roles = "Student")]
+
         public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
