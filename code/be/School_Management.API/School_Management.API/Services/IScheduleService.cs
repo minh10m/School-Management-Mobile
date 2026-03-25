@@ -6,5 +6,6 @@ namespace School_Management.API.Services
     {
         public Task<ScheduleResponse?> CreateSchedule(PostUpdateScheduleRequest request);
         public Task<List<ScheduleDetailResponse>> CreateScheduleDetail(PostUpdateScheduleDetailRequest request, Guid scheduleId);
+        public Task<ScheduleResponse?> UpdateSchedule(PostUpdateScheduleRequest request, Guid scheduleId);
     }
 }

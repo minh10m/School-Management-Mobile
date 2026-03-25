@@ -24,5 +24,16 @@ namespace School_Management.API.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<ScheduleResponse?> UpdateSchedule(PostUpdateScheduleRequest request, Guid scheduleId)
+        {
+            var schedule = await scheduleRepository.FindScheduleById(scheduleId);
+            if (schedule == null) throw new NotFoundException("Schedule is invalid");
+
+            var result = await scheduleRepository.UpdateSchedule(request, schedule);
+            if (result == null) throw new ConflictException("This class have already had this schedule");
+
+            return result;
+        }
     }
 }

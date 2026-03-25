@@ -21,11 +21,21 @@ namespace School_Management.API.Controllers
 
         [HttpPost]
         [ValidateModel]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateSchedule([FromBody] PostUpdateScheduleRequest request)
         {
             var result = await scheduleService.CreateSchedule(request);
             return CreatedAtAction(nameof(CreateSchedule), new { id = result?.ScheduleId }, result);
+        }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{scheduleId}")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateSchedule([FromRoute] Guid scheduleId, [FromBody] PostUpdateScheduleRequest request)
+        {
+            var result = await scheduleService.UpdateSchedule(request, scheduleId);
+            return Ok(result);
         }
     }
 }
