@@ -7,6 +7,7 @@ namespace School_Management.API.Models.Domain
         [Key]
         public Guid Id { get; set; }
         public string? SubjectName { get; set; }
+        public int MaxPeriod { get; set; }
 
         //Navigation properties
         public ICollection<TeacherSubject> TeacherSubjects { get; set; } = new List<TeacherSubject>();

@@ -16,6 +16,6 @@ namespace School_Management.API.Models.Domain
 
         [ForeignKey("SubjectId")]
         public Subject? Subject { get; set; }
-
+        public ICollection<ScheduleDetail> ScheduleDetails { get; set; } = new List<ScheduleDetail>();
     }
 }
