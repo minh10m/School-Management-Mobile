@@ -49,6 +49,7 @@ namespace School_Management.API.Repositories
             };
         }
 
+
         public async Task<Schedule?> FindScheduleById(Guid scheduleId)
         {
             var schedule = await context.Schedule
@@ -96,5 +97,6 @@ namespace School_Management.API.Repositories
             };
 
         }
+
     }
 }

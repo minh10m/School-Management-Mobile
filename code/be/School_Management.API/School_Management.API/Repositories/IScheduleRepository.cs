@@ -9,6 +9,5 @@ namespace School_Management.API.Repositories
         public Task<ScheduleResponse?> UpdateSchedule(PostUpdateScheduleRequest request, Schedule schedule);
         public Task<Schedule?> FindScheduleById(Guid scheduleId);
 
-
     }
 }
