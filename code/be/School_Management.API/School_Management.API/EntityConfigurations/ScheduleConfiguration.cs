@@ -13,7 +13,7 @@ namespace School_Management.API.EntityConfigurations
             builder.Property(x => x.Term).IsRequired();
             builder.Property(x => x.SchoolYear).IsRequired();
             builder.ToTable(t => t.HasCheckConstraint("CK_Term_Schedule", "\"Term\" >= 1 AND \"Term\" <= 2"));
-            builder.HasIndex(t => new { t.ClassYearId, t.Term, t.SchoolYear }).IsUnique();
+            builder.HasIndex(t => new { t.ClassYearId, t.Term, t.SchoolYear, t.Name }).IsUnique();
         }
     }
 }
