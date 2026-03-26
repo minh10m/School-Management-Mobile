@@ -27,7 +27,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> AdminResetPassword([FromBody] ResetPasswordRequest resetPasswordRequest, [FromRoute] Guid userId)
         {
             await userService.ResetPassword(resetPasswordRequest, userId.ToString());
-            return Ok(new { message = "Reset password successfully!"});
+            return Ok(new { message = "Khởi tạo lại mật khẩu thành công"});
         }
 
         //Change status of ones account
@@ -66,7 +66,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetMyProfileForAdmin()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { Message = "Session is expired or revoked" });
+            if (userId == null) return Unauthorized(new { Message = "Phiên làm việc hết hạn" });
 
             var result = await userService.GetMyProfileForAdmin(userId);
             return Ok(result);
@@ -79,7 +79,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> UpdateMyProfileForAdmin([FromBody] UpdateAdminRequest updateAdminRequest)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { Message = "Session is expired or revoked" });
+            if (userId == null) return Unauthorized(new { Message = "Phiên làm việc hết hạn" });
 
             var result = await userService.UpdateMyProfileForAdmin(updateAdminRequest, userId.ToString());
             return Ok(result);
@@ -94,7 +94,7 @@ namespace School_Management.API.Controllers
             var userIdOfAdmin = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userIdOfAdmin != null && userIdOfAdmin.Trim() == userId.ToString().Trim())
             {
-                return BadRequest(new { Message = "The role can not be changed by yourself, Admin" });
+                return BadRequest(new { Message = "Không thể thay đổi quyền truy cập của chính mình" });
             }
 
             var result = await userService.UpdateRoleForUser(updateRoleRequest, userId.ToString());

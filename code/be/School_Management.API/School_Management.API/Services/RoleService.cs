@@ -56,7 +56,7 @@ namespace School_Management.API.Services
         public async Task<RoleInfoResponse> GetRoleById(string roleId)
         {
             var role = await roleManager.FindByIdAsync(roleId);
-            if (role == null) throw new NotFoundException("Role is invalid");
+            if (role == null) throw new NotFoundException("Vai trò này (role) không tồn tại");
 
             return ReturnData(role);
         }
