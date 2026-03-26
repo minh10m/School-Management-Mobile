@@ -20,7 +20,7 @@ namespace School_Management.API.Services
         public async Task<ScheduleResponse?> CreateSchedule(PostUpdateScheduleRequest request)
         {
             var result = await scheduleRepository.CreateSchedule(request);
-            if (result == null) throw new ConflictException("This class have already had this schedule");
+            if (result == null) throw new ConflictException("Lớp học đã có lịch này rồi");
             return result;
 
         }
@@ -31,7 +31,7 @@ namespace School_Management.API.Services
                 .Where(x => x.Id == scheduleId)
                 .Select(x => new { x.SchoolYear, x.Term })
                 .FirstOrDefaultAsync();
-            if (currentSchedule == null) throw new NotFoundException("This schedule is invalid");
+            if (currentSchedule == null) throw new NotFoundException("Lịch không tồn tại");
 
             var isClassBusy = await context.ScheduleDetail
                 .AnyAsync(x => x.ScheduleId == scheduleId
@@ -41,40 +41,37 @@ namespace School_Management.API.Services
 
             if (isClassBusy) throw new BadRequestException($"Lịch học bị trùng vào thứ {request.DayOfWeek} lúc {request.StartTime:hh\\:mm}");
 
-            var teacherSubject = await context.TeacherSubject
+            var teacherId = await context.TeacherSubject
                 .Where(x => x.TeacherSubjectId == request.TeacherSubjectId)
-                .Select(x => new { x.TeacherId, x.SubjectId })
+                .Select(x => x.TeacherId)
                 .FirstOrDefaultAsync();
 
-            if (teacherSubject == null) throw new NotFoundException("TeacherSubject not found");
+            if (teacherId == Guid.Empty) throw new NotFoundException("Teacher not found");
 
             var isTeacherBusy = await context.ScheduleDetail
                 .AnyAsync(x => x.Schedule.SchoolYear == currentSchedule.SchoolYear
                             && x.Schedule.Term == currentSchedule.Term
-                            && x.TeacherSubject.TeacherId == teacherSubject.TeacherId
+                            && x.TeacherSubject.TeacherId == teacherId
                             && (currentDetailId == null || x.Id != currentDetailId) 
                             && x.DayOfWeek == request.DayOfWeek
                             && x.StartTime == request.StartTime);
 
-            if (isTeacherBusy) throw new BadRequestException($"Giáo viên đã có lịch dạy vào thứ {request.DayOfWeek} lúc {request.StartTime:hh\\:mm}");
-
-            var totalPeriod = await context.Subject
-                .Where(x => x.Id == teacherSubject.SubjectId)
-                .Select(x => new { x.MaxPeriod, x.SubjectName })
-                .FirstOrDefaultAsync();
-
-            if (totalPeriod == null) throw new NotFoundException("This subject is invalid");
-
-            var currentCountPeriod = await context.ScheduleDetail
-                .CountAsync(x => x.ScheduleId == scheduleId
-                              && x.TeacherSubjectId == request.TeacherSubjectId
-                              && (currentDetailId == null || x.Id != currentDetailId));
-
-            if (currentCountPeriod >= totalPeriod.MaxPeriod)
-                throw new BadRequestException($"Môn {totalPeriod.SubjectName} đã đủ {totalPeriod.MaxPeriod} tiết trong tuần.");
+            if (isTeacherBusy) throw new BadRequestException($"Giáo viên đã có lịch dạy vào {GetVietNameseDay(request.DayOfWeek)} lúc {request.StartTime:hh\\:mm}");
 
             return true;
         }
+
+        public string GetVietNameseDay(DayOfWeek dayOfWeek) => dayOfWeek switch
+        {
+            DayOfWeek.Sunday => "chủ nhật",
+            DayOfWeek.Monday => "thứ hai",
+            DayOfWeek.Tuesday => "thứ ba",
+            DayOfWeek.Wednesday => "thứ tư",
+            DayOfWeek.Thursday => "thứ năm",
+            DayOfWeek.Friday => "thứ sáu",
+            DayOfWeek.Saturday => "thứ bảy",
+            _ => "Không xác định"
+        };
         public async Task<int> CreateScheduleDetail(List<PostUpdateScheduleDetailRequest> request, Guid scheduleId)
         {
             var duplicateInList = request
@@ -83,6 +80,26 @@ namespace School_Management.API.Services
 
             if (duplicateInList)
                 throw new BadRequestException("Danh sách gửi lên có các tiết học bị trùng giờ với nhau.");
+            var periodInRequest = request
+                                    .GroupBy(x => x.TeacherSubjectId)
+                                    .Select(g => new { TeacherSubjectId = g.Key, Count = g.Count() });
+            foreach(var item in periodInRequest)
+            {
+                var periodInDb = await context.ScheduleDetail
+                                              .CountAsync(x => x.ScheduleId == scheduleId
+                                              && x.TeacherSubjectId == item.TeacherSubjectId);
+                var subjectInfo = await context.TeacherSubject
+                                             .Where(x => x.TeacherSubjectId == item.TeacherSubjectId)
+                                             .Select(g => new { g.Subject.MaxPeriod, g.Subject.SubjectName})
+                                             .FirstOrDefaultAsync();
+
+                if(periodInDb + item.Count > subjectInfo?.MaxPeriod)
+                {
+                    throw new BadRequestException($"{subjectInfo.SubjectName} đã bị vượt quá số lượng tiết trên " +
+                        $"tuần là {subjectInfo.MaxPeriod}, tổng số tiết hiện tại là {periodInDb + item.Count}");
+                }
+            }
+
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
@@ -118,10 +135,10 @@ namespace School_Management.API.Services
         public async Task<ScheduleResponse?> UpdateSchedule(PostUpdateScheduleRequest request, Guid scheduleId)
         {
             var schedule = await scheduleRepository.FindScheduleById(scheduleId);
-            if (schedule == null) throw new NotFoundException("Schedule is invalid");
+            if (schedule == null) throw new NotFoundException("Lịch không tồn tại");
 
             var result = await scheduleRepository.UpdateSchedule(request, schedule);
-            if (result == null) throw new ConflictException("This class have already had this schedule");
+            if (result == null) throw new ConflictException("Lớp học đã có lịch này rối");
 
             return result;
         }
