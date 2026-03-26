@@ -22,7 +22,7 @@ namespace School_Management.API.Services
 
         public Task<UserInfoResponse> UpdateRoleForUser(ChangeRoleRequest updateRoleRequest, string userId);
 
-        public Task<PagedResponse<UserListResponse>> GetAllUser(string? filterOn = null, string? filterQuery = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1, int pageSize = 10);
+        public Task<PagedResponse<UserListResponse>> GetAllUser(UserFilterRequest request);
 
         public Task<UserInfoResponse> CreateUser(CreateUserRequest createUserRequest);
         //Method in order to map data

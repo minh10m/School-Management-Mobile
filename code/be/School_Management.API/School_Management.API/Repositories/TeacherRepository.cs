@@ -13,38 +13,33 @@ namespace School_Management.API.Repositories
         {
             this.context = context;
         }
-        public async Task<PagedResponse<TeacherListResponse>> GetAllTeacher(string? filterOn, string? filterQuery, string? sortBy, bool isAscending, int pageNumber, int pageSize)
+        public async Task<PagedResponse<TeacherListResponse>> GetAllTeacher(TeacherFilterRequest request)
         {
             var query = context.Teacher.AsQueryable();
 
             //filtering
-            if(!string.IsNullOrWhiteSpace(filterOn) && !string.IsNullOrWhiteSpace(filterQuery))
-            {
-                if(filterOn.Equals("FullName", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(x => x.User.FullName.Contains(filterQuery));
-                }
-                else if (filterOn.Equals("SubjectName", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(x => x.TeacherSubjects.Any(ts => ts.Subject.SubjectName.Contains(filterQuery)));
-                }
-            }
+            if(!string.IsNullOrWhiteSpace(request.FullName))
+                query = query.Where(x => x.User.FullName.Contains(request.FullName));
+
+            if (!string.IsNullOrWhiteSpace(request.SubjectName))
+                query = query.Where(x => x.TeacherSubjects.Any(ts => ts.Subject.SubjectName.Contains(request.SubjectName)));
+
 
             //sorting
-            if(!string.IsNullOrWhiteSpace(sortBy))
+            if(!string.IsNullOrWhiteSpace(request.SortBy))
             {
-                if (sortBy.Equals("FullName", StringComparison.OrdinalIgnoreCase))
+                if (request.SortBy.Equals("FullName", StringComparison.OrdinalIgnoreCase))
                 {
-                    query = isAscending ? query.OrderBy(x => x.User.FullName) : query.OrderByDescending(x => x.User.FullName);
+                    query = request.IsAscending ? query.OrderBy(x => x.User.FullName) : query.OrderByDescending(x => x.User.FullName);
                 }
             }
 
             var totalCount = await query.CountAsync();
-            var skipResults = (pageNumber - 1) * pageSize;
+            var skipResults = (request.PageNumber - 1) * request.PageSize;
 
             var ListTeachers = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+                .Skip(skipResults)
+                .Take(request.PageSize)
                 .Select(x => new TeacherListResponse
             {
                 TeacherId = x.Id,
@@ -59,8 +54,8 @@ namespace School_Management.API.Repositories
             return new PagedResponse<TeacherListResponse>
             {
                 Items = ListTeachers,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
                 TotalCount = totalCount
             };
         }

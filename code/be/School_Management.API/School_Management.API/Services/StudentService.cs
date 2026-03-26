@@ -58,9 +58,9 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<PagedResponse<StudentListResponse>> GetAllStudent(string? filterOn, string? filterQuery, string? sortBy, bool? isAscending, int pageNumber, int pageSize)
+        public async Task<PagedResponse<StudentListResponse>> GetAllStudent(StudentFilterRequest request)
         {
-            return await studentRepository.GetAllStudent(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
+            return await studentRepository.GetAllStudent(request);
         }
 
         public async Task<StudentInfoResponse> GetMyProfileForStudent(Guid userId)

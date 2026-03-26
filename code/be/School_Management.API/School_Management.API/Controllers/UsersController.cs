@@ -103,12 +103,12 @@ namespace School_Management.API.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllUsers(
-            [FromQuery] string? filterOn, [FromQuery] string? filterQuery,
-            [FromQuery] string? sortBy = "FullName", [FromQuery] bool? isAscending = true, 
-            [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllUsers([FromQuery] UserFilterRequest request)
         {
-            var result = await userService.GetAllUser(filterOn, filterQuery, sortBy, isAscending ?? true, pageNumber, pageSize);
+            if (request.SortBy == null) request.SortBy = "FullName";
+            if (request.PageSize < 0) request.PageSize = 10;
+            if (request.PageNumber < 0) request.PageNumber = 1;
+            var result = await userService.GetAllUser(request);
             return Ok(result);
         }
 

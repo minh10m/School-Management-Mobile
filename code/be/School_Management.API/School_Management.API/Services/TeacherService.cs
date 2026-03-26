@@ -20,9 +20,9 @@ namespace School_Management.API.Services
             this.userManager = userManager;
             this.context = context;
         }
-        public async Task<PagedResponse<TeacherListResponse>> GetAllTeacher(string? filterOn, string? filterQuery, string? sortBy, bool isAscending, int pageNumber, int pageSize)
+        public async Task<PagedResponse<TeacherListResponse>> GetAllTeacher(TeacherFilterRequest request)
         {
-            return await teacherRepository.GetAllTeacher(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
+            return await teacherRepository.GetAllTeacher(request);
         }
 
         public async Task<TeacherInfoResponse> GetMyProfileForTeacher(Guid userId)

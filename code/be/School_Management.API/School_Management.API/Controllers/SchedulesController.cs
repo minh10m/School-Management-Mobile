@@ -51,7 +51,7 @@ namespace School_Management.API.Controllers
         [HttpPut]
         [ValidateModel]
         [Route("{scheduleId}/details")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateScheduleDetail([FromRoute] Guid scheduleId, [FromBody] List<PostUpdateScheduleDetailRequest> request)
         {
             var result = await scheduleService.UpdateScheduleDetail(request, scheduleId);

@@ -25,12 +25,12 @@ namespace School_Management.API.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetAllStudent(
-            [FromQuery] string? filterOn, [FromQuery] string? filterQuery,
-            [FromQuery] string? sortBy = "FullName", [FromQuery] bool? isAscending = true,
-            [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllStudent([FromQuery] StudentFilterRequest request)
         {
-            var result = await studentService.GetAllStudent(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
+            if (request.SortBy == null) request.SortBy = "FullName";
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await studentService.GetAllStudent(request);
             return Ok(result);
         }
 
