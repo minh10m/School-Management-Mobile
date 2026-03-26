@@ -22,7 +22,7 @@ namespace School_Management.API.Services
         public async Task ChangePasswordAsync(ChangePasswordRequest changePasswordRequest, string? UserId)
         {
             AppUser user = await userManager.FindByIdAsync(UserId);
-            if (user == null) throw new NotFoundException("User is invalid!");
+            if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
             var result = await userManager.ChangePasswordAsync(user, changePasswordRequest.OldPassword, changePasswordRequest.NewPassword);
             if(!result.Succeeded)
@@ -31,10 +31,10 @@ namespace School_Management.API.Services
 
                 if (error?.Code == "PasswordMismatch")
                 {
-                    throw new BadRequestException("OldPassword is incorrect!");
+                    throw new BadRequestException("Mật khẩu cũ không chính xác");
                 }
 
-                throw new BadRequestException(error?.Description ?? "ChangePassword failed");
+                throw new BadRequestException(error?.Description ?? "Đổi mật khẩu thất bại");
             }
         }
 
@@ -42,7 +42,7 @@ namespace School_Management.API.Services
         {
             // Check username
             var user = await userManager.FindByNameAsync(loginRequest.UserName);
-            if (user == null) throw new UnauthorizedException("Username or password is invalid!");
+            if (user == null) throw new UnauthorizedException("Tên đăng nhập hoặc mật khẩu không chính xác");
 
             // Check lock out
             if(await userManager.IsLockedOutAsync(user))
@@ -52,12 +52,12 @@ namespace School_Management.API.Services
                 {
                     if(lockoutEnd.Value.Year > 2090)
                     {
-                        throw new ForbiddenException("Your account is locked out by admin!");
+                        throw new ForbiddenException("Tài khoản đã bị khóa");
                     }
 
                     var time = lockoutEnd.Value - DateTimeOffset.UtcNow;
                     var secondLeft = Math.Ceiling(time.TotalSeconds);
-                    throw new ForbiddenException($"Your password is wrong too many time! Please wait {secondLeft.ToString()} seconds to login again");
+                    throw new ForbiddenException($"Bạn nhập sai mật khẩu quá nhiều lần, hãy đợi thêm {secondLeft.ToString()} giây để đăng nhập lại");
                 }
             }
 
@@ -65,7 +65,7 @@ namespace School_Management.API.Services
             if(!await userManager.CheckPasswordAsync(user, loginRequest.PassWord))
             {
                 await userManager.AccessFailedAsync(user);
-                throw new UnauthorizedException("Username or password is invalid!");
+                throw new UnauthorizedException("Người dùng không tồn tại");
             }
 
             await userManager.ResetAccessFailedCountAsync(user);

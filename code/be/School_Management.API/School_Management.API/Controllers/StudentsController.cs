@@ -49,7 +49,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetMyProfileForStudent()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { Message = "Session is expired or revoked" });
+            if (userId == null) return Unauthorized(new { Message = "Phiên làm việc hết hạn" });
 
             var result = await studentService.GetMyProfileForStudent(Guid.Parse(userId));
             return Ok(result);
@@ -72,7 +72,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new {Message = "Session is expired or revoked"});
+            if (userId == null) return Unauthorized(new {Message = "Phiên làm việc hết hạn"});
 
 
             var result = await studentService.UpdateMyProfileForStudent(request, Guid.Parse(userId));

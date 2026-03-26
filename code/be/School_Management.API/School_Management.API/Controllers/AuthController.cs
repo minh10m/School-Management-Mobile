@@ -48,7 +48,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest refreshTokenRequest)
         {
             await authService.LogoutAsync(refreshTokenRequest);
-            return Ok(new { message = "Logged out successfully" });
+            return Ok(new { message = "Đăng xuất thành công" });
         }
 
         // Change password
@@ -59,10 +59,10 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized("Session is expired or revoked");
+            if (userId == null) return Unauthorized("Phiên làm việc hết hạn");
             
             await authService.ChangePasswordAsync(changePasswordRequest, userId.ToString());
-            return Ok(new { Message = "Change password successfully!" });
+            return Ok(new { Message = "Đổi mật khẩu thành công" });
         }
     }
 }

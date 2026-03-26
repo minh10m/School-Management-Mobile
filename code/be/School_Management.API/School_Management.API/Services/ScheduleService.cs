@@ -46,7 +46,7 @@ namespace School_Management.API.Services
                 .Select(x => x.TeacherId)
                 .FirstOrDefaultAsync();
 
-            if (teacherId == Guid.Empty) throw new NotFoundException("Teacher not found");
+            if (teacherId == Guid.Empty) throw new NotFoundException("Giáo viên không tồn tại");
 
             var isTeacherBusy = await context.ScheduleDetail
                 .AnyAsync(x => x.Schedule.SchoolYear == currentSchedule.SchoolYear
@@ -80,29 +80,33 @@ namespace School_Management.API.Services
 
             if (duplicateInList)
                 throw new BadRequestException("Danh sách gửi lên có các tiết học bị trùng giờ với nhau.");
-            var periodInRequest = request
-                                    .GroupBy(x => x.TeacherSubjectId)
-                                    .Select(g => new { TeacherSubjectId = g.Key, Count = g.Count() });
-            foreach(var item in periodInRequest)
-            {
-                var periodInDb = await context.ScheduleDetail
-                                              .CountAsync(x => x.ScheduleId == scheduleId
-                                              && x.TeacherSubjectId == item.TeacherSubjectId);
-                var subjectInfo = await context.TeacherSubject
-                                             .Where(x => x.TeacherSubjectId == item.TeacherSubjectId)
-                                             .Select(g => new { g.Subject.MaxPeriod, g.Subject.SubjectName})
-                                             .FirstOrDefaultAsync();
-
-                if(periodInDb + item.Count > subjectInfo?.MaxPeriod)
-                {
-                    throw new BadRequestException($"{subjectInfo.SubjectName} đã bị vượt quá số lượng tiết trên " +
-                        $"tuần là {subjectInfo.MaxPeriod}, tổng số tiết hiện tại là {periodInDb + item.Count}");
-                }
-            }
-
-            using var transaction = await context.Database.BeginTransactionAsync();
+            
+            var existTransaction = context.Database.CurrentTransaction;
+            using var transaction = existTransaction == null ? await context.Database.BeginTransactionAsync() : null;
             try
             {
+                var periodInRequest = request
+                                    .GroupBy(x => x.TeacherSubjectId)
+                                    .Select(g => new { TeacherSubjectId = g.Key, Count = g.Count() });
+                foreach (var item in periodInRequest)
+                {
+                    var periodInDb = await context.ScheduleDetail
+                                                  .CountAsync(x => x.ScheduleId == scheduleId
+                                                  && x.TeacherSubjectId == item.TeacherSubjectId);
+                    var subjectInfo = await context.TeacherSubject
+                                                 .Where(x => x.TeacherSubjectId == item.TeacherSubjectId)
+                                                 .Select(g => new { g.Subject.MaxPeriod, g.Subject.SubjectName })
+                                                 .FirstOrDefaultAsync();
+                    if (subjectInfo == null)
+                        throw new NotFoundException($"Không tìm thấy thông tin môn học cho ID: {item.TeacherSubjectId}");
+
+                    if (periodInDb + item.Count > subjectInfo?.MaxPeriod)
+                    {
+                        throw new BadRequestException($"{subjectInfo.SubjectName} đã bị vượt quá số lượng tiết trên " +
+                            $"tuần là {subjectInfo.MaxPeriod}, tổng số tiết hiện tại là {periodInDb + item.Count}");
+                    }
+                }
+
                 var newDetails = new List<ScheduleDetail>();
                 foreach(var item in request)
                 {
@@ -121,13 +125,18 @@ namespace School_Management.API.Services
                 }
                 await context.ScheduleDetail.AddRangeAsync(newDetails);
                 var result = await context.SaveChangesAsync();
-                await transaction.CommitAsync();
+
+                if(existTransaction == null && transaction != null)
+                    await transaction.CommitAsync();
+
                 return result;
 
             }
             catch (Exception)
             {
-                await transaction.RollbackAsync();
+                if(existTransaction == null && transaction != null)
+                    await transaction.RollbackAsync();
+
                 throw;
             }
         }
@@ -138,10 +147,33 @@ namespace School_Management.API.Services
             if (schedule == null) throw new NotFoundException("Lịch không tồn tại");
 
             var result = await scheduleRepository.UpdateSchedule(request, schedule);
-            if (result == null) throw new ConflictException("Lớp học đã có lịch này rối");
+            if (result == null) throw new ConflictException("Lớp học đã có lịch này rồi");
 
             return result;
         }
 
+        public async Task<int> UpdateScheduleDetail(List<PostUpdateScheduleDetailRequest> request, Guid scheduleId)
+        {
+
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var oldDetails = await context.ScheduleDetail
+                                              .Where(x => x.ScheduleId == scheduleId)
+                                              .ToListAsync();
+                context.ScheduleDetail.RemoveRange(oldDetails);
+                await context.SaveChangesAsync();
+
+                var result = await CreateScheduleDetail(request, scheduleId);
+                await transaction.CommitAsync();
+                return result;
+
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }
