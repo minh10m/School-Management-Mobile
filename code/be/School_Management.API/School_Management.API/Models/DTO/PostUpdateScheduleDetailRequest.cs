@@ -4,11 +4,11 @@ namespace School_Management.API.Models.DTO
 {
     public class PostUpdateScheduleDetailRequest
     {
-        [Required(ErrorMessage ="Teacher and subject is required")]
+        [Required(ErrorMessage ="Giáo viên và môn học là bắt buộc")]
         public Guid TeacherSubjectId { get; set; }
-        [Required(ErrorMessage = "DayOfWeek is required")]
+        [Required(ErrorMessage = "Ngày trong tuần là bắt buộc")]
         public DayOfWeek DayOfWeek { get; set; }
-        [Required(ErrorMessage = "StartTime is required")]
+        [Required(ErrorMessage = "Thời gian bắt đầu là bắt buộc")]
         public TimeSpan StartTime { get; set; }
         //Finish Time = StartTime + 45 minutes
     }

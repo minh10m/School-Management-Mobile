@@ -13,15 +13,15 @@ namespace School_Management.API.Models.DTO
         [RegularExpression(@"^[0-9]{10,11}$", ErrorMessage = "Số điện thoại phải từ 10 - 11 số")]
         public string? PhoneNumber { get; set; }
 
-        [MaxLength(100, ErrorMessage = "FullName is too long")]
-        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 ]+$", ErrorMessage = "FullName cannot contain special characters or be only whitespace")]
+        [MaxLength(100, ErrorMessage = "Tên quá dài")]
+        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 ]+$", ErrorMessage = "Tên không được chứa kí tự đặc biệt hoặc là khoảng trắng")]
         public string? FullName { get; set; }
 
-        [MinLength(5, ErrorMessage = "Address is too short")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Address cannot be only whitespace")]
+        [MinLength(5, ErrorMessage = "Địa chỉ quá dài")]
+        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Địa chỉ không được phép là khoảng trắng")]
         public string? Address { get; set; }
 
-        [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Birthday must be YYYY-MM-DD")]
+        [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Ngày sinh nhật cần có định dạng YYYY-MM-DD")]
         public string? Birthday { get; set; }
 
     }

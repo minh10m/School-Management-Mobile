@@ -8,8 +8,8 @@ namespace School_Management.API.Models.DTO
         public Guid ClassYearId { get; set; }
 
         [Required]
-        [MaxLength(200, ErrorMessage = "Name is too long")]
-        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 ]+$", ErrorMessage = "Name cannot contain special characters or be only whitespace")]
+        [MaxLength(200, ErrorMessage = "Tên quá dài")]
+        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 ]+$", ErrorMessage = "Tên không được chứa kí tự đặc biệt hoặc là khoảng trắng")]
         public string? Name { get; set; }
 
         [Required]
@@ -19,7 +19,7 @@ namespace School_Management.API.Models.DTO
         public bool IsActive { get; set; }
 
         [Required]
-        [Range(1, 2, ErrorMessage = "The value of term is 1 or 2")]
+        [Range(1, 2, ErrorMessage = "Kì chỉ có giá trị là 1 hoặc 2")]
         public int Term { get; set; }
     }
 }
