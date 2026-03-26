@@ -21,7 +21,7 @@ namespace School_Management.API.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetAllTeacher([FromQuery]TeacherFilterRequest request)
+        public async Task<IActionResult> GetAllTeacher([FromQuery] TeacherFilterRequest request)
         {
             if (request.SortBy == null) request.SortBy = "FullName";
             if (request.PageSize < 0) request.PageSize = 10;

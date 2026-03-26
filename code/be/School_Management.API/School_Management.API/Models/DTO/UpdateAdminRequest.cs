@@ -6,11 +6,11 @@ namespace School_Management.API.Models.DTO
     {
         //Không cập nhật thì để null, đã cập nhật thì phải nhập không để trắng ""
         //Và quan trọng phải nhập đúng định dạng.
-        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [EmailAddress(ErrorMessage = "Email không đúng định dạng")]
         public string? Email { get; set; }
 
-        [Phone(ErrorMessage = "Invalid phone number format")]
-        [RegularExpression(@"^[0-9]{10,11}$", ErrorMessage = "Phone must be 10-11 digits")]
+        [Phone(ErrorMessage = "Số điện thoại không đúng định dạng")]
+        [RegularExpression(@"^[0-9]{10,11}$", ErrorMessage = "Số điện thoại phải từ 10 - 11 số")]
         public string? PhoneNumber { get; set; }
 
         [MaxLength(100, ErrorMessage = "FullName is too long")]

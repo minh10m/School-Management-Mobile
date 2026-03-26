@@ -8,5 +8,6 @@
         public Guid ClassYearId { get; set; }
         public string? ClassName { get; set; }
         public int SchoolYear { get; set; }
+        public bool IsActive { get; set; }
     }
 }

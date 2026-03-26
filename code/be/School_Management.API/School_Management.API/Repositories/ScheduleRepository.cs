@@ -32,6 +32,7 @@ namespace School_Management.API.Repositories
                 Term = request.Term,
                 SchoolYear = request.SchoolYear,
                 Name = request.Name,
+                IsActive = request.IsActive,
                 ClassYearId = request.ClassYearId
             };
 
@@ -44,6 +45,7 @@ namespace School_Management.API.Repositories
                 ClassYearId = schedule.ClassYearId,
                 Name = schedule.Name,
                 ScheduleId = schedule.Id,
+                IsActive = schedule.IsActive,
                 ClassName = className
 
             };
@@ -83,6 +85,7 @@ namespace School_Management.API.Repositories
             schedule.Name = request.Name;
             schedule.SchoolYear = request.SchoolYear;
             schedule.Term = request.Term;
+            schedule.IsActive = request.IsActive;
             schedule.ClassYearId = request.ClassYearId;
 
             await context.SaveChangesAsync();
@@ -92,6 +95,7 @@ namespace School_Management.API.Repositories
                 SchoolYear = schedule.SchoolYear,
                 ClassYearId = schedule.ClassYearId,
                 Name = schedule.Name,
+                IsActive = schedule.IsActive,
                 ScheduleId = schedule.Id,
                 ClassName = className
             };

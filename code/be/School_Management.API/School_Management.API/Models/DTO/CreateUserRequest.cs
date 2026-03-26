@@ -6,19 +6,19 @@ namespace School_Management.API.Models.DTO
     {
         //Username
         [Required]
-        [MinLength(4, ErrorMessage = "Username can not be only whitespace")]
+        [MinLength(4, ErrorMessage = "Tên đăng nhập không được phép là khoảng trắng")]
         public string? Username { get; set; }
 
         //Password
         [Required]
-        [MinLength(8, ErrorMessage = "Password mush have at least 8 characters")]
+        [MinLength(8, ErrorMessage = "Mật khẩu phải có 8 kí tự")]
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$",
-            ErrorMessage = "The password must include at least 1 uppercase letter, 1 lowercase letter, and 1 digit.")]
+            ErrorMessage = "Mật khẩu phải có ít nhất một chữ hoa, một chữ thường và một kí tự")]
         public string? Password { get; set; }
 
         //Email
         [Required]
-        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [EmailAddress(ErrorMessage = "Email không đúng định dạng")]
         public string? Email { get; set; }
 
         //PhoneNumber
