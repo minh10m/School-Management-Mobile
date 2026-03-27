@@ -175,7 +175,7 @@ namespace School_Management.API.Services
             if (studentId == Guid.Empty) throw new NotFoundException("Học sinh này không tồn tại");
 
             var result = await scheduleRepository.GetMyScheduleForStudent(request, studentId);
-            if (result == null || !result.Any())
+            if (result == null)
                 throw new NotFoundException("Không tìm thấy lịch");
 
             return result;
@@ -188,11 +188,23 @@ namespace School_Management.API.Services
             if (teacherId == Guid.Empty) throw new NotFoundException("Giáo viên không tồn tại");
 
             var result = await scheduleRepository.GetMyScheduleForTeacher(request, teacherId);
-            if (result == null || !result.Any())
+            if (result == null)
                 throw new NotFoundException("Không tìm thấy lịch");
 
             return result;
 
+        }
+
+        public async Task<PagedResponse<ScheduleResponse>> GetAllScheduleForAdmin(ScheduleFilterRequest request)
+        {
+            return await scheduleRepository.GetAllScheduleForAdmin(request);   
+        }
+
+        public async Task<List<ScheduleDetailResponse>> GetScheduleDetailByScheduleId(Guid scheduleId)
+        {
+            var result = await scheduleRepository.GetScheduleDetailByScheduleId(scheduleId);
+            if (result == null) throw new NotFoundException("Lịch học tổng quát không tồn tại");
+            return result;
         }
     }
 }

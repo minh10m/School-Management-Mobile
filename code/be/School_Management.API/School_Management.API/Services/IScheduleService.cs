@@ -11,6 +11,8 @@ namespace School_Management.API.Services
         public Task<List<TeacherScheduleDetailResponse>> GetMyScheduleForTeacher(ScheduleDetailIsActiveRequest request, Guid userId);
         public Task<int> UpdateScheduleDetail(List<PostUpdateScheduleDetailRequest> request, Guid scheduleId);
         public Task<bool> ValidateData(PostUpdateScheduleDetailRequest request, Guid scheduleId, Guid? currentDetailId = null);
+        public Task<PagedResponse<ScheduleResponse>> GetAllScheduleForAdmin(ScheduleFilterRequest request);
+        public Task<List<ScheduleDetailResponse>> GetScheduleDetailByScheduleId(Guid scheduleId);
 
     }
 }

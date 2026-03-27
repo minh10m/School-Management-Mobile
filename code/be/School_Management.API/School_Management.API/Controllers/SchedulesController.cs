@@ -83,5 +83,26 @@ namespace School_Management.API.Controllers
             var result = await scheduleService.GetMyScheduleForTeacher(request, Guid.Parse(userId));
             return Ok(result);
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllScheduleForAdmin([FromQuery] ScheduleFilterRequest request)
+        {
+            if (request.SortBy == null) request.SortBy = "Name";
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await scheduleService.GetAllScheduleForAdmin(request);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("{scheduleId}/details")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetScheduleDetailByScheduleId([FromRoute] Guid scheduleId)
+        {
+            var result = await scheduleService.GetScheduleDetailByScheduleId(scheduleId);
+            return Ok(result);
+        }
     }
 }
