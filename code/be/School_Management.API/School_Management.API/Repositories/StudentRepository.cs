@@ -13,42 +13,32 @@ namespace School_Management.API.Repositories
         {
             this.context = context;
         }
-        public async Task<PagedResponse<StudentListResponse>> GetAllStudent(string? filterOn, string? filterQuery, string? sortBy, bool? isAscending, int pageNumber, int pageSize)
+        public async Task<PagedResponse<StudentListResponse>> GetAllStudent(StudentFilterRequest request)
         {
             var query = context.Student.AsQueryable();
 
             //Filtering
-            if(!string.IsNullOrWhiteSpace(filterOn) && !string.IsNullOrWhiteSpace(filterQuery))
-            {
-                if(filterOn.Equals("FullName", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(x => x.User.FullName.Contains(filterQuery));
-                }
-                else if (filterOn.Equals("ClassName", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.ClassName.Contains(filterQuery)));
-                }
-                else if (filterOn.Equals("Grade", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (int.TryParse(filterQuery, out var gradeValue))
-                    {
-                        query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.Grade == gradeValue));
-                    }
-                }
-            }
+            if (!string.IsNullOrWhiteSpace(request.FullName))
+                query = query.Where(x => x.User.FullName.Contains(request.FullName));
+            if(!string.IsNullOrWhiteSpace(request.ClassName))
+                query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.ClassName.Contains(request.ClassName)));
+            if(request.Grade != 0)
+                query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.Grade == request.Grade));
+                   
+          
 
             //Sorting
-            if(!string.IsNullOrWhiteSpace(sortBy))
+            if(!string.IsNullOrWhiteSpace(request.SortBy))
             {
-                if (sortBy.Equals("FullName", StringComparison.OrdinalIgnoreCase))
+                if (request.SortBy.Equals("FullName", StringComparison.OrdinalIgnoreCase))
                 {
-                    query = (isAscending ?? true)
+                    query = (request.IsAscending)
                         ? query.OrderBy(x => x.User.FullName)
                         : query.OrderByDescending(x => x.User.FullName);
                 }
-                else if (sortBy.Equals("ClassName", StringComparison.OrdinalIgnoreCase))
+                else if (request.SortBy.Equals("ClassName", StringComparison.OrdinalIgnoreCase))
                 {
-                    query = (isAscending ?? true)
+                    query = (request.IsAscending)
                         ? query.OrderBy(x => x.StudentClassYears
                             .OrderByDescending(scy => scy.ClassYear.SchoolYear)
                             .Select(scy => scy.ClassYear.ClassName)
@@ -58,9 +48,9 @@ namespace School_Management.API.Repositories
                             .Select(scy => scy.ClassYear.ClassName)
                             .FirstOrDefault());
                 }
-                else if (sortBy.Equals("Grade", StringComparison.OrdinalIgnoreCase))
+                else if (request.SortBy.Equals("Grade", StringComparison.OrdinalIgnoreCase))
                 {
-                    query = (isAscending ?? true)
+                    query = (request.IsAscending)
                         ? query.OrderBy(x => x.StudentClassYears
                             .OrderByDescending(scy => scy.ClassYear.SchoolYear)
                             .Select(scy => scy.ClassYear.Grade)
@@ -75,8 +65,8 @@ namespace School_Management.API.Repositories
             var totalCount = await query.CountAsync();
 
             var ListStudent = await query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
                 .Select(x => new StudentListResponse
             {
                 StudentId = x.Id,
@@ -96,8 +86,8 @@ namespace School_Management.API.Repositories
             return new PagedResponse<StudentListResponse>
             {
                 Items = ListStudent,
-                PageSize = pageSize,
-                PageNumber = pageNumber,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
                 TotalCount = totalCount
             };
             

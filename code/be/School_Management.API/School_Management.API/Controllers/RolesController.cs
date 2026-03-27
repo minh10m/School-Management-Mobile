@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using School_Management.API.Models.DTO;
 using School_Management.API.Services;
 
 namespace School_Management.API.Controllers
@@ -18,10 +19,12 @@ namespace School_Management.API.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllRoles([FromQuery] string? filterOn, [FromQuery] string? filterQuery, [FromQuery] string? sortBy = "Name", [FromQuery] bool? isAscending = true,
-            [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 15)
+        public async Task<IActionResult> GetAllRoles([FromQuery] RoleFilterRequest request)
         {
-            var result = await roleService.GetAllRoles(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
+            if (request.SortBy == null) request.SortBy = "Name";
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await roleService.GetAllRoles(request);
             return Ok(result);
         }
 

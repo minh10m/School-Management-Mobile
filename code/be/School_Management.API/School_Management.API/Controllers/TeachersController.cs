@@ -21,12 +21,12 @@ namespace School_Management.API.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetAllTeacher(
-            [FromQuery] string? filterOn, [FromQuery] string? filterQuery,
-            [FromQuery] string? sortBy = "FullName", [FromQuery] bool? isAscending = true,
-            [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllTeacher([FromQuery] TeacherFilterRequest request)
         {
-            var result = await teacherService.GetAllTeacher(filterOn, filterQuery, sortBy, isAscending ?? true, pageNumber, pageSize);
+            if (request.SortBy == null) request.SortBy = "FullName";
+            if (request.PageSize < 0) request.PageSize = 10;
+            if (request.PageNumber < 0) request.PageNumber = 1;
+            var result = await teacherService.GetAllTeacher(request);
             return Ok(result);
         }
 
@@ -45,7 +45,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetMyProfileForTeacher()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { message = "Session is expired or revoked" });
+            if (userId == null) return Unauthorized(new { message = "Phiên làm việc hết hạn" });
             var result = await teacherService.GetMyProfileForTeacher(Guid.Parse(userId));
             return Ok(result);
         }
@@ -67,7 +67,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> UpdateProfileForTeacher([FromBody] UpdateUserRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { message = "Session is expired or revoked" });
+            if (userId == null) return Unauthorized(new { message = "Phiên làm việc hết hạn" });
             var result = await teacherService.UpdateMyProfileForTeacher(request, Guid.Parse(userId));
             return Ok(result);
         }

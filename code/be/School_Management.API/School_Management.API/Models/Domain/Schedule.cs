@@ -11,6 +11,8 @@ namespace School_Management.API.Models.Domain
         public int SchoolYear { get; set; }
         public string? Name { get; set; }
         public Guid ClassYearId { get; set; }
+        public bool IsActive { get; set; }
+
 
         //Navigation properties
         [ForeignKey("ClassYearId")]

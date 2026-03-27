@@ -20,34 +20,34 @@ namespace School_Management.API.Services
             this.userManager = userManager;
             this.context = context;
         }
-        public async Task<PagedResponse<TeacherListResponse>> GetAllTeacher(string? filterOn, string? filterQuery, string? sortBy, bool isAscending, int pageNumber, int pageSize)
+        public async Task<PagedResponse<TeacherListResponse>> GetAllTeacher(TeacherFilterRequest request)
         {
-            return await teacherRepository.GetAllTeacher(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
+            return await teacherRepository.GetAllTeacher(request);
         }
 
         public async Task<TeacherInfoResponse> GetMyProfileForTeacher(Guid userId)
         {
             var result = await teacherRepository.GetMyProfileForTeacher(userId);
-            if (result == null) throw new NotFoundException("Teacher is invalid");
+            if (result == null) throw new NotFoundException("Giáo viên không tồn tại");
             return result;
         }
 
         public async Task<TeacherInfoResponse> GetTeacherById(Guid teacherId)
         {
             var result = await teacherRepository.GetTeacherById(teacherId);
-            if (result == null) throw new NotFoundException("Teacher is invalid");
+            if (result == null) throw new NotFoundException("Giáo viên không tồn tại");
             return result;
         }
 
         public async Task<TeacherInfoResponse> UpdateMyProfileForTeacher(UpdateUserRequest updateUserRequest, Guid userId)
         {
             var user = await userManager.FindByIdAsync(userId.ToString());
-            if (user == null) throw new NotFoundException("Teacher is invalid");
+            if (user == null) throw new NotFoundException("Giáo viên không tồn tại");
 
             if (updateUserRequest.Email != null)
             {
                 var result = await userManager.SetEmailAsync(user, updateUserRequest.Email);
-                if (!result.Succeeded) throw new BadRequestException("Update email failed");
+                if (!result.Succeeded) throw new BadRequestException("Cập nhật email thất bại");
 
             }
 
@@ -60,21 +60,21 @@ namespace School_Management.API.Services
                 user.Birthday = date.ToUniversalTime();
             }
             var resultF = await userManager.UpdateAsync(user);
-            if (!resultF.Succeeded) throw new BadRequestException("Update failed");
+            if (!resultF.Succeeded) throw new BadRequestException("Cập nhật thất bại");
             return await teacherRepository.ReturnData(user, await teacherRepository.GetTeacherIdByUserId(user.Id));
         }
 
         public async Task<TeacherInfoResponse> UpdateTeacherForAdmin(UpdateUserRequest updateUserRequest, Guid teacherId)
         {
             var userId = await teacherRepository.GetUserIdByTeacherid(teacherId);
-            if (userId == Guid.Empty) throw new NotFoundException("Teacher is invalid");
+            if (userId == Guid.Empty) throw new NotFoundException("Giáo viên không tồn tại");
             var user = await userManager.FindByIdAsync(userId.ToString());
-            if (user == null) throw new NotFoundException("Teacher is invalid");
+            if (user == null) throw new NotFoundException("Giáo viên không tồn tại");
 
             if(updateUserRequest.Email != null)
             {
                 var result = await userManager.SetEmailAsync(user, updateUserRequest.Email);
-                if (!result.Succeeded) throw new BadRequestException("Update email failed");
+                if (!result.Succeeded) throw new BadRequestException("Cập nhật email thất bại");
 
             }
 
@@ -87,7 +87,7 @@ namespace School_Management.API.Services
                 user.Birthday = date.ToUniversalTime();
             }
             var resultF = await userManager.UpdateAsync(user);
-            if (!resultF.Succeeded) throw new BadRequestException("Update failed");
+            if (!resultF.Succeeded) throw new BadRequestException("Cập nhật thất bại");
             return await teacherRepository.ReturnData(user, teacherId);
         }
     }

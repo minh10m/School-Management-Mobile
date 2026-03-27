@@ -26,11 +26,11 @@ namespace School_Management.API.Services
         {
             var requestClassYearId = changeClassRequest.classYearId;
             var userId = await studentRepository.GetUserIdByStudentId(studentId);
-            if (userId == Guid.Empty) throw new NotFoundException("User is invalid");
+            if (userId == Guid.Empty) throw new NotFoundException("Người dùng không tồn tại");
             var user = await userManager.FindByIdAsync(userId.ToString());
             var currentClassRelation = await studentRepository.GetClassRelationByStudentId(studentId);
             if (currentClassRelation == null)
-                throw new NotFoundException("This student does not have a class to change");
+                throw new NotFoundException("Học sinh này không có lớp để thay đổi");
             if(currentClassRelation.ClassYearId != requestClassYearId)
             {
                 currentClassRelation.ClassYearId = requestClassYearId;
@@ -58,36 +58,36 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<PagedResponse<StudentListResponse>> GetAllStudent(string? filterOn, string? filterQuery, string? sortBy, bool? isAscending, int pageNumber, int pageSize)
+        public async Task<PagedResponse<StudentListResponse>> GetAllStudent(StudentFilterRequest request)
         {
-            return await studentRepository.GetAllStudent(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
+            return await studentRepository.GetAllStudent(request);
         }
 
         public async Task<StudentInfoResponse> GetMyProfileForStudent(Guid userId)
         {
             var result = await studentRepository.GetMyProfileForStudent(userId);
-            if (result == null) throw new NotFoundException("User is invalid");
+            if (result == null) throw new NotFoundException("Người dùng không tồn tại");
             return result;
         }
 
         public async Task<StudentInfoResponse> GetStudentById(Guid studentId)
         {
             var result = await studentRepository.GetStudentById(studentId);
-            if (result == null) throw new NotFoundException("Student is invalid");
+            if (result == null) throw new NotFoundException("Học sinh không tồn tại");
             return result;
         }
 
         public async Task<StudentInfoResponse> UpdateMyProfileForStudent(UpdateUserRequest updateUserRequest, Guid userId)
         {
             var user = await userManager.FindByIdAsync(userId.ToString());
-            if (user == null) throw new NotFoundException("User is invalid");
+            if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
             if (updateUserRequest.Email != null)
             {
                 var eResult = await userManager.SetEmailAsync(user, updateUserRequest.Email);
                 if (!eResult.Succeeded)
                 {
-                    throw new BadRequestException("Update Email failed");
+                    throw new BadRequestException("Cập nhật email thất bại");
                 }
             }
 
@@ -101,10 +101,10 @@ namespace School_Management.API.Services
             }
 
             var studentId = await studentRepository.GetStudentIdByUserId(userId);
-            if (studentId == Guid.Empty) throw new NotFoundException("Student is invalid");
+            if (studentId == Guid.Empty) throw new NotFoundException("Học sinh không tồn tại");
 
             var result = await userManager.UpdateAsync(user);
-            if (!result.Succeeded) throw new BadRequestException("Update failed");
+            if (!result.Succeeded) throw new BadRequestException("Cập nhật thất bại");
 
             return new StudentInfoResponse
             {
@@ -130,7 +130,7 @@ namespace School_Management.API.Services
         public async Task<StudentInfoResponse> UpdateStudentByAdminOrTeacher(UpdateUserRequest updateUserRequest, Guid studentId, ClaimsPrincipal currentUser)
         {
             var userId = await studentRepository.GetUserIdByStudentId(studentId);
-            if (userId == Guid.Empty) throw new NotFoundException("Student is invalid");
+            if (userId == Guid.Empty) throw new NotFoundException("Học sinh không tồn tại");
 
             var user = await userManager.FindByIdAsync(userId.ToString());
 
@@ -139,7 +139,7 @@ namespace School_Management.API.Services
                 var userOfTeacherId = Guid.Parse(currentUser.FindFirstValue(ClaimTypes.NameIdentifier));
                 var teacherId = await studentRepository.GetTeacherIdByUserId(userOfTeacherId);
                 var homeRoomId = await studentRepository.GetHomeRoomId(studentId);
-                if (teacherId != homeRoomId) throw new ForbiddenException("You are not the homeroom teacher of this student");
+                if (teacherId != homeRoomId) throw new ForbiddenException("Bạn không là giáo viên chủ nhiệm của lớp này");
             }
 
             if(updateUserRequest.Email != null)
@@ -147,7 +147,7 @@ namespace School_Management.API.Services
                 var eResult = await userManager.SetEmailAsync(user, updateUserRequest.Email);
                 if(!eResult.Succeeded)
                 {
-                    throw new BadRequestException("Update Email failed");
+                    throw new BadRequestException("Cập nhật email thất bại");
                 }
             }
 
@@ -161,7 +161,7 @@ namespace School_Management.API.Services
             }
 
             var result = await userManager.UpdateAsync(user);
-            if (!result.Succeeded) throw new BadRequestException("Update failed");
+            if (!result.Succeeded) throw new BadRequestException("Cập nhật thất bại");
 
             return new StudentInfoResponse
             {

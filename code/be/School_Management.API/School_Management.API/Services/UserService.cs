@@ -23,7 +23,7 @@ namespace School_Management.API.Services
         {
             //Check User
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new NotFoundException("User is invalid!");
+            if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
             //The account is unlocked that it will be locked
             if (user.LockoutEnd == null || user.LockoutEnd < DateTimeOffset.UtcNow)
@@ -35,7 +35,7 @@ namespace School_Management.API.Services
                 {
                     UserId = user.Id, 
                     LockoutEnd = lockoutEnd,
-                    Message = "Locked account successfully!"
+                    Message = "Khóa tài khoản thành công"
                 };
             }
 
@@ -46,7 +46,7 @@ namespace School_Management.API.Services
             {
                 UserId = user.Id,
                 LockoutEnd = null,
-                Message = "Unlocked account successfully!"
+                Message = "Mở khóa tài khoản thành công"
             };
 
         }
@@ -54,7 +54,7 @@ namespace School_Management.API.Services
         public async Task<UserInfoResponse> GetMyProfileForAdmin(string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new NotFoundException("User is invalid!");
+            if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
             var role = await userManager.GetRolesAsync(user);
             return ReturnData(user, role.FirstOrDefault());
@@ -63,7 +63,7 @@ namespace School_Management.API.Services
         public async Task<UserInfoResponse> GetUserById(string UserId)
         {
             var user = await userManager.FindByIdAsync(UserId);
-            if (user == null) throw new NotFoundException("User is invalid!");
+            if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
             var role = await userManager.GetRolesAsync(user);
             return ReturnData(user, role.FirstOrDefault());
@@ -73,7 +73,7 @@ namespace School_Management.API.Services
         {
             //Find user by id
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new NotFoundException("User is invalid!");
+            if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
             // Generate resetToken for admin
             var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
@@ -81,7 +81,7 @@ namespace School_Management.API.Services
             if(!result.Succeeded)
             {
                 var error = result.Errors.FirstOrDefault();
-                throw new BadRequestException(error?.Description ?? "Change password failed!");
+                throw new BadRequestException(error?.Description ?? "Khởi tạo lại mật khẩu thất bại");
             }
 
             // Log out this account in other devices
@@ -91,12 +91,12 @@ namespace School_Management.API.Services
         public async Task<UserInfoResponse> UpdateMyProfileForAdmin(UpdateAdminRequest updateAdminRequest, string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new NotFoundException("User is invalid");
+            if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
             if(updateAdminRequest.Email != null)
             {
                 var eResult = await userManager.SetEmailAsync(user, updateAdminRequest.Email);
-                if (!eResult.Succeeded) throw new BadRequestException("Update email failed");
+                if (!eResult.Succeeded) throw new BadRequestException("Cập nhật email thất bại");
             }
 
             user.PhoneNumber = updateAdminRequest.PhoneNumber ?? user.PhoneNumber;
@@ -110,7 +110,7 @@ namespace School_Management.API.Services
             user.Address = updateAdminRequest.Address ?? user.Address;
 
             var result = await userManager.UpdateAsync(user);
-            if (!result.Succeeded) throw new BadRequestException("Update failed");
+            if (!result.Succeeded) throw new BadRequestException("Cập nhật thất bại");
 
             var role = await userManager.GetRolesAsync(user);
 
@@ -121,7 +121,7 @@ namespace School_Management.API.Services
         public async Task<UserInfoResponse> UpdateRoleForUser(ChangeRoleRequest updateRoleRequest, string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new NotFoundException("User is invalid");
+            if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
             var currentRole = await userManager.GetRolesAsync(user);
             if(updateRoleRequest.Role != null && currentRole.Contains(updateRoleRequest.Role.Trim()))
@@ -134,7 +134,7 @@ namespace School_Management.API.Services
             {
                 var result = await userManager.AddToRoleAsync(user, updateRoleRequest.Role);
                 if (!result.Succeeded)
-                    throw new BadRequestException("Update role failed");
+                    throw new BadRequestException("Cập nhật vai trò thất bại");
             }
 
             return ReturnData(user, updateRoleRequest.Role);
@@ -143,12 +143,12 @@ namespace School_Management.API.Services
         public async Task<UserInfoResponse> UpdateUser(UpdateUserRequest updateUserRequest, string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
-            if (user == null) throw new NotFoundException("User is invalid!");
+            if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
             if(updateUserRequest.Email != null)
             {
                 var eResult = await userManager.SetEmailAsync(user, updateUserRequest.Email);
-                if (!eResult.Succeeded) throw new BadRequestException("Update email failed!");
+                if (!eResult.Succeeded) throw new BadRequestException("Cập nhật email thất bại");
             }
 
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
@@ -161,7 +161,7 @@ namespace School_Management.API.Services
             user.FullName = updateUserRequest.FullName ?? user.FullName;
 
             var result = await userManager.UpdateAsync(user);
-            if (!result.Succeeded) throw new BadRequestException("Update failed!");
+            if (!result.Succeeded) throw new BadRequestException("Cập nhật thất bại");
             var role = await userManager.GetRolesAsync(user);
             return ReturnData(user, role.FirstOrDefault());
         }
@@ -197,69 +197,57 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<PagedResponse<UserListResponse>> GetAllUser(string? filterOn = null, string? filterQuery = null, string? sortBy = null, bool isAscending = true, int pageNumber = 1, int pageSize = 10)
+        public async Task<PagedResponse<UserListResponse>> GetAllUser(UserFilterRequest request)
         {
             var query = userManager.Users.AsQueryable();
 
             // Filtering
-            if(!string.IsNullOrWhiteSpace(filterOn) && !string.IsNullOrWhiteSpace(filterQuery))
-            {
-                if(filterOn.Equals("FullName", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(x => x.FullName.Contains(filterQuery));
-                }
-                else if(filterOn.Equals("Email", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(x => x.Email.Contains(filterQuery));
-                }
-                else if(filterOn.Equals("Address", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = query.Where(x => x.Address.Contains(filterQuery));
-                }
-                else if(filterOn.Equals("Role", StringComparison.OrdinalIgnoreCase))
-                {
-                    var userInRoles = await userManager.GetUsersInRoleAsync(filterQuery);
-                    var userId = userInRoles.Select(x => x.Id).ToList();
+            if(!string.IsNullOrWhiteSpace(request.FullName))
+                query = query.Where(x => x.FullName.Contains(request.FullName));
 
-                    query = query.Where(x => userId.Contains(x.Id));
-                }
-            }
+            if (!string.IsNullOrWhiteSpace(request.Email))
+                query = query.Where(x => x.FullName.Contains(request.Email));
+
+            if (!string.IsNullOrWhiteSpace(request.Address))
+                query = query.Where(x => x.FullName.Contains(request.Address));
+
+            if (!string.IsNullOrWhiteSpace(request.Role))
+                query = query.Where(x => x.FullName.Contains(request.Role));
+            
 
             //Sorting
-            if(!string.IsNullOrWhiteSpace(sortBy))
+            if(!string.IsNullOrWhiteSpace(request.SortBy))
             {
-                if(sortBy.Equals("FullName", StringComparison.OrdinalIgnoreCase))
+                if(request.SortBy.Equals("FullName", StringComparison.OrdinalIgnoreCase))
                 {
-                    query = isAscending ? query.OrderBy(x => x.FullName) : query.OrderByDescending(x => x.FullName);
+                    query = request.IsAscending ? query.OrderBy(x => x.FullName) : query.OrderByDescending(x => x.FullName);
                 }
-                else if(sortBy.Equals("Address", StringComparison.OrdinalIgnoreCase))
+                else if(request.SortBy.Equals("Address", StringComparison.OrdinalIgnoreCase))
                 {
-                    query = isAscending ? query.OrderBy(x => x.Address) : query.OrderByDescending(x => x.Address);
+                    query = request.IsAscending ? query.OrderBy(x => x.Address) : query.OrderByDescending(x => x.Address);
                 }
-                else if(sortBy.Equals("Email", StringComparison.OrdinalIgnoreCase))
+                else if(request.SortBy.Equals("Email", StringComparison.OrdinalIgnoreCase))
                 {
-                    query = isAscending ? query.OrderBy(x => x.Email) : query.OrderByDescending(x => x.Email);
+                    query = request.IsAscending ? query.OrderBy(x => x.Email) : query.OrderByDescending(x => x.Email);
                 }
-                else if(sortBy.Equals("Birthday", StringComparison.OrdinalIgnoreCase))
+                else if(request.SortBy.Equals("Birthday", StringComparison.OrdinalIgnoreCase))
                 {
-                    query = isAscending ? query.OrderBy(x => x.Birthday) : query.OrderByDescending(x => x.Birthday);
+                    query = request.IsAscending ? query.OrderBy(x => x.Birthday) : query.OrderByDescending(x => x.Birthday);
                 }
             }
             var totalCount = await query.CountAsync();
 
             //Pagination
-            var skipResults = (pageNumber - 1) * pageSize;
-            var result = await query.Skip(skipResults).Take(pageSize).ToListAsync();
+            var skipResults = (request.PageNumber - 1) * request.PageSize;
+            var result = await query.Skip(skipResults).Take(request.PageSize).ToListAsync();
 
             return new PagedResponse<UserListResponse>
             {
                 Items = result.Select(x => ReturnListData(x)).ToList(),
-                PageNumber = pageNumber,
-                PageSize = pageSize,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
                 TotalCount = totalCount
             };
-                
-            
         }
 
         public async Task<UserInfoResponse> CreateUser(CreateUserRequest createUserRequest)
@@ -281,7 +269,7 @@ namespace School_Management.API.Services
                 var cResult = await userManager.CreateAsync(user, createUserRequest.Password);
                 if(!cResult.Succeeded)
                 {
-                    var error = cResult.Errors.FirstOrDefault().Description ?? "Create failed";
+                    var error = cResult.Errors.FirstOrDefault().Description ?? "Tạo thất bại";
                     throw new BadRequestException(error);
                 }
                 
@@ -289,7 +277,7 @@ namespace School_Management.API.Services
                 var rResult = await userManager.AddToRoleAsync(user, createUserRequest.Role);
                 if(!rResult.Succeeded)
                 {
-                    var error = rResult.Errors.FirstOrDefault().Description ?? "Creat failed";
+                    var error = rResult.Errors.FirstOrDefault().Description ?? "Tạo thất bại";
                     throw new BadRequestException(error);
                 }
 

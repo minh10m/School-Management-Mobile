@@ -6,47 +6,47 @@ namespace School_Management.API.Models.DTO
     {
         //Username
         [Required]
-        [MinLength(4, ErrorMessage = "Username can not be only whitespace")]
+        [MinLength(4, ErrorMessage = "Tên đăng nhập không được phép là khoảng trắng")]
         public string? Username { get; set; }
 
         //Password
         [Required]
-        [MinLength(8, ErrorMessage = "Password mush have at least 8 characters")]
+        [MinLength(8, ErrorMessage = "Mật khẩu phải có 8 kí tự")]
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$",
-            ErrorMessage = "The password must include at least 1 uppercase letter, 1 lowercase letter, and 1 digit.")]
+            ErrorMessage = "Mật khẩu phải có ít nhất một chữ hoa, một chữ thường và một kí tự")]
         public string? Password { get; set; }
 
         //Email
         [Required]
-        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [EmailAddress(ErrorMessage = "Email không đúng định dạng")]
         public string? Email { get; set; }
 
         //PhoneNumber
-        [Phone(ErrorMessage = "Invalid phone number format")]
+        [Phone(ErrorMessage = "Số điện thoại không đúng định dạng")]
         [Required]
-        [RegularExpression(@"^[0-9]{10,11}$", ErrorMessage = "Phone must be 10-11 digits")]
+        [RegularExpression(@"^[0-9]{10,11}$", ErrorMessage = "Số điện thoại phải từ 10 - 11 số")]
         public string? PhoneNumber { get; set; }
 
         //FullName
-        [MaxLength(100, ErrorMessage = "FullName is too long")]
+        [MaxLength(100, ErrorMessage = "Tên quá dài")]
         [Required]
-        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 ]+$", ErrorMessage = "FullName cannot contain special characters or be only whitespace")]
+        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 ]+$", ErrorMessage = "Tên không được chứa kí tự đặc biệt hoặc là khoảng trắng")]
         public string? FullName { get; set; }
 
         //Address
-        [MinLength(5, ErrorMessage = "Address is too short")]
+        [MinLength(5, ErrorMessage = "Địa chỉ quá dài")]
         [Required]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Address cannot be only whitespace")]
+        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Địa chỉ không được phép là khoảng trắng")]
         public string? Address { get; set; }
 
         //Birthday
-        [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Birthday must be YYYY-MM-DD")]
+        [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Ngày sinh nhật cần có định dạng YYYY-MM-DD")]
         [Required]
         public string? Birthday { get; set; }
 
         //Role
         [Required]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Role cannot be empty")]
+        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Vai trò không được để trống")]
         public string? Role { get; set; }
     }
 }

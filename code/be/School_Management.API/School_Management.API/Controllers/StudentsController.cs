@@ -25,12 +25,12 @@ namespace School_Management.API.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetAllStudent(
-            [FromQuery] string? filterOn, [FromQuery] string? filterQuery,
-            [FromQuery] string? sortBy = "FullName", [FromQuery] bool? isAscending = true,
-            [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllStudent([FromQuery] StudentFilterRequest request)
         {
-            var result = await studentService.GetAllStudent(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
+            if (request.SortBy == null) request.SortBy = "FullName";
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await studentService.GetAllStudent(request);
             return Ok(result);
         }
 
@@ -49,7 +49,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetMyProfileForStudent()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { Message = "Session is expired or revoked" });
+            if (userId == null) return Unauthorized(new { Message = "Phiên làm việc hết hạn" });
 
             var result = await studentService.GetMyProfileForStudent(Guid.Parse(userId));
             return Ok(result);
@@ -72,7 +72,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new {Message = "Session is expired or revoked"});
+            if (userId == null) return Unauthorized(new {Message = "Phiên làm việc hết hạn"});
 
 
             var result = await studentService.UpdateMyProfileForStudent(request, Guid.Parse(userId));
