@@ -98,7 +98,7 @@ namespace School_Management.API.Controllers
 
         [HttpGet]
         [Route("{scheduleId}/details")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetScheduleDetailByScheduleId([FromRoute] Guid scheduleId)
         {
             var result = await scheduleService.GetScheduleDetailByScheduleId(scheduleId);
