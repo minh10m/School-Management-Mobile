@@ -71,5 +71,17 @@ namespace School_Management.API.Controllers
             var result = await scheduleService.GetMyScheduleForStudent(request, Guid.Parse(userId));
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("teacher/me")]
+        [ValidateModel]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetMyScheduleForTeacher([FromQuery] ScheduleDetailIsActiveRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { Message = "Phiên làm việc hết hạn" });
+            var result = await scheduleService.GetMyScheduleForTeacher(request, Guid.Parse(userId));
+            return Ok(result);
+        }
     }
 }

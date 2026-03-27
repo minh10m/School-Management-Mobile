@@ -8,5 +8,7 @@
         public DayOfWeek DayOfWeek { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan FinishTime { get; set; }
+        public string? DayOfWeekVietNamese { get; set; }
+        public string TimeRange => $"{StartTime:hh\\:mm} - {FinishTime:hh\\:mm}";
     }
 }

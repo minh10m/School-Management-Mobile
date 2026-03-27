@@ -12,12 +12,14 @@ namespace School_Management.API.Services
         private readonly IScheduleRepository scheduleRepository;
         private readonly ApplicationDbContext context;
         private readonly IStudentRepository studentRepository;
+        private readonly ITeacherRepository teacherRepository;
 
-        public ScheduleService(IScheduleRepository scheduleRepository, ApplicationDbContext context, IStudentRepository studentRepository)
+        public ScheduleService(IScheduleRepository scheduleRepository, ApplicationDbContext context, IStudentRepository studentRepository, ITeacherRepository teacherRepository)
         {
             this.scheduleRepository = scheduleRepository;
             this.context = context;
             this.studentRepository = studentRepository;
+            this.teacherRepository = teacherRepository;
         }
         public async Task<ScheduleResponse?> CreateSchedule(PostUpdateScheduleRequest request)
         {
@@ -173,8 +175,21 @@ namespace School_Management.API.Services
             if (studentId == Guid.Empty) throw new NotFoundException("Học sinh này không tồn tại");
 
             var result = await scheduleRepository.GetMyScheduleForStudent(request, studentId);
-            if (result == null) throw new NotFoundException("Không tìm thấy lịch");
-            if(result.Count() == 0) throw new NotFoundException("Không tìm thấy lịch");
+            if (result == null || !result.Any())
+                throw new NotFoundException("Không tìm thấy lịch");
+
+            return result;
+
+        }
+
+        public async Task<List<TeacherScheduleDetailResponse>> GetMyScheduleForTeacher(ScheduleDetailIsActiveRequest request, Guid userId)
+        {
+            var teacherId = await teacherRepository.GetTeacherIdByUserId(userId);
+            if (teacherId == Guid.Empty) throw new NotFoundException("Giáo viên không tồn tại");
+
+            var result = await scheduleRepository.GetMyScheduleForTeacher(request, teacherId);
+            if (result == null || !result.Any())
+                throw new NotFoundException("Không tìm thấy lịch");
 
             return result;
 

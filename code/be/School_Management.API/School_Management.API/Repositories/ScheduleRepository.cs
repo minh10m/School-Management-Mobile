@@ -152,5 +152,31 @@ namespace School_Management.API.Repositories
 
         }
 
+        public async Task<List<TeacherScheduleDetailResponse>> GetMyScheduleForTeacher(ScheduleDetailIsActiveRequest request, Guid teacherId)
+        {
+            var ScheduleDetailList = await context.ScheduleDetail
+                                                  .AsNoTracking()
+                                                  .Where(x => x.Schedule.IsActive == true
+                                                  && x.Schedule.SchoolYear == request.SchoolYear
+                                                  && x.Schedule.Term == request.Term
+                                                  && x.TeacherSubject.TeacherId == teacherId)
+                                                  .Select(g => new TeacherScheduleDetailResponse
+                                                  {
+                                                      DayOfWeek = g.DayOfWeek,
+                                                      ScheduleDetailId = g.Id,
+                                                      FinishTime = g.FinishTime,
+                                                      StartTime = g.StartTime,
+                                                      SubjectName = g.TeacherSubject.Subject.SubjectName,
+                                                      ClassName = g.Schedule.ClassYear.ClassName
+                                                  })
+                                                  .OrderBy(x => x.DayOfWeek)
+                                                  .ThenBy(x => x.StartTime)
+                                                  .ToListAsync();
+            foreach(var item in ScheduleDetailList)
+            {
+                item.DayOfWeekVietNamese = GetVietNameseDay(item.DayOfWeek);
+            }
+            return ScheduleDetailList;
+        }
     }
 }
