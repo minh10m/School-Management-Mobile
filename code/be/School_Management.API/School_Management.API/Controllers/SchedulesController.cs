@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
+using System.Security.Claims;
 
 namespace School_Management.API.Controllers
 {
@@ -57,6 +58,18 @@ namespace School_Management.API.Controllers
             var result = await scheduleService.UpdateScheduleDetail(request, scheduleId);
             return Ok(result);
 
+        }
+
+        [HttpGet]
+        [Route("classes/me")]
+        [ValidateModel]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetMyScheduleForStudent([FromQuery] ScheduleDetailIsActiveRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { Message = "Phiên làm việc hết hạn" });
+            var result = await scheduleService.GetMyScheduleForStudent(request, Guid.Parse(userId));
+            return Ok(result);
         }
     }
 }

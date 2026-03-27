@@ -11,11 +11,13 @@ namespace School_Management.API.Services
     {
         private readonly IScheduleRepository scheduleRepository;
         private readonly ApplicationDbContext context;
+        private readonly IStudentRepository studentRepository;
 
-        public ScheduleService(IScheduleRepository scheduleRepository, ApplicationDbContext context)
+        public ScheduleService(IScheduleRepository scheduleRepository, ApplicationDbContext context, IStudentRepository studentRepository)
         {
             this.scheduleRepository = scheduleRepository;
             this.context = context;
+            this.studentRepository = studentRepository;
         }
         public async Task<ScheduleResponse?> CreateSchedule(PostUpdateScheduleRequest request)
         {
@@ -56,22 +58,11 @@ namespace School_Management.API.Services
                             && x.DayOfWeek == request.DayOfWeek
                             && x.StartTime == request.StartTime);
 
-            if (isTeacherBusy) throw new BadRequestException($"Giáo viên đã có lịch dạy vào {GetVietNameseDay(request.DayOfWeek)} lúc {request.StartTime:hh\\:mm}");
+            if (isTeacherBusy) throw new BadRequestException($"Giáo viên đã có lịch dạy vào {scheduleRepository.GetVietNameseDay(request.DayOfWeek)} lúc {request.StartTime:hh\\:mm}");
 
             return true;
         }
 
-        public string GetVietNameseDay(DayOfWeek dayOfWeek) => dayOfWeek switch
-        {
-            DayOfWeek.Sunday => "chủ nhật",
-            DayOfWeek.Monday => "thứ hai",
-            DayOfWeek.Tuesday => "thứ ba",
-            DayOfWeek.Wednesday => "thứ tư",
-            DayOfWeek.Thursday => "thứ năm",
-            DayOfWeek.Friday => "thứ sáu",
-            DayOfWeek.Saturday => "thứ bảy",
-            _ => "Không xác định"
-        };
         public async Task<int> CreateScheduleDetail(List<PostUpdateScheduleDetailRequest> request, Guid scheduleId)
         {
             var duplicateInList = request
@@ -174,6 +165,19 @@ namespace School_Management.API.Services
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        public async Task<List<ScheduleDetailResponse>> GetMyScheduleForStudent(ScheduleDetailIsActiveRequest request, Guid userId)
+        {
+            var studentId = await studentRepository.GetStudentIdByUserId(userId);
+            if (studentId == Guid.Empty) throw new NotFoundException("Học sinh này không tồn tại");
+
+            var result = await scheduleRepository.GetMyScheduleForStudent(request, studentId);
+            if (result == null) throw new NotFoundException("Không tìm thấy lịch");
+            if(result.Count() == 0) throw new NotFoundException("Không tìm thấy lịch");
+
+            return result;
+
         }
     }
 }

@@ -8,10 +8,12 @@ namespace School_Management.API.Repositories
     public class ScheduleRepository : IScheduleRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly IStudentRepository studentRepository;
 
-        public ScheduleRepository(ApplicationDbContext context)
+        public ScheduleRepository(ApplicationDbContext context, IStudentRepository studentRepository)
         {
             this.context = context;
+            this.studentRepository = studentRepository;
         }
         public async Task<ScheduleResponse?> CreateSchedule(PostUpdateScheduleRequest request)
         {
@@ -59,6 +61,54 @@ namespace School_Management.API.Repositories
                                         .FirstOrDefaultAsync();
             return schedule;
         }
+        public string GetVietNameseDay(DayOfWeek dayOfWeek) => dayOfWeek switch
+        {
+            DayOfWeek.Sunday => "chủ nhật",
+            DayOfWeek.Monday => "thứ hai",
+            DayOfWeek.Tuesday => "thứ ba",
+            DayOfWeek.Wednesday => "thứ tư",
+            DayOfWeek.Thursday => "thứ năm",
+            DayOfWeek.Friday => "thứ sáu",
+            DayOfWeek.Saturday => "thứ bảy",
+            _ => "Không xác định"
+        };
+        public async Task<List<ScheduleDetailResponse>> GetMyScheduleForStudent(ScheduleDetailIsActiveRequest request, Guid studentId)
+        {
+            var classYearId = await context.ClassYear
+                                           .Where(x => x.StudentClassYears.Any(sc => sc.Student.Id == studentId) && x.SchoolYear == request.SchoolYear)
+                                           .Select(x => x.Id)
+                                           .FirstOrDefaultAsync();
+            if (classYearId == Guid.Empty) return null;
+
+            var scheduleDetailList = await context.ScheduleDetail
+                                                  .Where(x => x.Schedule.ClassYearId == classYearId
+                                                  && x.Schedule.Term == request.Term
+                                                  && x.Schedule.IsActive == true)
+                                                  .Select(g => new ScheduleDetailResponse
+                                                  {
+                                                     ScheduleDetailId = g.Id,
+                                                     ScheduleId = g.ScheduleId,
+                                                     StartTime = g.StartTime,
+                                                     FinishTime = g.FinishTime,
+                                                     TeacherSubjectId = g.TeacherSubjectId,
+                                                     TeacherName = g.TeacherSubject.Teacher.User.FullName,
+                                                     SubjectName = g.TeacherSubject.Subject.SubjectName,
+                                                     DayOfWeek = g.DayOfWeek,
+                                                  })
+                                                  .OrderBy(x => x.DayOfWeek)
+                                                  .ThenBy(x => x.StartTime)
+                                                  .ToListAsync();
+
+            foreach(var item in scheduleDetailList)
+            {
+                item.DayOfWeekVietNamese = GetVietNameseDay(item.DayOfWeek);
+            }
+
+            return scheduleDetailList;
+
+        }
+
+        
 
         public async Task<ScheduleResponse?> UpdateSchedule(PostUpdateScheduleRequest request, Schedule schedule)
         {
