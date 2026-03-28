@@ -42,5 +42,18 @@ namespace School_Management.API.Controllers
             var result = await attendanceService.GetClassAttendance(request, Guid.Parse(userId));
             return Ok(result);
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("student/me")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetStudentAttendance([FromQuery] StudentAttedanceRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { Message = "Phiên làm việc hết hạn" });
+
+            var result = await attendanceService.GetStudentAttendance(request, Guid.Parse(userId));
+            return Ok(result);
+        }
     }
 }

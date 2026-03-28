@@ -34,5 +34,34 @@ namespace School_Management.API.Repositories
                                 .OrderBy(x => x.StudentName)
                                 .ToListAsync();
         }
+
+        public async Task<StudentAttendanceResponse> GetStudentAttendance(StudentAttedanceRequest request, Guid studentId)
+        {
+            var details = await context.Attendance
+                                .AsNoTracking()
+                                .Where(x => x.StudentClassYear.StudentId == studentId
+                                && x.Date.Month == request.Month && x.Date.Year == request.Year)
+                                .Select(g => new StudentAttendanceInfo
+                                {
+                                    Date = g.Date,
+                                    Note = g.Note,
+                                    Status = g.Status
+                                })
+                                .OrderBy(g => g.Date.Day)
+                                .ToListAsync();
+
+            var total = details.Count;
+            var present = details.Count(x => x.Status == "Có mặt" || x.Status == "Đi trễ");
+            var absent = details.Count(x => x.Status == "Vắng mặt");
+            var percentage = (total > 0) ? ((double)present / total) * 100 : 0;
+
+            return new StudentAttendanceResponse
+            {
+                Percentage = Math.Round(percentage, 1),
+                TotalPresent = present,
+                TotalAbsent = absent,
+                StudentAttendances = details 
+            };
+        }
     }
 }

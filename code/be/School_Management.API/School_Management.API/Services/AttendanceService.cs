@@ -12,12 +12,14 @@ namespace School_Management.API.Services
         private readonly ApplicationDbContext context;
         private readonly ITeacherRepository teacherRepository;
         private readonly IAttendanceRepository attendanceRepository;
+        private readonly IStudentRepository studentRepository;
 
-        public AttendanceService(ApplicationDbContext context, ITeacherRepository teacherRepository, IAttendanceRepository attendanceRepository)
+        public AttendanceService(ApplicationDbContext context, ITeacherRepository teacherRepository, IAttendanceRepository attendanceRepository, IStudentRepository studentRepository)
         {
             this.context = context;
             this.teacherRepository = teacherRepository;
             this.attendanceRepository = attendanceRepository;
+            this.studentRepository = studentRepository;
         }
 
         public async Task<int> InsertAttendance(AttendanceRequest request)
@@ -106,6 +108,15 @@ namespace School_Management.API.Services
             var isHomeroom = await CheckHomeRoomTeacher(request.ClassYearId, userId);
             if (!isHomeroom) throw new ForbiddenException("Bạn không phải giáo viên chủ nhiệm của lớp học");
             return await attendanceRepository.GetClassAttendance(request);
+        }
+
+        public async Task<StudentAttendanceResponse> GetStudentAttendance(StudentAttedanceRequest request, Guid userId)
+        {
+            var studentId = await studentRepository.GetStudentIdByUserId(userId);
+            if (studentId == Guid.Empty) throw new NotFoundException("Không tồn tại điểm danh của học sinh trong tháng");
+
+            var result = await attendanceRepository.GetStudentAttendance(request, studentId);
+            return result;
         }
     }
 }
