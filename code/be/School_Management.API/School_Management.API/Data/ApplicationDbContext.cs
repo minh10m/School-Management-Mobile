@@ -22,6 +22,7 @@ namespace School_Management.API.Data
         public DbSet<Subject> Subject { get; set; }
         public DbSet<Schedule> Schedule { get; set; }
         public DbSet<ScheduleDetail> ScheduleDetail { get; set; }
+        public DbSet<Attendance> Attendance { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

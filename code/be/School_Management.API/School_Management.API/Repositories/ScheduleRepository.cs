@@ -178,5 +178,88 @@ namespace School_Management.API.Repositories
             }
             return ScheduleDetailList;
         }
+
+        public async Task<PagedResponse<ScheduleResponse>> GetAllScheduleForAdmin(ScheduleFilterRequest request)
+        {
+            var query = context.Schedule.AsQueryable();
+
+            //filtering
+            if (request.SchoolYear.HasValue)
+                query = query.Where(x => x.SchoolYear == request.SchoolYear);
+            if (request.Term.HasValue)
+                query = query.Where(x => x.Term == request.Term);
+            if (request.IsActive.HasValue)
+                query = query.Where(x => x.IsActive == request.IsActive);
+
+            //sorting
+            if(request.SortBy.Equals("Name", StringComparison.OrdinalIgnoreCase))
+            {
+                query = request.IsAscending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name);
+            }
+            else if (request.SortBy.Equals("ClassName", StringComparison.OrdinalIgnoreCase))
+            {
+                query = request.IsAscending ? query.OrderBy(x => x.ClassYear.ClassName) : query.OrderByDescending(x => x.ClassYear.ClassName);
+            }
+            else if (request.SortBy.Equals("SchoolYear", StringComparison.OrdinalIgnoreCase))
+            {
+                query = request.IsAscending ? query.OrderBy(x => x.SchoolYear) : query.OrderByDescending(x => x.SchoolYear);
+            }
+
+            var totalCount = await query.CountAsync();
+            var skipResults = (request.PageNumber - 1) * request.PageSize;
+
+            var scheduleList = await query
+                                    .AsNoTracking()
+                                    .Skip(skipResults)
+                                    .Take(request.PageSize)
+                                    .Select(x => new ScheduleResponse 
+                                    {
+                                        ScheduleId = x.Id,
+                                        SchoolYear = x.SchoolYear,
+                                        ClassName = x.ClassYear.ClassName,
+                                        ClassYearId = x.ClassYearId,
+                                        IsActive = x.IsActive,
+                                        Name = x.Name,
+                                        Term = x.Term
+                                    }).ToListAsync();
+
+            return new PagedResponse<ScheduleResponse>
+            {
+                PageSize = request.PageSize,
+                Items = scheduleList,
+                PageNumber = request.PageNumber,
+                TotalCount = totalCount
+            };
+        }
+
+        public async Task<List<ScheduleDetailResponse>> GetScheduleDetailByScheduleId(Guid scheduleId)
+        {
+            var isExisted = await context.Schedule.AnyAsync(x => x.Id == scheduleId);
+            if (isExisted == false) return null; 
+            var scheduleDetailList = await context.ScheduleDetail
+                                                  .AsNoTracking()
+                                                  .Where(x => x.ScheduleId == scheduleId)
+                                                  .Select(g => new ScheduleDetailResponse
+                                                  {
+                                                      ScheduleDetailId = g.Id,
+                                                      ScheduleId = g.ScheduleId,
+                                                      StartTime = g.StartTime,
+                                                      FinishTime = g.FinishTime,
+                                                      TeacherSubjectId = g.TeacherSubjectId,
+                                                      TeacherName = g.TeacherSubject.Teacher.User.FullName,
+                                                      SubjectName = g.TeacherSubject.Subject.SubjectName,
+                                                      DayOfWeek = g.DayOfWeek,
+                                                  })
+                                                  .OrderBy(x => x.DayOfWeek)
+                                                  .ThenBy(x => x.StartTime)
+                                                  .ToListAsync();
+
+            foreach (var item in scheduleDetailList)
+            {
+                item.DayOfWeekVietNamese = GetVietNameseDay(item.DayOfWeek);
+            }
+
+            return scheduleDetailList;
+        }
     }
 }

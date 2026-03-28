@@ -17,5 +17,6 @@ namespace School_Management.API.Models.Domain
 
         [ForeignKey("ClassYearId")]
         public ClassYear? ClassYear { get; set; }
+        public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
     }
 }

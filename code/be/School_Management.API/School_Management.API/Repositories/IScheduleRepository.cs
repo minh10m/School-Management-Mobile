@@ -11,7 +11,8 @@ namespace School_Management.API.Repositories
         public Task<List<TeacherScheduleDetailResponse>> GetMyScheduleForTeacher(ScheduleDetailIsActiveRequest request, Guid teacherId);
         public Task<List<ScheduleDetailResponse>> GetMyScheduleForStudent(ScheduleDetailIsActiveRequest request, Guid studentId);
         public string GetVietNameseDay(DayOfWeek dayOfWeek);
-
+        public Task<PagedResponse<ScheduleResponse>> GetAllScheduleForAdmin(ScheduleFilterRequest request);
+        public Task<List<ScheduleDetailResponse>> GetScheduleDetailByScheduleId(Guid scheduleId);
 
     }
 }
