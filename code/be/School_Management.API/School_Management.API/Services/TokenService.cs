@@ -38,7 +38,7 @@ namespace School_Management.API.Services
                 configuration["Jwt:Issuer"],
                 configuration["Jwt:Audience"],
                 claims,
-                expires: DateTime.UtcNow.AddMinutes(15),
+                expires: DateTime.UtcNow.AddMinutes(45),
                 signingCredentials: credentials
             );
 

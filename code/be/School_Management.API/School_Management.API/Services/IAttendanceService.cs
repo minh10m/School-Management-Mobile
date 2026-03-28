@@ -6,5 +6,7 @@ namespace School_Management.API.Services
     {
         //Upsert method
         public Task<int> AttendanceCheck(AttendanceRequest request, Guid userId);
+
+        public Task<List<ClassAttendanceResponse>> GetClassAttendance(ClassAttendanceRequest request, Guid userId);
     }
 }
