@@ -8,5 +8,6 @@ namespace School_Management.API.Services
         public Task<SubjectResponse> UpdateSubject(PostOrUpdateSubjectRequest request, Guid subjectId);
         public Task<List<SubjectResponse>> GetAllSubject(SubjectFilterRequest request);
         public Task<SubjectResponse> GetSubjectById(Guid subjectId);
+        public Task<PagedResponse<TeacherOfSubjectResponse>> GetListTeacherBySubjectId(TeacherSubjectFilterRequest request, Guid subjectId);
     }
 }
