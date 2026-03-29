@@ -24,6 +24,13 @@ namespace School_Management.API.Services
             return await subjectRepository.GetAllSubject(request);
         }
 
+        public async Task<PagedResponse<TeacherOfSubjectResponse>> GetListTeacherBySubjectId(TeacherSubjectFilterRequest request, Guid subjectId)
+        {
+            var result = await subjectRepository.GetListTeacherBySubjectId(request, subjectId);
+            if (result == null) throw new NotFoundException("Môn học này không tồn tại, nên không thể tìm giáo viên");
+            return result;
+        }
+
         public async Task<SubjectResponse> GetSubjectById(Guid subjectId)
         {
             var result = await subjectRepository.GetSubjectById(subjectId);

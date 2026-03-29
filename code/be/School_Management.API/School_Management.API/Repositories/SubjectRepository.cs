@@ -72,6 +72,63 @@ namespace School_Management.API.Repositories
             return subjectList;
         }
 
+        public async Task<PagedResponse<TeacherOfSubjectResponse>?> GetListTeacherBySubjectId(TeacherSubjectFilterRequest request, Guid subjectId)
+        {
+            var isSubjectExisted = await context.Subject.AnyAsync(x => x.Id == subjectId);
+            if (!isSubjectExisted) return null;
+
+            var query = context.Teacher.AsNoTracking().Where(x => x.TeacherSubjects.Any(ts => ts.SubjectId == subjectId));
+
+            //Filtering
+            if(!string.IsNullOrWhiteSpace(request.FullName))
+            {
+                var name = request.FullName.Trim().ToLower();
+                query = query.Where(x => x.User.FullName.ToLower().Contains(name));
+            }
+            if(!string.IsNullOrWhiteSpace(request.Email))
+            {
+                var email = request.Email.ToLower();
+                query = query.Where(x => x.User.Email.ToLower().Contains(email));
+            }
+
+            //Sorting
+            if(!string.IsNullOrWhiteSpace(request.SortBy))
+            {
+                if (request.SortBy.Equals("FullName", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = request.IsAscending ? query.OrderBy(x => x.User.FullName) : query.OrderByDescending(x => x.User.FullName);
+                }
+                else if (request.SortBy.Equals("Email", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = request.IsAscending ? query.OrderBy(x => x.User.Email) : query.OrderByDescending(x => x.User.Email);
+                }
+            }
+
+            var totalCount = await query.CountAsync();
+            var skipResults = (request.PageNumber - 1) * request.PageSize;
+
+
+            var listTeacher = await query
+                            .Skip(skipResults)
+                            .Take(request.PageSize)
+                            .Select(g => new TeacherOfSubjectResponse
+            {
+                Email = g.User.Email,
+                FullName = g.User.FullName,
+                PhoneNumber = g.User.PhoneNumber,
+                TeacherId = g.Id,
+                UserId = g.User.Id
+            }).ToListAsync();
+
+            return new PagedResponse<TeacherOfSubjectResponse>
+            {
+                Items = listTeacher,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                TotalCount = totalCount
+            };
+        }
+
         public async Task<SubjectResponse?> GetSubjectById(Guid subjectId)
         {
             return await context.Subject.AsNoTracking()

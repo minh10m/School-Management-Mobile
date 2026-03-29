@@ -54,5 +54,16 @@ namespace School_Management.API.Controllers
             var result = await subjectService.GetSubjectById(subjectId);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("{subjectId}/teachers")]
+        [Authorize(Roles = "Admin")]
+        [ValidateModel]
+        public async Task<IActionResult> GetListTeacherOfSubjectId([FromRoute] Guid subjectId, [FromQuery] TeacherSubjectFilterRequest request)
+        {
+            if (request.SortBy == null) request.SortBy = "FullName";
+            var result = await subjectService.GetListTeacherBySubjectId(request, subjectId);
+            return Ok(result);
+        }
     }
 }
