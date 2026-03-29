@@ -39,6 +39,39 @@ namespace School_Management.API.Repositories
             };
         }
 
+        public async Task<List<SubjectResponse>> GetAllSubject(SubjectFilterRequest request)
+        {
+            var query = context.Subject.AsNoTracking().AsQueryable();
+
+            //Filtering
+            if (!string.IsNullOrWhiteSpace(request.SubjectName))
+                query = query.Where(x => x.SubjectName.Contains(request.SubjectName));
+            if (request.MaxPeriod.HasValue)
+                query = query.Where(x => x.MaxPeriod == request.MaxPeriod);
+
+            //Sorting
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
+            {
+                if (request.SortBy.Equals("SubjectName", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = request.IsAscending ? query.OrderBy(x => x.SubjectName) : query.OrderByDescending(x => x.SubjectName);
+                }
+                else if (request.SortBy.Equals("MaxPeriod", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = request.IsAscending ? query.OrderBy(x => x.MaxPeriod) : query.OrderByDescending(x => x.MaxPeriod);
+
+                }
+            }
+
+            var subjectList = await query.Select(x => new SubjectResponse {
+                SubjectId = x.Id,
+                MaxPeriod = x.MaxPeriod,
+                SubjectName = x.SubjectName
+            }).ToListAsync();
+
+            return subjectList;
+        }
+
         public async Task<(SubjectResponse? data, string? errorCode)> UpdateSubject(PostOrUpdateSubjectRequest request, Guid subjectId)
         {
             var subject = await context.Subject.Where(x => x.Id == subjectId).FirstOrDefaultAsync();

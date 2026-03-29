@@ -19,6 +19,11 @@ namespace School_Management.API.Services
             return result;
         }
 
+        public async Task<List<SubjectResponse>> GetAllSubject(SubjectFilterRequest request)
+        {
+            return await subjectRepository.GetAllSubject(request);
+        }
+
         public async Task<SubjectResponse> UpdateSubject(PostOrUpdateSubjectRequest request, Guid subjectId)
         {
             var (data, errorCode) = await subjectRepository.UpdateSubject(request, subjectId);

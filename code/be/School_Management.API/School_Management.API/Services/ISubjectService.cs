@@ -6,5 +6,6 @@ namespace School_Management.API.Services
     {
         public Task<SubjectResponse> CreateSubject(PostOrUpdateSubjectRequest request);
         public Task<SubjectResponse> UpdateSubject(PostOrUpdateSubjectRequest request, Guid subjectId);
+        public Task<List<SubjectResponse>> GetAllSubject(SubjectFilterRequest request);
     }
 }

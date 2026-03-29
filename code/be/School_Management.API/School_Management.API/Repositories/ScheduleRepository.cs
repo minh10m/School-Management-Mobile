@@ -192,17 +192,20 @@ namespace School_Management.API.Repositories
                 query = query.Where(x => x.IsActive == request.IsActive);
 
             //sorting
-            if(request.SortBy.Equals("Name", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
             {
-                query = request.IsAscending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name);
-            }
-            else if (request.SortBy.Equals("ClassName", StringComparison.OrdinalIgnoreCase))
-            {
-                query = request.IsAscending ? query.OrderBy(x => x.ClassYear.ClassName) : query.OrderByDescending(x => x.ClassYear.ClassName);
-            }
-            else if (request.SortBy.Equals("SchoolYear", StringComparison.OrdinalIgnoreCase))
-            {
-                query = request.IsAscending ? query.OrderBy(x => x.SchoolYear) : query.OrderByDescending(x => x.SchoolYear);
+                if (request.SortBy.Equals("Name", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = request.IsAscending ? query.OrderBy(x => x.Name) : query.OrderByDescending(x => x.Name);
+                }
+                else if (request.SortBy.Equals("ClassName", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = request.IsAscending ? query.OrderBy(x => x.ClassYear.ClassName) : query.OrderByDescending(x => x.ClassYear.ClassName);
+                }
+                else if (request.SortBy.Equals("SchoolYear", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = request.IsAscending ? query.OrderBy(x => x.SchoolYear) : query.OrderByDescending(x => x.SchoolYear);
+                }
             }
 
             var totalCount = await query.CountAsync();

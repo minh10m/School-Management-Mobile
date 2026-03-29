@@ -36,5 +36,14 @@ namespace School_Management.API.Controllers
             var result = await subjectService.UpdateSubject(request, subjectId);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllSubject([FromQuery] SubjectFilterRequest request)
+        {
+            if (request.SortBy == null) request.SortBy = "SubjectName";
+            var result = await subjectService.GetAllSubject(request);
+            return Ok(result);
+        }
     }
 }
