@@ -39,6 +39,8 @@ builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<IClassYearRepository, ClassYearRepository>();
+builder.Services.AddScoped<IClassYearService, ClassYearService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
