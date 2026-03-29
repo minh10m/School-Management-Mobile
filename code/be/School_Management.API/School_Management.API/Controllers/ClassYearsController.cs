@@ -26,5 +26,25 @@ namespace School_Management.API.Controllers
             var result = await classYearService.CreateClassYear(req);
             return StatusCode(201, result);
         }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{classYearId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateClassYear([FromBody] PostOrUpdateClassYearReq req, [FromRoute] Guid classYearId)
+        {
+            var result = await classYearService.UpdateClassYear(req, classYearId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [ValidateModel]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllClass([FromQuery] ClassYearFilterRequest request)
+        {
+            if (request.SortBy == null) request.SortBy = "ClassName";
+            var result = await classYearService.GetAllClass(request);
+            return Ok(result);
+        }
     }
 }

@@ -20,13 +20,28 @@ namespace School_Management.API.Services
                 "DUPLICATE_CLASSNAME" => throw new ConflictException("Tên lớp này đã có trong năm học"),
                 "IS_HOMEROOM" => throw new ConflictException("Giáo viên này đã có lớp chủ nhiệm"),
                 "TEACHER_NULL" => throw new NotFoundException("Giáo viên không tồn tại, không thể tạo lớp"),
+                "CONFLICT_NAMEGRADE" => throw new BadRequestException("Khối và lớp không tương thich"),
                 _ => result!
             };
         }
 
+        public async Task<PagedResponse<ClassYearResponse>> GetAllClass(ClassYearFilterRequest request)
+        {
+            return await classYearRepository.GetAllClass(request);
+        }
+
         public async Task<ClassYearResponse> UpdateClassYear(PostOrUpdateClassYearReq request, Guid classYearId)
         {
-            throw new NotImplementedException();
+            var (result, errorCode) = await classYearRepository.UpdateClassYear(request, classYearId);
+            return errorCode switch
+            {
+                "DUPLICATE_CLASSNAME" => throw new ConflictException("Tên lớp này đã có trong năm học"),
+                "IS_HOMEROOM" => throw new ConflictException("Giáo viên này đã có lớp chủ nhiệm"),
+                "TEACHER_NULL" => throw new NotFoundException("Giáo viên không tồn tại, không thể tạo lớp"),
+                "CONFLICT_NAMEGRADE" => throw new BadRequestException("Khối và lớp không tương thich"),
+                "NOT_FOUND_CLASS" => throw new NotFoundException("Lớp học không tồn tại"),
+                _ => result!
+            };
         }
     }
 }
