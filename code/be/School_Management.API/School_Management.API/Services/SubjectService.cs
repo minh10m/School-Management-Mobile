@@ -24,6 +24,13 @@ namespace School_Management.API.Services
             return await subjectRepository.GetAllSubject(request);
         }
 
+        public async Task<SubjectResponse> GetSubjectById(Guid subjectId)
+        {
+            var result = await subjectRepository.GetSubjectById(subjectId);
+            if (result == null) throw new NotFoundException("Môn học không tồn tại");
+            return result;
+        }
+
         public async Task<SubjectResponse> UpdateSubject(PostOrUpdateSubjectRequest request, Guid subjectId)
         {
             var (data, errorCode) = await subjectRepository.UpdateSubject(request, subjectId);

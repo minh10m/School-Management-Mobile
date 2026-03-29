@@ -2,6 +2,7 @@
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace School_Management.API.Repositories
 {
@@ -68,8 +69,18 @@ namespace School_Management.API.Repositories
                 MaxPeriod = x.MaxPeriod,
                 SubjectName = x.SubjectName
             }).ToListAsync();
-
             return subjectList;
+        }
+
+        public async Task<SubjectResponse?> GetSubjectById(Guid subjectId)
+        {
+            return await context.Subject.AsNoTracking()
+                                        .Where(x => x.Id == subjectId)
+                                        .Select(g => new SubjectResponse {
+                                            SubjectId = g.Id,
+                                            SubjectName = g.SubjectName,
+                                            MaxPeriod = g.MaxPeriod
+                                        }).FirstOrDefaultAsync();
         }
 
         public async Task<(SubjectResponse? data, string? errorCode)> UpdateSubject(PostOrUpdateSubjectRequest request, Guid subjectId)

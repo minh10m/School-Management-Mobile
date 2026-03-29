@@ -45,5 +45,14 @@ namespace School_Management.API.Controllers
             var result = await subjectService.GetAllSubject(request);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("{subjectId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetSubjectById([FromRoute] Guid subjectId)
+        {
+            var result = await subjectService.GetSubjectById(subjectId);
+            return Ok(result);
+        }
     }
 }
