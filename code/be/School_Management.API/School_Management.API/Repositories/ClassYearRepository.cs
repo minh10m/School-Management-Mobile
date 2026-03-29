@@ -115,6 +115,26 @@ namespace School_Management.API.Repositories
             };
         }
 
+        public async Task<(ClassYearResponse? data, string? errorCode)> GetClassYearById(Guid classYearId)
+        {
+            var classYear = await context.ClassYear
+                .AsNoTracking()
+                .Include(x => x.Teacher)
+                .ThenInclude(t => t.User)
+                .Where(x => x.Id == classYearId).FirstOrDefaultAsync();
+            if (classYear == null) return (null, "NOT_FOUND_CLASS");
+
+            return ( new ClassYearResponse
+            {
+                SchoolYear = classYear.SchoolYear,
+                ClassName = classYear.ClassName,
+                ClassYearId = classYear.Id,
+                Grade = classYear.Grade,
+                HomeRoomId = (Guid)classYear.HomeRoomId,
+                HomeRoomName = classYear.Teacher.User.FullName
+            }, "SUCCESS");
+        }
+
         public async Task<(ClassYearResponse? data, string? errorCode)> UpdateClassYear(PostOrUpdateClassYearReq request, Guid classYearId)
         {
             var classYear = await context.ClassYear.Where(x => x.Id == classYearId)

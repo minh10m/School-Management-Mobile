@@ -46,5 +46,14 @@ namespace School_Management.API.Controllers
             var result = await classYearService.GetAllClass(request);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("{classYearId}")]
+        [Authorize(Roles = "Admin,Teacher")]
+        public async Task<IActionResult> GetClassYearById([FromRoute] Guid classYearId)
+        {
+            var result = await classYearService.GetClassYearById(classYearId);
+            return Ok(result);
+        }
     }
 }

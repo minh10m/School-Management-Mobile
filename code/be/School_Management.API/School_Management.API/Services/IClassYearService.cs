@@ -7,5 +7,6 @@ namespace School_Management.API.Services
         public Task<ClassYearResponse> CreateClassYear(PostOrUpdateClassYearReq request);
         public Task<ClassYearResponse> UpdateClassYear(PostOrUpdateClassYearReq request, Guid classYearId);
         public Task<PagedResponse<ClassYearResponse>> GetAllClass(ClassYearFilterRequest request);
+        public Task<ClassYearResponse> GetClassYearById(Guid classYearId);
     }
 }
