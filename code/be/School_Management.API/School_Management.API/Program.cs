@@ -21,7 +21,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //Add auto mapper
-builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
 //Dependency Injection
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -98,48 +98,48 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var service = scope.ServiceProvider;
-    var userManager = service.GetRequiredService<UserManager<AppUser>>();
+//using (var scope = app.Services.CreateScope())
+//{
+//    var service = scope.ServiceProvider;
+//    var userManager = service.GetRequiredService<UserManager<AppUser>>();
 
-    var adminUser = await userManager.FindByNameAsync("admin123");
-    if(adminUser == null)
-    {
-        var user = new AppUser
-        {
-            UserName = "admin123",
-            FullName = "Hoàng Quốc Tùng",
-            Email = "TungKham123@gmail.com",
-            EmailConfirmed = true,
-            Address = "Xô Viết Nghệ Tĩnh, Bình Thạnh, Hồ Chí Minh",
-            Birthday = new DateTime(2004, 1, 22),
-            PhoneNumber = "0978654234"
-        };
+//    var adminUser = await userManager.FindByNameAsync("admin123");
+//    if(adminUser == null)
+//    {
+//        var user = new AppUser
+//        {
+//            UserName = "admin123",
+//            FullName = "Hoàng Quốc Tùng",
+//            Email = "TungKham123@gmail.com",
+//            EmailConfirmed = true,
+//            Address = "Xô Viết Nghệ Tĩnh, Bình Thạnh, Hồ Chí Minh",
+//            Birthday = new DateTime(2004, 1, 22),
+//            PhoneNumber = "0978654234"
+//        };
 
-        var result = await userManager.CreateAsync(user, "Admin@12345");
-        if (result.Succeeded)
-        { 
-            await userManager.AddToRoleAsync(user, "Admin");
-            Console.WriteLine("=====>  ĐÃ TẠO ADMIN THÀNH CÔNG");
-        }
-        else
-        {
-            foreach(var error in result.Errors)
-            {
-                Console.WriteLine($"======> TẠO ADMIN THẤT BẠI {error.Description}");
-            }
-        } 
+//        var result = await userManager.CreateAsync(user, "Admin@12345");
+//        if (result.Succeeded)
+//        { 
+//            await userManager.AddToRoleAsync(user, "Admin");
+//            Console.WriteLine("=====>  ĐÃ TẠO ADMIN THÀNH CÔNG");
+//        }
+//        else
+//        {
+//            foreach(var error in result.Errors)
+//            {
+//                Console.WriteLine($"======> TẠO ADMIN THẤT BẠI {error.Description}");
+//            }
+//        } 
             
-    }
-}
+//    }
+//}
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseMiddleware<ExceptionHandlerMiddlewares>();
 
