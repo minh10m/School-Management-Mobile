@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
+using System.Security.Claims;
 
 namespace School_Management.API.Controllers
 {
@@ -53,6 +54,19 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetClassYearById([FromRoute] Guid classYearId)
         {
             var result = await classYearService.GetClassYearById(classYearId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("teaching")]
+        [ValidateModel]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetAllClassOfTeaching([FromQuery] ClassOfTeacherFilterRequest request)
+        {
+            if (request.SortBy == null) request.SortBy = "ClassName";
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { Message = "Phiên đăng nhập hết hạn" });
+            var result = await classYearService.GetAllClassOfTeaching(request, Guid.Parse(userId));
             return Ok(result);
         }
     }
