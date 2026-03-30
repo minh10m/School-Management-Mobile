@@ -1,8 +1,10 @@
-﻿name: Deploy StudentManagement to Azure
+﻿name: Deploy Backend API to Azure
 
 on:
   push:
-    branches: [ "main" ] 
+    branches: [ "main" ]
+    paths:
+      - 'code/be/**'
 
 jobs:
   build-and-deploy:
@@ -18,10 +20,10 @@ jobs:
         dotnet-version: '8.0.x' 
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore "code/be/School_Management.API/School_Management.API/School_Management.API.csproj"
 
     - name: Build and Publish
-      run: dotnet publish -c Release -o ./publish
+      run: dotnet publish "code/be/School_Management.API/School_Management.API/School_Management.API.csproj" -c Release -o ./publish
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
