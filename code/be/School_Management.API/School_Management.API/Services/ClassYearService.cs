@@ -30,6 +30,16 @@ namespace School_Management.API.Services
             return await classYearRepository.GetAllClass(request);
         }
 
+        public async Task<PagedResponse<ClassYearResponse>> GetAllClassOfTeaching(ClassOfTeacherFilterRequest request, Guid userId)
+        {
+            var (result, errorCode) = await classYearRepository.GetAllClassOfTeaching(request, userId);
+            return errorCode switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Thông tin về lớp học của bạn không có"),
+                _ => result!
+            };
+        }
+
         public async Task<ClassYearResponse> GetClassYearById(Guid classYearId)
         {
             var (result, errorCode) = await classYearRepository.GetClassYearById(classYearId);
