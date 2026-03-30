@@ -1,6 +1,5 @@
-﻿name: Deploy SaleManagerApp to Azure
+﻿name: Deploy StudentManagement to Azure
 
-# Robot sẽ tự chạy mỗi khi Tùng push code lên nhánh main
 on:
   push:
     branches: [ "main" ] 
