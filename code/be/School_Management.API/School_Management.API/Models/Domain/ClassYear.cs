@@ -16,7 +16,7 @@ namespace School_Management.API.Models.Domain
 
         //Navigation properties
         [ForeignKey("HomeRoomId")]
-        public Teacher? teacher { get; set; }
+        public Teacher? Teacher { get; set; }
 
         public ICollection<StudentClassYear> StudentClassYears { get; set; } = new List<StudentClassYear>();
         public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
