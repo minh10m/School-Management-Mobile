@@ -73,5 +73,27 @@ namespace School_Management.API.Services
                 _ => result!
             };
         }
+
+        public async Task<ClassYearResponse> GetMyHomeRoomClass(HomeRoomClassOfTeacherRequest request, Guid userId)
+        {
+            var (result, error) = await classYearRepository.GetMyHomeRoomClass(request, userId);
+            return error switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Thông tin giáo viên không tồn tại, nên không có lớp"),
+                "NOT_HAVE_HOMEROOM" => throw new NotFoundException("Không có thông tin lớp chủ nhiệm"),
+                _ => result!
+            };
+        }
+
+        public async Task<ClassYearResponse> GetMyClassForStudent(ClassOfStudentRequest request, Guid userId)
+        {
+            var (result, errorCode) = await classYearRepository.GetMyClassForStudent(request, userId);
+            return errorCode switch
+            {
+                "NOT_FOUND_STUDENT" => throw new NotFoundException("Thông tin không tồn tại, không thể tìm thấy lớp"),
+                "NOT_FOUND_CLASS" => throw new NotFoundException("Không tìm thấy lớp hiện tại của bạn"),
+                _ => result!
+            };
+        }
     }
 }

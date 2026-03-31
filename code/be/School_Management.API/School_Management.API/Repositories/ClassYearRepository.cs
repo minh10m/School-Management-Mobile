@@ -295,5 +295,54 @@ namespace School_Management.API.Repositories
                 TotalCount = totalCount
             }, "SUCCESS");
         }
+
+        public async Task<(ClassYearResponse? data, string? errorCode)> GetMyHomeRoomClass(HomeRoomClassOfTeacherRequest request, Guid userId)
+        {
+            Guid? teacherId = await context.Teacher.AsNoTracking()
+                                                 .Where(x => x.UserId == userId)
+                                                 .Select(g => g.Id)
+                                                 .FirstOrDefaultAsync();
+
+            if (teacherId == null) return (null, "NOT_FOUND_TEACHER");
+
+            var homeRoomClass = await context.ClassYear.AsNoTracking()
+                                                       .Where(x => x.HomeRoomId == teacherId && x.SchoolYear == request.SchoolYear)
+                                                       .Select(g => new ClassYearResponse
+                                                       {
+                                                           SchoolYear = g.SchoolYear,
+                                                           ClassName = g.ClassName,
+                                                           ClassYearId = g.Id,
+                                                           Grade = g.Grade,
+                                                           HomeRoomId = (Guid)g.HomeRoomId!,
+                                                           HomeRoomName = null
+
+                                                       }).FirstOrDefaultAsync();
+            if (homeRoomClass == null) return (null, "NOT_HAVE_HOMEROOM");
+            return (homeRoomClass, "SUCCESS");
+        }
+
+        public async Task<(ClassYearResponse? data, string? errorCode)> GetMyClassForStudent(ClassOfStudentRequest request, Guid userId)
+        {
+            Guid? studentId = await context.Student.AsNoTracking()
+                                                   .Where(x => x.UserId == userId)
+                                                   .Select(g => g.Id)
+                                                   .FirstOrDefaultAsync();
+            if (studentId == null) return (null, "NOT_FOUND_STUDENT");
+
+            var myClass = await context.ClassYear.AsNoTracking()
+                                                 .Where(x => x.SchoolYear == request.SchoolYear
+                                                        && x.StudentClassYears.Any(scy => scy.StudentId == studentId))
+                                                 .Select(g => new ClassYearResponse
+                                                 {
+                                                     SchoolYear = g.SchoolYear,
+                                                     ClassName = g.ClassName,
+                                                     ClassYearId = g.Id,
+                                                     Grade = g.Grade,
+                                                     HomeRoomId = (Guid)g.HomeRoomId,
+                                                     HomeRoomName = g.Teacher.User.FullName
+                                                 }).FirstOrDefaultAsync();
+            if (myClass == null) return (null, "NOT_FOUND_CLASS");
+            return (myClass, "SUCCESS");
+        }
     }
 }

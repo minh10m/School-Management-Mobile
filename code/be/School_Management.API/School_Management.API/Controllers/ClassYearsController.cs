@@ -86,5 +86,29 @@ namespace School_Management.API.Controllers
             var result = await classYearService.GetAllClassIsTeachingByTeacher(request, teacherId);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("homeroom")]
+        [ValidateModel]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetMyHomeRoomClass([FromQuery] HomeRoomClassOfTeacherRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { message = "Phiên làm việc hết hạn" });
+            var result = await classYearService.GetMyHomeRoomClass(request, Guid.Parse(userId));
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("my-class")]
+        [ValidateModel]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetMyClassForStudent([FromQuery] ClassOfStudentRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { message = "Phiên làm việc hết hạn" });
+            var result = await classYearService.GetMyClassForStudent(request, Guid.Parse(userId));
+            return Ok(result);
+        }
     }
 }
