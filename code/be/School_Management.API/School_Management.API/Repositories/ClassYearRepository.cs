@@ -116,7 +116,7 @@ namespace School_Management.API.Repositories
             };
         }
 
-        public async Task<(PagedResponse<ClassYearResponse>? data, string? errorCode)> GetAllClassOfTeaching(ClassOfTeacherFilterRequest request, Guid userId)
+        public async Task<(PagedResponse<ClassYearResponse>? data, string? errorCode)> GetMyClassIsTeachingForTeacher(ClassOfTeacherFilterRequest request, Guid userId)
         {
             var teacherId = await context.Teacher.Where(x => x.UserId == userId)
                                                  .Select(g => g.Id)
@@ -235,6 +235,64 @@ namespace School_Management.API.Repositories
                 SchoolYear = classYear.SchoolYear,
                 HomeRoomName = teacherInfo.teacherName
 
+            }, "SUCCESS");
+        }
+
+        public async Task<(PagedResponse<ClassYearResponse>? data, string? errorCode)> GetAllClassIsTeachingByTeacher(ClassOfTeacherFilterRequest request, Guid teacherId)
+        {
+            var teacher = await context.Teacher.Where(x => x.Id == teacherId)
+                                                 .FirstOrDefaultAsync();
+
+            if (teacher == null) return (null, "NOT_FOUND_TEACHER");
+
+            var classQueryId = context.ScheduleDetail.AsNoTracking()
+                                              .Where(x => x.TeacherSubject.TeacherId == teacherId
+                                                     && x.Schedule.SchoolYear == request.SchoolYear)
+                                              .Select(g => g.Schedule.ClassYearId)
+                                              .Distinct();
+
+            var query = context.ClassYear.Where(x => classQueryId.Contains(x.Id));
+
+            //Filtering
+            if (!string.IsNullOrWhiteSpace(request.ClassName))
+            {
+                var className = request.ClassName.Trim();
+                query = query.Where(x => x.ClassName.ToLower().Contains(className));
+            }
+            if (request.Grade.HasValue)
+                query = query.Where(x => x.Grade == request.Grade);
+
+            //Sorting
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
+            {
+                if (request.SortBy.Equals("ClassName"))
+                {
+                    query = request.IsAscending ? query.OrderBy(x => x.ClassName) : query.OrderByDescending(x => x.ClassName);
+                }
+            }
+
+            var totalCount = await query.CountAsync();
+            var skipResults = (request.PageNumber - 1) * request.PageSize;
+            var classList = await query
+                .Skip(skipResults)
+                .Take(request.PageSize)
+                .Select(x => new ClassYearResponse
+                {
+                    SchoolYear = x.SchoolYear,
+                    ClassName = x.ClassName,
+                    ClassYearId = x.Id,
+                    Grade = x.Grade,
+                    HomeRoomId = (Guid)x.HomeRoomId!,
+                    HomeRoomName = null
+                })
+             .ToListAsync();
+
+            return (new PagedResponse<ClassYearResponse>
+            {
+                Items = classList,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                TotalCount = totalCount
             }, "SUCCESS");
         }
     }

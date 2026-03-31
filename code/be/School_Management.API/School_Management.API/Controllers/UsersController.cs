@@ -106,8 +106,8 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetAllUsers([FromQuery] UserFilterRequest request)
         {
             if (request.SortBy == null) request.SortBy = "FullName";
-            if (request.PageSize < 0) request.PageSize = 10;
-            if (request.PageNumber < 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            if (request.PageNumber <= 0) request.PageNumber = 1;
             var result = await userService.GetAllUser(request);
             return Ok(result);
         }

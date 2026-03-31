@@ -30,9 +30,9 @@ namespace School_Management.API.Services
             return await classYearRepository.GetAllClass(request);
         }
 
-        public async Task<PagedResponse<ClassYearResponse>> GetAllClassOfTeaching(ClassOfTeacherFilterRequest request, Guid userId)
+        public async Task<PagedResponse<ClassYearResponse>> GetMyClassIsTeachingForTeacher(ClassOfTeacherFilterRequest request, Guid userId)
         {
-            var (result, errorCode) = await classYearRepository.GetAllClassOfTeaching(request, userId);
+            var (result, errorCode) = await classYearRepository.GetMyClassIsTeachingForTeacher(request, userId);
             return errorCode switch
             {
                 "NOT_FOUND_TEACHER" => throw new NotFoundException("Thông tin về lớp học của bạn không có"),
@@ -60,6 +60,16 @@ namespace School_Management.API.Services
                 "TEACHER_NULL" => throw new NotFoundException("Giáo viên không tồn tại, không thể tạo lớp"),
                 "CONFLICT_NAMEGRADE" => throw new BadRequestException("Khối và lớp không tương thich"),
                 "NOT_FOUND_CLASS" => throw new NotFoundException("Lớp học không tồn tại"),
+                _ => result!
+            };
+        }
+
+        public async Task<PagedResponse<ClassYearResponse>> GetAllClassIsTeachingByTeacher(ClassOfTeacherFilterRequest request, Guid teacherId)
+        {
+            var (result, errorCode) = await classYearRepository.GetAllClassIsTeachingByTeacher(request, teacherId);
+            return errorCode switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Thông tin về lớp học của giáo viên này không có"),
                 _ => result!
             };
         }
