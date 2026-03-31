@@ -42,6 +42,8 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetAllSubject([FromQuery] SubjectFilterRequest request)
         {
             if (request.SortBy == null) request.SortBy = "SubjectName";
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
             var result = await subjectService.GetAllSubject(request);
             return Ok(result);
         }

@@ -44,6 +44,8 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetAllClass([FromQuery] ClassYearFilterRequest request)
         {
             if (request.SortBy == null) request.SortBy = "ClassName";
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
             var result = await classYearService.GetAllClass(request);
             return Ok(result);
         }
@@ -61,12 +63,51 @@ namespace School_Management.API.Controllers
         [Route("teaching")]
         [ValidateModel]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> GetAllClassOfTeaching([FromQuery] ClassOfTeacherFilterRequest request)
+        public async Task<IActionResult> GetMyClassIsTeachingForTeacher([FromQuery] ClassOfTeacherFilterRequest request)
         {
             if (request.SortBy == null) request.SortBy = "ClassName";
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized(new { Message = "Phiên đăng nhập hết hạn" });
-            var result = await classYearService.GetAllClassOfTeaching(request, Guid.Parse(userId));
+            var result = await classYearService.GetMyClassIsTeachingForTeacher(request, Guid.Parse(userId));
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("by-teacher/{teacherId}")]
+        [ValidateModel]
+        [Authorize]
+        public async Task<IActionResult> GetAllClassIsTeachingByTeacher([FromQuery] ClassOfTeacherFilterRequest request, [FromRoute] Guid teacherId)
+        {
+            if (request.SortBy == null) request.SortBy = "ClassName";
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await classYearService.GetAllClassIsTeachingByTeacher(request, teacherId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("homeroom")]
+        [ValidateModel]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetMyHomeRoomClass([FromQuery] HomeRoomClassOfTeacherRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { message = "Phiên làm việc hết hạn" });
+            var result = await classYearService.GetMyHomeRoomClass(request, Guid.Parse(userId));
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("my-class")]
+        [ValidateModel]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetMyClassForStudent([FromQuery] ClassOfStudentRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { message = "Phiên làm việc hết hạn" });
+            var result = await classYearService.GetMyClassForStudent(request, Guid.Parse(userId));
             return Ok(result);
         }
     }
