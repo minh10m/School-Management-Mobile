@@ -6,7 +6,7 @@ import axios, {
 import { useAuthStore } from "../store/authStore";
 
 // Replace with your actual backend URL
-const API_URL = "https://localhost:7117/api";
+const API_URL = "https://student-management-api-bbfdh3f8agg0gehg.indonesiacentral-01.azurewebsites.net/api";
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -64,7 +64,8 @@ apiClient.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       originalRequest &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      !originalRequest.url?.includes("/auth/login")
     ) {
       if (isRefreshing) {
         // Enqueue the request while refresh is in progress

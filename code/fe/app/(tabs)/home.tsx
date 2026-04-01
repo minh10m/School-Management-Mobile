@@ -7,9 +7,12 @@ import { router } from 'expo-router';
 
 import { useState } from 'react';
 import SideMenu from '@/components/SideMenu';
+import { useAuthStore } from '../../store/authStore';
 
 export default function HomeScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);
+  const { userInfo } = useAuthStore();
+  const firstName = userInfo?.fullName?.split(' ').at(-1) ?? 'Student';
   
   const academicsData = [
     { id: '1', title: 'Bus Tracking', icon: 'location', color: 'bg-blue-100', iconColor: '#136ADA' },
@@ -45,37 +48,11 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Greeting & Student Card */}
+        {/* Greeting */}
         <View className="px-6 mb-8">
-            <Text className="text-black text-lg mb-4" style={{ fontFamily: 'Poppins-SemiBold' }}>Hi, Welcome,</Text>
-            
-            <View className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-                <View className="flex-row justify-between items-start mb-4">
-                    <View>
-                        <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Nhật Minh</Text>
-                        <View className="flex-row items-center mt-1 gap-3">
-                             <View className="bg-blue-100 px-3 py-1 rounded-full">
-                                <Text className="text-bright-blue text-xs" style={{ fontFamily: 'Poppins-Medium' }}>Class : 8 - A</Text>
-                             </View>
-                             <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>Roll No : 19</Text>
-                        </View>
-                    </View>
-                     <View className="w-16 h-16 bg-gray-200 rounded-full overflow-hidden">
-                        <Image source={require('../../assets/images/on-boarding-1.png')} style={{width: '100%', height: '100%'}} contentFit="cover" />
-                     </View>
-                </View>
-
-                {/* Attendance Bar */}
-                <View>
-                    <View className="flex-row justify-between mb-2">
-                         <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Poppins-Medium' }}>Attendance</Text>
-                         <Text className="text-bright-blue text-xs" style={{ fontFamily: 'Poppins-Bold' }}>53%</Text>
-                    </View>
-                    <View className="h-3 bg-gray-100 rounded-full w-full overflow-hidden">
-                        <View className="h-full bg-bright-blue rounded-full" style={{ width: '53%' }} />
-                    </View>
-                </View>
-            </View>
+          <Text className="text-black text-xl" style={{ fontFamily: 'Poppins-SemiBold' }}>
+            Hi, Welcome, {firstName} 👋
+          </Text>
         </View>
 
         {/* Academics Grid */}
@@ -96,9 +73,9 @@ export default function HomeScreen() {
                             } else if (item.title === 'Results') {
                                 router.push('/student/results' as any);
                             } else if (item.title === 'Timetable') {
-                                router.push({ pathname: '/(tabs)/calendar', params: { tab: 'Timetable' } } as any);
+                                router.push('/(tabs)/timetable' as any);
                             } else if (item.title === 'Attendance') {
-                                router.push({ pathname: '/(tabs)/calendar', params: { tab: 'Attendance' } } as any);
+                                router.push('/(tabs)/attendance' as any);
                             } else if (item.title === 'Bus Tracking') {
                                 router.push('/student/bus-tracking' as any);
                             }

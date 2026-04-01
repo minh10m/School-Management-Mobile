@@ -3,11 +3,15 @@
 /** Lịch học (dành cho học sinh & admin xem theo lớp) */
 export interface ScheduleDetailItem {
   scheduleDetailId: string;
-  subjectName: string;
+  scheduleId: string;
+  teacherSubjectId: string;
+  dayOfWeek: number;          // 1=Mon, 2=Tue, ..., 7=Sun
+  startTime: string;          // e.g. "08:30:00"
+  finishTime: string;         // e.g. "09:15:00"
   teacherName: string;
-  dayOfWeek: string;   // e.g. "Monday"
-  startTime: string;   // e.g. "07:00"
-  finishTime: string;  // e.g. "08:30"
+  subjectName: string;
+  dayOfWeekVietNamese: string; // e.g. "thứ hai"
+  timeRange: string;           // e.g. "08:30 - 09:15"
 }
 
 /** Lịch dạy (dành cho giáo viên) */
@@ -64,6 +68,11 @@ export interface GetSchedulesParams {
   term?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+export interface GetMyClassScheduleParams {
+  Term?: number;
+  SchoolYear?: number;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────

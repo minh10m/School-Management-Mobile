@@ -17,7 +17,16 @@ export const classYearService = {
    * AuthN(login) + AuthZ(Admin)
    */
   getClassYears: async (params?: GetClassYearsParams): Promise<ClassYearResponse[]> => {
-    const response = await apiClient.get<ClassYearResponse[]>("/class-years", { params });
+    const backendParams: any = { ...params };
+    if (params?.schoolYear) {
+      backendParams.SchoolYear = parseInt(params.schoolYear.split("-")[0], 10);
+      delete backendParams.schoolYear;
+    }
+    if (params?.sortOrder) {
+      backendParams.IsAscending = params.sortOrder === 'asc';
+      delete backendParams.sortOrder;
+    }
+    const response = await apiClient.get<ClassYearResponse[]>("/class-years", { params: backendParams });
     return response.data;
   },
 
@@ -40,8 +49,13 @@ export const classYearService = {
    * AuthN(login) + AuthZ(Teacher)
    */
   getTeachingClasses: async (params?: GetClassYearsParams): Promise<ClassYearSummary[]> => {
+    const backendParams: any = { ...params };
+    if (params?.schoolYear) {
+      backendParams.SchoolYear = parseInt(params.schoolYear.split("-")[0], 10);
+      delete backendParams.schoolYear;
+    }
     const response = await apiClient.get<ClassYearSummary[]>("/class-years/teaching", {
-      params,
+      params: backendParams,
     });
     return response.data;
   },
@@ -57,9 +71,14 @@ export const classYearService = {
     teacherId: string,
     params?: GetClassYearsParams
   ): Promise<ClassYearSummary[]> => {
+    const backendParams: any = { ...params };
+    if (params?.schoolYear) {
+      backendParams.SchoolYear = parseInt(params.schoolYear.split("-")[0], 10);
+      delete backendParams.schoolYear;
+    }
     const response = await apiClient.get<ClassYearSummary[]>(
       `/class-years/by-teacher/${teacherId}`,
-      { params }
+      { params: backendParams }
     );
     return response.data;
   },
@@ -98,7 +117,13 @@ export const classYearService = {
    * 409: lớp đã tồn tại trong năm học
    */
   createClassYear: async (payload: CreateClassYearPayload): Promise<ClassYearResponse> => {
-    const response = await apiClient.post<ClassYearResponse>("/class-years", payload);
+    const backendPayload = {
+      className: payload.className,
+      grade: payload.grade,
+      schoolYear: parseInt(payload.schoolYear.split("-")[0], 10),
+      homeRoomId: payload.homeRoomId,
+    };
+    const response = await apiClient.post<ClassYearResponse>("/class-years", backendPayload);
     return response.data;
   },
 
@@ -114,9 +139,13 @@ export const classYearService = {
     classYearId: string,
     payload: UpdateClassYearPayload
   ): Promise<ClassYearResponse> => {
+    const backendPayload: any = { ...payload };
+    if (payload.schoolYear) {
+      backendPayload.schoolYear = parseInt(payload.schoolYear.split("-")[0], 10);
+    }
     const response = await apiClient.patch<ClassYearResponse>(
       `/class-years/${classYearId}`,
-      payload
+      backendPayload
     );
     return response.data;
   },
@@ -130,7 +159,8 @@ export const classYearService = {
    * 409: học sinh đã có lớp trong năm học
    */
   assignStudent: async (classYearId: string, payload: AssignStudentPayload): Promise<void> => {
-    await apiClient.post(`/class-years/${classYearId}/students`, payload);
+    // Backend API uses PATCH /students/{studentId}/classYear
+    await apiClient.patch(`/students/${payload.studentId}/classYear`, { classYearId });
   },
 
   // ─── ADMIN: PROMOTE ───────────────────────────────────────────────────────────

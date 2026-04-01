@@ -1,4 +1,4 @@
-export type AttendanceStatus = 'present' | 'absent' | 'late';
+export type AttendanceStatus = 'present' | 'absent' | 'late' | 'Có mặt' | 'Vắng mặt' | 'Đi trễ';
 
 // ─── Response Types ────────────────────────────────────────────────────────────
 
@@ -23,6 +23,14 @@ export interface StudentAttendanceRecord {
   date: string;                // "YYYY-MM-DD"
   status: AttendanceStatus;
   note: string;
+}
+
+/** Response đầy đủ từ GET /attendances/student/me */
+export interface StudentAttendanceResponse {
+  totalPresent: number;
+  totalAbsent: number;
+  percentage: number;
+  studentAttendances: StudentAttendanceRecord[];
 }
 
 // ─── Query Params ──────────────────────────────────────────────────────────────

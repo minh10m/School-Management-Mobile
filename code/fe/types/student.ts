@@ -16,17 +16,22 @@ export interface StudentListResponse {
   pageSize: number;
 }
 
+export interface ClassYearSub {
+  grade: number;
+  schoolYear: number;
+  className: string;
+}
+
 /** Chi tiết học sinh (get by id / get me) */
 export interface StudentResponse {
   studentId: string;
   userId: string;
   fullName: string;
   email: string;
-  phone: string;
-  className: string;
-  grade: string;
-  schoolYear: string;
+  phoneNumber: string;
+  address: string;
   birthday: string; // ISO date string
+  classYearSub: ClassYearSub[];
 }
 
 // ─── Query Params ──────────────────────────────────────────────────────────────
@@ -52,7 +57,13 @@ export interface UpdateStudentPayload {
 }
 
 /** Học sinh tự cập nhật profile (không được sửa lớp / role) */
-export type UpdateStudentSelfPayload = UpdateStudentPayload;
+export interface UpdateStudentSelfPayload {
+  fullName?: string;
+  email?: string;
+  phoneNumber?: string;
+  address?: string;
+  birthday?: string; // ISO date string "YYYY-MM-DD"
+}
 
 /** Admin chuyển lớp học sinh */
 export interface UpdateStudentClassPayload {

@@ -8,13 +8,16 @@ export interface UserInfo {
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;
-  userInfo?: UserInfo;
+  accessTokenExpireTime: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  role: string;
 }
 
 export interface LoginPayload {
-  username?: string;
-  password?: string;
+  userName?: string;
+  passWord?: string;
 }
 
 export interface SignupPayload {
