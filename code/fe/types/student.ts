@@ -54,6 +54,7 @@ export interface UpdateStudentPayload {
   email?: string;
   phone?: string;
   birthday?: string; // ISO date string
+  address?: string;
 }
 
 /** Học sinh tự cập nhật profile (không được sửa lớp / role) */

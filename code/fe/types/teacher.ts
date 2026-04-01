@@ -21,6 +21,7 @@ export interface TeacherResponse {
   email: string;
   phone: string;
   birthday: string; // ISO date string
+  address: string;
   subjectName: string;
 }
 
@@ -47,6 +48,7 @@ export interface UpdateTeacherPayload {
   email?: string;
   phone?: string;
   birthday?: string; // ISO date string
+  address?: string;
 }
 
 /** Teacher tự cập nhật (không được sửa role / tự gán môn) */

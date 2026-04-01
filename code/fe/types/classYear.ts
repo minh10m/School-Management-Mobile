@@ -6,6 +6,7 @@ export interface ClassYearResponse {
   grade: number;
   schoolYear: string;       // e.g. "2025-2026"
   homeRoomTeacher: string;  // teacher fullName
+  homeRoomId?: string;
   studentCount: number;
 }
 

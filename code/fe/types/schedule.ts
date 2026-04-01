@@ -46,6 +46,8 @@ export interface ScheduleResponse {
   name: string;
   classYearId: string;
   className: string;
+  schoolYear: string;
+  isActive: boolean;
 }
 
 /** Schedule detail sau khi tạo / sửa */
@@ -53,7 +55,9 @@ export interface ScheduleDetailResponse {
   scheduleDetailId: string;
   scheduleId: string;
   teacherSubjectId: string;
-  dayOfWeek: string;
+  teacherName: string;
+  subjectName: string;
+  dayOfWeek: number;
   startTime: string;
   finishTime: string;
 }
@@ -66,6 +70,8 @@ export interface GetSchedulesParams {
   classYearId?: string;
   teacherId?: string;
   term?: string;
+  schoolYear?: string;
+  isActive?: boolean;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
@@ -81,24 +87,28 @@ export interface CreateSchedulePayload {
   classYearId: string;
   name: string;
   term: string;
+  schoolYear: string;
+  isActive: boolean;
 }
 
 export interface UpdateSchedulePayload {
   name?: string;
   term?: string;
   classYearId?: string;
+  schoolYear?: string;
+  isActive?: boolean;
 }
 
 export interface CreateScheduleDetailPayload {
   teacherSubjectId: string;
-  dayOfWeek: string;   // "Monday" | "Tuesday" | ...
-  startTime: string;   // "HH:mm"
-  finishTime: string;  // "HH:mm"
+  dayOfWeek: number;   // 1-7
+  startTime: string;   // "HH:mm:ss"
+  finishTime: string;  // "HH:mm:ss"
 }
 
 export interface UpdateScheduleDetailPayload {
   teacherSubjectId?: string;
-  dayOfWeek?: string;
+  dayOfWeek?: number;
   startTime?: string;
   finishTime?: string;
 }
