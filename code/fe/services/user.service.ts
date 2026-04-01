@@ -65,11 +65,11 @@ export const userService = {
       fullName: payload.fullName,
       address: payload.address,
       birthday: payload.birthday,
-      role: payload.roleId // Assuming roleId holds the string name like "Teacher"
+      roleId: payload.roleId,
+      classYearId: payload.classYearId,
+      subjectId: payload.subjectId
     };
     const response = await apiClient.post<UserResponse>("/users", backendPayload);
-    // Note: Backend might not support assigning classYearId or subjectId during user creation directly,
-    // so we might need separate calls if the UI relies on it, but for now we map what's available.
     return response.data;
   },
 

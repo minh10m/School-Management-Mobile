@@ -150,17 +150,8 @@ export const classYearService = {
     return response.data;
   },
 
-  // ─── ADMIN: ASSIGN STUDENT ────────────────────────────────────────────────────
-  /**
-   * Admin gán học sinh vào lớp
-   * POST /class-years/{id}/students
-   * AuthN(login) + AuthZ(Admin)
-   * 404: classYear / student không tồn tại
-   * 409: học sinh đã có lớp trong năm học
-   */
   assignStudent: async (classYearId: string, payload: AssignStudentPayload): Promise<void> => {
-    // Backend API uses PATCH /students/{studentId}/classYear
-    await apiClient.patch(`/students/${payload.studentId}/classYear`, { classYearId });
+    await apiClient.post(`/class-years/${classYearId}/students`, payload);
   },
 
   // ─── ADMIN: PROMOTE ───────────────────────────────────────────────────────────

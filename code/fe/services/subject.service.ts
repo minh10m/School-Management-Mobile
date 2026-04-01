@@ -70,4 +70,28 @@ export const subjectService = {
     const response = await apiClient.patch<SubjectResponse>(`/subjects/${subjectId}`, payload);
     return response.data;
   },
+
+  // ─── TEACHER SUBJECTS (Assignment) ────────────────────────────────────────────
+  /**
+   * Admin gán môn học cho giáo viên
+   * POST /teacher-subjects
+   * AuthN(login) + AuthZ(Admin)
+   * 409: giáo viên đã được gán môn này
+   */
+  assignTeacherToSubject: async (teacherId: string, subjectId: string): Promise<any> => {
+    const response = await apiClient.post("/teacher-subjects", {
+      teacherId,
+      subjectId,
+    });
+    return response.data;
+  },
+
+  /**
+   * Admin hủy môn học của giáo viên ( soft delete)
+   * DELETE /teacher-subjects/{id}
+   * AuthN(login) + AuthZ(Admin)
+   */
+  removeTeacherFromSubject: async (teacherSubjectId: string): Promise<void> => {
+    await apiClient.delete(`/teacher-subjects/${teacherSubjectId}`);
+  },
 };
