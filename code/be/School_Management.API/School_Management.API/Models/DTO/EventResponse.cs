@@ -1,11 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace School_Management.API.Models.Domain
+﻿namespace School_Management.API.Models.DTO
 {
-    public class Event
+    public class EventResponse
     {
-        [Key]
-        public Guid Id { get; set; }
+        public Guid EventId { get; set; }
         public string? Title { get; set; }
         public string? Body { get; set; }
         public TimeSpan StartTime { get; set; }

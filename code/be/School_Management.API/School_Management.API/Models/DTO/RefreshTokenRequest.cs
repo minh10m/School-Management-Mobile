@@ -5,6 +5,6 @@ namespace School_Management.API.Models.DTO
     public class RefreshTokenRequest
     {
         [Required]
-        public string RefreshToken { get; set; }
+        public string? RefreshToken { get; set; }
     }
 }

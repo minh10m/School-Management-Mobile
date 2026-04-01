@@ -6,11 +6,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace School_Management.API.Migrations
 {
     /// <inheritdoc />
-    public partial class AddEventTable : Migration
+    public partial class AddEvents : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "IX_Schedule_ClassYearId_Term_SchoolYear_Name",
+                table: "Schedule");
+
             migrationBuilder.CreateTable(
                 name: "Events",
                 columns: table => new
@@ -18,8 +22,9 @@ namespace School_Management.API.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Body = table.Column<string>(type: "character varying(3000)", maxLength: 3000, nullable: false),
-                    StartTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    FinishTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    StartTime = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    FinishTime = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    EventDate = table.Column<DateOnly>(type: "date", nullable: false),
                     SchoolYear = table.Column<int>(type: "integer", nullable: false),
                     Term = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -32,9 +37,20 @@ namespace School_Management.API.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Events_Title_StartTime",
+                name: "IX_Schedule_ClassYearId",
+                table: "Schedule",
+                column: "ClassYearId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schedule_SchoolYear_Term_Name_ClassYearId",
+                table: "Schedule",
+                columns: new[] { "SchoolYear", "Term", "Name", "ClassYearId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Events_SchoolYear_Term_StartTime_Title",
                 table: "Events",
-                columns: new[] { "Title", "StartTime" },
+                columns: new[] { "SchoolYear", "Term", "StartTime", "Title" },
                 unique: true);
         }
 
@@ -43,6 +59,20 @@ namespace School_Management.API.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Events");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Schedule_ClassYearId",
+                table: "Schedule");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Schedule_SchoolYear_Term_Name_ClassYearId",
+                table: "Schedule");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schedule_ClassYearId_Term_SchoolYear_Name",
+                table: "Schedule",
+                columns: new[] { "ClassYearId", "Term", "SchoolYear", "Name" },
+                unique: true);
         }
     }
 }

@@ -31,10 +31,10 @@ namespace School_Management.API.Repositories
             var schedule = new Schedule
             {
                 Id = Guid.NewGuid(),
-                Term = request.Term,
-                SchoolYear = request.SchoolYear,
+                Term = (int)request.Term,
+                SchoolYear = (int)request.SchoolYear,
                 Name = request.Name,
-                IsActive = request.IsActive,
+                IsActive = (bool)request.IsActive,
                 ClassYearId = request.ClassYearId
             };
 
@@ -133,9 +133,9 @@ namespace School_Management.API.Repositories
                                          .Select(x => x.ClassName)
                                          .FirstOrDefaultAsync();
             schedule.Name = request.Name;
-            schedule.SchoolYear = request.SchoolYear;
-            schedule.Term = request.Term;
-            schedule.IsActive = request.IsActive;
+            schedule.SchoolYear = (int)request.SchoolYear;
+            schedule.Term = (int)request.Term;
+            schedule.IsActive = (bool)request.IsActive;
             schedule.ClassYearId = request.ClassYearId;
 
             await context.SaveChangesAsync();

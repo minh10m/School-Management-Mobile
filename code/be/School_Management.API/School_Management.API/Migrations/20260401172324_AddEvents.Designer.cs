@@ -12,8 +12,8 @@ using School_Management.API.Data;
 namespace School_Management.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260401130144_AddEventTable")]
-    partial class AddEventTable
+    [Migration("20260401172324_AddEvents")]
+    partial class AddEvents
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -343,14 +343,17 @@ namespace School_Management.API.Migrations
                         .HasMaxLength(3000)
                         .HasColumnType("character varying(3000)");
 
-                    b.Property<DateTimeOffset>("FinishTime")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("EventDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeSpan>("FinishTime")
+                        .HasColumnType("interval");
 
                     b.Property<int>("SchoolYear")
                         .HasColumnType("integer");
 
-                    b.Property<DateTimeOffset>("StartTime")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("interval");
 
                     b.Property<int>("Term")
                         .HasColumnType("integer");
@@ -362,7 +365,7 @@ namespace School_Management.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Title", "StartTime")
+                    b.HasIndex("SchoolYear", "Term", "StartTime", "Title")
                         .IsUnique();
 
                     b.ToTable("Events", null, t =>
@@ -447,7 +450,9 @@ namespace School_Management.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassYearId", "Term", "SchoolYear", "Name")
+                    b.HasIndex("ClassYearId");
+
+                    b.HasIndex("SchoolYear", "Term", "Name", "ClassYearId")
                         .IsUnique();
 
                     b.ToTable("Schedule", t =>

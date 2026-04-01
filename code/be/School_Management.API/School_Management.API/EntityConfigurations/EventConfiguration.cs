@@ -24,11 +24,13 @@ namespace School_Management.API.EntityConfigurations
 
             builder.Property(x => x.SchoolYear)
                    .IsRequired();
+            builder.Property(x => x.EventDate)
+                   .IsRequired();
 
             builder.Property(x => x.Term)
                    .IsRequired();
 
-            builder.HasIndex(x => new { x.Title, x.StartTime})
+            builder.HasIndex(x => new { x.SchoolYear, x.Term, x.StartTime, x.Title })
                     .IsUnique();
 
             builder.ToTable("Events", x =>
