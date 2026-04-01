@@ -1,18 +1,10 @@
-import { View, Text, FlatList, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
-
-const MOCK_USERS = [
-  { userId: '1', username: 'admin01', fullName: 'Nguyen Van Admin', role: 'Admin', email: 'admin@school.edu', lockoutEnd: null },
-  { userId: '2', username: 'teacher01', fullName: 'Tran Thi Mai', role: 'Teacher', email: 'mai@school.edu', lockoutEnd: null },
-  { userId: '3', username: 'student01', fullName: 'Le Van Minh', role: 'Student', email: 'minh@school.edu', lockoutEnd: null },
-  { userId: '4', username: 'teacher02', fullName: 'Pham Thi Lan', role: 'Teacher', email: 'lan@school.edu', lockoutEnd: null },
-  { userId: '5', username: 'student02', fullName: 'Hoang Van Nam', role: 'Student', email: 'nam@school.edu', lockoutEnd: '2099-12-31' },
-  { userId: '6', username: 'student03', fullName: 'Nguyen Thi Hoa', role: 'Student', email: 'hoa@school.edu', lockoutEnd: null },
-  { userId: '7', username: 'teacher03', fullName: 'Do Van Duc', role: 'Teacher', email: 'duc@school.edu', lockoutEnd: null },
-];
+import { useState, useEffect, useCallback } from 'react';
+import { userService } from '../../../services/user.service';
+import { UserListItem } from '../../../types/user';
 
 const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
   Admin:   { bg: '#EFF6FF', text: '#136ADA' },
@@ -25,13 +17,36 @@ const TABS = ['All', 'Admin', 'Teacher', 'Student'];
 export default function AdminUsersScreen() {
   const [activeTab, setActiveTab] = useState('All');
   const [search, setSearch] = useState('');
+  const [users, setUsers] = useState<UserListItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const filtered = MOCK_USERS.filter(u => {
-    const matchRole = activeTab === 'All' || u.role === activeTab;
-    const matchSearch = u.fullName.toLowerCase().includes(search.toLowerCase()) ||
-                        u.email.toLowerCase().includes(search.toLowerCase());
-    return matchRole && matchSearch;
-  });
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await userService.getUsers({
+        search,
+        role: activeTab === 'All' ? undefined : activeTab,
+        sortBy: 'createdAt',
+        sortOrder: 'desc'
+      });
+      setUsers(res.items);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [search, activeTab]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchUsers();
+    setRefreshing(false);
+  };
 
   const RoleBadge = ({ role }: { role: string }) => {
     const c = ROLE_COLORS[role] ?? { bg: '#F3F4F6', text: '#6B7280' };
@@ -84,39 +99,47 @@ export default function AdminUsersScreen() {
       </View>
 
       {/* List */}
-      <FlatList
-        data={filtered}
-        keyExtractor={item => item.userId}
-        contentContainerStyle={{ padding: 16, gap: 10 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center gap-3"
-            onPress={() => router.push(`/admin/users/${item.userId}` as any)}
-          >
-            {/* Avatar */}
-            <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center">
-              <Text style={{ fontFamily: 'Poppins-Bold', color: '#136ADA', fontSize: 16 }}>
-                {item.fullName.charAt(0)}
-              </Text>
-            </View>
-            <View className="flex-1">
-              <View className="flex-row items-center gap-2 mb-0.5">
-                <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-sm">{item.fullName}</Text>
-                {item.lockoutEnd && <Ionicons name="lock-closed" size={12} color="#EF4444" />}
+      {loading && !refreshing ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#136ADA" />
+        </View>
+      ) : (
+        <FlatList
+          data={users}
+          keyExtractor={item => item.userId}
+          contentContainerStyle={{ padding: 16, gap: 10 }}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center gap-3"
+              onPress={() => router.push(`/admin/users/${item.userId}` as any)}
+            >
+              {/* Avatar */}
+              <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center">
+                <Text style={{ fontFamily: 'Poppins-Bold', color: '#136ADA', fontSize: 16 }}>
+                  {item.fullName.charAt(0)}
+                </Text>
               </View>
-              <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs mb-1">{item.email}</Text>
-              <RoleBadge role={item.role} />
+              <View className="flex-1">
+                <View className="flex-row items-center gap-2 mb-0.5">
+                  <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-sm">{item.fullName}</Text>
+                  {item.lockoutEnd && <Ionicons name="lock-closed" size={12} color="#EF4444" />}
+                </View>
+                <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs mb-1">@{item.username}</Text>
+                <RoleBadge role={item.role ?? 'User'} />
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            <View className="items-center py-10">
+              <Ionicons name="people-outline" size={48} color="#D1D5DB" />
+              <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-2">No users found</Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          <View className="items-center py-10">
-            <Ionicons name="people-outline" size={48} color="#D1D5DB" />
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-2">No users found</Text>
-          </View>
-        }
-      />
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
