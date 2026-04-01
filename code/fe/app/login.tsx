@@ -5,6 +5,8 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { authService } from "../services/auth.service";
+import { useAuthStore } from "../store/authStore";
 
 export default function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -13,44 +15,39 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    // if (!username || !password) {
-    //   alert("Please enter both username and password");
-    //   return;
-    // }
+    if (!username || !password) {
+      alert("Please enter both username and password");
+      return;
+    }
 
-    // setLoading(true);
-    // try {
-    //   const payload = {
-    //     username: username,
-    //     password: password,
-    //   };
+    setLoading(true);
+    try {
+      const payload = {
+        userName: username,
+        passWord: password,
+      };
 
-    //   console.log("Login Payload:", payload);
+      console.log("Login Payload:", payload);
 
-    //   await authService.login(payload);
+      await authService.login(payload);
 
-    //   const userInfo = useAuthStore.getState().userInfo;
-    //   console.log("Logged in user:", userInfo);
-    //   alert("Login Success!");
+      const userInfo = useAuthStore.getState().userInfo;
+      console.log("Logged in user:", userInfo);
+      // alert("Login Success!");
 
-    //   router.replace("/home" as Href);
-    // } catch (error: any) {
-    //   console.error(error);
-    //   alert(
-    //     "Login failed: " + (error.response?.data?.message || error.message),
-    //   );
-    // } finally {
-    //   setLoading(false);
-    // }
-
-    if (username.toLowerCase() === 'admin') {
-      router.replace("/admin" as Href);
-    } else if (username.toLowerCase() === 'teacher') {
-      router.replace("/teacher" as Href);
-    } else if (username.toLowerCase() === 'student') {
-      router.replace("/student" as Href);
-    } else {
-      router.replace("/home" as Href);
+      if (userInfo?.role?.toLowerCase() === 'admin') {
+        router.replace("/admin" as Href);
+      } else if (userInfo?.role?.toLowerCase() === 'teacher') {
+        router.replace("/teacher" as Href);
+      } else {
+        router.replace("/home" as Href);
+      }
+    } catch (error: any) {
+      console.error(error);
+      const errorMessage = error.response?.data?.message || error.message || "Đăng nhập thất bại. Vui lòng thử lại.";
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 

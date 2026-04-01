@@ -1,8 +1,9 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { authService } from '../../services/auth.service';
 
 const STATS = [
   { label: 'Students', value: '1,248', icon: 'people', color: '#136ADA', bg: 'bg-blue-50' },
@@ -38,8 +39,23 @@ export default function AdminDashboard() {
 
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="p-1">
-          <Ionicons name="arrow-back" size={24} color="black" />
+        <TouchableOpacity 
+          onPress={() => {
+            Alert.alert("Đăng xuất", "Bạn có chắc chắn muốn đăng xuất không?", [
+              { text: "Hủy", style: "cancel" },
+              {
+                text: "Đăng xuất",
+                style: "destructive",
+                onPress: async () => {
+                  await authService.logout();
+                  router.replace("/login" as any);
+                },
+              },
+            ]);
+          }} 
+          className="p-1"
+        >
+          <Ionicons name="log-out-outline" size={24} color="#EF4444" />
         </TouchableOpacity>
         <View className="flex-row items-center gap-2">
           <Ionicons name="book" size={20} color="#136ADA" />
