@@ -2,7 +2,7 @@ import {
   ClassAttendanceItem,
   GetClassAttendanceParams,
   GetStudentAttendanceParams,
-  StudentAttendanceRecord,
+  StudentAttendanceResponse,
   SubmitAttendancePayload,
   SubmitAttendanceResponse,
 } from "../types/attendance";
@@ -23,9 +23,21 @@ export const attendanceService = {
   submitAttendance: async (
     payload: SubmitAttendancePayload
   ): Promise<SubmitAttendanceResponse> => {
+    // Map frontend payload to match backend AttendanceRequest
+    const backendPayload = {
+      classYearId: payload.classYearId,
+      date: payload.date,
+      // Map attendances to infoAttendances
+      infoAttendances: payload.attendances.map(a => ({
+        studentId: a.studentId,
+        status: a.status,
+        note: a.note || null
+      }))
+    };
+
     const response = await apiClient.post<SubmitAttendanceResponse>(
       "/attendances",
-      payload
+      backendPayload
     );
     return response.data;
   },
@@ -58,10 +70,15 @@ export const attendanceService = {
    */
   getMyAttendance: async (
     params?: GetStudentAttendanceParams
-  ): Promise<StudentAttendanceRecord[]> => {
-    const response = await apiClient.get<StudentAttendanceRecord[]>(
+  ): Promise<StudentAttendanceResponse> => {
+    // Backend expects Month and Year with capital first letter
+    const backendParams = params ? {
+      Month: params.month,
+      Year: params.year,
+    } : {};
+    const response = await apiClient.get<StudentAttendanceResponse>(
       "/attendances/student/me",
-      { params }
+      { params: backendParams }
     );
     return response.data;
   },

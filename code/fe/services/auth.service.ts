@@ -10,12 +10,20 @@ import apiClient from "./apiClient";
 export const authService = {
   login: async (payload: LoginPayload): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>("/auth/login", payload);
-    const { accessToken, refreshToken, userInfo } = response.data;
+    const data = response.data;
+
+    // Create UserInfo object from the root response
+    const userInfo = {
+      id: data.userId,
+      fullName: data.fullName,
+      email: data.email,
+      role: data.role,
+    };
 
     // Save to store
-    await useAuthStore.getState().setAuth(accessToken, refreshToken, userInfo);
+    await useAuthStore.getState().setAuth(data.accessToken, data.refreshToken, userInfo);
 
-    return response.data;
+    return data;
   },
 
   // Mocking signup since your provided API didn't include it explicitly,
@@ -41,6 +49,10 @@ export const authService = {
 
   changePassword: async (payload: ChangePasswordPayload): Promise<void> => {
     // Requires user to be logged in (token will be attached automatically by interceptor)
-    await apiClient.patch("/auth/change-password", payload);
+    await apiClient.patch("/auth/change-password", {
+      oldPassword: payload.oldPassword,
+      newPassword: payload.newPassword,
+      confirmPassword: payload.confirmedPassword
+    });
   },
 };

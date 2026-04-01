@@ -56,7 +56,20 @@ export const userService = {
    * 409: username hoặc email đã tồn tại
    */
   createUser: async (payload: CreateUserPayload): Promise<UserResponse> => {
-    const response = await apiClient.post<UserResponse>("/users", payload);
+    // Map Frontend Payload to Backend CreateUserRequest
+    const backendPayload = {
+      username: payload.username,
+      password: payload.password,
+      email: payload.email,
+      phoneNumber: payload.phone,
+      fullName: payload.fullName,
+      address: payload.address,
+      birthday: payload.birthday,
+      role: payload.roleId // Assuming roleId holds the string name like "Teacher"
+    };
+    const response = await apiClient.post<UserResponse>("/users", backendPayload);
+    // Note: Backend might not support assigning classYearId or subjectId during user creation directly,
+    // so we might need separate calls if the UI relies on it, but for now we map what's available.
     return response.data;
   },
 
@@ -68,7 +81,14 @@ export const userService = {
    * 400: sai format | 404: not found | 409: email lặp lại
    */
   updateUser: async (userId: string, payload: UpdateUserPayload): Promise<UserResponse> => {
-    const response = await apiClient.patch<UserResponse>(`/users/${userId}`, payload);
+    const backendPayload: any = {
+      email: payload.email,
+      phoneNumber: payload.phone,
+      fullName: payload.fullName,
+      address: payload.address,
+      birthday: payload.birthday,
+    };
+    const response = await apiClient.patch<UserResponse>(`/users/${userId}`, backendPayload);
     return response.data;
   },
 
@@ -79,7 +99,14 @@ export const userService = {
    * AuthN(login) + AuthZ(Admin)
    */
   updateMe: async (payload: Omit<UpdateUserPayload, "roleId">): Promise<UserResponse> => {
-    const response = await apiClient.patch<UserResponse>("/users/me", payload);
+    const backendPayload: any = {
+      email: payload.email,
+      phoneNumber: payload.phone,
+      fullName: payload.fullName,
+      address: payload.address,
+      birthday: payload.birthday,
+    };
+    const response = await apiClient.patch<UserResponse>("/users/me", backendPayload);
     return response.data;
   },
 
@@ -116,7 +143,8 @@ export const userService = {
    * 404: ko tìm thấy | 400: roleId không hợp lệ
    */
   updateRole: async (userId: string, payload: UpdateUserRolePayload): Promise<UserResponse> => {
-    const response = await apiClient.patch<UserResponse>(`/users/${userId}/role`, payload);
+    const backendPayload = { role: payload.roleId };
+    const response = await apiClient.patch<UserResponse>(`/users/${userId}/role`, backendPayload);
     return response.data;
   },
 };
