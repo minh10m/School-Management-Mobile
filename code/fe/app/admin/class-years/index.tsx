@@ -1,27 +1,46 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
-
-const MOCK_CLASSES = [
-  { classYearId: '1', className: '10A1', grade: 10, schoolYear: '2025-2026', homeRoomTeacher: 'Tran Thi Mai', studentCount: 35 },
-  { classYearId: '2', className: '10A2', grade: 10, schoolYear: '2025-2026', homeRoomTeacher: 'Pham Thi Lan', studentCount: 33 },
-  { classYearId: '3', className: '10B1', grade: 10, schoolYear: '2025-2026', homeRoomTeacher: 'Do Van Duc', studentCount: 34 },
-  { classYearId: '4', className: '11A1', grade: 11, schoolYear: '2025-2026', homeRoomTeacher: 'Nguyen Thi Hoa', studentCount: 36 },
-  { classYearId: '5', className: '11A2', grade: 11, schoolYear: '2025-2026', homeRoomTeacher: 'Le Van Nam', studentCount: 32 },
-  { classYearId: '6', className: '12A1', grade: 12, schoolYear: '2025-2026', homeRoomTeacher: 'Vo Thi Bich', studentCount: 30 },
-  { classYearId: '7', className: '12A2', grade: 12, schoolYear: '2025-2026', homeRoomTeacher: 'Phan Van Hung', studentCount: 28 },
-];
-
-const GRADE_TABS = ['All', '10', '11', '12'];
+import { useState, useEffect, useCallback } from 'react';
+import { classYearService } from '../../../services/classYear.service';
+import { ClassYearResponse } from '../../../types/classYear';
 
 export default function AdminClassYearsScreen() {
-  const [activeGrade, setActiveGrade] = useState('All');
+  const [classes, setClasses] = useState<ClassYearResponse[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [grade, setGrade] = useState<number | undefined>();
+  const [schoolYear, setSchoolYear] = useState('2026');
 
-  const filtered = MOCK_CLASSES.filter(c =>
-    activeGrade === 'All' || c.grade === parseInt(activeGrade)
-  );
+  const fetchClasses = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await classYearService.getClassYears({
+        schoolYear,
+        grade
+      });
+      // Handle both { items: [] } and direct array [] responses
+      const data = Array.isArray(res) ? res : (res as any).items || [];
+      setClasses(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [schoolYear, grade]);
+
+  useEffect(() => {
+    fetchClasses();
+  }, [fetchClasses]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchClasses();
+    setRefreshing(false);
+  };
+
+  const GRADES = [10, 11, 12];
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -36,64 +55,85 @@ export default function AdminClassYearsScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* School Year Tag */}
-      <View className="px-6 py-3 bg-white border-b border-gray-100">
-        <View className="flex-row items-center gap-2">
-          <Ionicons name="calendar-outline" size={16} color="#6B7280" />
-          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-sm">School Year: 2025-2026</Text>
+      {/* Filters */}
+      <View className="bg-white border-b border-gray-100 px-6 py-3 gap-3">
+         <View className="flex-row items-center gap-2">
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs">School Year:</Text>
+            <TextInput
+               value={schoolYear}
+               onChangeText={setSchoolYear}
+               placeholder="2026"
+               className="bg-gray-100 px-3 py-1 rounded-lg text-black text-xs min-w-[60px]"
+            />
+         </View>
+        <View className="flex-row gap-2">
+          <TouchableOpacity
+            onPress={() => setGrade(undefined)}
+            className={`px-3 py-1.5 rounded-full ${grade === undefined ? 'bg-bright-blue' : 'bg-gray-100'}`}
+          >
+            <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: grade === undefined ? 'white' : '#6B7280' }}>
+              All Grades
+            </Text>
+          </TouchableOpacity>
+          {GRADES.map(g => (
+            <TouchableOpacity
+              key={g}
+              onPress={() => setGrade(g)}
+              className={`px-3 py-1.5 rounded-full ${grade === g ? 'bg-bright-blue' : 'bg-gray-100'}`}
+            >
+              <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: grade === g ? 'white' : '#6B7280' }}>
+                Grade {g}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
-      {/* Grade Tabs */}
-      <View className="flex-row px-6 py-3 bg-white border-b border-gray-100 gap-2">
-        {GRADE_TABS.map(g => (
-          <TouchableOpacity
-            key={g} onPress={() => setActiveGrade(g)}
-            className={`px-4 py-1.5 rounded-full ${activeGrade === g ? 'bg-bright-blue' : 'bg-gray-100'}`}
-          >
-            <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12, color: activeGrade === g ? 'white' : '#6B7280' }}>
-              {g === 'All' ? 'All' : `Grade ${g}`}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Summary */}
-      <View className="px-6 py-2 bg-gray-50">
-        <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">{filtered.length} classes found</Text>
-      </View>
-
       {/* List */}
-      <FlatList
-        data={filtered}
-        keyExtractor={item => item.classYearId}
-        contentContainerStyle={{ padding: 16, gap: 10 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            className="bg-white rounded-2xl p-4 border border-gray-100"
-            onPress={() => router.push(`/admin/class-years/${item.classYearId}` as any)}
-          >
-            <View className="flex-row items-center justify-between mb-2">
-              <View className="flex-row items-center gap-2">
-                <View className="w-10 h-10 bg-blue-100 rounded-xl items-center justify-center">
-                  <Text style={{ fontFamily: 'Poppins-Bold', color: '#136ADA', fontSize: 14 }}>{item.grade}</Text>
+      {loading && !refreshing ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#136ADA" />
+        </View>
+      ) : (
+        <FlatList
+          data={classes}
+          keyExtractor={(item, index) => item.classYearId || index.toString()}
+          contentContainerStyle={{ padding: 16, gap: 12 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm"
+              onPress={() => router.push(`/admin/class-years/${item.classYearId}` as any)}
+            >
+              <View className="flex-row items-center justify-between mb-3">
+                <View className="bg-blue-50 px-3 py-1 rounded-full">
+                  <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 14, color: '#136ADA' }}>{item.className}</Text>
                 </View>
-                <View>
-                  <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-base">{item.className}</Text>
-                  <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">{item.schoolYear}</Text>
+                <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">Year: {item.schoolYear}</Text>
+              </View>
+              
+              <View className="flex-row items-center gap-2 mb-3">
+                 <Ionicons name="person-outline" size={14} color="#6B7280" />
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600 text-xs">Advisor: {item.homeRoomTeacher || 'No Advisor Assigned'}</Text>
+              </View>
+
+              <View className="flex-row items-center justify-between pt-3 border-t border-gray-50">
+                <View className="flex-row items-center gap-1">
+                   <Ionicons name="people-outline" size={14} color="#9CA3AF" />
+                   <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-[10px]">{item.studentCount || 0} Students</Text>
                 </View>
+                <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
               </View>
-              <View className="bg-blue-50 px-3 py-1 rounded-full">
-                <Text style={{ fontFamily: 'Poppins-SemiBold', color: '#136ADA', fontSize: 12 }}>{item.studentCount} students</Text>
-              </View>
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            <View className="items-center py-10">
+              <Ionicons name="business-outline" size={48} color="#D1D5DB" />
+              <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-2">No classes found</Text>
             </View>
-            <View className="flex-row items-center gap-1 mt-1">
-              <Ionicons name="person-outline" size={13} color="#9CA3AF" />
-              <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">Homeroom: {item.homeRoomTeacher}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      />
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }

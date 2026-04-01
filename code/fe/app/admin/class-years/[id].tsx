@@ -1,39 +1,104 @@
-import { View, Text, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { classYearService } from '../../../services/classYear.service';
+import { teacherService } from '../../../services/teacher.service';
+import { studentService } from '../../../services/student.service';
+import { ClassYearResponse } from '../../../types/classYear';
+import { TeacherListItem } from '../../../types/teacher';
+import { StudentListItem } from '../../../types/student';
 
-const MOCK_CLASSES: Record<string, any> = {
-  '1': {
-    classYearId: '1', className: '10A1', grade: 10, schoolYear: '2025-2026',
-    homeRoomTeacher: 'Tran Thi Mai', studentCount: 35,
-    students: [
-      { id: 's1', fullName: 'Le Van Minh', birthday: '2006-03-15' },
-      { id: 's2', fullName: 'Nguyen Thi Lan', birthday: '2006-07-22' },
-      { id: 's3', fullName: 'Tran Van An', birthday: '2006-11-08' },
-      { id: 's4', fullName: 'Pham Thi Bich', birthday: '2006-01-30' },
-      { id: 's5', fullName: 'Hoang Van Nam', birthday: '2007-05-14' },
-    ],
-  },
-  '2': {
-    classYearId: '2', className: '10A2', grade: 10, schoolYear: '2025-2026',
-    homeRoomTeacher: 'Pham Thi Lan', studentCount: 33,
-    students: [
-      { id: 's6', fullName: 'Dao Thi Huong', birthday: '2006-09-12' },
-      { id: 's7', fullName: 'Vu Van Long', birthday: '2006-04-18' },
-    ],
-  },
-};
-
-const TABS = ['Students', 'Info'];
-
-export default function AdminClassYearDetailScreen() {
+export default function AdminClassDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const cls = MOCK_CLASSES[id ?? '1'];
-  const [activeTab, setActiveTab] = useState('Students');
+  const [classData, setClassData] = useState<ClassYearResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [teachers, setTeachers] = useState<TeacherListItem[]>([]);
+  const [editing, setEditing] = useState(false);
+  const [assignModal, setAssignModal] = useState(false);
+  
+  // Form for Edit
+  const [form, setForm] = useState({
+    className: '',
+    grade: 0,
+    schoolYear: '',
+    homeRoomId: ''
+  });
 
-  if (!cls) return (
+  // For Student Assignment
+  const [searchStudent, setSearchStudent] = useState('');
+  const [foundStudents, setFoundStudents] = useState<StudentListItem[]>([]);
+
+  const fetchData = async () => {
+    if (!id) return;
+    try {
+      setLoading(true);
+      const [res, teaRes] = await Promise.all([
+        classYearService.getClassYearById(id),
+        teacherService.getTeachers({ pageSize: 100 })
+      ]);
+      setClassData(res);
+      setForm({
+        className: res.className,
+        grade: res.grade,
+        schoolYear: res.schoolYear,
+        homeRoomId: res.homeRoomId || ''
+      });
+      const tdata = Array.isArray(teaRes) ? teaRes : (teaRes as any).items || [];
+      setTeachers(tdata);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [id]);
+
+  const handleUpdate = async () => {
+    if (!id) return;
+    try {
+      await classYearService.updateClassYear(id, form);
+      Alert.alert('Success', 'Class updated successfully!');
+      setEditing(false);
+      fetchData();
+    } catch (err: any) {
+      Alert.alert('Error', err?.response?.data?.message || 'Update failed.');
+    }
+  };
+
+  const handleSearchStudent = async () => {
+    try {
+      const res = await studentService.getStudents({ search: searchStudent, pageSize: 5 });
+      const sdata = Array.isArray(res) ? res : (res as any).items || [];
+      setFoundStudents(sdata);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAssignStudent = async (studentId: string) => {
+    if (!id) return;
+    try {
+      await classYearService.assignStudent(id, { studentId });
+      Alert.alert('Success', 'Student assigned to class!');
+      setAssignModal(false);
+      fetchData();
+    } catch (err: any) {
+      Alert.alert('Error', err?.response?.data?.message || 'Assignment failed.');
+    }
+  };
+
+  if (loading) return (
+    <SafeAreaView className="flex-1 bg-white items-center justify-center">
+      <ActivityIndicator size="large" color="#136ADA" />
+    </SafeAreaView>
+  );
+
+  if (!classData) return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center">
       <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Class not found</Text>
     </SafeAreaView>
@@ -46,76 +111,145 @@ export default function AdminClassYearDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">{cls.className}</Text>
-        <View className="bg-blue-50 px-3 py-1 rounded-full">
-          <Text style={{ fontFamily: 'Poppins-SemiBold', color: '#136ADA', fontSize: 12 }}>Grade {cls.grade}</Text>
-        </View>
+        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Class Detail</Text>
+        <TouchableOpacity onPress={() => setEditing(!editing)}>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">
+             {editing ? 'Cancel' : 'Edit'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Class Summary Card */}
-      <View className="bg-white mx-4 mt-4 rounded-2xl p-4 border border-gray-100 flex-row">
-        <View className="flex-1">
-          <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">School Year</Text>
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-sm">{cls.schoolYear}</Text>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {/* Detail Card */}
+        <View className="bg-white p-6 border-b border-gray-100 items-center">
+           <View className="w-20 h-20 rounded-3xl bg-blue-100 items-center justify-center mb-3">
+              <Ionicons name="school" size={40} color="#136ADA" />
+           </View>
+           <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl">{classData.className}</Text>
+           <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-sm">Grade {classData.grade} • Year {classData.schoolYear}</Text>
         </View>
-        <View className="flex-1">
-          <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">Homeroom</Text>
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-sm">{cls.homeRoomTeacher}</Text>
-        </View>
-        <View>
-          <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">Students</Text>
-          <Text style={{ fontFamily: 'Poppins-Bold', color: '#136ADA' }} className="text-lg">{cls.studentCount}</Text>
-        </View>
-      </View>
 
-      {/* Tabs */}
-      <View className="flex-row mx-4 mt-3 bg-white rounded-xl border border-gray-100 overflow-hidden">
-        {TABS.map(t => (
-          <TouchableOpacity key={t} onPress={() => setActiveTab(t)}
-            className={`flex-1 py-3 items-center ${activeTab === t ? 'bg-bright-blue' : ''}`}
-          >
-            <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 13, color: activeTab === t ? 'white' : '#9CA3AF' }}>{t}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+        {editing ? (
+          <View className="p-6 gap-4">
+             <View>
+                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1">Class Name</Text>
+                <TextInput
+                   value={form.className}
+                   onChangeText={(t) => setForm({...form, className: t})}
+                   className="bg-white border border-gray-200 rounded-2xl px-4 py-3 text-black"
+                   style={{ fontFamily: 'Poppins-Regular' }}
+                />
+             </View>
+             
+             <View>
+                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1">Grade</Text>
+                <View className="flex-row gap-2">
+                   {[10, 11, 12].map(g => (
+                      <TouchableOpacity key={g} 
+                        onPress={() => setForm({...form, grade: g})}
+                        className={`flex-1 py-3 rounded-2xl border items-center ${form.grade === g ? 'bg-bright-blue border-bright-blue' : 'bg-white border-gray-200'}`}
+                      >
+                         <Text style={{ fontFamily: 'Poppins-SemiBold', color: form.grade === g ? 'white' : '#6B7280' }}>{g}</Text>
+                      </TouchableOpacity>
+                   ))}
+                </View>
+             </View>
 
-      {activeTab === 'Students' ? (
-        <FlatList
-          data={cls.students}
-          keyExtractor={(item: any) => item.id}
-          contentContainerStyle={{ padding: 16, gap: 10 }}
-          renderItem={({ item }: any) => (
-            <View className="bg-white rounded-2xl px-4 py-3 border border-gray-100 flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-full bg-teal-100 items-center justify-center">
-                <Text style={{ fontFamily: 'Poppins-Bold', color: '#14B8A6', fontSize: 14 }}>{item.fullName.charAt(0)}</Text>
-              </View>
-              <View className="flex-1">
-                <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-sm">{item.fullName}</Text>
-                <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">Born: {item.birthday}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
-            </View>
-          )}
-        />
-      ) : (
-        <ScrollView className="flex-1 px-4 pt-4">
-          {[
-            { label: 'Class Name', value: cls.className, icon: 'school-outline' },
-            { label: 'Grade', value: `Grade ${cls.grade}`, icon: 'layers-outline' },
-            { label: 'School Year', value: cls.schoolYear, icon: 'calendar-outline' },
-            { label: 'Homeroom Teacher', value: cls.homeRoomTeacher, icon: 'person-outline' },
-            { label: 'Total Students', value: `${cls.studentCount} students`, icon: 'people-outline' },
-          ].map(row => (
-            <View key={row.label} className="flex-row items-center gap-3 bg-white rounded-xl px-4 py-3 mb-2 border border-gray-100">
-              <Ionicons name={row.icon as any} size={18} color="#9CA3AF" />
-              <View>
-                <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">{row.label}</Text>
-                <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-sm">{row.value}</Text>
-              </View>
-            </View>
-          ))}
-        </ScrollView>
-      )}
+             <View>
+                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1">Advisor (Teacher)</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
+                   {teachers.map(t => (
+                      <TouchableOpacity key={t.teacherId} 
+                        onPress={() => setForm({...form, homeRoomId: t.teacherId})}
+                        className={`px-4 py-2 rounded-2xl border items-center ${form.homeRoomId === t.teacherId ? 'bg-indigo-500 border-indigo-500' : 'bg-gray-50 border-gray-200'}`}
+                      >
+                         <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: form.homeRoomId === t.teacherId ? 'white' : '#6B7280' }}>
+                            {t.fullName}
+                         </Text>
+                      </TouchableOpacity>
+                   ))}
+                </ScrollView>
+             </View>
+
+             <TouchableOpacity 
+               className="bg-bright-blue rounded-3xl py-4 items-center mt-2 shadow-lg shadow-blue-200"
+               onPress={handleUpdate}
+             >
+                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white">Save Changes</Text>
+             </TouchableOpacity>
+          </View>
+        ) : (
+          <View className="p-6">
+             <View className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm mb-4">
+                <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-400 text-[10px] uppercase tracking-wider mb-2">Homeroom Teacher</Text>
+                <View className="flex-row items-center gap-3">
+                   <View className="w-10 h-10 rounded-full bg-purple-100 items-center justify-center">
+                      <Ionicons name="person" size={20} color="#A855F7" />
+                   </View>
+                   <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-base">{classData.homeRoomTeacher || 'Not Assigned'}</Text>
+                </View>
+             </View>
+
+             <View className="flex-row items-center justify-between mb-4 px-2">
+                <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-base">Students ({classData.studentCount})</Text>
+                <TouchableOpacity 
+                   className="bg-blue-50 px-4 py-2 rounded-full flex-row items-center gap-1"
+                   onPress={() => setAssignModal(true)}
+                >
+                   <Ionicons name="person-add" size={14} color="#136ADA" />
+                   <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 10, color: '#136ADA' }}>Assign Student</Text>
+                </TouchableOpacity>
+             </View>
+
+             {/* Assign Student Modal */}
+             <Modal visible={assignModal} animationType="slide" presentationStyle="pageSheet">
+                <SafeAreaView className="flex-1 bg-white">
+                   <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
+                      <TouchableOpacity onPress={() => setAssignModal(false)}>
+                         <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Close</Text>
+                      </TouchableOpacity>
+                      <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-lg">Assign Student</Text>
+                      <View className="w-10" />
+                   </View>
+                   
+                   <View className="p-6">
+                      <View className="flex-row gap-2 mb-6">
+                         <TextInput
+                            placeholder="Student name..."
+                            value={searchStudent}
+                            onChangeText={setSearchStudent}
+                            className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3"
+                         />
+                         <TouchableOpacity 
+                           className="bg-bright-blue w-12 items-center justify-center rounded-2xl"
+                           onPress={handleSearchStudent}
+                         >
+                            <Ionicons name="search" size={20} color="white" />
+                         </TouchableOpacity>
+                      </View>
+
+                      {foundStudents.map(s => (
+                         <TouchableOpacity key={s.studentId} 
+                           className="flex-row items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl mb-2 shadow-sm"
+                           onPress={() => handleAssignStudent(s.studentId)}
+                         >
+                            <View>
+                               <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black">{s.fullName}</Text>
+                               <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">ID: {s.studentId}</Text>
+                            </View>
+                            <Ionicons name="add-circle" size={24} color="#136ADA" />
+                         </TouchableOpacity>
+                      ))}
+                      
+                      {foundStudents.length === 0 && searchStudent && (
+                         <Text className="text-center text-gray-400 p-10 italic">No search results</Text>
+                      )}
+                   </View>
+                </SafeAreaView>
+             </Modal>
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
