@@ -33,7 +33,7 @@ namespace School_Management.API.Services
                 throw new NotFoundException("Học sinh này không có lớp để thay đổi");
             if(currentClassRelation.ClassYearId != requestClassYearId)
             {
-                currentClassRelation.ClassYearId = requestClassYearId;
+                currentClassRelation.ClassYearId = (Guid)requestClassYearId;
             }
 
             await context.SaveChangesAsync();

@@ -6,9 +6,9 @@ namespace School_Management.API.Models.DTO
     {
         [Required(ErrorMessage = "Học kì bắt buộc phải có")]
         [Range(1, 2)]
-        public int Term { get; set; }
+        public int? Term { get; set; }
 
         [Required(ErrorMessage = "Năm học bắt buộc phải có")]
-        public int SchoolYear { get; set; }
+        public int? SchoolYear { get; set; }
     }
 }

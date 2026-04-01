@@ -36,10 +36,10 @@ namespace School_Management.API.Repositories
 
             var classYear = new ClassYear
             {
-                SchoolYear = request.SchoolYear,
+                SchoolYear = (int)request.SchoolYear,
                 Id = Guid.NewGuid(),
                 ClassName = request.ClassName,
-                Grade = request.Grade,
+                Grade = (int)request.Grade,
                 HomeRoomId = request.HomeRoomId
             };
             context.ClassYear.Add(classYear);
@@ -68,7 +68,7 @@ namespace School_Management.API.Repositories
             //Filtering
             if (!string.IsNullOrWhiteSpace(request.ClassName))
             {
-                var name = request.ClassName.Trim();
+                var name = request.ClassName.Trim().ToLower();
                 query = query.Where(x => x.ClassName.ToLower().Contains(name));
             }
             if (request.SchoolYear.HasValue)
@@ -135,7 +135,7 @@ namespace School_Management.API.Repositories
             //Filtering
             if(!string.IsNullOrWhiteSpace(request.ClassName))
             {
-                var className = request.ClassName.Trim();
+                var className = request.ClassName.Trim().ToLower();
                 query = query.Where(x => x.ClassName.ToLower().Contains(className));
             }
             if (request.Grade.HasValue)
@@ -219,10 +219,10 @@ namespace School_Management.API.Repositories
             if (teacherInfo == null) return (null, "TEACHER_NULL");
             if (teacherInfo.isHomeRoom) return (null, "IS_HOMEROOM");
 
-            classYear.Grade = request.Grade;
+            classYear.Grade = (int)request.Grade;
             classYear.ClassName = request.ClassName;
             classYear.HomeRoomId = request.HomeRoomId;
-            classYear.SchoolYear = request.SchoolYear;
+            classYear.SchoolYear = (int)request.SchoolYear;
 
             await context.SaveChangesAsync();
 
@@ -256,7 +256,7 @@ namespace School_Management.API.Repositories
             //Filtering
             if (!string.IsNullOrWhiteSpace(request.ClassName))
             {
-                var className = request.ClassName.Trim();
+                var className = request.ClassName.Trim().ToLower();
                 query = query.Where(x => x.ClassName.ToLower().Contains(className));
             }
             if (request.Grade.HasValue)

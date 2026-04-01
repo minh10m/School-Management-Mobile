@@ -28,7 +28,7 @@ namespace School_Management.API.Controllers
             return StatusCode(201, result);
         }
 
-        [HttpPatch]
+        [HttpPut]
         [ValidateModel]
         [Route("{classYearId}")]
         [Authorize(Roles = "Admin")]

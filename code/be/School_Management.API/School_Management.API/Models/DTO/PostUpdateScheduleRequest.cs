@@ -13,13 +13,13 @@ namespace School_Management.API.Models.DTO
         public string? Name { get; set; }
 
         [Required]
-        public int SchoolYear { get; set; }
+        public int? SchoolYear { get; set; }
 
         [Required]
-        public bool IsActive { get; set; }
+        public bool? IsActive { get; set; }
 
         [Required]
         [Range(1, 2, ErrorMessage = "Kì chỉ có giá trị là 1 hoặc 2")]
-        public int Term { get; set; }
+        public int? Term { get; set; }
     }
 }
