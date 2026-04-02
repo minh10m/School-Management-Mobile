@@ -14,14 +14,15 @@ export interface ScheduleDetailItem {
   timeRange: string;           // e.g. "08:30 - 09:15"
 }
 
-/** Lịch dạy (dành cho giáo viên) */
 export interface TeacherScheduleDetailItem {
   scheduleDetailId: string;
   className: string;
   subjectName: string;
-  dayOfWeek: string;
+  dayOfWeek: number;
   startTime: string;
   finishTime: string;
+  dayOfWeekVietNamese: string;
+  timeRange: string;
 }
 
 /** Schedule summary (dành cho admin list) */
