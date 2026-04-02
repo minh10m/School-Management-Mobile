@@ -136,9 +136,9 @@ export const scheduleService = {
    * AuthN(login) + AuthZ(Teacher)
    * 404: teacher không tồn tại
    */
-  getMyTeachingSchedule: async (): Promise<TeacherScheduleDetailItem[]> => {
+  getMyTeachingSchedule: async (params?: GetMyClassScheduleParams): Promise<TeacherScheduleDetailItem[]> => {
     const response = await apiClient.get<TeacherScheduleDetailItem[]>(
-      "/schedules/teacher/me"
+      "/schedules/teacher/me", { params }
     );
     return response.data;
   },

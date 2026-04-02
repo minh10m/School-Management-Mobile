@@ -4,7 +4,7 @@ export interface TeacherListItem {
   teacherId: string;
   userId: string;
   fullName: string;
-  subjectName: string;
+  subjectNames: string[];
 }
 
 export interface TeacherListResponse {
@@ -19,10 +19,10 @@ export interface TeacherResponse {
   userId: string;
   fullName: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   birthday: string; // ISO date string
   address: string;
-  subjectName: string;
+  subjectNames: string[];
 }
 
 export interface TeacherSubject {
@@ -46,8 +46,8 @@ export interface GetTeachersParams {
 export interface UpdateTeacherPayload {
   fullName?: string;
   email?: string;
-  phone?: string;
-  birthday?: string; // ISO date string
+  phoneNumber?: string;
+  birthday?: string; // YYYY-MM-DD
   address?: string;
 }
 

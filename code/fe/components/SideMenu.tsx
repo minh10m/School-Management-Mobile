@@ -1,20 +1,14 @@
-import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity,  Dimensions, StyleSheet, Platform, Modal } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, Dimensions, StyleSheet, Modal } from 'react-native';
 import Animated, { 
-    useSharedValue, 
-    useAnimatedStyle, 
-    withTiming, 
-    withSpring,
-    runOnJS,
     SlideInLeft,
     SlideOutLeft,
     FadeIn,
     FadeOut
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { useAuthStore } from '../store/authStore';
 
 const { width, height } = Dimensions.get('window');
 const MENU_WIDTH = width * 0.8;
@@ -24,16 +18,21 @@ interface SideMenuProps {
     onClose: () => void;
 }
 
-const MENU_ITEMS = [
-    { icon: 'shield-checkmark-outline', label: 'Admin Panel', route: '/admin' },
-    { icon: 'school-outline', label: 'Teacher Panel', route: '/teacher/edit-profile' },
-    { icon: 'swap-horizontal-outline', label: 'Switch Profile', route: null },
-    { icon: 'person-add-outline', label: 'Add Account', route: null },
-    { icon: 'card-outline', label: 'Payment History', route: null },
-    { icon: 'settings-outline', label: 'Setting', route: '/settings' },
-];
-
 export default function SideMenu({ visible, onClose }: SideMenuProps) {
+    const { userInfo, clearAuth } = useAuthStore();
+    const displayName = userInfo?.fullName ?? 'User';
+    const role = userInfo?.role?.toUpperCase() || 'STUDENT';
+
+    let menuItems = [
+        { icon: 'settings-outline', label: 'Setting', route: '/settings' },
+    ];
+
+    if (role === 'STUDENT') {
+        menuItems = [
+            { icon: 'card-outline', label: 'Payment History', route: '/student/payment' },
+            ...menuItems
+        ];
+    }
 
     return (
         <Modal
@@ -61,18 +60,19 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                     {/* Header */}
                     <View className="pt-12 px-6 pb-8 border-b border-gray-100">
                         <View className="flex-row items-center gap-4">
-                            <View className="p-1 rounded-full border-2 border-bright-blue">
-                                <View className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
-                                    <Image 
-                                        source={require('../assets/images/on-boarding-1.png')} 
-                                        style={{ width: '100%', height: '100%' }}
-                                        contentFit="cover"
-                                    />
-                                </View>
+                            <View className="w-16 h-16 rounded-full bg-blue-50 items-center justify-center border-2 border-bright-blue">
+                                <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 28, color: '#136ADA' }}>
+                                    {displayName.charAt(0)}
+                                </Text>
                             </View>
                             <View>
-                                <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Dinesh Kumar</Text>
-                                <TouchableOpacity>
+                                <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>{displayName}</Text>
+                                <TouchableOpacity onPress={() => { 
+                                    onClose(); 
+                                    if (role === 'ADMIN') router.push('/admin/profile');
+                                    else if (role === 'TEACHER') router.push('/teacher/edit-profile');
+                                    else router.push('/(tabs)/profile'); 
+                                }}>
                                     <Text className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins-Regular' }}>View Profile</Text>
                                 </TouchableOpacity>
                             </View>
@@ -81,7 +81,7 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
 
                     {/* Menu Items */}
                     <View className="flex-1 px-6 py-6">
-                    {MENU_ITEMS.map((item, index) => (
+                    {menuItems.map((item, index) => (
                             <TouchableOpacity key={index} className="flex-row items-center justify-between py-4 active:bg-gray-50 rounded-xl px-2"
                                 onPress={() => {
                                     if (item.route) {
@@ -91,7 +91,7 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                                 }}
                             >
                                  <View className="flex-row items-center gap-4">
-                                    <Ionicons name={item.icon as any} size={22} color={item.label === 'Admin Panel' ? '#136ADA' : '#6B7280'} />
+                                    <Ionicons name={item.icon as any} size={22} color="#6B7280" />
                                     <Text className="text-gray-600 text-base" style={{ fontFamily: 'Poppins-Medium' }}>{item.label}</Text>
                                  </View>
                                  <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
@@ -99,19 +99,20 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                         ))}
                     </View>
 
-                    {/* Footer */}
+                    {/* Footer - Log Out */}
                     <View className="px-6 pb-10 pt-4 border-t border-gray-200">
                          <TouchableOpacity className="flex-row items-center justify-between py-2" onPress={() => {
                              onClose();
+                             clearAuth();
                              router.replace('/login');
                          }}>
                             <View className="flex-row items-center gap-4">
-                                <View className="w-8 h-8 items-center justify-center rounded-lg border border-black">
-                                    <Ionicons name="log-out-outline" size={18} color="black" />
+                                <View className="w-8 h-8 items-center justify-center rounded-lg border border-red-500 bg-red-50">
+                                    <Ionicons name="log-out-outline" size={18} color="#EF4444" />
                                 </View>
-                                <Text className="text-black text-base" style={{ fontFamily: 'Poppins-Medium' }}>Log Out</Text>
+                                <Text className="text-red-500 text-base" style={{ fontFamily: 'Poppins-Medium' }}>Log Out</Text>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color="black" />
+                            <Ionicons name="chevron-forward" size={20} color="#EF4444" />
                          </TouchableOpacity>
                     </View>
                 </Animated.View>
