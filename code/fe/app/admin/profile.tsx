@@ -135,17 +135,7 @@ export default function AdminProfileScreen() {
             />
           </View>
 
-          <TouchableOpacity 
-             className="mx-6 mb-10 py-4 bg-gray-100 rounded-2xl items-center"
-             onPress={() => {
-                Alert.alert("Logout", "Logout from the system?", [
-                   { text: "Cancel", style: "cancel" },
-                   { text: "Logout", style: "destructive", onPress: () => { useAuthStore.getState().clearAuth(); router.replace('/login'); } }
-                ]);
-             }}
-          >
-             <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-red-500">Log Out</Text>
-          </TouchableOpacity>
+
         </ScrollView>
       )}
 

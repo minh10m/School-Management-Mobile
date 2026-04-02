@@ -127,7 +127,7 @@ export default function AdminTeachersScreen() {
               <View className="flex-1">
                 <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-sm">{item.fullName}</Text>
                 <View className="bg-purple-50 self-start px-2 py-0.5 rounded-full mt-1">
-                   <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 10, color: '#A855F7' }}>{item.subjectName}</Text>
+                   <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 10, color: '#A855F7' }}>{item.subjectNames?.join(", ") || "No Subject"}</Text>
                 </View>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />

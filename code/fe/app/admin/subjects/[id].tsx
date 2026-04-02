@@ -253,7 +253,7 @@ export default function AdminSubjectDetailScreen() {
                             </View>
                             <View>
                                <Text style={{ fontFamily: 'Poppins-Bold' }}>{item.fullName}</Text>
-                               <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">{item.subjectName || 'No Subject'}</Text>
+                               <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">{item.subjectNames?.join(', ') || 'No Subject'}</Text>
                             </View>
                          </View>
                          <Ionicons name="add-circle" size={24} color="#136ADA" />

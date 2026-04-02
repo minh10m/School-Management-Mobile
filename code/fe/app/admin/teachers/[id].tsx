@@ -17,7 +17,7 @@ export default function AdminTeacherDetailScreen() {
   const [form, setForm] = useState({
     fullName: '',
     email: '',
-    phone: '',
+    phoneNumber: '',
     address: '',
     birthday: '',
   });
@@ -31,7 +31,7 @@ export default function AdminTeacherDetailScreen() {
       setForm({
         fullName: res.fullName || '',
         email: res.email || '',
-        phone: res.phone || '',
+        phoneNumber: res.phoneNumber || '',
         address: res.address || '',
         birthday: res.birthday ? res.birthday.split('T')[0] : '',
       });
@@ -54,9 +54,9 @@ export default function AdminTeacherDetailScreen() {
       const updated = await teacherService.updateTeacher(id, {
         fullName: form.fullName,
         email: form.email,
-        phone: form.phone,
+        phoneNumber: form.phoneNumber,
         address: form.address,
-        birthday: form.birthday ? new Date(form.birthday).toISOString() : undefined,
+        birthday: form.birthday || undefined,
       });
       setTeacher(updated);
       setIsEditing(false);
@@ -131,7 +131,7 @@ export default function AdminTeacherDetailScreen() {
            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl">{teacher.fullName}</Text>
            <View className="bg-purple-100 px-4 py-1.5 rounded-full mt-2 border border-purple-200">
               <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 12, color: '#9333EA' }}>
-                {teacher.subjectName}
+                {teacher.subjectNames?.join(", ") || "No Subject"}
               </Text>
            </View>
         </View>
@@ -140,7 +140,7 @@ export default function AdminTeacherDetailScreen() {
           <View className="p-6">
             <EditField label="Full Name" value={form.fullName} onChangeText={(t: string) => setForm({...form, fullName: t})} />
             <EditField label="Email" value={form.email} onChangeText={(t: string) => setForm({...form, email: t})} keyboardType="email-address" />
-            <EditField label="Phone" value={form.phone} onChangeText={(t: string) => setForm({...form, phone: t})} keyboardType="phone-pad" />
+            <EditField label="Phone" value={form.phoneNumber} onChangeText={(t: string) => setForm({...form, phoneNumber: t})} keyboardType="phone-pad" />
             <EditField label="Address" value={form.address} onChangeText={(t: string) => setForm({...form, address: t})} />
             <EditField label="Birthday (YYYY-MM-DD)" value={form.birthday} onChangeText={(t: string) => setForm({...form, birthday: t})} placeholder="1980-05-15" />
 
@@ -157,7 +157,7 @@ export default function AdminTeacherDetailScreen() {
         ) : (
           <View className="mt-4">
              <InfoRow label="Email" value={teacher.email} icon="mail-outline" />
-             <InfoRow label="Phone" value={teacher.phone} icon="call-outline" />
+             <InfoRow label="Phone" value={teacher.phoneNumber} icon="call-outline" />
              <InfoRow label="Address" value={teacher.address} icon="location-outline" />
              <InfoRow label="Birthday" value={teacher.birthday ? new Date(teacher.birthday).toLocaleDateString('en-GB') : 'N/A'} icon="calendar-outline" />
              <InfoRow label="User ID" value={teacher.userId} icon="finger-print-outline" />

@@ -9,6 +9,7 @@ import { studentService } from '../../services/student.service';
 import { teacherService } from '../../services/teacher.service';
 import { classYearService } from '../../services/classYear.service';
 import { useAuthStore } from '../../store/authStore';
+import SideMenu from '../../components/SideMenu';
 
 export default function AdminDashboard() {
   const { userInfo } = useAuthStore();
@@ -22,6 +23,7 @@ export default function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [isMenuVisible, setMenuVisible] = useState(false);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -79,34 +81,16 @@ export default function AdminDashboard() {
       <StatusBar hidden />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity 
-          onPress={() => {
-            Alert.alert("Logout", "Are you sure you want to logout?", [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "Logout",
-                style: "destructive",
-                onPress: async () => {
-                  await authService.logout();
-                  router.replace("/login" as any);
-                },
-              },
-            ]);
-          }} 
-          className="p-1"
-        >
-          <Ionicons name="log-out-outline" size={24} color="#EF4444" />
+      <View className="flex-row justify-between items-center px-6 pt-4 mb-6">
+        <TouchableOpacity onPress={() => setMenuVisible(true)}>
+          <Ionicons name="menu-outline" size={28} color="black" />
         </TouchableOpacity>
         <View className="flex-row items-center gap-2">
-          <Ionicons name="book" size={20} color="#136ADA" />
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-bright-blue text-lg">Admin Panel</Text>
+          <Ionicons name="book" size={24} color="#136ADA" />
+          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-bright-blue text-xl">Admin Panel</Text>
         </View>
-        <TouchableOpacity 
-          className="p-1"
-          onPress={() => router.push('/admin/profile' as any)}
-        >
-          <Ionicons name="person-circle-outline" size={26} color="black" />
+        <TouchableOpacity onPress={() => router.push('/admin/profile' as any)}>
+          <Ionicons name="person-circle-outline" size={28} color="black" />
         </TouchableOpacity>
       </View>
 
@@ -131,7 +115,7 @@ export default function AdminDashboard() {
           <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Overview</Text>
           <View className="flex-row flex-wrap gap-3">
             {STAT_CARDS.map((s) => (
-              <View key={s.label} className={`${s.bg} flex-1 min-w-[44%] rounded-3xl p-5 border border-white`}>
+              <View key={s.label} className={`${s.bg} flex-1 min-w-[44%] rounded-3xl p-5`}>
                 <View className="flex-row items-center justify-between mb-2">
                   <View className="w-8 h-8 rounded-full bg-white/60 items-center justify-center">
                     <Ionicons name={s.icon as any} size={18} color={s.color} />
@@ -155,13 +139,13 @@ export default function AdminDashboard() {
             {QUICK_ACTIONS.map((action) => (
               <TouchableOpacity
                 key={action.label}
-                className={`${action.color} w-[31%] py-6 rounded-3xl items-center justify-center gap-2 border border-white shadow-sm`}
+                className={`${action.color} w-[31%] py-6 rounded-2xl items-center justify-center gap-2`}
                 onPress={() => router.push(action.route as any)}
               >
-                <View className="w-10 h-10 bg-white/80 rounded-full items-center justify-center">
+                <View className="w-10 h-10 bg-white/50 rounded-full items-center justify-center">
                   <Ionicons name={action.icon as any} size={20} color={action.iconColor} />
                 </View>
-                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-[10px] text-center">{action.label}</Text>
+                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-xs text-center">{action.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -178,6 +162,7 @@ export default function AdminDashboard() {
         </View>
 
       </ScrollView>
+      <SideMenu visible={isMenuVisible} onClose={() => setMenuVisible(false)} />
     </SafeAreaView>
   );
 }
