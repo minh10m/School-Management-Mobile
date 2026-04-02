@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Modal,
   ScrollView,
   Text,
@@ -14,21 +13,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { studentService } from "../../services/student.service";
-import { userService } from "../../services/user.service";
 import { useAuthStore } from "../../store/authStore";
 import { StudentResponse } from "../../types/student";
-import { UserResponse } from "../../types/user";
 
-export default function ProfileScreen() {
-  const { userInfo } = useAuthStore();
-  const role = userInfo?.role?.toLowerCase() ?? "student";
-
-  const [profile, setProfile] = useState<StudentResponse | UserResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+export default function StudentProfileScreen() {
+  const { clearAuth } = useAuthStore();
+  const [profile, setProfile] = useState<StudentResponse | null>(null);
+  const [loading, setLoading] = useState(true);
   const [editVisible, setEditVisible] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Edit form state
   const [editForm, setEditForm] = useState({
     fullName: "",
     email: "",
@@ -39,24 +33,16 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     loadProfile();
-  }, [role]);
+  }, []);
 
   const loadProfile = async () => {
     try {
       setLoading(true);
-      let data;
-      if (role === "student") {
-        data = await studentService.getMe();
-      } else if (role === "admin") {
-        data = await userService.getMe();
-      } else {
-        // Teacher or others - fallback or teacherService
-        // For now, let's try getMe from userService as a general "Get Me"
-        data = await userService.getMe();
-      }
+      const data = await studentService.getMe();
       setProfile(data);
     } catch (error) {
-      console.error("Lỗi khi tải thông tin hồ sơ:", error);
+      console.error("Error loading student profile:", error);
+      Alert.alert("Error", "Cannot load profile information.");
     } finally {
       setLoading(false);
     }
@@ -75,21 +61,19 @@ export default function ProfileScreen() {
   };
 
   const handleSave = async () => {
+    if (!editForm.fullName || !editForm.email) {
+      Alert.alert("Error", "Please provide full name and email.");
+      return;
+    }
     try {
       setSaving(true);
-      let updated;
-      if (role === "student") {
-        updated = await studentService.updateMe(editForm);
-      } else {
-        // Admin or Teacher use userService.updateMe
-        updated = await userService.updateMe({
-          email: editForm.email,
-          phone: editForm.phoneNumber,
-          fullName: editForm.fullName,
-          address: editForm.address,
-          birthday: editForm.birthday ? new Date(editForm.birthday).toISOString() : undefined,
-        });
-      }
+      const updated = await studentService.updateMe({
+        fullName: editForm.fullName,
+        email: editForm.email,
+        phoneNumber: editForm.phoneNumber,
+        address: editForm.address,
+        birthday: editForm.birthday || undefined,
+      });
       setProfile(updated);
       setEditVisible(false);
       Alert.alert("Success", "Profile updated successfully!");
@@ -101,26 +85,22 @@ export default function ProfileScreen() {
     }
   };
 
-  const isStudent = (p: any): p is StudentResponse => role === "student";
+  // Derive class info
+  const classInfo = (profile as any)?.classYearSub?.[0];
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 relative">
-        <TouchableOpacity
-          className="absolute left-6 z-10 p-2"
-          onPress={() => router.back()}
-        >
+      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-50">
+        <TouchableOpacity onPress={() => router.back()} className="p-2">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <View className="flex-1 items-center">
-          <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
-            Profile
-          </Text>
-        </View>
-        <TouchableOpacity className="absolute right-6 z-10 p-2" onPress={openEdit}>
+        <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
+          Student Profile
+        </Text>
+        <TouchableOpacity className="p-2" onPress={openEdit}>
           <Ionicons name="pencil-outline" size={22} color="#136ADA" />
         </TouchableOpacity>
       </View>
@@ -130,59 +110,43 @@ export default function ProfileScreen() {
           <ActivityIndicator size="large" color="#136ADA" />
         </View>
       ) : (
-        <ScrollView className="flex-1 px-6 pb-10" showsVerticalScrollIndicator={false}>
+        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           {/* Summary Card */}
-          <View className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8 flex-row items-center">
-            <View className="w-24 h-24 rounded-full border-4 border-blue-500 items-center justify-center p-1 mr-6">
-              <View className="w-full h-full rounded-full bg-blue-50 items-center justify-center overflow-hidden">
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 32, color: "#136ADA" }}>
-                  {profile?.fullName?.charAt(0) || "?"}
-                </Text>
-              </View>
-            </View>
-
-            <View className="flex-1">
-              <Text className="text-black text-lg mb-1" style={{ fontFamily: "Poppins-Bold" }}>
-                {profile?.fullName || userInfo?.fullName || "User"}
+          <View className="bg-white items-center py-10 border-b border-gray-50">
+            <View className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center mb-4 border-4 border-white shadow-sm">
+              <Text style={{ fontFamily: "Poppins-Bold", fontSize: 36, color: "#136ADA" }}>
+                {profile?.fullName?.charAt(0) || "S"}
               </Text>
-
-              <View className="bg-blue-100 px-3 py-0.5 rounded-full self-start mb-1">
-                <Text className="text-blue-700 text-[10px]" style={{ fontFamily: "Poppins-Bold" }}>
-                  {((profile as any)?.role || role).toUpperCase()}
-                </Text>
-              </View>
-
-              {role === "student" && isStudent(profile) && profile?.classYearSub?.[0] && (
-                <Text className="text-gray-600 text-sm" style={{ fontFamily: "Poppins-Regular" }}>
-                  Class: {profile.classYearSub[0].className} ({profile.classYearSub[0].grade})
-                </Text>
-              )}
+            </View>
+            <Text className="text-black text-xl mb-1" style={{ fontFamily: "Poppins-Bold" }}>
+              {profile?.fullName || "Student"}
+            </Text>
+            <View className="bg-indigo-100 px-4 py-1 rounded-full mt-2">
+              <Text className="text-indigo-700 text-[10px] uppercase" style={{ fontFamily: "Poppins-Bold" }}>
+                STUDENT{classInfo ? ` • ${classInfo.className} (${classInfo.grade})` : ""}
+              </Text>
             </View>
           </View>
 
           {/* Details Section */}
-          <View className="space-y-6 gap-6 pb-10">
-            <DetailField
-              label="Date of birth"
-              value={
-                profile?.birthday
-                  ? new Date(profile.birthday).toLocaleDateString("en-GB")
-                  : "—"
-              }
+          <View className="p-6 gap-6">
+            <InfoField label="Email" value={profile?.email ?? "—"} icon="mail-outline" />
+            <InfoField label="Phone" value={(profile as any)?.phoneNumber ?? "—"} icon="call-outline" />
+            <InfoField label="Address" value={profile?.address ?? "—"} icon="location-outline" />
+            <InfoField
+              label="Birthday"
+              value={profile?.birthday ? new Date(profile.birthday).toLocaleDateString("en-GB") : "—"}
+              icon="calendar-outline"
             />
-            <DetailField label="Email" value={profile?.email ?? "—"} />
-                <DetailField label="Address" value={profile?.address ?? "—"} multiline />
-                {role !== "student" && (
-                  <DetailField label="Username" value={(profile as any)?.username ?? "—"} />
-                )}
-              </View>
+          </View>
+
+
         </ScrollView>
       )}
 
       {/* Edit Modal */}
       <Modal visible={editVisible} animationType="slide" presentationStyle="pageSheet">
         <SafeAreaView className="flex-1 bg-white">
-          {/* Modal Header */}
           <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
             <TouchableOpacity onPress={() => setEditVisible(false)}>
               <Text className="text-gray-500 text-base" style={{ fontFamily: "Poppins-Regular" }}>
@@ -205,35 +169,11 @@ export default function ProfileScreen() {
 
           <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
             <View className="gap-5">
-              <EditField
-                label="Full Name"
-                value={editForm.fullName}
-                onChangeText={(v) => setEditForm({ ...editForm, fullName: v })}
-              />
-              <EditField
-                label="Email"
-                value={editForm.email}
-                onChangeText={(v) => setEditForm({ ...editForm, email: v })}
-                keyboardType="email-address"
-              />
-              <EditField
-                label="Phone Number"
-                value={editForm.phoneNumber}
-                onChangeText={(v) => setEditForm({ ...editForm, phoneNumber: v })}
-                keyboardType="phone-pad"
-              />
-              <EditField
-                label="Address"
-                value={editForm.address}
-                onChangeText={(v) => setEditForm({ ...editForm, address: v })}
-                multiline
-              />
-              <EditField
-                label="Birthday (YYYY-MM-DD)"
-                value={editForm.birthday}
-                onChangeText={(v) => setEditForm({ ...editForm, birthday: v })}
-                placeholder="2005-10-10"
-              />
+              <EditInput label="Full Name" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
+              <EditInput label="Email" value={editForm.email} onChangeText={(v: string) => setEditForm({ ...editForm, email: v })} keyboardType="email-address" />
+              <EditInput label="Phone Number" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
+              <EditInput label="Address" value={editForm.address} onChangeText={(v: string) => setEditForm({ ...editForm, address: v })} />
+              <EditInput label="Birthday (YYYY-MM-DD)" value={editForm.birthday} onChangeText={(v: string) => setEditForm({ ...editForm, birthday: v })} placeholder="2005-10-10" />
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -242,64 +182,30 @@ export default function ProfileScreen() {
   );
 }
 
-function DetailField({
-  label,
-  value,
-  multiline = false,
-}: {
-  label: string;
-  value: string;
-  multiline?: boolean;
-}) {
+function InfoField({ label, value, icon }: any) {
   return (
-    <View className="relative border border-gray-300 rounded-xl p-4 pt-5">
-      <View className="absolute -top-3 left-4 bg-white px-1">
-        <Text className="text-gray-400 text-xs" style={{ fontFamily: "Poppins-Regular" }}>
-          {label}
-        </Text>
+    <View className="flex-row items-center bg-gray-50 p-4 rounded-2xl border border-white">
+      <View className="w-10 h-10 rounded-full bg-white items-center justify-center mr-4">
+        <Ionicons name={icon} size={20} color="#6366F1" />
       </View>
-      <Text
-        className={`text-black text-sm ${multiline ? "leading-5" : ""}`}
-        style={{ fontFamily: "Poppins-Medium" }}
-      >
-        {value}
-      </Text>
+      <View className="flex-1">
+        <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px] uppercase tracking-wider">{label}</Text>
+        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-sm">{value}</Text>
+      </View>
     </View>
   );
 }
 
-function EditField({
-  label,
-  value,
-  onChangeText,
-  multiline = false,
-  keyboardType = "default",
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChangeText: (v: string) => void;
-  multiline?: boolean;
-  keyboardType?: "default" | "email-address" | "phone-pad";
-  placeholder?: string;
-}) {
+function EditInput({ label, value, onChangeText, ...props }: { label: string; value: string; onChangeText: (v: string) => void; [key: string]: any }) {
   return (
-    <View className="relative border border-gray-300 rounded-xl px-4 pt-5 pb-3">
-      <View className="absolute -top-3 left-4 bg-white px-1">
-        <Text className="text-gray-400 text-xs" style={{ fontFamily: "Poppins-Regular" }}>
-          {label}
-        </Text>
-      </View>
+    <View className="gap-1">
+      <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs ml-1">{label}</Text>
       <TextInput
         value={value}
         onChangeText={onChangeText}
-        multiline={multiline}
-        keyboardType={keyboardType}
-        placeholder={placeholder}
-        placeholderTextColor="#9CA3AF"
-        className={`text-black text-sm ${multiline ? "min-h-[60px]" : ""}`}
-        style={{ fontFamily: "Poppins-Medium" }}
-        autoCapitalize="none"
+        className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-black text-sm"
+        style={{ fontFamily: "Poppins-Regular" }}
+        {...props}
       />
     </View>
   );

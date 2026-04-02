@@ -25,6 +25,10 @@ export default function TeacherLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="edit-profile" />
+      <Stack.Screen name="students/index" />
+      <Stack.Screen name="students/[id]" />
+      <Stack.Screen name="community/teachers/index" />
+      <Stack.Screen name="community/teachers/[id]" />
       <Stack.Screen name="classes/index" />
       <Stack.Screen name="attendance/index" />
       <Stack.Screen name="schedules/index" />
