@@ -110,5 +110,15 @@ namespace School_Management.API.Controllers
             var result = await classYearService.GetMyClassForStudent(request, Guid.Parse(userId));
             return Ok(result);
         }
+
+        [HttpPost]
+        [Route("promote")]
+        [ValidateModel]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> PromoteClassYear([FromBody] ClassPromoteRequest request)
+        {
+            var result = await classYearService.PromoteClassYear(request);
+            return Ok(new {Message = "Chuyển lớp thành công", Status = result});
+        }
     }
 }

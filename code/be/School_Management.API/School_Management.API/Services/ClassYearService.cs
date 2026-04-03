@@ -96,9 +96,18 @@ namespace School_Management.API.Services
             };
         }
 
-        public Task<int> PromoteClassYear(List<ClassPromoteRequest> requests)
+        public async Task<bool> PromoteClassYear(ClassPromoteRequest request)
         {
-            throw new NotImplementedException();
+            var (result, errorCode) = await classYearRepository.PromoteClassYear(request);
+            return errorCode switch
+            {
+                "CLASS_NOT_FOUND" => throw new NotFoundException("Không tìm thấy các lớp học này"),
+                "INVALID_SCHOOL_YEAR_SEQUENCE" => throw new BadRequestException("Năm học của lớp chuyển đi phải là năm trước, lớp chuyển tới là năm hiện tại"),
+                "INVALID_GRADE_PROMOTION" => throw new BadRequestException("Hai lớp chỉ được cách nhau một khối lớp"),
+                "CANNOT_PROMOTE_GRADE_12" => throw new BadRequestException("Không thể chuyển lớp cho lớp 12, vì đã tốt nghiệp"),
+                "SUCCESS" => result,
+                _ => throw new Exception("Lỗi hệ thống")
+            };
         }
     }
 }
