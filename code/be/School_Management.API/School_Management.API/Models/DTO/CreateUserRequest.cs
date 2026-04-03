@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 namespace School_Management.API.Models.DTO
 {
@@ -48,5 +49,8 @@ namespace School_Management.API.Models.DTO
         [Required]
         [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Vai trò không được để trống")]
         public string? Role { get; set; }
+
+        public Guid? ClassYearId { get; set; }
+        public List<Guid>? SubjectId { get; set; }
     }
 }

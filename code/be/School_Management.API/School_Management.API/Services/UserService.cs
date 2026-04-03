@@ -255,13 +255,14 @@ namespace School_Management.API.Services
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
+                DateTimeOffset.TryParse(createUserRequest.Birthday, out var birthday);
                 //User
                 var user = new AppUser
                 {
                     UserName = createUserRequest.Username,
                     Address = createUserRequest.Address,
                     PhoneNumber = createUserRequest.PhoneNumber,
-                    Birthday = DateTimeOffset.Parse(createUserRequest.Birthday).ToUniversalTime(),
+                    Birthday = birthday.ToUniversalTime(),
                     FullName = createUserRequest.FullName,
                     Email = createUserRequest.Email,
                     EmailConfirmed = true
@@ -283,11 +284,47 @@ namespace School_Management.API.Services
 
                 if(createUserRequest.Role.Equals("Teacher", StringComparison.OrdinalIgnoreCase))
                 {
-                    await context.Teacher.AddAsync(new Teacher { UserId = user.Id });
+                    var teacher = new Teacher
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = user.Id
+                    };
+                    await context.Teacher.AddAsync(teacher);
+                    if (createUserRequest.SubjectId != null)
+                    {
+                        var teacherSubjects = new List<TeacherSubject>();
+                        foreach (var item in createUserRequest.SubjectId)
+                        {
+                            var teacherSubject = new TeacherSubject
+                            {
+                                TeacherSubjectId = Guid.NewGuid(),
+                                SubjectId = item,
+                                TeacherId = teacher.Id
+                            };
+                            teacherSubjects.Add(teacherSubject);
+                            
+                        }
+                        await context.TeacherSubject.AddRangeAsync(teacherSubjects);
+
+                    }
+                        
                 }
                 if (createUserRequest.Role.Equals("Student", StringComparison.OrdinalIgnoreCase))
                 {
-                    await context.Student.AddAsync(new Student { UserId = user.Id });
+                    var student = new Student 
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = user.Id
+                    };
+                    await context.Student.AddAsync(student);
+
+                    if(createUserRequest.ClassYearId != null)
+                        await context.AddAsync(new StudentClassYear
+                        {
+                            StudentClassYearId = Guid.NewGuid(),
+                            ClassYearId = (Guid)createUserRequest.ClassYearId,
+                            StudentId = student.Id
+                        });
                 }
 
                 await context.SaveChangesAsync();
