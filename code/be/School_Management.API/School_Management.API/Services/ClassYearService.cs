@@ -95,5 +95,10 @@ namespace School_Management.API.Services
                 _ => result!
             };
         }
+
+        public Task<int> PromoteClassYear(List<ClassPromoteRequest> requests)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
