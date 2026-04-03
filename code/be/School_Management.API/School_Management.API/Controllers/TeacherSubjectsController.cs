@@ -21,7 +21,7 @@ namespace School_Management.API.Controllers
         [HttpPost]
         [ValidateModel]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AssignSubjectForTeacher(TeacherSubjectRequest request)
+        public async Task<IActionResult> AssignSubjectForTeacher([FromBody] TeacherSubjectRequest request)
         {
             var result = await teacherSubjectService.AssignSubjectForTeacher(request);
             return StatusCode(201, result);
@@ -29,8 +29,8 @@ namespace School_Management.API.Controllers
 
         [HttpPatch]
         [ValidateModel]
-        //[Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateSubjectForTeacher(UpdateTeacherSubjectRequest request)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateSubjectForTeacher([FromBody] UpdateTeacherSubjectRequest request)
         {
             var result = await teacherSubjectService.UpdateSubjectAfterAssignForTeacher(request);
             return Ok(result);
