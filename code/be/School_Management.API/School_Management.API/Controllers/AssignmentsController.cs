@@ -53,5 +53,14 @@ namespace School_Management.API.Controllers
             var result = await assignmentService.GetAllAssignment(request);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("{assignmentId}")]
+        [Authorize]
+        public async Task<IActionResult> GetAssignmentById([FromRoute] Guid assignmentId)
+        {
+            var result = await assignmentService.GetAssignmentById(assignmentId);
+            return Ok(result);
+        }
     }
 }

@@ -110,6 +110,28 @@ namespace School_Management.API.Repositories
 
         }
 
+        public async Task<(AssignmentResponse? data, string? message)> GetAssignmentById(Guid assignmentId)
+        {
+            var vnOffset = TimeSpan.FromHours(7);
+            var assignmentResult = await context.Assignment.AsNoTracking().Where(x => x.Id == assignmentId)
+                                                     .Select(assignment => new AssignmentResponse
+                                                     {
+                                                         AssignmentId = assignment.Id,
+                                                         ClassName = assignment.ClassYear.ClassName,
+                                                         ClassYearId = assignment.ClassYearId,
+                                                         FileTitle = assignment.FileTitle,
+                                                         FileUrl = assignment.FileUrl,
+                                                         FinishTime = assignment.FinishTime.ToOffset(vnOffset),
+                                                         StartTime = assignment.StartTime.ToOffset(vnOffset),
+                                                         SubjectName = assignment.TeacherSubject.Subject.SubjectName,
+                                                         TeacherSubjectId = assignment.TeacherSubjectId,
+                                                         TeacherName = assignment.TeacherSubject.Teacher.User.FullName,
+                                                         Title = assignment.Title
+                                                     }).FirstOrDefaultAsync();
+            if (assignmentResult == null) return (null, "NOT_FOUND_ASSIGNMENT");
+            return (assignmentResult, "SUCCESS");
+        }
+
         public async Task<(AssignmentResponse? data, string? message)> UpdateAssignment(PostOrUpdateAssignmentRequest request, Guid userId, Guid assignmentId)
         {
             var assignment = await context.Assignment.Include(x => x.ClassYear).Include(x => x.TeacherSubject)
