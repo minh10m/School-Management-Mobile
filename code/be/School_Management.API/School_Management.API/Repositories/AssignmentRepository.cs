@@ -70,5 +70,62 @@ namespace School_Management.API.Repositories
                 SubjectName = teacherSubject.Subject.SubjectName
             }, "SUCCESS");
         }
+
+        public async Task<(AssignmentResponse? data, string? message)> UpdateAssignment(PostOrUpdateAssignmentRequest request, Guid userId, Guid assignmentId)
+        {
+            var assignment = await context.Assignment.Include(x => x.ClassYear).Include(x => x.TeacherSubject)
+                                                     .FirstOrDefaultAsync(x => x.Id == assignmentId);
+            if (assignment == null) return (null, "NOT_FOUND_ASSIGNMENT");
+
+            var teacher = await context.Teacher.Include(x => x.User)
+                                               .FirstOrDefaultAsync(x => x.UserId == userId);
+            if (teacher == null) return (null, "NOT_FOUND_TEACHER");
+
+            var teacherSubject = await context.TeacherSubject.Include(g => g.Subject)
+                                                             .FirstOrDefaultAsync(x => x.TeacherId == teacher.Id && x.SubjectId == request.SubjectId);
+            if (teacherSubject == null) return (null, "FORBIDDEN_TEACHER_SUBJECT");
+
+            if(assignment.TeacherSubject.TeacherId != teacherSubject.TeacherId) return (null, "FORBIDDEN_TEACHER_SUBJECT");
+
+            var normalizedName = request.Title.Trim().ToLower();
+            var isExistedName = await context.Assignment.AnyAsync(x => x.ClassYearId == request.ClassYearId
+                                                                 && x.TeacherSubject.SubjectId == request.SubjectId
+                                                                 && x.Title.Trim().ToLower() == normalizedName
+                                                                 && x.Id != assignmentId);
+            if (isExistedName) return (null, "CONFLICT_TITLE");
+
+            var startTimeVN = request.StartTime.ToOffset(TimeSpan.FromHours(7));
+            var finishTimeVN = request.FinishTime.ToOffset(TimeSpan.FromHours(7));
+
+            var officialStartTime = new DateTimeOffset(startTimeVN.Year, startTimeVN.Month, startTimeVN.Day,
+                                                       startTimeVN.Hour, startTimeVN.Minute, 0, startTimeVN.Offset);
+            var officialFinishTime = new DateTimeOffset(finishTimeVN.Year, finishTimeVN.Month, finishTimeVN.Day,
+                                                        finishTimeVN.Hour, finishTimeVN.Minute, 0, finishTimeVN.Offset);
+
+            assignment.Title = request.Title;
+            assignment.StartTime = officialStartTime.ToUniversalTime();
+            assignment.FinishTime = officialFinishTime.ToUniversalTime();
+            assignment.FileUrl = request.FileUrl;
+            assignment.FileTitle = request.FileTitle;
+            assignment.TeacherSubjectId = teacherSubject.TeacherSubjectId;
+            assignment.ClassYearId = request.ClassYearId;
+            await context.Entry(assignment).Reference(x => x.ClassYear).LoadAsync();
+
+            await context.SaveChangesAsync();
+            return (new AssignmentResponse
+            {
+                AssignmentId = assignment.Id,
+                StartTime = assignment.StartTime,
+                FileTitle = assignment.FileTitle,
+                FileUrl = assignment.FileUrl,
+                FinishTime = assignment.FinishTime,
+                ClassName = assignment.ClassYear.ClassName,
+                ClassYearId = assignment.ClassYearId,
+                SubjectName = teacherSubject.Subject.SubjectName,
+                TeacherSubjectId = teacherSubject.TeacherSubjectId,
+                TeacherName = teacher.User.FullName,
+                Title = assignment.Title
+            }, "SUCCESS");
+        }
     }
 }

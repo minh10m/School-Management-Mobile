@@ -24,5 +24,19 @@ namespace School_Management.API.Services
                 _ => throw new Exception("Lỗi không xác định")
             };
         }
+
+        public async Task<AssignmentResponse> UpdateAssignment(PostOrUpdateAssignmentRequest request, Guid userId, Guid assignmentId)
+        {
+            var (result, message) = await assignmentRepository.UpdateAssignment(request, userId, assignmentId);
+            return message switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không phải là giáo viên"),
+                "FORBIDDEN_TEACHER_SUBJECT" => throw new ForbiddenException("Bạn không phải giáo viên dạy môn học này"),
+                "CONFLICT_TITLE" => throw new ConflictException("Tên tiêu đề bài tập đã tồn tại ở môn học này"),
+                "SUCCESS" => result!,
+                "NOT_FOUND_ASSIGNMENT" => throw new NotFoundException("Không tìm thấy bài tập để sửa thông tin"),
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
     }
 }

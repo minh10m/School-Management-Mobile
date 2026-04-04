@@ -29,5 +29,17 @@ namespace School_Management.API.Controllers
             var result = await assignmentService.CreateAssignment(request, Guid.Parse(userId));
             return StatusCode(201, result);
         }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{assignmentId}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> UpdateAssignment([FromBody] PostOrUpdateAssignmentRequest request, [FromRoute] Guid assignmentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { message = "Phiên đăng nhập hết hạn" });
+            var result = await assignmentService.UpdateAssignment(request, Guid.Parse(userId), assignmentId);
+            return Ok(result);
+        }
     }
 }
