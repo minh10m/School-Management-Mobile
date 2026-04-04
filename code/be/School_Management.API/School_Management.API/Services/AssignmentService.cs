@@ -25,6 +25,11 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request)
+        {
+            return await assignmentRepository.GetAllAssignment(request);
+        }
+
         public async Task<AssignmentResponse> UpdateAssignment(PostOrUpdateAssignmentRequest request, Guid userId, Guid assignmentId)
         {
             var (result, message) = await assignmentRepository.UpdateAssignment(request, userId, assignmentId);

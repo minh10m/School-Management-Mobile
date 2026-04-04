@@ -41,5 +41,17 @@ namespace School_Management.API.Controllers
             var result = await assignmentService.UpdateAssignment(request, Guid.Parse(userId), assignmentId);
             return Ok(result);
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetAllAssignment([FromQuery] AssignmentFilterRequest request)
+        {
+            if (request.SortBy == null) request.SortBy = "StartTime";
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await assignmentService.GetAllAssignment(request);
+            return Ok(result);
+        }
     }
 }

@@ -71,6 +71,45 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
+        public async Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request)
+        {
+            var query = context.Assignment.Include(g => g.TeacherSubject).AsNoTracking()
+                                          .Where(x => x.ClassYearId == request.ClassYearId && x.TeacherSubject.SubjectId == request.SubjectId);
+
+            if(!string.IsNullOrWhiteSpace(request.Title))
+            {
+                var normalizedName = request.Title.Trim().ToLower();
+                query = query.Where(x => x.Title.ToLower().Contains(normalizedName));
+            }
+
+            if(!string.IsNullOrWhiteSpace(request.SortBy) && request.SortBy.Equals("StartTime", StringComparison.OrdinalIgnoreCase))
+            {
+                query = request.IsAscending ? query.OrderBy(x => x.StartTime) : query.OrderByDescending(x => x.StartTime);
+                
+            }
+
+            var totalCount = await query.CountAsync();
+            var skipResults = (request.PageNumber - 1) * request.PageSize;
+            var assignmentList = await query.Skip(skipResults).Take(request.PageSize)
+                                            .Select(x => new AssignmentListResponse
+                                            {
+                                                AssignmentId = x.Id,
+                                                StartTime = x.StartTime,
+                                                FileTitle = x.FileTitle,
+                                                FileUrl = x.FileUrl,
+                                                FinishTime = x.FinishTime,
+                                                Title = x.Title
+                                            }).ToListAsync();
+            return new PagedResponse<AssignmentListResponse>
+            {
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                Items = assignmentList
+            };
+
+        }
+
         public async Task<(AssignmentResponse? data, string? message)> UpdateAssignment(PostOrUpdateAssignmentRequest request, Guid userId, Guid assignmentId)
         {
             var assignment = await context.Assignment.Include(x => x.ClassYear).Include(x => x.TeacherSubject)
