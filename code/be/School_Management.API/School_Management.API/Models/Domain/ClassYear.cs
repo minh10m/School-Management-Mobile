@@ -20,6 +20,7 @@ namespace School_Management.API.Models.Domain
 
         public ICollection<StudentClassYear> StudentClassYears { get; set; } = new List<StudentClassYear>();
         public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
+        public ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 
     }
 }

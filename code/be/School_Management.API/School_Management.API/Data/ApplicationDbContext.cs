@@ -24,7 +24,7 @@ namespace School_Management.API.Data
         public DbSet<ScheduleDetail> ScheduleDetail { get; set; }
         public DbSet<Attendance> Attendance { get; set; }
         public DbSet<Event> Event { get; set; }
-
+        public DbSet<Assignment> Assignment { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
