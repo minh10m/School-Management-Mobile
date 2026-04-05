@@ -24,7 +24,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> CreateSubject([FromBody] PostOrUpdateSubjectRequest request)
         {
             var result = await subjectService.CreateSubject(request);
-            return StatusCode(210, new
+            return StatusCode(201, new
             {
                 success = true,
                 message = "Tạo môn học thành công",

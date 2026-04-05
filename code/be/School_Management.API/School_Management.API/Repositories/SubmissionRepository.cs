@@ -57,5 +57,61 @@ namespace School_Management.API.Repositories
 
             }, "SUCCESS");
         }
+
+        public async Task<(PagedResponse<SubmissionResponse>? data, string? message)> GetAllSubmissionOfAssignmentForTeacher(SubmissionFilterRequest request, Guid userId)
+        {
+            var teacherId = await context.Teacher.Where(x => x.UserId == userId).Select(g => g.Id).FirstOrDefaultAsync();
+            if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
+
+            var assignmentInfo = await context.Assignment.Where(x => x.Id == request.AssignmentId)
+                                                         .Select(x => new
+                                                         {
+                                                             x.TeacherSubject.TeacherId,
+                                                             x.Id
+                                                         })
+                                                         .FirstOrDefaultAsync();
+            if (assignmentInfo == null) return (null, "NOT_FOUND_ASSIGNMENT");
+
+            if (assignmentInfo.TeacherId != teacherId)
+                return (null, "NOT_A_TEACHER_OF_ASSIGNMENT");
+            var query = context.Submission.AsNoTracking().Where(x => x.AssignmentId == assignmentInfo.Id);
+
+            if (!string.IsNullOrWhiteSpace(request.Status))
+            {
+                var nomalizedName = request.Status.Trim().ToLower();
+                query = query.Where(x => x.Status.Trim().ToLower().Contains(nomalizedName));
+            }
+            if(!string.IsNullOrWhiteSpace(request.FileTitle))
+            {
+                var nomalizedName = request.FileTitle.Trim().ToLower();
+                query = query.Where(x => x.FileTitle.Trim().ToLower().Contains(nomalizedName));
+            }
+
+            query = query.OrderByDescending(x => x.TimeSubmit);
+
+            var totalCount = await query.CountAsync();
+            var skipResults = (request.PageNumber - 1) * request.PageSize;
+
+            var listSubmission = await query.Skip(skipResults).Take(request.PageSize)
+                                            .Select(x => new SubmissionResponse
+                                            {
+                                                AssignmentId = x.AssignmentId,
+                                                Score = x.Score,
+                                                Status = x.Status,
+                                                StudentId = x.StudentId,
+                                                SubmissionId = x.Id,
+                                                TimeSubmit = x.TimeSubmit,
+                                                FileTitle = x.FileTitle,
+                                                FileUrl = x.FileUrl,
+                                                StudentName = x.Student.User.FullName
+                                            }).ToListAsync();
+            return (new PagedResponse<SubmissionResponse>
+            {
+                Items = listSubmission,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                TotalCount = totalCount
+            }, "SUCCESS");
+        }
     }
 }

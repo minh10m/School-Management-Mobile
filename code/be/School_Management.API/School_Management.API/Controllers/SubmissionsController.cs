@@ -38,5 +38,20 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetAllSubmissionOfAssignmentForTeacher([FromQuery] SubmissionFilterRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+            var result = await submissionService.GetAllSubmissionOfAssignmentForTeacher(request, Guid.Parse(userId));
+            return Ok(result);
+        }
     }
 }

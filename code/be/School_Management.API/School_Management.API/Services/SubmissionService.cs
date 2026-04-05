@@ -24,5 +24,18 @@ namespace School_Management.API.Services
                 _ => throw new Exception("Lỗi không xác định")
             };
         }
+
+        public async Task<PagedResponse<SubmissionResponse>> GetAllSubmissionOfAssignmentForTeacher(SubmissionFilterRequest request, Guid userId)
+        {
+            var (result, message) = await submissionRepository.GetAllSubmissionOfAssignmentForTeacher(request, userId);
+            return message switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không phải là giáo viên"),
+                "NOT_FOUND_ASSIGNMENT" => throw new NotFoundException("Bài tập không tồn tại, không thể tìm thấy danh sách bài nộp"),
+                "NOT_A_TEACHER_OF_ASSIGNMENT" => throw new BadRequestException("Bạn không là giáo viên ra bài tập này"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
     }
 }

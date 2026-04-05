@@ -5,6 +5,7 @@ namespace School_Management.API.Repositories
     public interface ISubmissionRepository
     {
         public Task<(SubmissionResponse? data, string? message)> CreateSubmission(SubmissionRequest request, Guid userId);
+        public Task<(PagedResponse<SubmissionResponse>? data, string? message)> GetAllSubmissionOfAssignmentForTeacher(SubmissionFilterRequest request, Guid userId);
 
     }
 }
