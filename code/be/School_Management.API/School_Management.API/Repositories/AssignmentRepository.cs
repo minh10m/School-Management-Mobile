@@ -82,11 +82,8 @@ namespace School_Management.API.Repositories
                 query = query.Where(x => x.Title.ToLower().Contains(normalizedName));
             }
 
-            if(!string.IsNullOrWhiteSpace(request.SortBy) && request.SortBy.Equals("StartTime", StringComparison.OrdinalIgnoreCase))
-            {
-                query = request.IsAscending ? query.OrderBy(x => x.StartTime) : query.OrderByDescending(x => x.StartTime);
-                
-            }
+            query = query.OrderByDescending(x => x.StartTime).ThenByDescending(x => x.FinishTime);
+
 
             var totalCount = await query.CountAsync();
             var skipResults = (request.PageNumber - 1) * request.PageSize;
@@ -130,6 +127,43 @@ namespace School_Management.API.Repositories
                                                      }).FirstOrDefaultAsync();
             if (assignmentResult == null) return (null, "NOT_FOUND_ASSIGNMENT");
             return (assignmentResult, "SUCCESS");
+        }
+
+        public async Task<(PagedResponse<AssignmentResponseForStudent>? data, string? message)> GetMyAssignmentsForStudent(AssignmentForStudentRequest request, Guid userId)
+        {
+            var student = await context.Student.FirstOrDefaultAsync(x => x.UserId == userId);
+            if (student == null) return (null, "NOT_FOUND_STUDENT");
+            var query = context.Assignment.AsNoTracking().Where(x => x.ClassYearId == request.ClassYearId);
+            query = query.OrderByDescending(x => x.StartTime).ThenByDescending(x => x.FinishTime);
+            var totalCount = await query.CountAsync();
+            var skipResults = (request.PageNumber - 1) * request.PageSize;
+
+            var listAssignment = await query.Skip(skipResults)
+                                            .Take(request.PageSize)
+                                            .Select(x => new AssignmentResponseForStudent
+            {
+                AssignmentId = x.Id,
+                StartTime = x.StartTime,
+                FileTitle = x.FileTitle,
+                FileUrl = x.FileUrl,
+                FinishTime = x.FinishTime,
+                ClassName = x.ClassYear.ClassName,
+                ClassYearId = x.ClassYearId,
+                SubjectName = x.TeacherSubject.Subject.SubjectName,
+                TeacherSubjectId = x.TeacherSubjectId,
+                Title = x.Title,
+                TeacherName = x.TeacherSubject.Teacher.User.FullName,
+                Status = x.Submissions.Where(g => g.StudentId == student.Id).Select(h => h.Status).FirstOrDefault(),
+            }).ToListAsync();
+
+            return (new PagedResponse<AssignmentResponseForStudent>
+            {
+                Items = listAssignment,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                TotalCount = totalCount
+            }, "SUCCESS");
+                
         }
 
         public async Task<(AssignmentResponse? data, string? message)> UpdateAssignment(PostOrUpdateAssignmentRequest request, Guid userId, Guid assignmentId)

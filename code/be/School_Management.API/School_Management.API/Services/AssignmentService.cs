@@ -41,6 +41,18 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<PagedResponse<AssignmentResponseForStudent>> GetMyAssignmentsForStudent(AssignmentForStudentRequest request, Guid userId)
+        {
+            var (result, message) = await assignmentRepository.GetMyAssignmentsForStudent(request, userId);
+            return message switch
+            {
+                "NOT_FOUND_STUDENT" => throw new NotFoundException("Bạn không phải là một học sinh"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+
+            };
+        }
+
         public async Task<AssignmentResponse> UpdateAssignment(PostOrUpdateAssignmentRequest request, Guid userId, Guid assignmentId)
         {
             var (result, message) = await assignmentRepository.UpdateAssignment(request, userId, assignmentId);

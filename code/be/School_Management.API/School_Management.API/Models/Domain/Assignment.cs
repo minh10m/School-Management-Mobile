@@ -21,5 +21,6 @@ namespace School_Management.API.Models.Domain
 
         [ForeignKey("ClassYearId")]
         public ClassYear? ClassYear { get; set; }
+        public ICollection<Submission> Submissions { get; set; } = new List<Submission>();
     }
 }

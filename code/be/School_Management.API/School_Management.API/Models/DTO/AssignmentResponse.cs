@@ -14,4 +14,9 @@
         public Guid ClassYearId { get; set; }
         public string ClassName { get; set; } = string.Empty;
     }
+
+    public class AssignmentResponseForStudent : AssignmentResponse
+    {
+        public string? Status { get; set; }
+    }
 }

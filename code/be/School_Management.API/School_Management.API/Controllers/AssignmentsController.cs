@@ -47,7 +47,6 @@ namespace School_Management.API.Controllers
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> GetAllAssignment([FromQuery] AssignmentFilterRequest request)
         {
-            if (request.SortBy == null) request.SortBy = "StartTime";
             if (request.PageNumber <= 0) request.PageNumber = 1;
             if (request.PageSize <= 0) request.PageSize = 10;
             var result = await assignmentService.GetAllAssignment(request);
@@ -60,6 +59,20 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetAssignmentById([FromRoute] Guid assignmentId)
         {
             var result = await assignmentService.GetAssignmentById(assignmentId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("my")]
+        [ValidateModel]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetAssignmentForStudent([FromQuery] AssignmentForStudentRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { message = "Phiên đăng nhập hết hạn" });
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await assignmentService.GetMyAssignmentsForStudent(request, Guid.Parse(userId));
             return Ok(result);
         }
     }
