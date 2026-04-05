@@ -165,5 +165,38 @@ namespace School_Management.API.Repositories
                                                  }).FirstOrDefaultAsync();
             return (result, "SUCCESS");
         }
+
+        public async Task<(SubmissionResponse? data, string? message)> ScoreSubmission(ScoreSubmissionRequest request, Guid submissionId, Guid userId)
+        {
+            var teacherId = await context.Teacher.Where(x => x.UserId == userId).Select(g => g.Id).FirstOrDefaultAsync();
+            if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
+            var submission = await context.Submission.Include(x => x.Student)
+                                                     .ThenInclude(x => x.User)
+                                                     .Include(x => x.Assignment)
+                                                     .ThenInclude(x => x.TeacherSubject)
+                                                     .FirstOrDefaultAsync(x => x.Id == submissionId);
+            if (submission == null) return (null, "NOT_FOUND_SUBMISSION");
+
+            if (teacherId != submission.Assignment.TeacherSubject.TeacherId)
+                return (null, "NOT_A_TEACHER_OF_ASSIGNMENT");
+
+            submission.Score = request.Score;
+            submission.Status = "Đã chấm";
+            await context.SaveChangesAsync();
+            var result =  new SubmissionResponse
+            {
+                AssignmentId = submission.AssignmentId,
+                FileTitle = submission.FileTitle,
+                FileUrl = submission.FileUrl,
+                Score = submission.Score,
+                Status = submission.Status,
+                StudentId = submission.StudentId,
+                StudentName = submission.Student.User.FullName,
+                SubmissionId = submission.Id,
+                TimeSubmit = submission.TimeSubmit
+            };
+
+            return (result, "SUCCESS");
+        }
     }
 }

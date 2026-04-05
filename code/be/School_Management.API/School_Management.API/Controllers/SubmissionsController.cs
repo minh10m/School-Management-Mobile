@@ -84,5 +84,27 @@ namespace School_Management.API.Controllers
             });
         }
 
+        [HttpPatch]
+        [Route("{submissionId}/score")]
+        [ValidateModel]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> ScoreSubmission([FromBody] ScoreSubmissionRequest request, [FromRoute] Guid submissionId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+            var result = await submissionService.ScoreSubmission(request, submissionId, Guid.Parse(userId));
+            return Ok(new
+            {
+                success = true,
+                message = "Chấm điểm thành công",
+                data = result
+            });
+        }
+
+
     }
 }
