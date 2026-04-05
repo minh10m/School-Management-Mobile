@@ -25,7 +25,11 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> AttendanceCheck([FromBody] AttendanceRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { Message = "Phiên làm việc hết hạn" });
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
             var result = await attendanceService.AttendanceCheck(request, Guid.Parse(userId));
             return Ok(result);
         }
@@ -37,7 +41,11 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetClassAttendance([FromQuery] ClassAttendanceRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { Message = "Phiên làm việc hết hạn" });
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
 
             var result = await attendanceService.GetClassAttendance(request, Guid.Parse(userId));
             return Ok(result);
@@ -50,7 +58,11 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetStudentAttendance([FromQuery] StudentAttedanceRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { Message = "Phiên làm việc hết hạn" });
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
 
             var result = await attendanceService.GetStudentAttendance(request, Guid.Parse(userId));
             return Ok(result);

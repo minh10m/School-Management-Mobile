@@ -24,7 +24,12 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> CreateEvent([FromBody] PostOrUpdateEventRequest request)
         {
             var result = await eventService.CreateEvent(request);
-            return StatusCode(201, result);
+            return StatusCode(201, new
+            {
+                success = true,
+                message = "Tạo sự kiện thành công",
+                data = result
+            });
         }
 
         [HttpPut]

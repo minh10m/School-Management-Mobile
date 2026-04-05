@@ -79,6 +79,8 @@ builder.Services.AddScoped<ITeacherSubjectRepository, TeacherSubjectRepository>(
 builder.Services.AddScoped<ITeacherSubjectService, TeacherSubjectService>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()

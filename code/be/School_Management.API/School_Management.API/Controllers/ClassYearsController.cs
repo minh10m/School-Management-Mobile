@@ -25,7 +25,12 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> CreateClassYear([FromBody] PostOrUpdateClassYearReq req)
         {
             var result = await classYearService.CreateClassYear(req);
-            return StatusCode(201, result);
+            return StatusCode(201, new
+            {
+                success = true,
+                message = "Tạo lớp mới thành công",
+                data = result
+            });
         }
 
         [HttpPut]
@@ -69,7 +74,11 @@ namespace School_Management.API.Controllers
             if (request.PageNumber <= 0) request.PageNumber = 1;
             if (request.PageSize <= 0) request.PageSize = 10;
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { Message = "Phiên đăng nhập hết hạn" });
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
             var result = await classYearService.GetMyClassIsTeachingForTeacher(request, Guid.Parse(userId));
             return Ok(result);
         }
@@ -94,7 +103,11 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetMyHomeRoomClass([FromQuery] HomeRoomClassOfTeacherRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { message = "Phiên làm việc hết hạn" });
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
             var result = await classYearService.GetMyHomeRoomClass(request, Guid.Parse(userId));
             return Ok(result);
         }
@@ -106,7 +119,11 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetMyClassForStudent([FromQuery] ClassOfStudentRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { message = "Phiên làm việc hết hạn" });
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
             var result = await classYearService.GetMyClassForStudent(request, Guid.Parse(userId));
             return Ok(result);
         }
