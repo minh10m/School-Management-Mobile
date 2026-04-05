@@ -134,5 +134,36 @@ namespace School_Management.API.Repositories
                                                  }).FirstOrDefaultAsync();
             return (result, "SUCCESS");
         }
+
+        public async Task<(SubmissionResponse? data, string? message)> GetSubmissionOfAssignmentForStudent(SubmissionStudentRequest request, Guid userId)
+        {
+            var studentId = await context.Student.Where(x => x.UserId == userId).Select(x => x.Id).FirstOrDefaultAsync();
+            if (studentId == Guid.Empty) return (null, "NOT_FOUND_STUDENT");
+
+            var assignmentInfo = await context.Assignment.Where(x => x.Id == request.AssignmentId)
+                                                         .Select(x => new
+                                                         {
+                                                             x.TeacherSubject.TeacherId,
+                                                             x.Id
+                                                         })
+                                                         .FirstOrDefaultAsync();
+            if (assignmentInfo == null) return (null, "NOT_FOUND_ASSIGNMENT");
+
+            var result = await context.Submission.AsNoTracking()
+                                                 .Where(x => x.AssignmentId == request.AssignmentId && x.StudentId == studentId)
+                                                 .Select(g => new SubmissionResponse
+                                                 {
+                                                     AssignmentId = g.AssignmentId,
+                                                     FileTitle = g.FileTitle,
+                                                     FileUrl = g.FileUrl,
+                                                     Score = g.Score,
+                                                     Status = g.Status,
+                                                     StudentId = g.StudentId,
+                                                     StudentName = g.Student.User.FullName,
+                                                     SubmissionId = g.Id,
+                                                     TimeSubmit = g.TimeSubmit
+                                                 }).FirstOrDefaultAsync();
+            return (result, "SUCCESS");
+        }
     }
 }

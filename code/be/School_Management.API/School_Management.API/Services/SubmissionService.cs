@@ -48,5 +48,17 @@ namespace School_Management.API.Services
                 _ => throw new Exception("Lỗi không xác định")
             };
         }
+
+        public async Task<SubmissionResponse> GetSubmissionOfAssignmentForStudent(SubmissionStudentRequest request, Guid userId)
+        {
+            var (result, message) = await submissionRepository.GetSubmissionOfAssignmentForStudent(request, userId);
+            return message switch
+            {
+                "NOT_FOUND_STUDENT" => throw new NotFoundException("Bạn không phải là học sinh"),
+                "NOT_FOUND_ASSIGNMENT" => throw new NotFoundException("Bài tập không tồn tại, không thể tìm thấy bài nộp"),
+                "SUCCESS" => result,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
     }
 }

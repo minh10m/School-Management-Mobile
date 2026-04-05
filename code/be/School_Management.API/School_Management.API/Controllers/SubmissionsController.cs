@@ -62,5 +62,27 @@ namespace School_Management.API.Controllers
             var result = await submissionService.GetSubmissionById(submissionId);
             return Ok(result);
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("mySubmission")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetAllSubmissionOfAssignmentForStudent([FromQuery] SubmissionStudentRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+            var result = await submissionService.GetSubmissionOfAssignmentForStudent(request, Guid.Parse(userId));
+            return Ok(new
+            {
+                success = true,
+                message = result == null ? "Học sinh chưa nộp bài" : "Lấy thông tin bài nộp thành công",
+                data = result
+            });
+        }
+
     }
 }
