@@ -4,10 +4,10 @@ namespace School_Management.API.Models.DTO
 {
     public class ClassPromoteRequest
     {
-        [Required]
+        [Required(ErrorMessage = "Năm học hiện tại là bắt buộc")]
         public int CurrentSystemYear { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Thông tin lớp chuyển tới và chuyển đi là bắt buộc")]
         public List<ClassPromote>? ClassPromotes { get; set; }
     }
 
