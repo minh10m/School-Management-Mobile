@@ -37,5 +37,16 @@ namespace School_Management.API.Services
                 _ => throw new Exception("Lỗi không xác định")
             };
         }
+
+        public async Task<SubmissionResponse> GetSubmissionById(Guid submissionId)
+        {
+            var (result, message) = await submissionRepository.GetSubmissionById(submissionId);
+            return message switch
+            {
+                "NOT_FOUND_SUBMISSION" => throw new NotFoundException("Bài nộp này không tồn tại"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
     }
 }

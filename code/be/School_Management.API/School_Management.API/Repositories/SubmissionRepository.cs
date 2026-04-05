@@ -113,5 +113,26 @@ namespace School_Management.API.Repositories
                 TotalCount = totalCount
             }, "SUCCESS");
         }
+
+        public async Task<(SubmissionResponse? data, string? message)> GetSubmissionById(Guid submissionId)
+        {
+            var submission = await context.Submission.FirstOrDefaultAsync(x => x.Id == submissionId);
+            if (submission == null) return (null, "NOT_FOUND_SUBMISSION");
+
+            var result = await context.Submission.Where(x => x.Id == submissionId)
+                                                 .Select(g => new SubmissionResponse
+                                                 {
+                                                     AssignmentId = g.AssignmentId,
+                                                     FileTitle = g.FileTitle,
+                                                     FileUrl = g.FileUrl,
+                                                     Score = g.Score,
+                                                     Status = g.Status,
+                                                     StudentId = g.StudentId,
+                                                     StudentName = g.Student.User.FullName,
+                                                     SubmissionId = g.Id,
+                                                     TimeSubmit = g.TimeSubmit
+                                                 }).FirstOrDefaultAsync();
+            return (result, "SUCCESS");
+        }
     }
 }

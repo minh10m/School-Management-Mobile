@@ -53,5 +53,14 @@ namespace School_Management.API.Controllers
             var result = await submissionService.GetAllSubmissionOfAssignmentForTeacher(request, Guid.Parse(userId));
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("{submissionId}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetSubmissionById([FromRoute] Guid submissionId)
+        {
+            var result = await submissionService.GetSubmissionById(submissionId);
+            return Ok(result);
+        }
     }
 }

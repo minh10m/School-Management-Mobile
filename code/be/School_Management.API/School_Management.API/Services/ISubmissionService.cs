@@ -6,5 +6,6 @@ namespace School_Management.API.Services
     {
         public Task<SubmissionResponse> CreateSubmission(SubmissionRequest request, Guid userId);
         public Task<PagedResponse<SubmissionResponse>> GetAllSubmissionOfAssignmentForTeacher(SubmissionFilterRequest request, Guid userId);
+        public Task<SubmissionResponse> GetSubmissionById(Guid submissionId);
     }
 }
