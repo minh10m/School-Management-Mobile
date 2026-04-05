@@ -25,9 +25,18 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> CreateAssignment([FromBody] PostOrUpdateAssignmentRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { message = "Phiên đăng nhập hết hạn" });
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
             var result = await assignmentService.CreateAssignment(request, Guid.Parse(userId));
-            return StatusCode(201, result);
+            return StatusCode(210, new
+            {
+                success = true,
+                message = "Tạo bài tập thành công",
+                data = result
+            });
         }
 
         [HttpPatch]
@@ -37,7 +46,11 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> UpdateAssignment([FromBody] PostOrUpdateAssignmentRequest request, [FromRoute] Guid assignmentId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { message = "Phiên đăng nhập hết hạn" });
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
             var result = await assignmentService.UpdateAssignment(request, Guid.Parse(userId), assignmentId);
             return Ok(result);
         }
@@ -69,7 +82,11 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetAssignmentForStudent([FromQuery] AssignmentForStudentRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized(new { message = "Phiên đăng nhập hết hạn" });
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
             if (request.PageNumber <= 0) request.PageNumber = 1;
             if (request.PageSize <= 0) request.PageSize = 10;
             var result = await assignmentService.GetMyAssignmentsForStudent(request, Guid.Parse(userId));

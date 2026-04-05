@@ -24,7 +24,12 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> AssignSubjectForTeacher([FromBody] TeacherSubjectRequest request)
         {
             var result = await teacherSubjectService.AssignSubjectForTeacher(request);
-            return StatusCode(201, result);
+            return StatusCode(201, new
+            {
+                success = true,
+                message = "Gán môn cho giáo viên thành công",
+                data = result
+            });
         }
 
         [HttpPatch]
