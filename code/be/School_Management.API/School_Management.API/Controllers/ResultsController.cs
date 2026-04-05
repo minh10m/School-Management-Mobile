@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
+using System.Security.Claims;
 
 namespace School_Management.API.Controllers
 {
@@ -31,6 +32,26 @@ namespace School_Management.API.Controllers
                 result
             });
 
+        }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{resultId}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> UpdateResult([FromBody] UpdateResultRequest request, [FromRoute] Guid resultId)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdClaim, out var userGuid))
+            {
+                return Unauthorized(new { success = false, message = "Phiên đăng nhập hết hạn" });
+            }
+            var result = await resultService.UpdateResult(request, resultId, userGuid);
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật thành công",
+                data = result
+            });
         }
     }
 }

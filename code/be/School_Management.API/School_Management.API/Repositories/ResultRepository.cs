@@ -65,5 +65,46 @@ namespace School_Management.API.Repositories
                 throw;
             }
         }
+
+        public async Task<(ResultResponse? data, string? message)> UpdateResult(UpdateResultRequest request, Guid resultId, Guid userId)
+        {
+            var teacher = await context.Teacher.FirstOrDefaultAsync(x => x.UserId == userId);
+            if (teacher == null) return (null, "NOT_FOUND_TEACHER");
+            var result = await context.Result.Include(x => x.Student).ThenInclude(x => x.User)
+                                             .Include(x => x.Subject).ThenInclude(x => x.TeacherSubjects)
+                                             .FirstOrDefaultAsync(x => x.Id == resultId);
+            if (result == null) return (null, "NOT_FOUND_RESULT");
+
+            var isTeacher = result.Subject.TeacherSubjects.Any(x => x.TeacherId == teacher.Id);
+            if (isTeacher == false) return (null, "IS_NOT_TEACHER_OF_SUBJECT");
+
+            var isExisted = await context.Result.AnyAsync(x => x.SchoolYear == request.SchoolYear && x.Term == request.Term
+                                                            && x.StudentId == result.StudentId && x.SubjectId == result.SubjectId
+                                                            && x.Id != resultId && x.Type.ToLower() == request.Type.ToLower());
+            if(isExisted) return (null, "DUPLICATED_TYPE");
+
+            
+
+            result.Type = request.Type;
+            result.Term = request.Term;
+            result.SchoolYear = request.SchoolYear;
+            result.Value = request.Value;
+            result.Weight = request.Weight;
+
+            await context.SaveChangesAsync();
+            return (new ResultResponse
+            {
+                Term = result.Term,
+                SchoolYear = result.SchoolYear,
+                StudentId = result.StudentId,
+                StudentName = result.Student.User.FullName,
+                SubjectId = result.SubjectId,
+                SubjectName = result.Subject.SubjectName,
+                ResultId = result.Id,
+                Type = result.Type,
+                Value = result.Value,
+                Weight = result.Weight
+            }, "SUCCESS");
+        }
     }
 }
