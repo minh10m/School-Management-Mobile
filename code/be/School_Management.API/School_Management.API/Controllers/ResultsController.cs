@@ -24,7 +24,12 @@ namespace School_Management.API.Controllers
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> CreateResult([FromBody] List<ResultRequest> requests)
         {
-            var result = await resultService.CreateResult(requests);
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdClaim, out var userGuid))
+            {
+                return Unauthorized(new { success = false, message = "Phiên đăng nhập hết hạn" });
+            }
+            var result = await resultService.CreateResult(requests, userGuid);
             return StatusCode(201, new
             {
                 success = true,
