@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -64,6 +65,77 @@ namespace School_Management.API.Repositories
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        public async Task<(List<ResultForStudentResponse>? data, string? message)> GetMyResultForStudent(ResultOfStudentRequest request, Guid userId)
+        {
+            var studentId = await context.Student.AsNoTracking()
+                                                 .Where(x => x.UserId == userId)
+                                                 .Select(g => g.Id)
+                                                 .FirstOrDefaultAsync();
+            if (studentId == Guid.Empty) return (null, "NOT_FOUND_STUDENT");
+            var myResultsList = await context.Result.Include(x => x.Subject).AsNoTracking()
+                                               .Where(x => x.SchoolYear == request.SchoolYear
+                                                        && x.Term == request.Term
+                                                        && x.StudentId == studentId)
+                                               .ToListAsync();
+            var result = myResultsList.GroupBy(x => new { x.SubjectId, x.Subject.SubjectName })
+                                      .Select(g => new ResultForStudentResponse
+                                      {
+                                          SubjectId = g.Key.SubjectId,
+                                          SubjectName = g.Key.SubjectName,
+                                          Average = g.Sum(x => x.Weight) > 0 ? (float)Math.Round(g.Sum(x => x.Value * x.Weight) / g.Sum(x => x.Weight), 2) : 0,
+                                          DetailResults = g.Select(x => new DetailResult
+                                          {
+                                              Type = x.Type,
+                                              Value = x.Value,
+                                              Weight = x.Weight
+                                          }).ToList()
+                                      }).ToList();
+
+            return (result, "SUCCESS");
+        }
+
+        public async Task<(List<StudentResultForTeacherResponse>? data, string? message)> GetResultOfAllStudentInClass(ResultOfStudentRequest request, Guid userId)
+        {
+            var teacherId = await context.Teacher.AsNoTracking()
+                                                 .Where(x => x.UserId == userId)
+                                                 .Select(g => g.Id)
+                                                 .FirstOrDefaultAsync();
+            if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
+
+            var classYearId = await context.ClassYear.AsNoTracking().Where(x => x.HomeRoomId == teacherId
+                                                                && x.SchoolYear == request.SchoolYear)
+                                                                    .Select(g => g.Id)
+                                                                    .FirstOrDefaultAsync();
+            if (classYearId == Guid.Empty) return (null, "NOT_FOUND_CLASS");
+
+            var studentIds = await context.StudentClassYear.AsNoTracking().Where(x => x.ClassYearId == classYearId)
+                                                           .Select(g => g.StudentId)
+                                                           .ToListAsync();
+
+            if (!studentIds.Any()) return (null, "EMPTY_LIST");
+
+            var listResults = await context.Result.Include(x => x.Subject)
+                                                  .Include(x => x.Student).ThenInclude(x => x.User)
+                                                  .Where(x => studentIds.Contains(x.StudentId)
+                                                        && x.Term == request.Term && x.SchoolYear == request.SchoolYear)
+                                                  .ToListAsync();
+
+            var overallResult = listResults.GroupBy(x => new { x.StudentId, x.Student.User.FullName })
+                                           .Select(g => new StudentResultForTeacherResponse
+                                           {
+                                               StudentId = g.Key.StudentId,
+                                               StudentName = g.Key.FullName,
+                                               SubjectResults = g.GroupBy(t => new { t.SubjectId, t.Subject.SubjectName })
+                                                                 .Select(h => new SubjectResult
+                                                                 {
+                                                                     SubjectId = h.Key.SubjectId,
+                                                                     SubjectName = h.Key.SubjectName,
+                                                                     Average = h.Sum(y => y.Weight) > 0 ? (float)Math.Round(h.Sum(y => y.Value * y.Weight) / h.Sum(y => y.Weight), 2) : 0
+                                                                 }).ToList()
+                                           }).ToList();
+            return (overallResult, "SUCCESS");
         }
 
         public async Task<(ResultResponse? data, string? message)> UpdateResult(UpdateResultRequest request, Guid resultId, Guid userId)

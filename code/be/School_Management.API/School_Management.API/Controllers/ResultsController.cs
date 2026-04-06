@@ -53,5 +53,45 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("student")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetMyResultForStudent([FromQuery] ResultOfStudentRequest request)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdClaim, out var userGuid))
+            {
+                return Unauthorized(new { success = false, message = "Phiên đăng nhập hết hạn" });
+            }
+            var result = await resultService.GetMyResultForStudent(request, userGuid);
+            return Ok(new
+            {
+                success = true,
+                message = "Lấy thông tin thành công",
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("class")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetResultOfAllStudentInClass([FromQuery] ResultOfStudentRequest request)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdClaim, out var userGuid))
+            {
+                return Unauthorized(new { success = false, message = "Phiên đăng nhập hết hạn" });
+            }
+            var result = await resultService.GetResultOfAllStudentInClass(request, userGuid);
+            return Ok(new
+            {
+                success = true,
+                message = "Lấy thông tin thành công",
+                data = result
+            });
+        }
     }
 }
