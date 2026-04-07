@@ -125,7 +125,7 @@ namespace School_Management.API.Repositories
             return (result, "SUCCESS");
         }
 
-        public async Task<(List<StudentResultForTeacherResponse>? data, string? message)> GetResultOfAllStudentInClass(ResultOfStudentRequest request, Guid userId)
+        public async Task<(List<StudentResultForTeacherResponse>? data, string? message)> GetResultOfAllStudentInClass(ResultOfAllStudentRequest request, Guid classYearId, Guid userId)
         {
             var teacherId = await context.Teacher.AsNoTracking()
                                                  .Where(x => x.UserId == userId)
@@ -133,11 +133,12 @@ namespace School_Management.API.Repositories
                                                  .FirstOrDefaultAsync();
             if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
 
-            var classYearId = await context.ClassYear.AsNoTracking().Where(x => x.HomeRoomId == teacherId
-                                                                && x.SchoolYear == request.SchoolYear)
-                                                                    .Select(g => g.Id)
-                                                                    .FirstOrDefaultAsync();
-            if (classYearId == Guid.Empty) return (null, "NOT_FOUND_CLASS");
+            var classYearInfo = await context.ClassYear.AsNoTracking()
+                .Where(x => x.Id == classYearId)
+                .Select(x => new { x.HomeRoomId, x.SchoolYear })
+                .FirstOrDefaultAsync(); if (classYearInfo == null) return (null, "NOT_FOUND_CLASS");
+
+            if (classYearInfo.HomeRoomId != teacherId) return (null, "NOT_HOMEROOM_TEACHER");
 
             var studentIds = await context.StudentClassYear.AsNoTracking().Where(x => x.ClassYearId == classYearId)
                                                            .Select(g => g.StudentId)
@@ -148,7 +149,7 @@ namespace School_Management.API.Repositories
             var listResults = await context.Result.Include(x => x.Subject)
                                                   .Include(x => x.Student).ThenInclude(x => x.User)
                                                   .Where(x => studentIds.Contains(x.StudentId)
-                                                        && x.Term == request.Term && x.SchoolYear == request.SchoolYear)
+                                                        && x.Term == request.Term && x.SchoolYear == classYearInfo.SchoolYear)
                                                   .ToListAsync();
 
             var overallResult = listResults.GroupBy(x => new { x.StudentId, x.Student.User.FullName })

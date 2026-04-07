@@ -81,16 +81,16 @@ namespace School_Management.API.Controllers
 
         [HttpGet]
         [ValidateModel]
-        [Route("class")]
+        [Route("class/{classYearId}")]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> GetResultOfAllStudentInClass([FromQuery] ResultOfStudentRequest request)
+        public async Task<IActionResult> GetResultOfAllStudentInClass([FromQuery] ResultOfAllStudentRequest request, [FromRoute] Guid classYearId)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdClaim, out var userGuid))
             {
                 return Unauthorized(new { success = false, message = "Phiên đăng nhập hết hạn" });
             }
-            var result = await resultService.GetResultOfAllStudentInClass(request, userGuid);
+            var result = await resultService.GetResultOfAllStudentInClass(request, classYearId, userGuid);
             return Ok(new
             {
                 success = true,
