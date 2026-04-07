@@ -98,5 +98,25 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("class/{classYearId}/student/{studentId}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetResultOfOneStudentForTeacher([FromQuery] ResultOfAllStudentRequest request, [FromRoute] Guid classYearId, [FromRoute] Guid studentId)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdClaim, out var userGuid))
+            {
+                return Unauthorized(new { success = false, message = "Phiên đăng nhập hết hạn" });
+            }
+            var result = await resultService.GetResultOfOneStudentForTeacher(request, classYearId, studentId, userGuid);
+            return Ok(new
+            {
+                success = true,
+                message = "Lấy thông tin thành công",
+                data = result
+            });
+        }
     }
 }

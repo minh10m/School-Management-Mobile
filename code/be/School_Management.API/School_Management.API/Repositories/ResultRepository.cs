@@ -168,6 +168,49 @@ namespace School_Management.API.Repositories
             return (overallResult, "SUCCESS");
         }
 
+        public async Task<(List<ResultForStudentResponse>? data, string? message)> GetResultOfOneStudentForTeacher(ResultOfAllStudentRequest request, Guid classYearId, Guid studentId, Guid userId)
+        {
+            var teacherId = await context.Teacher.AsNoTracking().Where(x => x.UserId == userId).Select(g => g.Id).FirstOrDefaultAsync();
+            if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
+
+            var classYearInfo = await context.ClassYear.AsNoTracking().Where(x => x.Id == classYearId)
+                                                       .Select(g => new { g.SchoolYear })
+                                                       .FirstOrDefaultAsync();
+            if (classYearInfo == null) return (null, "NOT_FOUND_CLASS");
+
+            var subjectIdsOfTeacher = await context.ScheduleDetail.AsNoTracking()
+                                                         .Where(x => x.Schedule.ClassYearId == classYearId
+                                                                   && x.Schedule.IsActive == true
+                                                                   && x.Schedule.SchoolYear == classYearInfo.SchoolYear && x.Schedule.Term == request.Term
+                                                                   && x.TeacherSubject.TeacherId == teacherId)
+                                                         .Select(g => g.TeacherSubject.SubjectId)
+                                                         .Distinct()
+                                                         .ToListAsync();
+            if (!subjectIdsOfTeacher.Any()) return (null, "NOT_A_TEACHER_OF_THIS_STUDENT");
+
+            var listResult = await context.Result.Include(x => x.Subject).AsNoTracking()
+                                                 .Where(x => x.SchoolYear == classYearInfo.SchoolYear && x.Term == request.Term
+                                                          && subjectIdsOfTeacher.Contains(x.SubjectId) && x.StudentId == studentId)
+                                                 .ToListAsync();
+
+            var result = listResult.GroupBy(t => new { t.SubjectId, t.Subject.SubjectName })
+                                   .Select(g => new ResultForStudentResponse
+                                   {
+                                       SubjectId = g.Key.SubjectId,
+                                       SubjectName = g.Key.SubjectName,
+                                       Average = g.Sum(x => x.Weight) > 0 ? (float)Math.Round(g.Sum(x => x.Value * x.Weight) / g.Sum(x => x.Weight), 2) : 0,
+                                       DetailResults = g.Select(y => new DetailResult
+                                       {
+                                           Type = y.Type,
+                                           Value = y.Value,
+                                           Weight = y.Weight
+                                       }).ToList()
+
+                                   }).ToList();
+
+            return (result, "SUCCESS");
+        }
+
         public async Task<(ResultResponse? data, string? message)> UpdateResult(UpdateResultRequest request, Guid resultId, Guid userId)
         {
             var teacher = await context.Teacher.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId);

@@ -8,6 +8,6 @@ namespace School_Management.API.Services
         public Task<ResultResponse> UpdateResult(UpdateResultRequest request, Guid resultId, Guid userId);
         public Task<List<ResultForStudentResponse>> GetMyResultForStudent(ResultOfStudentRequest request, Guid userId);
         public Task<List<StudentResultForTeacherResponse>> GetResultOfAllStudentInClass(ResultOfAllStudentRequest request, Guid classYearId, Guid userId);
-        public Task<List<ResultForStudentResponse>> GetResultOfOneStudentForTeacher()
+        public Task<List<ResultForStudentResponse>> GetResultOfOneStudentForTeacher(ResultOfAllStudentRequest request, Guid classYearId, Guid studentId, Guid userId);
     }
 }

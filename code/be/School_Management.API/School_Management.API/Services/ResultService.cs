@@ -54,6 +54,19 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<List<ResultForStudentResponse>> GetResultOfOneStudentForTeacher(ResultOfAllStudentRequest request, Guid classYearId, Guid studentId, Guid userId)
+        {
+            var (result, message) = await resultRepository.GetResultOfOneStudentForTeacher(request, classYearId, studentId, userId);
+            return message switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không phải là giáo viên"),
+                "NOT_FOUND_CLASS" => throw new  NotFoundException("Không tìm thấy lớp học"),
+                "NOT_A_TEACHER_OF_THIS_STUDENT" => throw new ForbiddenException("Bạn không dạy học sinh này"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<ResultResponse> UpdateResult(UpdateResultRequest request, Guid resultId, Guid userId)
         {
             var (result, message) = await resultRepository.UpdateResult(request, resultId, userId);
