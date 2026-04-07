@@ -40,14 +40,28 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<List<StudentResultForTeacherResponse>> GetResultOfAllStudentInClass(ResultOfStudentRequest request, Guid userId)
+        public async Task<List<StudentResultForTeacherResponse>> GetResultOfAllStudentInClass(ResultOfAllStudentRequest request, Guid classYearId, Guid userId)
         {
-            var (result, message) = await resultRepository.GetResultOfAllStudentInClass(request, userId);
+            var (result, message) = await resultRepository.GetResultOfAllStudentInClass(request, classYearId, userId);
             return message switch
             {
                 "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không là giáo viên"),
-                "NOT_FOUND_CLASS" => throw new NotFoundException("Bạn không chủ nhiệm lớp học nào"),
+                "NOT_FOUND_CLASS" => throw new NotFoundException("Không tìm thấy thông tin lớp học"),
                 "EMPTY_LIST" => throw new NotFoundException("Lớp chưa có học sinh"),
+                "NOT_HOMEROOM_TEACHER" => throw new ForbiddenException("Bạn không phải là giáo viên chủ nhiệm của lớp này"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
+        public async Task<List<ResultForStudentResponse>> GetResultOfOneStudentForTeacher(ResultOfAllStudentRequest request, Guid classYearId, Guid studentId, Guid userId)
+        {
+            var (result, message) = await resultRepository.GetResultOfOneStudentForTeacher(request, classYearId, studentId, userId);
+            return message switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không phải là giáo viên"),
+                "NOT_FOUND_CLASS" => throw new  NotFoundException("Không tìm thấy lớp học"),
+                "NOT_A_TEACHER_OF_THIS_STUDENT" => throw new ForbiddenException("Bạn không dạy học sinh này"),
                 "SUCCESS" => result!,
                 _ => throw new Exception("Lỗi không xác định")
             };
