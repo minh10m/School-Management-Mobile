@@ -124,6 +124,9 @@ apiClient.interceptors.response.use(
       }
     }
 
+    if (error.response) {
+      console.log('API Error Response:', error.response.status, error.response.data);
+    }
     return Promise.reject(error);
   },
 );
