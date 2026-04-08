@@ -19,9 +19,9 @@ namespace School_Management.API.Repositories
 
             //Filtering
             if (!string.IsNullOrWhiteSpace(request.FullName))
-                query = query.Where(x => x.User.FullName.Contains(request.FullName));
+                query = query.Where(x => x.User.FullName.ToLower().Contains(request.FullName.ToLower()));
             if(!string.IsNullOrWhiteSpace(request.ClassName))
-                query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.ClassName.Contains(request.ClassName)));
+                query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.ClassName.ToLower().Contains(request.ClassName.ToLower())));
             if(request.Grade != 0)
                 query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.Grade == request.Grade));
                    

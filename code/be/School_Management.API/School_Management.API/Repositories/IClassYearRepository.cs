@@ -12,6 +12,7 @@ namespace School_Management.API.Repositories
         public Task<(PagedResponse<ClassYearResponse>? data, string? errorCode)> GetAllClassIsTeachingByTeacher(ClassOfTeacherFilterRequest request, Guid teacherId);
         public Task<(ClassYearResponse? data, string? errorCode)> GetMyHomeRoomClass(HomeRoomClassOfTeacherRequest request, Guid userId);
         public Task<(ClassYearResponse? data, string? errorCode)> GetMyClassForStudent(ClassOfStudentRequest request, Guid userId);
+        public Task<(bool result, string? errorCode)> PromoteClassYear(ClassPromoteRequest request);
 
     }
 }

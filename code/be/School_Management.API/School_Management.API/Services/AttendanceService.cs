@@ -31,13 +31,13 @@ namespace School_Management.API.Services
             var infoAttendances = new List<Attendance>();
             foreach (var item in request.InfoAttendances)
             {
-                if(studentMaps.TryGetValue(item.StudentId, out var scy))
+                if(studentMaps.TryGetValue((Guid)item.StudentId, out var scy))
                 {
                     infoAttendances.Add(new Attendance
                     {
                         Id = Guid.NewGuid(),
                         Status = item.Status,
-                        Date = request.Date,
+                        Date = (DateOnly)request.Date,
                         Note = item.Note,
                         StudentClassYearId = scy
                     });
@@ -53,7 +53,7 @@ namespace School_Management.API.Services
         public async Task<int> AttendanceCheck(AttendanceRequest request, Guid userId)
         {
             //Check HomeRoom teacher
-            var isHomeroom = await CheckHomeRoomTeacher(request.ClassYearId, userId);
+            var isHomeroom = await CheckHomeRoomTeacher((Guid)request.ClassYearId, userId);
             if (!isHomeroom) throw new ForbiddenException("Bạn không phải giáo viên chủ nhiệm của lớp học");
 
             using var transaction = await context.Database.BeginTransactionAsync();
@@ -105,7 +105,7 @@ namespace School_Management.API.Services
 
         public async Task<List<ClassAttendanceResponse>> GetClassAttendance(ClassAttendanceRequest request, Guid userId)
         {
-            var isHomeroom = await CheckHomeRoomTeacher(request.ClassYearId, userId);
+            var isHomeroom = await CheckHomeRoomTeacher((Guid)request.ClassYearId!, userId);
             if (!isHomeroom) throw new ForbiddenException("Bạn không phải giáo viên chủ nhiệm của lớp học");
             return await attendanceRepository.GetClassAttendance(request);
         }

@@ -26,7 +26,7 @@ namespace School_Management.API.Repositories
             {
                 Id = Guid.NewGuid(),
                 SubjectName = request.SubjectName,
-                MaxPeriod = request.MaxPeriod
+                MaxPeriod = (int)request.MaxPeriod
             };
 
             context.Subject.Add(newSubject);
@@ -46,7 +46,7 @@ namespace School_Management.API.Repositories
 
             //Filtering
             if (!string.IsNullOrWhiteSpace(request.SubjectName))
-                query = query.Where(x => x.SubjectName.Contains(request.SubjectName));
+                query = query.Where(x => x.SubjectName.ToLower().Contains(request.SubjectName.ToLower()));
             if (request.MaxPeriod.HasValue)
                 query = query.Where(x => x.MaxPeriod == request.MaxPeriod);
 
@@ -151,7 +151,7 @@ namespace School_Management.API.Repositories
             if (isExistedName) return (null, "DUPLICATE_NAME");
 
             subject.SubjectName = normalizedName;
-            subject.MaxPeriod = request.MaxPeriod;
+            subject.MaxPeriod = (int)request.MaxPeriod;
             await context.SaveChangesAsync();
 
             return (new SubjectResponse

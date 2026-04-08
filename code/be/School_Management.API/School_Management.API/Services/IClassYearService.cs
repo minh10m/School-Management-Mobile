@@ -12,5 +12,6 @@ namespace School_Management.API.Services
         public Task<PagedResponse<ClassYearResponse>> GetAllClassIsTeachingByTeacher(ClassOfTeacherFilterRequest request, Guid teacherId);
         public Task<ClassYearResponse> GetMyHomeRoomClass(HomeRoomClassOfTeacherRequest request, Guid userId);
         public Task<ClassYearResponse> GetMyClassForStudent(ClassOfStudentRequest request, Guid userId);
+        public Task<bool> PromoteClassYear(ClassPromoteRequest request);
     }
 }

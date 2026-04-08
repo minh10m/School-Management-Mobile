@@ -11,5 +11,6 @@ namespace School_Management.API.Models.Domain
 
         //Navigation properties
         public ICollection<TeacherSubject> TeacherSubjects { get; set; } = new List<TeacherSubject>();
+        public ICollection<Result> Results { get; set; } = new List<Result>();
     }
 }

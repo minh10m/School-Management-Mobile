@@ -60,7 +60,7 @@ namespace School_Management.API.Services
                             && x.DayOfWeek == request.DayOfWeek
                             && x.StartTime == request.StartTime);
 
-            if (isTeacherBusy) throw new BadRequestException($"Giáo viên đã có lịch dạy vào {scheduleRepository.GetVietNameseDay(request.DayOfWeek)} lúc {request.StartTime:hh\\:mm}");
+            if (isTeacherBusy) throw new BadRequestException($"Giáo viên đã có lịch dạy vào {scheduleRepository.GetVietNameseDay((DayOfWeek)request.DayOfWeek)} lúc {request.StartTime:hh\\:mm}");
 
             return true;
         }
@@ -108,10 +108,10 @@ namespace School_Management.API.Services
                     {
                         Id = Guid.NewGuid(),
                         ScheduleId = scheduleId,
-                        TeacherSubjectId = item.TeacherSubjectId,
-                        DayOfWeek = item.DayOfWeek,
-                        StartTime = item.StartTime,
-                        FinishTime = item.StartTime.Add(TimeSpan.FromMinutes(45)) 
+                        TeacherSubjectId = (Guid)item.TeacherSubjectId,
+                        DayOfWeek = (DayOfWeek)item.DayOfWeek,
+                        StartTime = (TimeSpan)item.StartTime,
+                        FinishTime = ((TimeSpan)item.StartTime).Add(TimeSpan.FromMinutes(45)) 
                     };
 
                     newDetails.Add(detail);

@@ -59,8 +59,12 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized("Phiên làm việc hết hạn");
-            
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+
             await authService.ChangePasswordAsync(changePasswordRequest, userId.ToString());
             return Ok(new { Message = "Đổi mật khẩu thành công" });
         }

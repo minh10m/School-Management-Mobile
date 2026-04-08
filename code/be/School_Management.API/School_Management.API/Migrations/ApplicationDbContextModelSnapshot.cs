@@ -17,7 +17,7 @@ namespace School_Management.API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.24")
+                .HasAnnotation("ProductVersion", "8.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -263,6 +263,49 @@ namespace School_Management.API.Migrations
                     b.ToTable("User", (string)null);
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Assignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClassYearId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FileTitle")
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("FileUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<DateTimeOffset>("FinishTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TeacherSubjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassYearId");
+
+                    b.HasIndex("TeacherSubjectId");
+
+                    b.ToTable("Assignment", t =>
+                        {
+                            t.HasCheckConstraint("CK_Time_Assignment", "\"StartTime\" < \"FinishTime\"");
+                        });
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Attendance", b =>
                 {
                     b.Property<Guid>("Id")
@@ -329,6 +372,52 @@ namespace School_Management.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Event", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(3000)
+                        .HasColumnType("character varying(3000)");
+
+                    b.Property<DateOnly>("EventDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeSpan>("FinishTime")
+                        .HasColumnType("interval");
+
+                    b.Property<int>("SchoolYear")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("interval");
+
+                    b.Property<int>("Term")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SchoolYear", "Term", "StartTime", "Title")
+                        .IsUnique();
+
+                    b.ToTable("Events", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SchoolYear", " \"SchoolYear\" >= 2000 AND \"SchoolYear\" <= 2100");
+
+                            t.HasCheckConstraint("CK_StartTime_FinishTime", " \"StartTime\" < \"FinishTime\"");
+
+                            t.HasCheckConstraint("CK_Term", " \"Term\" >= 1 AND \"Term\" <= 2");
+                        });
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -376,6 +465,54 @@ namespace School_Management.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Result", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SchoolYear")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Term")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(70)
+                        .HasColumnType("character varying(70)");
+
+                    b.Property<float>("Value")
+                        .HasColumnType("real");
+
+                    b.Property<int>("Weight")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubjectId");
+
+                    b.HasIndex("StudentId", "SubjectId", "Type", "Term", "SchoolYear")
+                        .IsUnique();
+
+                    b.ToTable("Result", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SchoolYear_Result", "\"SchoolYear\" > 2000 AND \"SchoolYear\" < 2100");
+
+                            t.HasCheckConstraint("CK_Term_Result", "\"Term\" >= 1 AND \"Term\" <= 2");
+
+                            t.HasCheckConstraint("CK_Value_Result", "\"Value\" >= 0 AND \"Value\" <= 10");
+
+                            t.HasCheckConstraint("CK_Weight_Result", "\"Weight\" >= 1 AND \"Weight\" <= 3");
+                        });
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Schedule", b =>
                 {
                     b.Property<Guid>("Id")
@@ -401,7 +538,9 @@ namespace School_Management.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassYearId", "Term", "SchoolYear", "Name")
+                    b.HasIndex("ClassYearId");
+
+                    b.HasIndex("SchoolYear", "Term", "Name", "ClassYearId")
                         .IsUnique();
 
                     b.ToTable("Schedule", t =>
@@ -509,6 +648,47 @@ namespace School_Management.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Submission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AssignmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FileTitle")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<float?>("Score")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("TimeSubmit")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignmentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Submission");
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Teacher", b =>
                 {
                     b.Property<Guid>("Id")
@@ -599,6 +779,25 @@ namespace School_Management.API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Assignment", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.ClassYear", "ClassYear")
+                        .WithMany("Assignments")
+                        .HasForeignKey("ClassYearId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("School_Management.API.Models.Domain.TeacherSubject", "TeacherSubject")
+                        .WithMany("Assignments")
+                        .HasForeignKey("TeacherSubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClassYear");
+
+                    b.Navigation("TeacherSubject");
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Attendance", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.StudentClassYear", "StudentClassYear")
@@ -612,11 +811,11 @@ namespace School_Management.API.Migrations
 
             modelBuilder.Entity("School_Management.API.Models.Domain.ClassYear", b =>
                 {
-                    b.HasOne("School_Management.API.Models.Domain.Teacher", "teacher")
+                    b.HasOne("School_Management.API.Models.Domain.Teacher", "Teacher")
                         .WithOne("ClassYear")
                         .HasForeignKey("School_Management.API.Models.Domain.ClassYear", "HomeRoomId");
 
-                    b.Navigation("teacher");
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.RefreshToken", b =>
@@ -628,6 +827,25 @@ namespace School_Management.API.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.Result", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.Student", "Student")
+                        .WithMany("Results")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("School_Management.API.Models.Domain.Subject", "Subject")
+                        .WithMany("Results")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Schedule", b =>
@@ -690,6 +908,25 @@ namespace School_Management.API.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Submission", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.Assignment", "Assignment")
+                        .WithMany("Submissions")
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("School_Management.API.Models.Domain.Student", "Student")
+                        .WithMany("Submissions")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Assignment");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Teacher", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.AppUser", "User")
@@ -729,8 +966,15 @@ namespace School_Management.API.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Assignment", b =>
+                {
+                    b.Navigation("Submissions");
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.ClassYear", b =>
                 {
+                    b.Navigation("Assignments");
+
                     b.Navigation("Schedules");
 
                     b.Navigation("StudentClassYears");
@@ -743,7 +987,11 @@ namespace School_Management.API.Migrations
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Student", b =>
                 {
+                    b.Navigation("Results");
+
                     b.Navigation("StudentClassYears");
+
+                    b.Navigation("Submissions");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.StudentClassYear", b =>
@@ -753,6 +1001,8 @@ namespace School_Management.API.Migrations
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Subject", b =>
                 {
+                    b.Navigation("Results");
+
                     b.Navigation("TeacherSubjects");
                 });
 
@@ -765,6 +1015,8 @@ namespace School_Management.API.Migrations
 
             modelBuilder.Entity("School_Management.API.Models.Domain.TeacherSubject", b =>
                 {
+                    b.Navigation("Assignments");
+
                     b.Navigation("ScheduleDetails");
                 });
 #pragma warning restore 612, 618

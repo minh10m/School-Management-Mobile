@@ -36,10 +36,10 @@ namespace School_Management.API.Repositories
 
             var classYear = new ClassYear
             {
-                SchoolYear = request.SchoolYear,
+                SchoolYear = (int)request.SchoolYear,
                 Id = Guid.NewGuid(),
                 ClassName = request.ClassName,
-                Grade = request.Grade,
+                Grade = (int)request.Grade,
                 HomeRoomId = request.HomeRoomId
             };
             context.ClassYear.Add(classYear);
@@ -68,7 +68,7 @@ namespace School_Management.API.Repositories
             //Filtering
             if (!string.IsNullOrWhiteSpace(request.ClassName))
             {
-                var name = request.ClassName.Trim();
+                var name = request.ClassName.Trim().ToLower();
                 query = query.Where(x => x.ClassName.ToLower().Contains(name));
             }
             if (request.SchoolYear.HasValue)
@@ -135,7 +135,7 @@ namespace School_Management.API.Repositories
             //Filtering
             if(!string.IsNullOrWhiteSpace(request.ClassName))
             {
-                var className = request.ClassName.Trim();
+                var className = request.ClassName.Trim().ToLower();
                 query = query.Where(x => x.ClassName.ToLower().Contains(className));
             }
             if (request.Grade.HasValue)
@@ -219,10 +219,10 @@ namespace School_Management.API.Repositories
             if (teacherInfo == null) return (null, "TEACHER_NULL");
             if (teacherInfo.isHomeRoom) return (null, "IS_HOMEROOM");
 
-            classYear.Grade = request.Grade;
+            classYear.Grade = (int)request.Grade;
             classYear.ClassName = request.ClassName;
             classYear.HomeRoomId = request.HomeRoomId;
-            classYear.SchoolYear = request.SchoolYear;
+            classYear.SchoolYear = (int)request.SchoolYear;
 
             await context.SaveChangesAsync();
 
@@ -256,7 +256,7 @@ namespace School_Management.API.Repositories
             //Filtering
             if (!string.IsNullOrWhiteSpace(request.ClassName))
             {
-                var className = request.ClassName.Trim();
+                var className = request.ClassName.Trim().ToLower();
                 query = query.Where(x => x.ClassName.ToLower().Contains(className));
             }
             if (request.Grade.HasValue)
@@ -343,6 +343,74 @@ namespace School_Management.API.Repositories
                                                  }).FirstOrDefaultAsync();
             if (myClass == null) return (null, "NOT_FOUND_CLASS");
             return (myClass, "SUCCESS");
+        }
+
+        public async Task<(bool result, string? errorCode)> PromoteClassYear(ClassPromoteRequest request)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                foreach (var pair in request.ClassPromotes)
+                {
+                    var fromClass = await context.ClassYear.FindAsync(pair.FromClassYearId);
+                    var toClass = await context.ClassYear.FindAsync(pair.ToClassYearId);
+
+                    if (fromClass == null || toClass == null)
+                        return (false, "CLASS_NOT_FOUND");
+
+                    if (fromClass.SchoolYear != request.CurrentSystemYear - 1 || toClass.SchoolYear != request.CurrentSystemYear)
+                    {
+                        return (false, "INVALID_SCHOOL_YEAR_SEQUENCE");
+                    }
+
+                    if (toClass.Grade != fromClass.Grade + 1)
+                    {
+                        return (false, "INVALID_GRADE_PROMOTION");
+                    }
+
+                    if (fromClass.Grade >= 12)
+                    {
+                        return (false, "CANNOT_PROMOTE_GRADE_12");
+                    }
+
+                    var studentIds = await context.StudentClassYear
+                        .Where(sc => sc.ClassYearId == pair.FromClassYearId)
+                        .Select(sc => sc.StudentId)
+                        .ToListAsync();
+
+                    if (studentIds.Any())
+                    {
+                        var existingStudentIds = await context.StudentClassYear
+                            .Where(sc => sc.ClassYearId == pair.ToClassYearId)
+                            .Select(sc => sc.StudentId)
+                            .ToListAsync();
+
+                        var newClassAssignments = studentIds
+                            .Where(sId => !existingStudentIds.Contains(sId)) 
+                            .Select(sId => new StudentClassYear
+                            {
+                                StudentClassYearId = Guid.NewGuid(),
+                                StudentId = sId,
+                                ClassYearId = pair.ToClassYearId
+                            }).ToList();
+
+                        if (newClassAssignments.Any())
+                        {
+                            await context.StudentClassYear.AddRangeAsync(newClassAssignments);
+                        }
+                    }
+                }
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return (true, "SUCCESS");
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return (false, "SYSTEM_ERROR");
+            }
+
         }
     }
 }
