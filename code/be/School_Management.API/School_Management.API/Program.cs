@@ -84,6 +84,8 @@ builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 builder.Services.AddScoped<IResultService, ResultService>();
 builder.Services.AddScoped<IResultRepository, ResultRepository>();
+builder.Services.AddScoped<IExamScheduleService, ExamScheduleService>();
+builder.Services.AddScoped<IExamScheduleRepository, ExamScheduleRepository>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
