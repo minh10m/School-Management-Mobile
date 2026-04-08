@@ -81,7 +81,7 @@ namespace School_Management.API.Services
             if(!result.Succeeded)
             {
                 var error = result.Errors.FirstOrDefault();
-                throw new BadRequestException(error?.Description ?? "Khởi tạo lại mật khẩu thất bại");
+                throw new BadRequestException("Vui lòng thử lại với mật khẩu khác với chữ hoa, thường, kí tự đặc biệt và ít nhất 8 kí tự");
             }
 
             // Log out this account in other devices
