@@ -56,8 +56,10 @@ export const userService = {
    * 409: username hoặc email đã tồn tại
    */
   createUser: async (payload: CreateUserPayload): Promise<UserResponse> => {
+    const role = (payload.roleId as string).toLowerCase();
+
     // Map Frontend Payload to Backend CreateUserRequest
-    const backendPayload = {
+    const backendPayload: any = {
       username: payload.username,
       password: payload.password,
       email: payload.email,
@@ -65,10 +67,15 @@ export const userService = {
       fullName: payload.fullName,
       address: payload.address,
       birthday: payload.birthday,
-      roleId: payload.roleId,
-      classYearId: payload.classYearId,
-      subjectId: payload.subjectId
+      role: role,
     };
+
+    if (role === 'student') {
+      backendPayload.classYearId = payload.classYearId;
+    } else if (role === 'teacher') {
+      backendPayload.subjectId = payload.subjectId || [];
+    }
+
     const response = await apiClient.post<UserResponse>("/users", backendPayload);
     return response.data;
   },

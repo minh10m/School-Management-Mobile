@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -19,6 +19,17 @@ export default function AdminUserDetailScreen() {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<RoleResponse[]>([]);
+  const [editVisible, setEditVisible] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    birthday: "",
+  });
 
   useEffect(() => {
     fetchUser();
@@ -42,9 +53,42 @@ export default function AdminUserDetailScreen() {
   const fetchRoles = async () => {
     try {
       const res = await roleService.getRoles();
-      setRoles(res.items);
+      const rolesData = Array.isArray(res) ? res : (res as any).items || [];
+      setRoles(rolesData);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const openEdit = () => {
+    if (!user) return;
+    setEditForm({
+      fullName: user.fullName || "",
+      email: user.email || "",
+      phoneNumber: user.phoneNumber || "",
+      address: user.address || "",
+      birthday: user.birthday ? user.birthday.split("T")[0] : "",
+    });
+    setEditVisible(true);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      setSaving(true);
+      const updated = await userService.updateUser(user!.userId, {
+        fullName: editForm.fullName,
+        email: editForm.email,
+        phone: editForm.phoneNumber,
+        address: editForm.address,
+        birthday: editForm.birthday ? new Date(editForm.birthday).toISOString() : undefined,
+      });
+      setUser(updated);
+      setEditVisible(false);
+      Alert.alert("Success", "User details updated.");
+    } catch (error: any) {
+      Alert.alert("Error", error?.response?.data?.message || "Update failed.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -63,7 +107,7 @@ export default function AdminUserDetailScreen() {
     </SafeAreaView>
   );
 
-  const isLocked = !!(user as any).lockoutEnd; // The UserListItem has lockoutEnd, UserResponse might not if not in swagger
+  const isLocked = !!user.lockoutEnd;
   const roleColor = ROLE_COLORS[user.role] ?? { bg: '#F3F4F6', text: '#6B7280' };
 
   const handleResetPassword = () => {
@@ -76,6 +120,13 @@ export default function AdminUserDetailScreen() {
           text: 'Reset',
           onPress: async (password?: string) => {
             if (!password) return;
+
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+            if (!passwordRegex.test(password)) {
+              Alert.alert('Invalid Password', 'Password must be at least 8 characters long and contain uppercase letters, lowercase letters, and numbers.');
+              return;
+            }
+
             try {
               await userService.resetPassword(user.userId, { newPassword: password });
               Alert.alert('Success', 'Password has been reset.');
@@ -118,11 +169,11 @@ export default function AdminUserDetailScreen() {
     Alert.alert(
       'Change Role',
       'Select new role:',
-      roles.map(r => ({
+      roles.map((r: any) => ({
         text: r.name,
         onPress: async () => {
           try {
-            await userService.updateRole(user.userId, { roleId: r.name }); // Backend expects name or ID, mapping string r.name for current type
+            await userService.updateRole(user.userId, { roleId: r.id || r.roleId }); // Use Role ID or fallback
             Alert.alert('Success', 'Role updated.');
             fetchUser();
           } catch (err: any) {
@@ -153,6 +204,9 @@ export default function AdminUserDetailScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">User Detail</Text>
+        <TouchableOpacity onPress={openEdit} className="p-2">
+            <Ionicons name="pencil-outline" size={20} color="#136ADA" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
@@ -222,6 +276,48 @@ export default function AdminUserDetailScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Edit Modal */}
+      <Modal visible={editVisible} animationType="slide" presentationStyle="pageSheet">
+        <SafeAreaView className="flex-1 bg-white">
+          <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
+            <TouchableOpacity onPress={() => setEditVisible(false)}>
+              <Text className="text-gray-500 text-base" style={{ fontFamily: "Poppins-Regular" }}>Cancel</Text>
+            </TouchableOpacity>
+            <Text className="text-black text-base" style={{ fontFamily: "Poppins-Bold" }}>Edit User Info</Text>
+            <TouchableOpacity onPress={handleSaveEdit} disabled={saving}>
+              {saving ? <ActivityIndicator size="small" color="#136ADA" /> : (
+                <Text className="text-blue-600 text-base" style={{ fontFamily: "Poppins-SemiBold" }}>Save</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+            <View className="gap-5">
+              <EditInput label="Full Name" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
+              <EditInput label="Email" value={editForm.email} onChangeText={(v: string) => setEditForm({ ...editForm, email: v })} keyboardType="email-address" />
+              <EditInput label="Phone Number" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
+              <EditInput label="Address" value={editForm.address} onChangeText={(v: string) => setEditForm({ ...editForm, address: v })} />
+              <EditInput label="Birthday (YYYY-MM-DD)" value={editForm.birthday} onChangeText={(v: string) => setEditForm({ ...editForm, birthday: v })} placeholder="1990-01-01" />
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
+  );
+}
+
+function EditInput({ label, value, onChangeText, ...props }: { label: string; value: string; onChangeText: (v: string) => void; [key: string]: any }) {
+  return (
+    <View className="gap-1">
+      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs ml-1">{label}</Text>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-black text-sm"
+        style={{ fontFamily: 'Poppins-Regular' }}
+        {...props}
+      />
+    </View>
   );
 }

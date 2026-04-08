@@ -11,11 +11,33 @@ import { RoleResponse } from '../../../types/role';
 import { ClassYearResponse } from '../../../types/classYear';
 import { SubjectResponse } from '../../../types/subject';
 
+const Field = ({ label, value, onChangeText, placeholder, secureTextEntry = false }: any) => (
+  <View className="mb-4">
+    <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600 text-xs mb-1">{label}</Text>
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      placeholder={placeholder}
+      secureTextEntry={secureTextEntry}
+      placeholderTextColor="#9CA3AF"
+      className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-black text-sm"
+      style={{ fontFamily: 'Poppins-Regular' }}
+    />
+  </View>
+);
+
 export default function AdminCreateUserScreen() {
   const [form, setForm] = useState({
-    username: '', password: '', email: '', phone: '',
-    fullName: '', address: '', birthday: '',
-    roleId: '', classYearId: '', subjectId: '',
+    username: '',
+    password: '',
+    email: '',
+    phone: '',
+    fullName: '',
+    address: '',
+    birthday: '',
+    roleId: '',
+    classYearId: '',
+    subjectId: '',
   });
 
   const [roles, setRoles] = useState<RoleResponse[]>([]);
@@ -34,15 +56,19 @@ export default function AdminCreateUserScreen() {
       const [roleRes, subjectRes, classRes] = await Promise.all([
         roleService.getRoles(),
         subjectService.getSubjects(),
-        classYearService.getClassYears({ schoolYear: '2026' }) // Defaulting to current year
+        classYearService.getClassYears({ schoolYear: '2026' })
       ]);
-      setRoles(roleRes.items);
-      setSubjects(subjectRes);
-      setClasses(classRes);
+
+      const rolesData = Array.isArray(roleRes) ? roleRes : (roleRes as any).items || [];
+      const subjectsData = Array.isArray(subjectRes) ? subjectRes : (subjectRes as any).items || [];
+      const classesData = Array.isArray(classRes) ? classRes : (classRes as any).items || [];
+
+      setRoles(rolesData);
+      setSubjects(subjectsData);
+      setClasses(classesData);
       
-      // Default role to Student if exists
-      const studentRole = roleRes.items.find(r => r.name === 'Student');
-      if (studentRole) setForm(f => ({ ...f, roleId: studentRole.id }));
+      const studentRole = rolesData.find((r: any) => r.name === 'Student');
+      if (studentRole) setForm(f => ({ ...f, roleId: studentRole.name.toLowerCase() }));
     } catch (err) {
       console.error(err);
     } finally {
@@ -52,11 +78,17 @@ export default function AdminCreateUserScreen() {
 
   const set = (key: string, val: string) => setForm(f => ({ ...f, [key]: val }));
 
-  const selectedRoleName = roles.find(r => r.id === form.roleId)?.name || '';
+  const selectedRoleName = form.roleId.charAt(0).toUpperCase() + form.roleId.slice(1);
 
   const handleSubmit = async () => {
     if (!form.username || !form.password || !form.fullName || !form.email || !form.roleId) {
       Alert.alert('Missing info', 'Please fill in all required fields (*).');
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(form.password)) {
+      Alert.alert('Invalid Password', 'Password must be at least 8 characters long and contain uppercase letters, lowercase letters, and numbers.');
       return;
     }
 
@@ -79,10 +111,10 @@ export default function AdminCreateUserScreen() {
         email: form.email,
         phone: form.phone,
         address: form.address,
-        birthday: form.birthday ? new Date(form.birthday).toISOString() : '',
+        birthday: form.birthday,
         roleId: form.roleId,
         classYearId: form.classYearId,
-        subjectId: form.subjectId
+        subjectId: form.subjectId ? [form.subjectId] : []
       });
       Alert.alert('Success', `Account created for ${form.fullName}`, [
         { text: 'OK', onPress: () => router.back() }
@@ -94,21 +126,6 @@ export default function AdminCreateUserScreen() {
     }
   };
 
-  const Field = ({ label, value, onChangeText, placeholder, secureTextEntry = false }: any) => (
-    <View className="mb-4">
-      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600 text-xs mb-1">{label}</Text>
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        secureTextEntry={secureTextEntry}
-        placeholderTextColor="#9CA3AF"
-        className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-black text-sm"
-        style={{ fontFamily: 'Poppins-Regular' }}
-      />
-    </View>
-  );
-
   if (fetching) return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center">
       <ActivityIndicator size="large" color="#136ADA" />
@@ -117,7 +134,6 @@ export default function AdminCreateUserScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
       <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
@@ -135,22 +151,21 @@ export default function AdminCreateUserScreen() {
           <Field label="Address" value={form.address} onChangeText={(v: string) => set('address', v)} placeholder="123 Road ABC..." />
           <Field label="Birthday (YYYY-MM-DD)" value={form.birthday} onChangeText={(v: string) => set('birthday', v)} placeholder="2000-01-15" />
 
-          {/* Role Picker */}
           <View className="mb-4">
             <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600 text-xs mb-2">Role *</Text>
             <View className="flex-row flex-wrap gap-2">
-              {roles.map(r => (
+              {roles.map((r: any) => (
                 <TouchableOpacity
-                  key={r.id} onPress={() => set('roleId', r.id)}
-                  className={`px-4 py-2 rounded-xl border items-center ${form.roleId === r.id ? 'bg-bright-blue border-bright-blue' : 'bg-gray-50 border-gray-200'}`}
+                  key={r.id || r.roleId || r.name} 
+                  onPress={() => set('roleId', r.name.toLowerCase())}
+                  className={`px-4 py-2 rounded-xl border items-center ${form.roleId === r.name.toLowerCase() ? 'bg-bright-blue border-bright-blue' : 'bg-gray-50 border-gray-200'}`}
                 >
-                  <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12, color: form.roleId === r.id ? 'white' : '#6B7280' }}>{r.name}</Text>
+                  <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 12, color: form.roleId === r.name.toLowerCase() ? 'white' : '#6B7280' }}>{r.name}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
 
-          {/* Class (Student only) */}
           {selectedRoleName === 'Student' && (
             <View className="mb-4">
               <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600 text-xs mb-2">Class *</Text>
@@ -169,7 +184,6 @@ export default function AdminCreateUserScreen() {
             </View>
           )}
 
-          {/* Subject (Teacher only) */}
           {selectedRoleName === 'Teacher' && (
             <View className="mb-4">
               <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600 text-xs mb-2">Subject *</Text>

@@ -26,11 +26,11 @@ export default function AdminUsersScreen() {
       setLoading(true);
       const res = await userService.getUsers({
         search,
-        role: activeTab === 'All' ? undefined : activeTab,
+        role: activeTab === 'All' ? undefined : activeTab.toLowerCase(),
         sortBy: 'createdAt',
         sortOrder: 'desc'
       });
-      setUsers(res.items);
+      setUsers(res.items || []);
     } catch (err) {
       console.error(err);
     } finally {
