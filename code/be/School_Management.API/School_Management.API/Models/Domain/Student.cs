@@ -17,5 +17,6 @@ namespace School_Management.API.Models.Domain
         public ICollection<StudentClassYear> StudentClassYears { get; set; } = new List<StudentClassYear>();
         public ICollection<Submission> Submissions { get; set; } = new List<Submission>();
         public ICollection<Result> Results { get; set; } = new List<Result>();
+        public ICollection<ExamStudentAssignment> ExamStudentAssignments { get; set; } = new List<ExamStudentAssignment>();
     }
 }
