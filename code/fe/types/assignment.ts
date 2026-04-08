@@ -1,28 +1,43 @@
 // ─── Response Types ────────────────────────────────────────────────────────────
 
-/** Dùng cho giáo viên xem bài tập */
+export interface TeacherAssignmentListResponse {
+  assignmentId: string;
+  title: string;
+  fileTitle: string | null;
+  fileUrl: string | null;
+  startTime: string; // ISO datetime
+  finishTime: string; // ISO datetime
+}
+
+/** Chi tiết bài tập (Dùng cho Create, Update, GetById cho giáo viên) */
 export interface AssignmentResponse {
   assignmentId: string;
   title: string;
-  body: string;
   fileUrl: string | null;
-  startTime: string;   // ISO datetime
-  finishTime: string;  // ISO datetime
+  fileTitle: string | null;
+  startTime: string; // ISO datetime
+  finishTime: string; // ISO datetime
   teacherSubjectId: string;
+  teacherName: string;
+  subjectName: string;
   classYearId: string;
+  className: string;
+  body?: string; // Mô tả chi tiết (nếu có)
 }
 
-/** Dùng cho học sinh xem bài tập (có thêm thông tin giáo viên, môn, lớp) */
-export interface StudentAssignmentResponse extends AssignmentResponse {
+export interface StudentAssignmentResponse {
+  assignmentId: string;
+  title: string;
+  body: string | null;
+  fileUrl: string | null;
+  startTime: string;
+  finishTime: string;
+  teacherSubjectId: string;
   teacherName: string;
   subjectName: string;
   className: string;
-  /** null = chưa nộp, object = đã nộp (left join submission) */
-  submission: {
-    submissionId: string;
-    status: string;
-    timeSubmit: string;
-  } | null;
+  classYearId: string;
+  status: string | null;
 }
 
 // ─── Query Params ──────────────────────────────────────────────────────────────
@@ -30,28 +45,30 @@ export interface StudentAssignmentResponse extends AssignmentResponse {
 export interface GetAssignmentsParams {
   classYearId?: string;
   teacherSubjectId?: string;
-  page?: number;
-  pageSize?: number;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────
 
 export interface CreateAssignmentPayload {
   title: string;
-  body: string;
-  fileUrl?: string;
-  startTime: string;          // ISO datetime
-  finishTime: string;         // ISO datetime
-  teacherSubjectId: string;
+  fileUrl?: string | null;
+  fileTitle?: string | null;
+  startTime: string; // ISO datetime
+  finishTime: string; // ISO datetime
+  subjectId: string;
   classYearId: string;
+  body?: string; // Mô tả chi tiết (nếu có)
 }
 
+/**
+ * Khi sửa bài tập, KHÔNG ĐƯỢC sửa classYearId (lớp) vì bài tập đã cố định trong lớp.
+ */
 export interface UpdateAssignmentPayload {
   title?: string;
-  body?: string;
-  fileUrl?: string;
+  fileUrl?: string | null;
+  fileTitle?: string | null;
   startTime?: string;
   finishTime?: string;
-  teacherSubjectId?: string;
-  classYearId?: string;
+  subjectId?: string;
+  body?: string;
 }

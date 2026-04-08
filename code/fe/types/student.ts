@@ -17,6 +17,7 @@ export interface StudentListResponse {
 }
 
 export interface ClassYearSub {
+  classYearId: string;
   grade: number;
   schoolYear: number;
   className: string;

@@ -9,6 +9,7 @@ export interface UserResponse {
   address: string;
   birthday: string; // ISO date string
   role: string;
+  lockoutEnd?: string | null; // ISO datetime string or null
 }
 
 export interface UserListItem {
@@ -50,7 +51,7 @@ export interface CreateUserPayload {
   birthday: string; // ISO date string
   roleId: string;
   classYearId?: string; // Required if role = Student
-  subjectId?: string;   // Required if role = Teacher
+  subjectId?: string[];   // Required if role = Teacher (Array of strings as per cURL)
 }
 
 export interface UpdateUserPayload {

@@ -1,38 +1,34 @@
-// ─── Response Types ────────────────────────────────────────────────────────────
-
-export interface EventResponse {
+export interface EventItem {
   eventId: string;
   title: string;
   body: string;
-  startTime: string;   // ISO datetime
-  finishTime: string;
-  schoolYear: string;
-  term: string;
+  startTime: string; // "09:00:00"
+  finishTime: string; // "11:30:00"
+  eventDate: string; // "2026-04-02"
+  schoolYear: number;
+  term: number;
 }
 
-// ─── Query Params ──────────────────────────────────────────────────────────────
+export interface EventListResponse {
+  items: EventItem[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+}
 
 export interface GetEventsParams {
-  term?: string;
-  schoolYear?: string;
+  Title?: string;
+  SchoolYear?: number;
+  Term?: number;
 }
-
-// ─── Request Payloads ─────────────────────────────────────────────────────────
 
 export interface CreateEventPayload {
   title: string;
   body: string;
   startTime: string;
   finishTime: string;
-  schoolYear: string;
-  term: string;
-}
-
-export interface UpdateEventPayload {
-  title?: string;
-  body?: string;
-  startTime?: string;
-  finishTime?: string;
-  schoolYear?: string;
-  term?: string;
+  eventDate: string;
+  schoolYear: number;
+  term: number;
 }

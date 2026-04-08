@@ -26,6 +26,7 @@ export interface TeacherResponse {
 }
 
 export interface TeacherSubject {
+  teacherSubjectId: string;
   subjectId: string;
   subjectName: string;
 }
@@ -37,7 +38,7 @@ export interface GetTeachersParams {
   pageSize?: number;
   search?: string;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
   subjectId?: string;
 }
 
@@ -51,5 +52,4 @@ export interface UpdateTeacherPayload {
   address?: string;
 }
 
-/** Teacher tự cập nhật (không được sửa role / tự gán môn) */
 export type UpdateTeacherSelfPayload = UpdateTeacherPayload;
