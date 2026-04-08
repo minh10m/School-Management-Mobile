@@ -31,5 +31,23 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [Route("{examScheduleId}/details")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateExamScheduleDetail(IFormFile file, [FromRoute] Guid examScheduleId)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { success = false, message = "Vui lòng chọn file Excel để upload." });
+            }
+            var result = await examScheduleService.CreateExamScheduleDetail(file, examScheduleId);
+            return StatusCode(201, new
+            {
+                success = result, 
+                message = "Tạo chi tiết lịch thi thành công"
+            });
+        }
     }
 }

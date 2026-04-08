@@ -5,6 +5,9 @@ namespace School_Management.API.Repositories
     public interface IExamScheduleRepository
     {
         public Task<(ExamScheduleResponse? data, string? message)> CreateExamSchedule(ExamScheduleRequest request);
+        public List<ExamScheduleDetailRequest> ReadExcelData(IFormFile file);
+
+        public Task<(bool result, string? message)> CreateExamScheduleDetail(IFormFile file, Guid examScheduleId);
 
     }
 }

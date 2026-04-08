@@ -22,5 +22,13 @@ namespace School_Management.API.Services
                 _ => throw new Exception("Lỗi không xác định")
             };
         }
+
+        public async Task<bool> CreateExamScheduleDetail(IFormFile file, Guid examScheduleId)
+        {
+            var (result, message) = await examScheduleRepository.CreateExamScheduleDetail(file, examScheduleId);
+            if (result == false) throw new BadRequestException(message ?? "Lỗi không xác định");
+
+            return result;
+        }
     }
 }

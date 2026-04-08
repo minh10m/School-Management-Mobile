@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ExcelDataReader;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using System.ComponentModel.DataAnnotations;
 
 namespace School_Management.API.Repositories
 {
@@ -65,6 +67,103 @@ namespace School_Management.API.Repositories
                 throw;
             }
             
+        }
+
+        public async Task<(bool result, string? message)> CreateExamScheduleDetail(IFormFile file, Guid examScheduleId)
+        {
+            var rows = ReadExcelData(file);
+            if (!rows.Any()) return (false, "File trống không có dữ liệu");
+
+            var teacherDict = await context.Teacher.Include(x => x.User).ToDictionaryAsync(x => x.User.Email, x => x.Id);
+            var subjectDict = await context.Subject.ToDictionaryAsync(x => x.SubjectName, x => x.Id);
+
+            var dateFile = rows.Select(x => x.Date).Distinct().ToList();
+            var existingData = await context.ExamScheduleDetail.AsNoTracking().Where(x => dateFile.Contains(x.Date))
+                                                               .Select(g => new { g.StartTime, g.FinishTime, g.Date, g.RoomName, g.TeacherId })
+                                                               .ToListAsync();
+            var overallResult = new List<ExamScheduleDetail>();
+            var currentRow = 2;
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                foreach (var row in rows)
+                {
+                    var validationContext = new ValidationContext(row);
+                    var result = new List<ValidationResult>();
+
+                    if (!Validator.TryValidateObject(row, validationContext, result, true))
+                        return (false, $"Dòng {currentRow} : {result.First().ErrorMessage}");
+
+                    if (!teacherDict.TryGetValue(row.TeacherEmail, out var tId))
+                        return (false, $"Dòng {currentRow} : Giá trị {row.TeacherEmail} không tồn tại");
+
+                    if (!subjectDict.TryGetValue(row.SubjectName, out var sId))
+                        return (false, $"Dòng {currentRow} : Giá trị {row.SubjectName} không tồn tại");
+
+                    var isExisted = existingData.Any(x => x.Date == row.Date
+                                                       && (x.StartTime < row.FinishTime && x.FinishTime > row.StartTime)
+                                                       && (x.TeacherId == tId || x.RoomName == row.RoomName))
+                                    ||
+                                    overallResult.Any(x => x.Date == row.Date
+                                                       && (x.StartTime < row.FinishTime && x.FinishTime > row.StartTime)
+                                                       && (x.TeacherId == tId || x.RoomName == row.RoomName));
+                    if (isExisted) return (false, $"Dòng {currentRow} : Lỗi trùng giáo viên hoặc phòng thi");
+                    overallResult.Add(new ExamScheduleDetail
+                    {
+                        Id = Guid.NewGuid(),
+                        ExamScheduleId = examScheduleId,
+                        TeacherId = tId,
+                        SubjectId = sId,
+                        StartTime = row.StartTime,
+                        FinishTime = row.FinishTime,
+                        Date = row.Date,
+                        RoomName = row.RoomName
+                    });
+
+                    currentRow++;
+
+                }
+                context.ExamScheduleDetail.AddRange(overallResult);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return (true, "SUCCESS");
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            
+
+        }
+
+        public List<ExamScheduleDetailRequest> ReadExcelData(IFormFile file)
+        {
+            var list = new List<ExamScheduleDetailRequest>();
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            using (var stream = file.OpenReadStream())
+            using(var reader = ExcelReaderFactory.CreateReader(stream))
+            {
+                var rowIndex = 0;
+                while (reader.Read())
+                {
+                    rowIndex++;
+                    if (rowIndex == 1) continue;
+
+                    list.Add(new ExamScheduleDetailRequest
+                    {
+                        TeacherEmail = reader.GetValue(0)?.ToString()?.Trim() ?? "",
+                        SubjectName = reader.GetValue(1)?.ToString()?.Trim() ?? "",
+                        RoomName = reader.GetValue(2)?.ToString()?.Trim() ?? "",
+                        StartTime = TimeSpan.Parse(reader.GetValue(3)?.ToString()?.Trim()),
+                        FinishTime = TimeSpan.Parse(reader.GetValue(4)?.ToString()?.Trim()),
+                        Date = DateOnly.FromDateTime(Convert.ToDateTime(reader.GetValue(5)))
+                    });
+                }
+
+                return list;
+            }
         }
     }
 }
