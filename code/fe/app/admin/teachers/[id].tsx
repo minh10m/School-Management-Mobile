@@ -1,10 +1,13 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, Modal, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { teacherService } from '../../../services/teacher.service';
-import { TeacherResponse } from '../../../types/teacher';
+import { subjectService } from '../../../services/subject.service';
+import { teacherSubjectService } from '../../../services/teacherSubject.service';
+import { TeacherResponse, TeacherSubject } from '../../../types/teacher';
+import { SubjectResponse } from '../../../types/subject';
 
 export default function AdminTeacherDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -12,6 +15,12 @@ export default function AdminTeacherDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
+  // Subject management state
+  const [assignedSubjects, setAssignedSubjects] = useState<TeacherSubject[]>([]);
+  const [allSubjects, setAllSubjects] = useState<SubjectResponse[]>([]);
+  const [showSubjectModal, setShowSubjectModal] = useState(false);
+  const [subjectLoading, setSubjectLoading] = useState(false);
 
   // Edit form state
   const [form, setForm] = useState({
@@ -22,12 +31,20 @@ export default function AdminTeacherDetailScreen() {
     birthday: '',
   });
 
-  const fetchTeacher = async () => {
+  const fetchData = async () => {
     if (!id) return;
     try {
       setLoading(true);
-      const res = await teacherService.getTeacherById(id);
+      const [res, subjects, availableSubjects] = await Promise.all([
+        teacherService.getTeacherById(id),
+        teacherService.getTeacherSubjects(id),
+        subjectService.getSubjects()
+      ]);
+      
       setTeacher(res);
+      setAssignedSubjects(subjects);
+      setAllSubjects(Array.isArray(availableSubjects) ? availableSubjects : []);
+      
       setForm({
         fullName: res.fullName || '',
         email: res.email || '',
@@ -44,7 +61,7 @@ export default function AdminTeacherDetailScreen() {
   };
 
   useEffect(() => {
-    fetchTeacher();
+    fetchData();
   }, [id]);
 
   const handleUpdate = async () => {
@@ -67,6 +84,52 @@ export default function AdminTeacherDetailScreen() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleAssignSubject = async (subjectId: string) => {
+    if (!id) return;
+    try {
+      setSubjectLoading(true);
+      await teacherSubjectService.assignSubject({ teacherId: id, subjectId });
+      // Refresh subjects
+      const updated = await teacherService.getTeacherSubjects(id);
+      setAssignedSubjects(updated);
+      setShowSubjectModal(false);
+      Alert.alert('Success', 'Subject assigned successfully!');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || 'Failed to assign subject.';
+      Alert.alert('Error', msg);
+    } finally {
+      setSubjectLoading(false);
+    }
+  };
+
+  const handleRemoveSubject = (teacherSubjectId: string, subjectName: string) => {
+    Alert.alert(
+      'Remove Subject',
+      `Are you sure you want to remove "${subjectName}" from this teacher?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setSubjectLoading(true);
+              await teacherSubjectService.removeSubject(teacherSubjectId);
+              // Refresh subjects
+              const updated = await teacherService.getTeacherSubjects(id!);
+              setAssignedSubjects(updated);
+            } catch (err: any) {
+              const msg = err?.response?.data?.message || 'Failed to remove subject.';
+              Alert.alert('Error', msg);
+            } finally {
+              setSubjectLoading(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
   if (loading) return (
@@ -129,11 +192,6 @@ export default function AdminTeacherDetailScreen() {
               <Text style={{ fontFamily: 'Poppins-Bold', color: '#A855F7', fontSize: 36 }}>{teacher.fullName.charAt(0)}</Text>
            </View>
            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl">{teacher.fullName}</Text>
-           <View className="bg-purple-100 px-4 py-1.5 rounded-full mt-2 border border-purple-200">
-              <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 12, color: '#9333EA' }}>
-                {teacher.subjectNames?.join(", ") || "No Subject"}
-              </Text>
-           </View>
         </View>
 
         {isEditing ? (
@@ -156,14 +214,91 @@ export default function AdminTeacherDetailScreen() {
           </View>
         ) : (
           <View className="mt-4">
+             <View className="px-6 py-2">
+                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-400 text-[10px] uppercase tracking-wider">Basic Information</Text>
+             </View>
              <InfoRow label="Email" value={teacher.email} icon="mail-outline" />
              <InfoRow label="Phone" value={teacher.phoneNumber} icon="call-outline" />
              <InfoRow label="Address" value={teacher.address} icon="location-outline" />
              <InfoRow label="Birthday" value={teacher.birthday ? new Date(teacher.birthday).toLocaleDateString('en-GB') : 'N/A'} icon="calendar-outline" />
              <InfoRow label="User ID" value={teacher.userId} icon="finger-print-outline" />
+
+             {/* Subject Management Section */}
+             <View className="px-6 py-4 mt-2">
+                <View className="flex-row justify-between items-center mb-3">
+                   <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-400 text-[10px] uppercase tracking-wider">Teaching Subjects</Text>
+                   <TouchableOpacity 
+                    onPress={() => setShowSubjectModal(true)}
+                    className="bg-bright-blue/10 px-3 py-1 rounded-full flex-row items-center"
+                   >
+                      <Ionicons name="add" size={14} color="#136ADA" />
+                      <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 11, color: '#136ADA' }} className="ml-0.5">Assign</Text>
+                   </TouchableOpacity>
+                </View>
+
+                {subjectLoading && assignedSubjects.length === 0 ? (
+                  <ActivityIndicator size="small" color="#136ADA" />
+                ) : assignedSubjects.length === 0 ? (
+                  <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs italic">No subjects assigned</Text>
+                ) : (
+                  <View className="flex-row flex-wrap gap-2">
+                    {assignedSubjects.map(sub => (
+                      <View key={sub.teacherSubjectId} className="bg-purple-50 border border-purple-100 rounded-xl px-3 py-2 flex-row items-center">
+                        <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 13, color: '#9333EA' }} className="mr-2">{sub.subjectName}</Text>
+                        <TouchableOpacity onPress={() => handleRemoveSubject(sub.teacherSubjectId, sub.subjectName)}>
+                          <Ionicons name="close-circle" size={16} color="#A855F7" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                )}
+             </View>
           </View>
         )}
       </ScrollView>
+
+      {/* Subject Selection Modal */}
+      <Modal
+        visible={showSubjectModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowSubjectModal(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-[40px] h-[60%] p-6">
+            <View className="flex-row justify-between items-center mb-6">
+              <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl">Assign Subject</Text>
+              <TouchableOpacity onPress={() => setShowSubjectModal(false)}>
+                <Ionicons name="close" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={allSubjects.filter(sub => !assignedSubjects.some(a => a.subjectId === sub.subjectId))}
+              keyExtractor={item => item.subjectId}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => handleAssignSubject(item.subjectId)}
+                  className="flex-row items-center py-4 border-b border-gray-50"
+                  disabled={subjectLoading}
+                >
+                  <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mr-4">
+                    <Ionicons name="book-outline" size={20} color="#136ADA" />
+                  </View>
+                  <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-base flex-1">{item.subjectName}</Text>
+                  <Ionicons name="add-circle-outline" size={24} color="#136ADA" />
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={
+                <View className="items-center py-10">
+                   <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400">All subjects have been assigned</Text>
+                </View>
+              }
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
