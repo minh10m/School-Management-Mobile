@@ -8,6 +8,7 @@ namespace School_Management.API.Repositories
         public List<ExamScheduleDetailRequest> ReadExcelData(IFormFile file);
 
         public Task<(bool result, string? message)> CreateExamScheduleDetail(IFormFile file, Guid examScheduleId);
+        public Task<(bool result, string? message)> AssignStudentIntoExamScheduleDetail(Guid examScheduleId);
 
     }
 }

@@ -49,5 +49,18 @@ namespace School_Management.API.Controllers
                 message = "Tạo chi tiết lịch thi thành công"
             });
         }
+
+        [HttpPost]
+        [Route("{examScheduleId}/details/assign")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AssignStudentIntoExamScheduleDetail([FromRoute] Guid examScheduleId)
+        {
+            var result = await examScheduleService.AssignStudentIntoExamScheduleDetail(examScheduleId);
+            return StatusCode(201, new
+            {
+                success = result,
+                message = "Phân bổ học sinh vào chi tiết lịch thành công"
+            });
+        }
     }
 }
