@@ -144,7 +144,7 @@ export const classYearService = {
     if (payload.schoolYear) {
       backendPayload.schoolYear = parseInt(payload.schoolYear.split("-")[0], 10);
     }
-    const response = await apiClient.patch<ClassYearResponse>(
+    const response = await apiClient.put<ClassYearResponse>(
       `/class-years/${classYearId}`,
       backendPayload
     );

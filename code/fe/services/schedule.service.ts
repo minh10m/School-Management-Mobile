@@ -99,7 +99,7 @@ export const scheduleService = {
     scheduleId: string,
     payload: UpdateScheduleDetailPayload
   ): Promise<any> => {
-    const response = await apiClient.patch(`/schedules/${scheduleId}/details`, payload);
+    const response = await apiClient.put(`/schedules/${scheduleId}/details`, payload);
     return response.data;
   },
 

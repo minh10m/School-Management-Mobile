@@ -1,4 +1,4 @@
-import { AssignSubjectPayload, TeacherSubjectResponse } from "../types/teacherSubject";
+import { AssignSubjectPayload, TeacherSubjectResponse, UpdateTeacherSubjectPayload } from "../types/teacherSubject";
 import apiClient from "./apiClient";
 
 export const teacherSubjectService = {
@@ -27,5 +27,16 @@ export const teacherSubjectService = {
    */
   removeSubject: async (teacherSubjectId: string): Promise<void> => {
     await apiClient.delete(`/teacher-subjects/${teacherSubjectId}`);
+  },
+
+  // ─── UPDATE SUBJECT FOR TEACHER ─────────────────────────────────────────────
+  /**
+   * Admin sửa môn học của giáo viên
+   * PATCH /teacher-subjects
+   * AuthN(login) + AuthZ(Admin)
+   */
+  updateSubjectForTeacher: async (payload: UpdateTeacherSubjectPayload): Promise<any> => {
+    const response = await apiClient.patch("/teacher-subjects", payload);
+    return response.data;
   },
 };

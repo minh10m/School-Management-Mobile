@@ -32,7 +32,7 @@ export const eventService = {
     if (payload.schoolYear) backendPayload.SchoolYear = payload.schoolYear;
     if (payload.term) backendPayload.Term = payload.term;
 
-    const response = await apiClient.patch<EventItem>(`/events/${id}`, backendPayload);
+    const response = await apiClient.put<EventItem>(`/events/${id}`, backendPayload);
     return response.data;
   },
 };
