@@ -1,114 +1,211 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from 'react';
-
-const MOCK_EVENTS: Record<string, any> = {
-  '1': { title: 'Sports Day 2025', body: 'Toàn trường tham gia đại hội thể thao tại sân vận động.', startTime: '2025-11-03T07:00:00', finishTime: '2025-11-03T17:00:00', schoolYear: '2025-2026', term: 'HK1' },
-};
+import { eventService } from '../../../services/event.service';
+import { getErrorMessage } from '../../../utils/error';
 
 export default function AdminCreateEventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const isEdit = !!id;
+  const [fetching, setFetching] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
     body: '',
-    startTime: '2025-11-03T07:00:00',
-    finishTime: '2025-11-03T17:00:00',
-    schoolYear: '2025-2026',
-    term: 'HK1'
+    eventDate: new Date().toISOString().split('T')[0],
+    startTime: '09:00:00',
+    finishTime: '11:30:00',
+    schoolYear: 2026,
+    term: 1
   });
 
   useEffect(() => {
-    if (id && MOCK_EVENTS[id]) {
-      setForm(MOCK_EVENTS[id]);
+    if (isEdit) {
+      loadEvent();
     }
   }, [id]);
 
-  const set = (key: string, val: string) => setForm(f => ({ ...f, [key]: val }));
-
-  const handleSubmit = () => {
-    if (!form.title || !form.body) {
-      Alert.alert('Lỗi', 'Vui lòng điền tiêu đề và nội dung sự kiện.');
-      return;
+  const loadEvent = async () => {
+    try {
+      setFetching(true);
+      // Fetch specifically by id or search within the list
+      const res = await eventService.getEvents({ Title: '' }); // Simplified: Fetch all and find
+      const event = res.items.find(e => e.eventId === id);
+      if (event) {
+        setForm({
+          title: event.title,
+          body: event.body,
+          eventDate: event.eventDate,
+          startTime: event.startTime,
+          finishTime: event.finishTime,
+          schoolYear: event.schoolYear,
+          term: event.term
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      Alert.alert('Error', 'Unable to load event details');
+    } finally {
+      setFetching(false);
     }
-    Alert.alert('Thành công', `Đã ${isEdit ? 'cập nhật' : 'tạo'} sự kiện "${form.title}"`, [
-      { text: 'OK', onPress: () => router.back() }
-    ]);
   };
 
-  const Field = ({ label, value, onChangeText, placeholder, multiline = false }: any) => (
-    <View className="mb-4">
-      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600 text-xs mb-1">{label}</Text>
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        multiline={multiline}
-        placeholderTextColor="#9CA3AF"
-        className={`bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-black text-sm ${multiline ? 'h-24 text-start' : ''}`}
-        style={{ fontFamily: 'Poppins-Regular', textAlignVertical: multiline ? 'top' : 'center' }}
-      />
-    </View>
-  );
+  const set = (key: string, val: any) => setForm(f => ({ ...f, [key]: val }));
+
+  const handleSubmit = async () => {
+    if (!form.title || !form.body || !form.eventDate || !form.startTime || !form.finishTime) {
+      Alert.alert('Error', 'Please fill in all required fields.');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      if (isEdit) {
+        await eventService.updateEvent(id!, form);
+      } else {
+        await eventService.createEvent(form);
+      }
+      Alert.alert('Success', `Successfully ${isEdit ? 'updated' : 'created'} the event.`, [
+        { text: 'OK', onPress: () => router.back() }
+      ]);
+    } catch (err: any) {
+      console.log(err);
+      const msg = getErrorMessage(err);
+      Alert.alert('Failed', msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (fetching) {
+    return (
+      <SafeAreaView className="flex-1 bg-white items-center justify-center">
+        <ActivityIndicator color="#136ADA" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-row items-center px-6 py-4 border-b border-gray-100">
+      {/* Header */}
+      <View className="flex-row items-center px-6 py-4 border-b border-gray-100 bg-white">
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg">{isEdit ? 'Edit Event' : 'Create Event'}</Text>
+        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg">
+          {isEdit ? 'Edit Event' : 'Create New Event'}
+        </Text>
       </View>
 
       <ScrollView className="flex-1 px-6 pt-5" showsVerticalScrollIndicator={false}>
-        <Field label="Event Title *" value={form.title} onChangeText={(v: string) => set('title', v)} placeholder="Ví dụ: Đại hội thể thao" />
-        <Field label="Description *" value={form.body} onChangeText={(v: string) => set('body', v)} placeholder="Nội dung sự kiện..." multiline />
-        
-        <View className="flex-row gap-3">
+        {/* Title */}
+        <View className="mb-5">
+          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Event Title *</Text>
+          <TextInput
+            value={form.title}
+            onChangeText={(v) => set('title', v)}
+            placeholder="Enter event title..."
+            placeholderTextColor="#9CA3AF"
+            className="bg-white border border-gray-100 rounded-2xl px-4 py-3.5 text-black text-sm"
+            style={{ fontFamily: 'Poppins-Regular' }}
+          />
+        </View>
+
+        {/* Body */}
+        <View className="mb-5">
+          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Event Description *</Text>
+          <TextInput
+            value={form.body}
+            onChangeText={(v) => set('body', v)}
+            placeholder="Describe the event details..."
+            placeholderTextColor="#9CA3AF"
+            multiline
+            numberOfLines={4}
+            className="bg-white border border-gray-100 rounded-2xl px-4 py-3.5 text-black text-sm h-32 text-start"
+            style={{ fontFamily: 'Poppins-Regular', textAlignVertical: 'top' }}
+          />
+        </View>
+
+        {/* Date */}
+        <View className="mb-5">
+          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Event Date (YYYY-MM-DD) *</Text>
+          <TextInput
+            value={form.eventDate}
+            onChangeText={(v) => set('eventDate', v)}
+            placeholder="2026-04-02"
+            placeholderTextColor="#D1D5DB"
+            className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm text-black"
+          />
+        </View>
+
+        {/* Times */}
+        <View className="flex-row gap-4 mb-5">
           <View className="flex-1">
-            <Field label="Start (ISO) *" value={form.startTime} onChangeText={(v: string) => set('startTime', v)} placeholder="2025-11-03T07:00:00" />
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Start Time (HH:mm:ss) *</Text>
+            <TextInput
+              value={form.startTime}
+              onChangeText={(v) => set('startTime', v)}
+              placeholder="09:00:00"
+              placeholderTextColor="#D1D5DB"
+              className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-xs text-black"
+            />
           </View>
           <View className="flex-1">
-             <Field label="Finish (ISO) *" value={form.finishTime} onChangeText={(v: string) => set('finishTime', v)} placeholder="2025-11-03T17:00:00" />
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Finish Time (HH:mm:ss) *</Text>
+            <TextInput
+              value={form.finishTime}
+              onChangeText={(v) => set('finishTime', v)}
+              placeholder="11:30:00"
+              placeholderTextColor="#D1D5DB"
+              className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-xs text-black"
+            />
           </View>
         </View>
 
-        <View className="flex-row gap-3">
+        {/* Year and Term */}
+        <View className="flex-row gap-4 mb-5">
           <View className="flex-1">
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600 text-xs mb-1">Term *</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">School Year *</Text>
+            <TextInput
+              value={form.schoolYear.toString()}
+              onChangeText={(v) => set('schoolYear', parseInt(v) || 2026)}
+              keyboardType="numeric"
+              className="bg-white border border-gray-100 rounded-2xl px-4 py-3.5 text-black text-sm"
+              style={{ fontFamily: 'Poppins-Regular' }}
+            />
+          </View>
+          <View className="flex-1">
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Academic Term *</Text>
             <View className="flex-row gap-2">
-              {['HK1', 'HK2'].map(t => (
-                <TouchableOpacity key={t} onPress={() => set('term', t)}
-                  className={`flex-1 py-3 rounded-xl border items-center ${form.term === t ? 'bg-bright-blue border-bright-blue' : 'bg-white border-gray-200'}`}
+              {[1, 2].map(t => (
+                <TouchableOpacity 
+                  key={t} onPress={() => set('term', t)}
+                  className={`flex-1 py-3.5 rounded-2xl border items-center ${form.term === t ? 'bg-bright-blue border-bright-blue' : 'bg-white border-gray-100'}`}
                 >
-                  <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 13, color: form.term === t ? 'white' : '#6B7280' }}>{t}</Text>
+                  <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 13, color: form.term === t ? 'white' : '#9CA3AF' }}>Term {t}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
-          <View className="flex-1">
-            <Field label="School Year *" value={form.schoolYear} onChangeText={(v: string) => set('schoolYear', v)} placeholder="2025-2026" />
-          </View>
         </View>
 
+        {/* Submit */}
         <TouchableOpacity
-          className="bg-bright-blue rounded-2xl py-4 items-center mt-6 mb-10"
+          className={`${submitting ? 'bg-blue-300' : 'bg-bright-blue'} rounded-2xl py-4 items-center mt-6 mb-10 shadow-sm shadow-blue-100`}
           onPress={handleSubmit}
+          disabled={submitting}
         >
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">{isEdit ? 'Update Event' : 'Create Event'}</Text>
+          {submitting ? (
+            <ActivityIndicator color="white" size="small" />
+          ) : (
+            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">
+              {isEdit ? 'Update Event' : 'Save Event'}
+            </Text>
+          )}
         </TouchableOpacity>
-
-        {isEdit && (
-          <TouchableOpacity
-            className="border border-red-100 bg-red-50 rounded-2xl py-4 items-center mb-10"
-            onPress={() => Alert.alert('Xóa sự kiện', 'Bạn có chắc chắn muốn xóa sự kiện này?', [{ text: 'Hủy' }, { text: 'Xóa', style: 'destructive', onPress: () => router.back() }])}
-          >
-            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-red-500 text-base">Delete Event</Text>
-          </TouchableOpacity>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
