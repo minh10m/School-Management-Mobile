@@ -11,6 +11,7 @@ using School_Management.API.Mappings;
 using School_Management.API.Services;
 using School_Management.API.Repositories;
 using Microsoft.OpenApi.Models;
+using School_Management.API.ErrorMessageConfiguration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +84,8 @@ builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 builder.Services.AddScoped<IResultService, ResultService>();
 builder.Services.AddScoped<IResultRepository, ResultRepository>();
+builder.Services.AddScoped<IExamScheduleService, ExamScheduleService>();
+builder.Services.AddScoped<IExamScheduleRepository, ExamScheduleRepository>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
@@ -100,6 +103,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Configure identity services
 builder.Services.AddIdentityCore<AppUser>()
+    .AddErrorDescriber<VietnameseIdentityErrorDescriber>()
     .AddRoles<IdentityRole<Guid>>()
     .AddTokenProvider<DataProtectorTokenProvider<AppUser>>("SchoolManager")
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -136,6 +140,8 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
     options.Lockout.AllowedForNewUsers = true;
 
+    //Email configuration
+    options.User.RequireUniqueEmail = true;
 });
 
 var app = builder.Build();

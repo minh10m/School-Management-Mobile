@@ -27,6 +27,9 @@ namespace School_Management.API.Data
         public DbSet<Assignment> Assignment { get; set; }
         public DbSet<Submission> Submission { get; set; }
         public DbSet<Result> Result { get; set; }
+        public DbSet<ExamSchedule> ExamSchedule { get; set; }
+        public DbSet<ExamScheduleDetail> ExamScheduleDetail { get; set; }
+        public DbSet<ExamStudentAssignment> ExamStudentAssignment { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

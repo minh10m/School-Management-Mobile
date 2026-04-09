@@ -17,40 +17,64 @@ namespace School_Management.API.Repositories
         }
         public async Task<ScheduleResponse?> CreateSchedule(PostUpdateScheduleRequest request)
         {
-            var isExisted = await context.Schedule
-                                      .AnyAsync(x => x.Name == request.Name && x.SchoolYear == request.SchoolYear
-                                      && x.Term == request.Term && x.ClassYearId == request.ClassYearId);
-                                      
-            if (isExisted) return null;
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                if(request.IsActive)
+                {
+                    var activeTrueSchedule = await context.Schedule.Where(x => x.SchoolYear == request.SchoolYear
+                                                                            && x.Term == request.Term
+                                                                            && x.IsActive == true 
+                                                                            && x.ClassYearId == request.ClassYearId).FirstOrDefaultAsync();
+                    if (activeTrueSchedule != null)
+                        activeTrueSchedule.IsActive = false;
+                }
+                else
+                {
+                    var isExisted = await context.Schedule
+                                         .AnyAsync(x => x.Name == request.Name && x.SchoolYear == request.SchoolYear
+                                         && x.Term == request.Term && x.ClassYearId == request.ClassYearId && x.IsActive == request.IsActive);
 
-            var className = await context.ClassYear
-                                         .Where(x => x.Id == request.ClassYearId)
-                                         .Select(x => x.ClassName)
-                                         .FirstOrDefaultAsync();
+                    if (isExisted) return null;
+                }
+                   
+
+                var className = await context.ClassYear
+                                             .Where(x => x.Id == request.ClassYearId)
+                                             .Select(x => x.ClassName)
+                                             .FirstOrDefaultAsync();
+
+                var schedule = new Schedule
+                {
+                    Id = Guid.NewGuid(),
+                    Term = (int)request.Term,
+                    SchoolYear = (int)request.SchoolYear,
+                    Name = request.Name,
+                    IsActive = (bool)request.IsActive,
+                    ClassYearId = request.ClassYearId
+                };
+
+                context.Schedule.Add(schedule);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return new ScheduleResponse
+                {
+                    Term = schedule.Term,
+                    SchoolYear = schedule.SchoolYear,
+                    ClassYearId = schedule.ClassYearId,
+                    Name = schedule.Name,
+                    ScheduleId = schedule.Id,
+                    IsActive = schedule.IsActive,
+                    ClassName = className
+
+                };
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
             
-            var schedule = new Schedule
-            {
-                Id = Guid.NewGuid(),
-                Term = (int)request.Term,
-                SchoolYear = (int)request.SchoolYear,
-                Name = request.Name,
-                IsActive = (bool)request.IsActive,
-                ClassYearId = request.ClassYearId
-            };
-
-            context.Schedule.Add(schedule);
-            await context.SaveChangesAsync();
-            return new ScheduleResponse
-            {
-                Term = schedule.Term,
-                SchoolYear = schedule.SchoolYear,
-                ClassYearId = schedule.ClassYearId,
-                Name = schedule.Name,
-                ScheduleId = schedule.Id,
-                IsActive = schedule.IsActive,
-                ClassName = className
-
-            };
         }
 
 
@@ -108,48 +132,70 @@ namespace School_Management.API.Repositories
 
         }
 
-        
+
 
         public async Task<ScheduleResponse?> UpdateSchedule(PostUpdateScheduleRequest request, Schedule schedule)
         {
-            var isExisted = await context.Schedule
-                                      .AnyAsync(x => x.Id != schedule.Id 
-                                      && x.Name == request.Name 
-                                      && x.SchoolYear == request.SchoolYear
-                                      && x.Term == request.Term 
-                                      && x.ClassYearId == request.ClassYearId);
-
-            if (isExisted) return null;
-            if(request.ClassYearId != schedule.ClassYearId)
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
             {
-                var oldDetails = await context.ScheduleDetail
-                                              .Where(x => x.ScheduleId == schedule.Id)
-                                              .ExecuteDeleteAsync();
+                var isExisted = await context.Schedule.AnyAsync(x => x.Id != schedule.Id
+                    && x.Name == request.Name && x.SchoolYear == request.SchoolYear
+                    && x.Term == request.Term && x.ClassYearId == request.ClassYearId);
 
+                if (isExisted) return null;
+
+                if (request.IsActive == true)
+                {
+                    var oldActive = await context.Schedule
+                        .FirstOrDefaultAsync(x => x.Id != schedule.Id
+                                               && x.ClassYearId == request.ClassYearId
+                                               && x.SchoolYear == request.SchoolYear
+                                               && x.Term == request.Term
+                                               && x.IsActive == true);
+                    if (oldActive != null)
+                    {
+                        oldActive.IsActive = false;
+                    }
+                }
+
+                if (request.ClassYearId != schedule.ClassYearId)
+                {
+                    await context.ScheduleDetail
+                                 .Where(x => x.ScheduleId == schedule.Id)
+                                 .ExecuteDeleteAsync();
+                }
+
+                var className = await context.ClassYear
+                                             .Where(x => x.Id == request.ClassYearId)
+                                             .Select(x => x.ClassName)
+                                             .FirstOrDefaultAsync();
+
+                schedule.Name = request.Name;
+                schedule.SchoolYear = (int)request.SchoolYear;
+                schedule.Term = (int)request.Term;
+                schedule.IsActive = (bool)request.IsActive;
+                schedule.ClassYearId = request.ClassYearId;
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync(); 
+
+                return new ScheduleResponse
+                {
+                    Term = schedule.Term,
+                    SchoolYear = schedule.SchoolYear,
+                    ClassYearId = schedule.ClassYearId,
+                    Name = schedule.Name,
+                    IsActive = schedule.IsActive,
+                    ScheduleId = schedule.Id,
+                    ClassName = className
+                };
             }
-
-            var className = await context.ClassYear
-                                         .Where(x => x.Id == request.ClassYearId)
-                                         .Select(x => x.ClassName)
-                                         .FirstOrDefaultAsync();
-            schedule.Name = request.Name;
-            schedule.SchoolYear = (int)request.SchoolYear;
-            schedule.Term = (int)request.Term;
-            schedule.IsActive = (bool)request.IsActive;
-            schedule.ClassYearId = request.ClassYearId;
-
-            await context.SaveChangesAsync();
-            return new ScheduleResponse
+            catch (Exception)
             {
-                Term = schedule.Term,
-                SchoolYear = schedule.SchoolYear,
-                ClassYearId = schedule.ClassYearId,
-                Name = schedule.Name,
-                IsActive = schedule.IsActive,
-                ScheduleId = schedule.Id,
-                ClassName = className
-            };
-
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task<List<TeacherScheduleDetailResponse>> GetMyScheduleForTeacher(ScheduleDetailIsActiveRequest request, Guid teacherId)

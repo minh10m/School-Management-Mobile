@@ -17,6 +17,7 @@ namespace School_Management.API.Models.Domain
         public AppUser? User { get; set; }
         public ClassYear? ClassYear { get; set; }
         public ICollection<TeacherSubject> TeacherSubjects { get; set; } = new List<TeacherSubject>();
+        public ICollection<ExamScheduleDetail> ExamScheduleDetails { get; set; } = new List<ExamScheduleDetail>();
 
     }
 }
