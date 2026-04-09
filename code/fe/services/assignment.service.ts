@@ -3,6 +3,7 @@ import {
   CreateAssignmentPayload,
   GetAssignmentsParams,
   StudentAssignmentResponse,
+  TeacherAssignmentListResponse,
   UpdateAssignmentPayload,
 } from "../types/assignment";
 import apiClient from "./apiClient";
@@ -10,47 +11,40 @@ import apiClient from "./apiClient";
 export const assignmentService = {
   // ─── TEACHER: LIST ────────────────────────────────────────────────────────────
   /**
-   * Giáo viên lấy danh sách bài tập theo lớp và môn
+   * Teacher retrieves a list of assignments by their assigned class and subject.
    * GET /assignments?classYearId=&teacherSubjectId=
+   * System automatically sorts by startTime descending (ASC).
    * AuthN(login) + AuthZ(Teacher)
-   * 404: teacherSubjectId hoặc classYearId không tồn tại
    */
-  getAssignments: async (params: GetAssignmentsParams): Promise<AssignmentResponse[]> => {
-    const response = await apiClient.get<AssignmentResponse[]>("/assignments", { params });
+  getAssignments: async (params: GetAssignmentsParams): Promise<TeacherAssignmentListResponse[]> => {
+    const response = await apiClient.get<TeacherAssignmentListResponse[]>("/assignments", { params });
     return response.data;
   },
 
   // ─── TEACHER: GET ONE ─────────────────────────────────────────────────────────
   /**
-   * Giáo viên lấy thông tin bài tập theo id
+   * Teacher retrieves detailed information for a specific assignment.
    * GET /assignments/{id}
    * AuthN(login) + AuthZ(Teacher)
-   * 404: bài tập không tồn tại
    */
-  getAssignmentById: async (assignmentId: string): Promise<AssignmentResponse> => {
-    const response = await apiClient.get<AssignmentResponse>(`/assignments/${assignmentId}`);
+  getAssignmentById: async (id: string): Promise<AssignmentResponse> => {
+    const response = await apiClient.get<AssignmentResponse>(`/assignments/${id}`);
     return response.data;
   },
 
-  // ─── STUDENT: GET MY ASSIGNMENTS ──────────────────────────────────────────────
-  /**
-   * Học sinh xem bài tập của lớp mình (có kèm trạng thái đã nộp chưa)
-   * null submission = chưa nộp
-   * GET /assignments/my
-   * AuthN(login) + AuthZ(Student)
-   */
-  getMyAssignments: async (): Promise<StudentAssignmentResponse[]> => {
-    const response = await apiClient.get<StudentAssignmentResponse[]>("/assignments/my");
+  getMyAssignments: async (params?: GetAssignmentsParams): Promise<StudentAssignmentResponse[]> => {
+    const response = await apiClient.get<any>("/assignments/my", { params });
+    // Returns response.data directly because component handles both { items: [] } or raw array formats
     return response.data;
   },
 
   // ─── TEACHER: CREATE ──────────────────────────────────────────────────────────
   /**
-   * Giáo viên tạo bài tập mới
+   * Teacher creates a new assignment for a class.
    * POST /assignments
    * AuthN(login) + AuthZ(Teacher)
-   * 403: teacher không được phép dạy môn này
-   * 404: teacherSubjectId hoặc classYearId không tồn tại
+   * 403: Teacher not authorized to teach this subject
+   * 404: Subject or Class not found
    */
   createAssignment: async (payload: CreateAssignmentPayload): Promise<AssignmentResponse> => {
     const response = await apiClient.post<AssignmentResponse>("/assignments", payload);
@@ -59,30 +53,27 @@ export const assignmentService = {
 
   // ─── TEACHER: UPDATE ──────────────────────────────────────────────────────────
   /**
-   * Giáo viên sửa thông tin bài tập (chỉ người tạo mới được sửa)
+   * Teacher updates assignment information (only creator can edit).
+   * Modifying classYearId is NOT allowed as assignments are fixed to a class.
    * PATCH /assignments/{id}
    * AuthN(login) + AuthZ(Teacher)
-   * 403: không phải giáo viên đã tạo bài tập
-   * 404: bài tập / teacherSubjectId / classYearId không tồn tại
+   * 403: User is not the teacher who created this assignment
    */
   updateAssignment: async (
-    assignmentId: string,
+    id: string,
     payload: UpdateAssignmentPayload
   ): Promise<AssignmentResponse> => {
-    const response = await apiClient.patch<AssignmentResponse>(
-      `/assignments/${assignmentId}`,
-      payload
-    );
+    const response = await apiClient.patch<AssignmentResponse>(`/assignments/${id}`, payload);
     return response.data;
   },
 
   // ─── TEACHER: DELETE ──────────────────────────────────────────────────────────
   /**
-   * Giáo viên xóa bài tập
+   * Teacher deletes an assignment.
    * DELETE /assignments/{id}
    * AuthN(login) + AuthZ(Teacher)
    */
-  deleteAssignment: async (assignmentId: string): Promise<void> => {
-    await apiClient.delete(`/assignments/${assignmentId}`);
+  deleteAssignment: async (id: string): Promise<void> => {
+    await apiClient.delete(`/assignments/${id}`);
   },
 };
