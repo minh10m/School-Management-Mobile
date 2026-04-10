@@ -50,7 +50,7 @@ export interface GetStudentAttendanceParams {
 export interface AttendanceEntry {
   studentId: string;
   status: AttendanceStatus;
-  note?: string;
+  note?: string | null;
 }
 
 export interface SubmitAttendancePayload {
