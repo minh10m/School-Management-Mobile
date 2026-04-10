@@ -21,7 +21,7 @@ namespace School_Management.API.EntityConfigurations
                 x.HasCheckConstraint("CK_Grade_ExamSchedule", "\"Grade\" >= 10 AND \"Grade\" <= 12");
             });
 
-            builder.HasIndex(x => new { x.Type, x.Term, x.Grade, x.SchoolYear, x.IsActive }).IsUnique();
+            builder.HasIndex(x => new { x.Type, x.Term, x.Grade, x.SchoolYear}).IsUnique();
         }
     }
 }

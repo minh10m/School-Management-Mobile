@@ -105,8 +105,7 @@ namespace School_Management.API.Repositories
                 else
                 {
                     var isExisted = await context.ExamSchedule.AnyAsync(x => x.Type == request.Type && x.Term == request.Term
-                                                                        && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade
-                                                                        && x.IsActive == request.IsActive);
+                                                                        && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade);
                     if (isExisted) return (null, "CONFLICT_TYPE");
                 }
 
@@ -244,22 +243,18 @@ namespace School_Management.API.Repositories
             var examSchedule = await context.ExamSchedule.FirstOrDefaultAsync(x => x.Id == examScheduleId);
             if (examSchedule == null) return (null, "NOT_FOUND_EXAMSCHEDULE");
 
-            if (examSchedule.IsActive && request.IsActive)
+            if (!examSchedule.IsActive && request.IsActive)
             {
-
+                var activeTrueExamSCH = await context.ExamSchedule.FirstOrDefaultAsync(x => x.IsActive == true);
+                if (activeTrueExamSCH != null) activeTrueExamSCH.IsActive = false;
             }
-            else if (examSchedule.IsActive && !request.IsActive)
-            {
 
-            }
-            else if (!examSchedule.IsActive && request.IsActive)
-            {
+            examSchedule.IsActive = request.IsActive;
+            examSchedule.Grade = request.Grade;
+            examSchedule.SchoolYear = request.SchoolYear;
+            examSchedule.Term = request.Term;
+            examSchedule.Type = request.Type;
 
-            }
-            else if (!examSchedule.IsActive && !request.IsActive)
-            {
-
-            }
 
             return (null, "");
         }
