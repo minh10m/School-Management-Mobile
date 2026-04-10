@@ -4,6 +4,7 @@ using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 namespace School_Management.API.Repositories
 {
@@ -252,6 +253,46 @@ namespace School_Management.API.Repositories
                                         }).ToListAsync();
 
             return (new PagedResponse<ExamScheduleDetailResponse>
+            {
+                Items = listResult,
+                TotalCount = totalCount,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber
+            }, "SUCCESS");
+        }
+
+        public async Task<(PagedResponse<ExamStudentAssignmentResponse>? data, string? message)> GetAllExamStudentAssignment(ExamStudentAssignmentFilterRequest request, Guid examScheduleDetailId)
+        {
+            var examScheduleDetail = await context.ExamScheduleDetail.FirstOrDefaultAsync(x => x.Id == examScheduleDetailId);
+            if (examScheduleDetail == null) return (null, "NOT_FOUND_EXAM_SCHEDULE_DETAIL");
+
+            var query = context.ExamStudentAssignment.AsNoTracking().Where(x => x.ExamScheduleDetailId == examScheduleDetailId);
+
+            if (!string.IsNullOrWhiteSpace(request.IdentificationNumber))
+            {
+                var name = request.IdentificationNumber.Trim();
+                query = query.Where(x => x.IdentificationNumber.Contains(name));
+            }
+            if (!string.IsNullOrWhiteSpace(request.StudentName))
+            {
+                var name = request.StudentName.Trim().ToLower();
+                query = query.Where(x => x.Student.User.FullName.ToLower().Contains(name));
+            }
+
+            query = query.OrderBy(x => x.IdentificationNumber);
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(x => new ExamStudentAssignmentResponse
+                                        {
+                                            StudentId = x.StudentId,
+                                            StudentName = x.Student.User.FullName,
+                                            ExamStudentAssignmentId = x.Id,
+                                            IdentificationNumber = x.IdentificationNumber
+                                        }).ToListAsync();
+
+            return (new PagedResponse<ExamStudentAssignmentResponse>
             {
                 Items = listResult,
                 TotalCount = totalCount,

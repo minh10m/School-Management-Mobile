@@ -1,4 +1,5 @@
 ﻿using School_Management.API.Exceptions;
+using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
 
@@ -46,6 +47,17 @@ namespace School_Management.API.Services
             return message switch
             {
                 "NOT_FOUND_EXAMSCHEDULE" => throw new NotFoundException("Không tìm thấy lịch thi"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
+        public async Task<PagedResponse<ExamStudentAssignmentResponse>> GetAllExamStudentAssignment(ExamStudentAssignmentFilterRequest request, Guid examScheduleDetailId)
+        {
+            var (result, message) = await examScheduleRepository.GetAllExamStudentAssignment(request, examScheduleDetailId);
+            return message switch
+            {
+                "NOT_FOUND_EXAM_SCHEDULE_DETAIL" => throw new NotFoundException("Không tìm thấy chi tiết lịch thi"),
                 "SUCCESS" => result!,
                 _ => throw new Exception("Lỗi không xác định")
             };

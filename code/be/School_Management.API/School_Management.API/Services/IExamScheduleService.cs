@@ -10,5 +10,6 @@ namespace School_Management.API.Services
         public Task<ExamScheduleResponse> UpdateExamSchedule(ExamScheduleRequest request, Guid examScheduleId);
         public Task<ExamScheduleDetailResponse> UpdateExamScheduleDetail(UpdateExamScheduleDetail request, Guid examScheduleDetailId);
         public Task<PagedResponse<ExamScheduleDetailResponse>> GetAllExamScheduleDetail(ExamScheduleDetailFilterRequest request, Guid examScheduleId);
+        public Task<PagedResponse<ExamStudentAssignmentResponse>> GetAllExamStudentAssignment(ExamStudentAssignmentFilterRequest request, Guid examScheduleDetailId);
     }
 }

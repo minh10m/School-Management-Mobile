@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
+using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
 
@@ -102,6 +103,22 @@ namespace School_Management.API.Controllers
             if (request.PageNumber <= 0) request.PageNumber = 1;
             if (request.PageSize <= 0) request.PageSize = 10;
             var result = await examScheduleService.GetAllExamScheduleDetail(request, examScheduleId);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("details/{examScheduleDetailId}/assign")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllExamStudentAssignment([FromQuery] ExamStudentAssignmentFilterRequest request, [FromRoute] Guid examScheduleDetailId)
+        {
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await examScheduleService.GetAllExamStudentAssignment(request, examScheduleDetailId);
             return Ok(new
             {
                 success = true,
