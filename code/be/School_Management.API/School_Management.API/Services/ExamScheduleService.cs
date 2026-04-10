@@ -26,7 +26,7 @@ namespace School_Management.API.Services
             var (result, message) = await examScheduleRepository.CreateExamSchedule(request);
             return message switch
             {
-                "CONFLICT_TYPE" => throw new ConflictException("Loại lịch này đã tồn tại, vui lòng đổi sang tên loại khác"),
+                "CONFLICT_TITLE" => throw new ConflictException("Tên lịch này đã tồn tại, vui lòng đổi sang tên loại khác"),
                 "SUCCESS" => result!,
                 _ => throw new Exception("Lỗi không xác định")
             };
@@ -46,7 +46,7 @@ namespace School_Management.API.Services
             return message switch
             {
                 "NOT_FOUND_EXAMSCHEDULE" => throw new NotFoundException("Không tìm thấy lịch này"),
-                "DUPLICATED_TYPE" => throw new ConflictException("Loại lịch thi đã tồn tại"),
+                "CONFLICT_TITLE" => throw new ConflictException("Tên lịch thi đã tồn tại"),
                 "SUCCESS" => result!,
                 _ => throw new Exception("Lỗi không xác định")
             };

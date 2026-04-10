@@ -4,6 +4,7 @@
     {
         public Guid ExamScheduleId { get; set; }
         public string Type { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
         public int Term { get; set; }
         public int SchoolYear { get; set; }
         public int Grade { get; set; }

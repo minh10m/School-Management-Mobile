@@ -90,10 +90,13 @@ namespace School_Management.API.Repositories
 
         public async Task<(ExamScheduleResponse? data, string? message)> CreateExamSchedule(ExamScheduleRequest request)
         {
+            var isExisted = await context.ExamSchedule.AnyAsync(x => x.Type == request.Type && x.Term == request.Term && x.Title == request.Title
+                                                                        && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade);
+            if (isExisted) return (null, "CONFLICT_TITLE");
+
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var examschedule = new ExamSchedule();
                 if (request.IsActive)
                 {
                     var activeTrueExamSCH = await context.ExamSchedule.Where(x => x.Type == request.Type && x.Term == request.Term
@@ -101,19 +104,17 @@ namespace School_Management.API.Repositories
                                                                         && x.IsActive == true).FirstOrDefaultAsync();
                     if (activeTrueExamSCH != null)
                         activeTrueExamSCH.IsActive = false;
-                }
-                else
-                {
-                    var isExisted = await context.ExamSchedule.AnyAsync(x => x.Type == request.Type && x.Term == request.Term
-                                                                        && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade);
-                    if (isExisted) return (null, "CONFLICT_TYPE");
+
                 }
 
+                
 
-                examschedule = new ExamSchedule
+
+                var examschedule = new ExamSchedule
                 {
                     Id = Guid.NewGuid(),
                     SchoolYear = request.SchoolYear,
+                    Title = request.Title,
                     Grade = request.Grade,
                     IsActive = request.IsActive,
                     Term = request.Term,
@@ -128,6 +129,7 @@ namespace School_Management.API.Repositories
                     ExamScheduleId = examschedule.Id,
                     SchoolYear = examschedule.SchoolYear,
                     Grade = examschedule.Grade,
+                    Title = examschedule.Title,
                     IsActive = examschedule.IsActive,
                     Term = examschedule.Term,
                     Type = examschedule.Type
@@ -245,39 +247,49 @@ namespace School_Management.API.Repositories
 
             var isExisted = await context.ExamSchedule.AnyAsync(x => x.Type == request.Type && x.Term == request.Term
                                                             && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade
-                                                            && x.Id != examScheduleId);
+                                                            && x.Id != examScheduleId && x.Title == request.Title);
 
-            if (isExisted) return (null, "DUPLICATED_TYPE");
+            if (isExisted) return (null, "CONFLICT_TITLE");
 
-            if (!examSchedule.IsActive && request.IsActive)
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
             {
-                var currentActive = await context.ExamSchedule.FirstOrDefaultAsync(x => x.IsActive == true && x.Term == request.Term
-                                                             && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade && x.Id != examScheduleId);
-                if (currentActive != null) currentActive.IsActive = false;
+                if (request.IsActive)
+                {
+                    var currentActive = await context.ExamSchedule.FirstOrDefaultAsync(x => x.IsActive == true && x.Term == request.Term && x.Type == request.Type
+                                                                 && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade && x.Id != examScheduleId);
+                    if (currentActive != null) currentActive.IsActive = false;
+                }
+
+                examSchedule.IsActive = request.IsActive;
+                examSchedule.Grade = request.Grade;
+                examSchedule.SchoolYear = request.SchoolYear;
+                examSchedule.Term = request.Term;
+                examSchedule.Title = request.Title;
+                examSchedule.Type = request.Type;
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                var result = new ExamScheduleResponse
+                {
+                    SchoolYear = examSchedule.SchoolYear,
+                    ExamScheduleId = examSchedule.Id,
+                    Title = examSchedule.Title,
+                    Grade = examSchedule.Grade,
+                    IsActive = examSchedule.IsActive,
+                    Term = examSchedule.Term,
+                    Type = examSchedule.Type
+                };
+
+                return (result, "SUCCESS");
             }
-
-           
-
-            examSchedule.IsActive = request.IsActive;
-            examSchedule.Grade = request.Grade;
-            examSchedule.SchoolYear = request.SchoolYear;
-            examSchedule.Term = request.Term;
-            examSchedule.Type = request.Type;
-
-            await context.SaveChangesAsync();
-
-            var result = new ExamScheduleResponse
+            catch (Exception)
             {
-                SchoolYear = examSchedule.SchoolYear,
-                ExamScheduleId = examSchedule.Id,
-                Grade = examSchedule.Grade,
-                IsActive = examSchedule.IsActive,
-                Term = examSchedule.Term,
-                Type = examSchedule.Type
-            };
-
-
-            return (result, "SUCCESS");
+                await transaction.RollbackAsync();
+                throw;
+            }
+            
         }
     }
 }

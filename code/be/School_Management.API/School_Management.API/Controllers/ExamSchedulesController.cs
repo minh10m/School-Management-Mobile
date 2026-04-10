@@ -62,5 +62,20 @@ namespace School_Management.API.Controllers
                 message = "Phân bổ học sinh vào chi tiết lịch thành công"
             });
         }
+
+        [HttpPatch]
+        [Route("{examScheduleId}")]
+        [Authorize(Roles = "Admin")]
+        [ValidateModel]
+        public async Task<IActionResult> UpdateExamSchedule([FromBody] ExamScheduleRequest request, [FromRoute] Guid examScheduleId)
+        {
+            var result = await examScheduleService.UpdateExamSchedule(request, examScheduleId);
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật thành công",
+                data = result
+            });
+        }
     }
 }

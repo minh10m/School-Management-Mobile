@@ -10,6 +10,12 @@ namespace School_Management.API.Models.DTO
         [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Loại lịch thi không được chỉ chứa khoảng trắng")]
         public string Type { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Tên lịch thi là bắt buộc")]
+        [MaxLength(150, ErrorMessage = "Độ dài kí tự tối đa của tên lịch thi là 150")]
+        [MinLength(2, ErrorMessage = "Độ dài kí tự tối đa của tên lịch thi là 2")]
+        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Tên lịch thi không được chỉ chứa khoảng trắng")]
+        public string Title { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Học kì là bắt buộc")]
         [Range(1, 2, ErrorMessage = "Học kì nằm trong khoảng từ 1 tới 2")]
         public int Term { get; set; }
