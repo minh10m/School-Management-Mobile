@@ -9,6 +9,5 @@ namespace School_Management.API.Services
         public Task<List<SubjectResponse>> GetAllSubject(SubjectFilterRequest request);
         public Task<SubjectResponse> GetSubjectById(Guid subjectId);
         public Task<PagedResponse<TeacherOfSubjectResponse>> GetListTeacherBySubjectId(TeacherSubjectFilterRequest request, Guid subjectId);
-        public Task<bool> DeleteSubject(Guid subjectId);
     }
 }

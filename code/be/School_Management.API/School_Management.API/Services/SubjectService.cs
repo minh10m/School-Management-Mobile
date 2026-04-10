@@ -49,12 +49,5 @@ namespace School_Management.API.Services
                 _ => data!
             };
         }
-
-        public async Task<bool> DeleteSubject(Guid subjectId)
-        {
-            var result = await subjectRepository.DeleteSubject(subjectId);
-            if (!result) throw new NotFoundException("Môn học không tồn tại");
-            return result;
-        }
     }
 }

@@ -162,15 +162,5 @@ namespace School_Management.API.Repositories
                 MaxPeriod = subject.MaxPeriod
             }, "SUCCESS");
         }
-
-        public async Task<bool> DeleteSubject(Guid subjectId)
-        {
-            var subject = await context.Subject.FindAsync(subjectId);
-            if (subject == null) return false;
-
-            context.Subject.Remove(subject);
-            await context.SaveChangesAsync();
-            return true;
-        }
     }
 }
