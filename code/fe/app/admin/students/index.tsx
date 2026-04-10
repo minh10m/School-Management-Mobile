@@ -7,6 +7,7 @@ import { studentService } from '../../../services/student.service';
 import { classYearService } from '../../../services/classYear.service';
 import { StudentListItem } from '../../../types/student';
 import { ClassYearResponse } from '../../../types/classYear';
+import { SCHOOL_YEAR } from '../../../constants/config';
 
 export default function AdminStudentsScreen() {
   const [students, setStudents] = useState<StudentListItem[]>([]);
@@ -19,7 +20,7 @@ export default function AdminStudentsScreen() {
 
   const loadInitialData = async () => {
     try {
-      const cls = await classYearService.getClassYears({ schoolYear: '2026' });
+      const cls = await classYearService.getClassYears({ schoolYear: SCHOOL_YEAR });
       setClasses(Array.isArray(cls) ? cls : []);
     } catch (err) {
       console.error(err);
@@ -29,9 +30,10 @@ export default function AdminStudentsScreen() {
   const fetchStudents = useCallback(async () => {
     try {
       setLoading(true);
+      const selectedClass = classes.find(c => c.classYearId === selectedClassId);
       const res = await studentService.getStudents({
         search,
-        classId: selectedClassId,
+        className: selectedClass?.className,
         grade: selectedGrade,
         pageSize: 50
       });
@@ -42,7 +44,7 @@ export default function AdminStudentsScreen() {
     } finally {
       setLoading(false);
     }
-  }, [search, selectedClassId, selectedGrade]);
+  }, [search, selectedClassId, selectedGrade, classes]);
 
   useEffect(() => {
     loadInitialData();
@@ -66,6 +68,13 @@ export default function AdminStudentsScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Student Management</Text>
+        <TouchableOpacity onPress={() => router.push('/admin/students/promote')}>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Promote</Text>
+        </TouchableOpacity>
+        <View className="w-4" />
+        <TouchableOpacity onPress={() => router.push('/admin/students/create' as any)}>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Create</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Filters */}
