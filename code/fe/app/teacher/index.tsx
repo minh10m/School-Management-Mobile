@@ -11,9 +11,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { authService } from "../../services/auth.service";
 import { useAuthStore } from "../../store/authStore";
+import { classYearService } from "../../services/classYear.service";
+import { assignmentService } from "../../services/assignment.service";
+import { courseService } from "../../services/course.service";
 import SideMenu from "../../components/SideMenu";
 
 const QUICK_ACTIONS = [
@@ -93,17 +96,50 @@ export default function TeacherDashboard() {
   const { userInfo } = useAuthStore();
   const teacherName = userInfo?.fullName?.split(" ").at(-1) ?? "Teacher";
 
-  const [loading] = useState(false);
+  const [stats, setStats] = useState({
+    classes: "0",
+    students: "0",
+    assignments: "0",
+    courses: "0",
+  });
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isMenuVisible, setMenuVisible] = useState(false);
 
-  // Stats can be mocked or fetched similarly
-  const stats = {
-    classes: "4",
-    students: "142",
-    assignments: "12",
-    courses: "3",
-  };
+  const fetchStats = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [homeroom, teaching, assignments, courses] = await Promise.all([
+        classYearService.getHomeroomClass().catch(() => null),
+        classYearService.getTeachingClasses().catch(() => []),
+        assignmentService.getAssignments({}).catch(() => []), // Adjust if needed
+        courseService.getMyCourses().catch(() => []),
+      ]);
+
+      const totalClasses = (homeroom ? 1 : 0) + teaching.length;
+      
+      // For students, we might need a more direct way, but let's assume we sum them
+      // If teaching summary doesn't have count, we might just show homeroom count or 0 for now
+      // or fetch homeroom details.
+      const studentCount = homeroom?.studentCount || 0;
+
+      setStats({
+        classes: totalClasses.toString(),
+        students: studentCount.toString(), // or sum if available
+        assignments: assignments.length.toString(),
+        courses: courses.length.toString(),
+      });
+    } catch (error) {
+      console.error("Error fetching teacher stats:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const STAT_CARDS = [
     {
@@ -138,10 +174,8 @@ export default function TeacherDashboard() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
-  }, []);
+    fetchStats();
+  }, [fetchStats]);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
