@@ -20,14 +20,14 @@ export default function AttendanceView() {
                 {/* Calendar Header */}
                 <View className="flex-row justify-between items-center mb-4 bg-white rounded-xl py-2 px-3">
                     <Ionicons name="chevron-back" size={20} color="black" />
-                    <Text className="text-black font-poppins-bold text-sm">Jan 2023</Text>
+                    <Text className="text-black text-sm" style={{ fontFamily: 'Poppins-Bold' }}>Jan 2023</Text>
                     <Ionicons name="chevron-forward" size={20} color="black" />
                 </View>
 
                 {/* Days Header */}
                 <View className="flex-row justify-between mb-4 px-2">
                     {DAYS_OF_WEEK.map((day, index) => (
-                        <Text key={index} className="text-black font-poppins text-xs w-[13%] text-center">{day}</Text>
+                        <Text key={index} className="text-black text-xs w-[13%] text-center" style={{ fontFamily: 'Poppins-Regular' }}>{day}</Text>
                     ))}
                 </View>
 
@@ -43,10 +43,13 @@ export default function AttendanceView() {
                                     // Selected day style (static for now as per mockup '17' is blue)
                                     item.day === 17 ? 'bg-blue-500' : 'bg-transparent'
                                 }`}>
-                                    <Text className={`font-poppins-medium text-sm ${
-                                        item.status === 'leave' || item.day === 17 ? 'text-white' : 
-                                        item.status === 'absent' ? 'text-black' : 'text-black'
-                                    }`}>
+                                    <Text
+                                        className={`text-sm ${
+                                            item.status === 'leave' || item.day === 17 ? 'text-white' : 
+                                            item.status === 'absent' ? 'text-black' : 'text-black'
+                                        }`}
+                                        style={{ fontFamily: 'Poppins-Medium' }}
+                                    >
                                         {item.day}
                                     </Text>
                                 </View>
@@ -60,22 +63,22 @@ export default function AttendanceView() {
             <View className="flex-row justify-center space-x-8 mb-6 gap-5">
                 <View className="flex-row items-center">
                     <View className="w-3 h-3 rounded-full bg-red-500 mr-2" />
-                    <Text className="text-black font-poppins-medium text-xs">Absent</Text>
+                    <Text className="text-black text-xs" style={{ fontFamily: 'Poppins-Medium' }}>Absent</Text>
                 </View>
                 <View className="flex-row items-center">
                     <View className="w-3 h-3 rounded-full bg-blue-500 mr-2" />
-                    <Text className="text-black font-poppins-medium text-xs">Festival Leave</Text>
+                    <Text className="text-black text-xs" style={{ fontFamily: 'Poppins-Medium' }}>Festival Leave</Text>
                 </View>
             </View>
 
             {/* Today Attendance Card */}
             <View className="bg-blue-500 rounded-2xl p-4 flex-row items-center mb-6 shadow-md">
                 <View className="w-12 h-12 bg-green-500 rounded-xl items-center justify-center mr-4">
-                    <Text className="text-white font-poppins-bold text-lg">P</Text>
+                    <Text className="text-white text-lg" style={{ fontFamily: 'Poppins-Bold' }}>P</Text>
                 </View>
                 <View>
-                    <Text className="text-white font-poppins-bold text-base">Today Attendance</Text>
-                    <Text className="text-blue-100 font-poppins text-xs">17th Jan 2024</Text>
+                    <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Today Attendance</Text>
+                    <Text className="text-blue-100 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>17th Jan 2024</Text>
                 </View>
             </View>
 
@@ -86,8 +89,8 @@ export default function AttendanceView() {
                     <View className="absolute w-32 h-32 rounded-full border-[8px] border-l-blue-500 border-t-blue-500 border-r-transparent border-b-transparent transform -rotate-45 opacity-100" />
                     
                     <View className="items-center">
-                        <Text className="text-black font-poppins-bold text-2xl">24%</Text>
-                        <Text className="text-gray-400 font-poppins text-xs">Absent</Text>
+                        <Text className="text-black text-2xl" style={{ fontFamily: 'Poppins-Bold' }}>24%</Text>
+                        <Text className="text-gray-400 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>Absent</Text>
                     </View>
                     </View>
             </View>

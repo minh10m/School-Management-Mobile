@@ -24,7 +24,7 @@ export default function TimetableView() {
                 className="bg-white border border-gray-100 rounded-2xl p-4 mb-6 flex-row justify-between items-center z-50 shadow-sm"
                 onPress={() => setDaySelectorOpen(!isDaySelectorOpen)}
             >
-                <Text className="text-black font-poppins-bold text-sm">{selectedDay}</Text>
+                <Text className="text-black text-sm" style={{ fontFamily: 'Poppins-Bold' }}>{selectedDay}</Text>
                 <Ionicons name={isDaySelectorOpen ? "chevron-up" : "chevron-down"} size={20} color="black" />
             </TouchableOpacity>
 
@@ -40,7 +40,10 @@ export default function TimetableView() {
                                 setDaySelectorOpen(false);
                             }}
                         >
-                            <Text className={`font-poppins-medium text-sm ${selectedDay === day ? 'text-bright-blue' : 'text-gray-600'}`}>
+                            <Text
+                                className={`text-sm ${selectedDay === day ? 'text-bright-blue' : 'text-gray-600'}`}
+                                style={{ fontFamily: selectedDay === day ? 'Poppins-Medium' : 'Poppins-Regular' }}
+                            >
                                 {day}
                             </Text>
                         </TouchableOpacity>
@@ -50,8 +53,8 @@ export default function TimetableView() {
 
             {/* Timetable Header */}
             <View className="flex-row mb-4">
-                <Text className="text-gray-500 font-poppins-medium text-xs w-20 text-center">Time</Text>
-                <Text className="text-gray-500 font-poppins-medium text-xs flex-1 ml-4">Class</Text>
+                <Text className="text-gray-500 text-xs w-20 text-center" style={{ fontFamily: 'Poppins-Medium' }}>Time</Text>
+                <Text className="text-gray-500 text-xs flex-1 ml-4" style={{ fontFamily: 'Poppins-Medium' }}>Class</Text>
             </View>
 
             {/* Timetable List */}
@@ -60,8 +63,8 @@ export default function TimetableView() {
                     <View key={index} className="flex-row mb-6">
                         {/* Time Column */}
                         <View className="w-20 items-end pr-2 pt-2">
-                            <Text className="text-black font-poppins-bold text-sm">{item.time}</Text>
-                            <Text className="text-gray-400 font-poppins text-[10px]">{item.endTime}</Text>
+                            <Text className="text-black text-sm" style={{ fontFamily: 'Poppins-Bold' }}>{item.time}</Text>
+                            <Text className="text-gray-400 text-[10px]" style={{ fontFamily: 'Poppins-Regular' }}>{item.endTime}</Text>
                         </View>
 
                         {/* Timeline Graphic */}
@@ -76,7 +79,7 @@ export default function TimetableView() {
                         <View className="flex-1">
                             {item.isBreak ? (
                                 <View className={`${item.bg} rounded-2xl p-4 justify-center`}>
-                                    <Text className="text-black font-poppins-bold text-sm text-center">{item.title}</Text>
+                                    <Text className="text-black text-sm text-center" style={{ fontFamily: 'Poppins-Bold' }}>{item.title}</Text>
                                 </View>
                             ) : (
                                 <View className={`${item.bg} rounded-2xl p-4 flex-row items-center`}>
@@ -85,8 +88,8 @@ export default function TimetableView() {
                                         <Ionicons name="person" size={20} color="gray" />
                                     </View>
                                     <View>
-                                        <Text className="text-black font-poppins-bold text-sm">{item.subject}</Text>
-                                        <Text className="text-gray-500 font-poppins text-xs">{item.teacher}</Text>
+                                        <Text className="text-black text-sm" style={{ fontFamily: 'Poppins-Bold' }}>{item.subject}</Text>
+                                        <Text className="text-gray-500 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>{item.teacher}</Text>
                                     </View>
                                 </View>
                             )}

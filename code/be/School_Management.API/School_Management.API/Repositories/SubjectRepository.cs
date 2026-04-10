@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -113,6 +113,7 @@ namespace School_Management.API.Repositories
                             .Take(request.PageSize)
                             .Select(g => new TeacherOfSubjectResponse
             {
+                TeacherSubjectId = g.TeacherSubjects.Where(ts => ts.SubjectId == subjectId).Select(ts => ts.TeacherSubjectId).FirstOrDefault(),
                 Email = g.User.Email,
                 FullName = g.User.FullName,
                 PhoneNumber = g.User.PhoneNumber,

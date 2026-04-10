@@ -1,58 +1,93 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs, router } from "expo-router";
+import React, { useEffect } from "react";
+import { Platform } from "react-native";
+import { useAuthStore } from "../../store/authStore";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { HapticTab } from "@/components/haptic-tab";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { userInfo } = useAuthStore();
+
+  useEffect(() => {
+    if (!userInfo) {
+       router.replace('/login');
+       return;
+    }
+    if (userInfo.role?.toLowerCase() !== 'student') {
+       if (userInfo.role?.toLowerCase() === 'admin') {
+          router.replace('/admin');
+       } else if (userInfo.role?.toLowerCase() === 'teacher') {
+          router.replace('/teacher');
+       }
+    }
+  }, [userInfo]);
+
+  if (!userInfo || userInfo.role?.toLowerCase() !== 'student') return null;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: undefined,
         tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
+          ios: { position: "absolute" },
           default: {},
         }),
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "Home",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="home-outline" size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="calendar"
+        name="attendance"
         options={{
-          title: 'Calendar',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar" color={color} />,
+          title: "Attendance",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="calendar-outline" size={24} color={color} />
+          ),
         }}
       />
-       <Tabs.Screen
-        name="messages"
+      <Tabs.Screen
+        name="timetable"
         options={{
-          title: 'Messages',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "Timetable",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="time-outline" size={24} color={color} />
+          ),
         }}
       />
-       <Tabs.Screen
+      <Tabs.Screen
+        name="events"
+        options={{
+          title: "Events",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="megaphone-outline" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+          title: "Profile",
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person-outline" size={24} color={color} />
+          ),
         }}
       />
+      {/* Hidden screens - not shown in tab bar */}
+      <Tabs.Screen name="calendar" options={{ href: null }} />
     </Tabs>
   );
 }
