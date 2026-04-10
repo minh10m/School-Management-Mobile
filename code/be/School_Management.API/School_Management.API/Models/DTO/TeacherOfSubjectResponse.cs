@@ -1,7 +1,8 @@
-﻿namespace School_Management.API.Models.DTO
+namespace School_Management.API.Models.DTO
 {
     public class TeacherOfSubjectResponse
     {
+        public Guid TeacherSubjectId { get; set; }
         public Guid TeacherId { get; set; }
         public Guid UserId { get; set; }
         public string? FullName { get; set; }
