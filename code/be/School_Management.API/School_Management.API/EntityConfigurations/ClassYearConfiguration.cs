@@ -27,6 +27,9 @@ namespace School_Management.API.EntityConfigurations
             builder.HasIndex(x => new { x.SchoolYear, x.ClassName })
                 .IsUnique()
                 .HasDatabaseName("UX_ClassYear_Name_Year");
+
+            builder.HasIndex(x => new { x.SchoolYear, x.HomeRoomId })
+                .IsUnique();
         }
     }
 }

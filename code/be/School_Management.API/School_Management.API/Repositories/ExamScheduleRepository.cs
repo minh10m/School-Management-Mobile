@@ -31,6 +31,8 @@ namespace School_Management.API.Repositories
             var allDetails = await context.ExamScheduleDetail.Include(x => x.Subject).Where(x => x.ExamScheduleId == examScheduleId)
                                                                        .ToListAsync();
 
+            if (!allDetails.Any()) return (false, "Không tìm thấy danh sách chi tiết lịch");
+
             var subjectGroups = allDetails.GroupBy(x => new { x.SubjectId, x.Subject.SubjectName });
             var assignments = new List<ExamStudentAssignment>();
             using var transaction = await context.Database.BeginTransactionAsync();
@@ -235,6 +237,31 @@ namespace School_Management.API.Repositories
 
                 return list;
             }
+        }
+
+        public async Task<(ExamScheduleResponse? data, string? message)> UpdateExamSchedule(ExamScheduleRequest request, Guid examScheduleId)
+        {
+            var examSchedule = await context.ExamSchedule.FirstOrDefaultAsync(x => x.Id == examScheduleId);
+            if (examSchedule == null) return (null, "NOT_FOUND_EXAMSCHEDULE");
+
+            if (examSchedule.IsActive && request.IsActive)
+            {
+
+            }
+            else if (examSchedule.IsActive && !request.IsActive)
+            {
+
+            }
+            else if (!examSchedule.IsActive && request.IsActive)
+            {
+
+            }
+            else if (!examSchedule.IsActive && !request.IsActive)
+            {
+
+            }
+
+            return (null, "");
         }
     }
 }

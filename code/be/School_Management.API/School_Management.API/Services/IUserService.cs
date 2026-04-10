@@ -27,7 +27,7 @@ namespace School_Management.API.Services
         public Task<UserInfoResponse> CreateUser(CreateUserRequest createUserRequest);
         //Method in order to map data
         public UserInfoResponse ReturnData(AppUser user, string? role);
-        public UserListResponse ReturnListData(AppUser user);
+        public UserListResponse ReturnListData(AppUser user, string? role);
 
     }
 }
