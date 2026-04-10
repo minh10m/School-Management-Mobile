@@ -3,7 +3,14 @@ import apiClient from "./apiClient";
 
 export const eventService = {
   getEvents: async (params?: GetEventsParams): Promise<EventListResponse> => {
-    const response = await apiClient.get<EventListResponse>("/events", { params });
+    // Explicitly map to PascalCase and provide safe defaults to avoid 400 Validation errors
+    const backendParams: any = {
+      Title: params?.Title || undefined,
+      SchoolYear: Number(params?.SchoolYear || 2026),
+      Term: Number(params?.Term || 1),
+    };
+    
+    const response = await apiClient.get<EventListResponse>("/events", { params: backendParams });
     return response.data;
   },
 
