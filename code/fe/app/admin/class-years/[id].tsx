@@ -16,7 +16,7 @@ export default function AdminClassDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [teachers, setTeachers] = useState<TeacherListItem[]>([]);
   const [editing, setEditing] = useState(false);
-  const [assignModal, setAssignModal] = useState(false);
+  const [studentsInClass, setStudentsInClass] = useState<StudentListItem[]>([]);
   
   // Form for Edit
   const [form, setForm] = useState({
@@ -26,17 +26,16 @@ export default function AdminClassDetailScreen() {
     homeRoomId: ''
   });
 
-  // For Student Assignment
-  const [searchStudent, setSearchStudent] = useState('');
-  const [foundStudents, setFoundStudents] = useState<StudentListItem[]>([]);
 
   const fetchData = async () => {
     if (!id) return;
     try {
       setLoading(true);
-      const [res, teaRes] = await Promise.all([
-        classYearService.getClassYearById(id),
-        teacherService.getTeachers({ pageSize: 100 })
+      const res = await classYearService.getClassYearById(id);
+      const [teaRes, studentsRes, allClassesRes] = await Promise.all([
+        teacherService.getTeachers({ pageSize: 100 }),
+        studentService.getStudents({ className: res.className, pageSize: 100 }),
+        classYearService.getClassYears()
       ]);
       setClassData(res);
       setForm({
@@ -45,8 +44,18 @@ export default function AdminClassDetailScreen() {
         schoolYear: res.schoolYear,
         homeRoomId: res.homeRoomId || ''
       });
-      const tdata = Array.isArray(teaRes) ? teaRes : (teaRes as any).items || [];
+      let tdata: TeacherListItem[] = Array.isArray(teaRes) ? teaRes : (teaRes as any).items || [];
+      const sdata = Array.isArray(studentsRes) ? studentsRes : (studentsRes as any).items || [];
+      const cdata = Array.isArray(allClassesRes) ? allClassesRes : (allClassesRes as any).items || [];
+
+      // Workaround: Filter out teachers already assigned to OTHER classes to prevent DB 500 constraint Error
+      const usedTeacherIds = new Set(
+         cdata.map((c: any) => c.homeRoomId).filter((tid: string) => tid && tid !== res.homeRoomId)
+      );
+      tdata = tdata.filter(t => !usedTeacherIds.has(t.teacherId));
+
       setTeachers(tdata);
+      setStudentsInClass(sdata);
     } catch (err) {
       console.error(err);
     } finally {
@@ -60,6 +69,16 @@ export default function AdminClassDetailScreen() {
 
   const handleUpdate = async () => {
     if (!id) return;
+    
+    if (!form.className.trim()) {
+      Alert.alert('Validation Error', 'Class Name is required.');
+      return;
+    }
+    if (!form.homeRoomId) {
+      Alert.alert('Validation Error', 'Please select an Advisor (Homeroom Teacher).');
+      return;
+    }
+
     try {
       await classYearService.updateClassYear(id, form);
       Alert.alert('Success', 'Class updated successfully!');
@@ -70,27 +89,6 @@ export default function AdminClassDetailScreen() {
     }
   };
 
-  const handleSearchStudent = async () => {
-    try {
-      const res = await studentService.getStudents({ search: searchStudent, pageSize: 5 });
-      const sdata = Array.isArray(res) ? res : (res as any).items || [];
-      setFoundStudents(sdata);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleAssignStudent = async (studentId: string) => {
-    if (!id) return;
-    try {
-      await classYearService.assignStudent(id, { studentId });
-      Alert.alert('Success', 'Student assigned to class!');
-      setAssignModal(false);
-      fetchData();
-    } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.message || 'Assignment failed.');
-    }
-  };
 
   if (loading) return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center">
@@ -186,67 +184,36 @@ export default function AdminClassDetailScreen() {
                    <View className="w-10 h-10 rounded-full bg-purple-100 items-center justify-center">
                       <Ionicons name="person" size={20} color="#A855F7" />
                    </View>
-                   <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-base">{classData.homeRoomTeacher || 'Not Assigned'}</Text>
+                   <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-base">
+                     {classData.homeRoomTeacher || (classData.homeRoomId ? teachers.find(t => t.teacherId === classData.homeRoomId)?.fullName : null) || 'Not Assigned'}
+                   </Text>
                 </View>
              </View>
 
              <View className="flex-row items-center justify-between mb-4 px-2">
-                <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-base">Students ({classData.studentCount})</Text>
-                <TouchableOpacity 
-                   className="bg-blue-50 px-4 py-2 rounded-full flex-row items-center gap-1"
-                   onPress={() => setAssignModal(true)}
-                >
-                   <Ionicons name="person-add" size={14} color="#136ADA" />
-                   <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 10, color: '#136ADA' }}>Assign Student</Text>
-                </TouchableOpacity>
+                <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-base">Students ({studentsInClass.length})</Text>
              </View>
 
-             {/* Assign Student Modal */}
-             <Modal visible={assignModal} animationType="slide" presentationStyle="pageSheet">
-                <SafeAreaView className="flex-1 bg-white">
-                   <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
-                      <TouchableOpacity onPress={() => setAssignModal(false)}>
-                         <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Close</Text>
-                      </TouchableOpacity>
-                      <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-lg">Assign Student</Text>
-                      <View className="w-10" />
+             {studentsInClass.length > 0 ? (
+               <View className="gap-2">
+                 {studentsInClass.map(s => (
+                   <View key={s.studentId} className="flex-row items-center p-4 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                     <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mr-3">
+                       <Ionicons name="person" size={20} color="#136ADA" />
+                     </View>
+                     <View className="justify-center">
+                       <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-base">{s.fullName}</Text>
+                     </View>
                    </View>
-                   
-                   <View className="p-6">
-                      <View className="flex-row gap-2 mb-6">
-                         <TextInput
-                            placeholder="Student name..."
-                            value={searchStudent}
-                            onChangeText={setSearchStudent}
-                            className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3"
-                         />
-                         <TouchableOpacity 
-                           className="bg-bright-blue w-12 items-center justify-center rounded-2xl"
-                           onPress={handleSearchStudent}
-                         >
-                            <Ionicons name="search" size={20} color="white" />
-                         </TouchableOpacity>
-                      </View>
+                 ))}
+               </View>
+             ) : (
+               <View className="items-center py-6">
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">No students assigned yet</Text>
+               </View>
+             )}
 
-                      {foundStudents.map(s => (
-                         <TouchableOpacity key={s.studentId} 
-                           className="flex-row items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl mb-2 shadow-sm"
-                           onPress={() => handleAssignStudent(s.studentId)}
-                         >
-                            <View>
-                               <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black">{s.fullName}</Text>
-                               <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">ID: {s.studentId}</Text>
-                            </View>
-                            <Ionicons name="add-circle" size={24} color="#136ADA" />
-                         </TouchableOpacity>
-                      ))}
-                      
-                      {foundStudents.length === 0 && searchStudent && (
-                         <Text className="text-center text-gray-400 p-10 italic">No search results</Text>
-                      )}
-                   </View>
-                </SafeAreaView>
-             </Modal>
+
           </View>
         )}
       </ScrollView>
