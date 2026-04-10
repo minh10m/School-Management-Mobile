@@ -58,7 +58,12 @@ export interface AssignStudentPayload {
 }
 
 /** Promote học sinh từ lớp cũ lên lớp mới */
-export interface PromoteClassPayload {
+export interface PromoteClassPair {
   fromClassYearId: string;
   toClassYearId: string;
+}
+
+export interface ClassPromoteRequest {
+  currentSystemYear: number;
+  classPromotes: PromoteClassPair[];
 }

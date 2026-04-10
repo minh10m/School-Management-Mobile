@@ -7,12 +7,12 @@ export interface SubjectResponse {
 }
 
 export interface SubjectTeacherItem {
+  teacherSubjectId: string; // Required — used when creating schedule details
   teacherId: string;
   userId: string;
   fullName: string;
   email: string;
   phone: string;
-  teacherSubjectId?: string; // For deletion
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────

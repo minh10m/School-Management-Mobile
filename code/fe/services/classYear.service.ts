@@ -4,7 +4,7 @@ import {
   ClassYearSummary,
   CreateClassYearPayload,
   GetClassYearsParams,
-  PromoteClassPayload,
+  ClassPromoteRequest,
   UpdateClassYearPayload,
 } from "../types/classYear";
 import apiClient from "./apiClient";
@@ -26,8 +26,10 @@ export const classYearService = {
       backendParams.IsAscending = params.sortOrder === 'asc';
       delete backendParams.sortOrder;
     }
-    const response = await apiClient.get<ClassYearResponse[]>("/class-years", { params: backendParams });
-    return response.data;
+    const response = await apiClient.get<any>("/class-years", { params: backendParams });
+    // Handle PagedResponse structure { items: [], totalCount: n }
+    const data = response.data;
+    return Array.isArray(data) ? data : (data?.items || []);
   },
 
   // ─── GET ONE ──────────────────────────────────────────────────────────────────
@@ -90,8 +92,9 @@ export const classYearService = {
    * AuthN(login) + AuthZ(Teacher)
    * 404: teacher does not have a homeroom class
    */
-  getHomeroomClass: async (): Promise<ClassYearResponse> => {
-    const response = await apiClient.get<ClassYearResponse>("/class-years/homeroom");
+  getHomeroomClass: async (schoolYear?: number): Promise<ClassYearResponse> => {
+    const params = schoolYear ? { SchoolYear: schoolYear } : {};
+    const response = await apiClient.get<ClassYearResponse>("/class-years/homeroom", { params });
     return response.data;
   },
 
@@ -142,8 +145,11 @@ export const classYearService = {
   ): Promise<ClassYearResponse> => {
     const backendPayload: any = { ...payload };
     if (payload.schoolYear) {
-      backendPayload.schoolYear = parseInt(payload.schoolYear.split("-")[0], 10);
+      const yearStr = String(payload.schoolYear).split("-")[0];
+      backendPayload.SchoolYear = parseInt(yearStr, 10);
+      backendPayload.schoolYear = backendPayload.SchoolYear;
     }
+
     const response = await apiClient.put<ClassYearResponse>(
       `/class-years/${classYearId}`,
       backendPayload
@@ -163,7 +169,14 @@ export const classYearService = {
    * 404: classYear does not exist
    * 409: Incompatible grades for promotion (e.g., must be 10→11, 11→12)
    */
-  promote: async (mappings: PromoteClassPayload[]): Promise<void> => {
-    await apiClient.post("/class-years/promote", mappings);
+  promote: async (payload: ClassPromoteRequest): Promise<void> => {
+    const backendPayload = {
+      CurrentSystemYear: payload.currentSystemYear,
+      ClassPromotes: payload.classPromotes.map(p => ({
+        FromClassYearId: p.fromClassYearId,
+        ToClassYearId: p.toClassYearId
+      }))
+    };
+    await apiClient.post("/class-years/promote", backendPayload);
   },
 };

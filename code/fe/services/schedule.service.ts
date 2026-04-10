@@ -63,9 +63,10 @@ export const scheduleService = {
    */
   createScheduleDetail: async (
     scheduleId: string,
-    payload: CreateScheduleDetailPayload
+    payload: CreateScheduleDetailPayload | CreateScheduleDetailPayload[]
   ): Promise<any> => {
-    const response = await apiClient.post(`/schedules/${scheduleId}/details`, payload);
+    const data = Array.isArray(payload) ? payload : [payload];
+    const response = await apiClient.post(`/schedules/${scheduleId}/details`, data);
     return response.data;
   },
 
