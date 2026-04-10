@@ -2,7 +2,7 @@
 
 export interface UserResponse {
   userId: string;
-  username: string;
+  userName: string;  // C# UserName → JSON userName
   email: string;
   phoneNumber: string;
   fullName: string;
@@ -14,7 +14,7 @@ export interface UserResponse {
 
 export interface UserListItem {
   userId: string;
-  username: string;
+  userName: string; // Changed from username to match backend JSON
   fullName: string;
   role: string;
   createdAt: string;
