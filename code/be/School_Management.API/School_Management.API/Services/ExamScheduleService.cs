@@ -12,6 +12,15 @@ namespace School_Management.API.Services
         {
             this.examScheduleRepository = examScheduleRepository;
         }
+
+        public async Task<bool> AssignStudentIntoExamScheduleDetail(Guid examScheduleId)
+        {
+            var (result, message) = await examScheduleRepository.AssignStudentIntoExamScheduleDetail(examScheduleId);
+            if (result == false) throw new BadRequestException(message);
+
+            return result;
+        }
+
         public async Task<ExamScheduleResponse> CreateExamSchedule(ExamScheduleRequest request)
         {
             var (result, message) = await examScheduleRepository.CreateExamSchedule(request);

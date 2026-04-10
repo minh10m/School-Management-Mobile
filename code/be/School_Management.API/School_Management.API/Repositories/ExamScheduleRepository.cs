@@ -15,6 +15,77 @@ namespace School_Management.API.Repositories
         {
             this.context = context;
         }
+
+        public async Task<(bool result, string? message)> AssignStudentIntoExamScheduleDetail(Guid examScheduleId)
+        {
+            var examSchedule = await context.ExamSchedule.FirstOrDefaultAsync(x => x.Id == examScheduleId);
+            if (examSchedule == null) return (false, "Không tìm thấy lịch thi");
+
+            var studentIds = await context.StudentClassYear.AsNoTracking().Where(x => x.ClassYear.SchoolYear == examSchedule.SchoolYear
+                                                                    && x.ClassYear.Grade == examSchedule.Grade)
+                                                           .OrderBy(x => x.Student.User.FullName)
+                                                           .Select(g => g.StudentId)
+                                                           .ToListAsync();
+            if (!studentIds.Any()) return (false, "Không tìm thấy danh sách học sinh của lịch thi này");
+
+            var allDetails = await context.ExamScheduleDetail.Include(x => x.Subject).Where(x => x.ExamScheduleId == examScheduleId)
+                                                                       .ToListAsync();
+
+            var subjectGroups = allDetails.GroupBy(x => new { x.SubjectId, x.Subject.SubjectName });
+            var assignments = new List<ExamStudentAssignment>();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var detailIds = allDetails.Select(d => d.Id).ToList();
+                var oldRecords = context.ExamStudentAssignment.Where(a => detailIds.Contains(a.ExamScheduleDetailId));
+                context.ExamStudentAssignment.RemoveRange(oldRecords);
+
+                foreach (var group in subjectGroups)
+                {
+                    var subjectName = group.Key.SubjectName;
+
+                    var roomGroups = group.ToList();
+                    var totalCapicity = roomGroups.Count * 30;
+                    if (totalCapicity < studentIds.Count) return (false, $"Môn {subjectName} không đủ chỗ, tổng học sinh là {studentIds.Count} học sinh và số chỗ hiện tại là {totalCapicity}");
+
+                    var studentIdx = 0;
+                    var idNumberCounter = 1;
+
+                    foreach(var room in roomGroups)
+                    {
+                        var studentsInRoom = studentIds.Skip(studentIdx)
+                                                       .Take(30)
+                                                       .ToList();
+                        if (!studentsInRoom.Any()) break;
+                        foreach(var studentId in studentsInRoom)
+                        {
+                            assignments.Add(new ExamStudentAssignment
+                            {
+                                Id = Guid.NewGuid(),
+                                StudentId = studentId,
+                                ExamScheduleDetailId = room.Id,
+                                IdentificationNumber = $"SBD{idNumberCounter:D4}"
+                            });
+                            idNumberCounter++;
+                        }
+                        studentIdx += 30;
+
+                    }
+                }
+
+                context.ExamStudentAssignment.AddRange(assignments);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return (true, "Thêm dữ liệu thành công");
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
         public async Task<(ExamScheduleResponse? data, string? message)> CreateExamSchedule(ExamScheduleRequest request)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
