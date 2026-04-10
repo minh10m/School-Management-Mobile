@@ -39,5 +39,10 @@ namespace School_Management.API.Services
 
             return result;
         }
+
+        public async Task<ExamScheduleResponse> UpdateExamSchedule(ExamScheduleRequest request, Guid examScheduleId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

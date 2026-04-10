@@ -15,7 +15,7 @@ namespace School_Management.API.Models.Domain
 
         [ForeignKey("UserId")]
         public AppUser? User { get; set; }
-        public ClassYear? ClassYear { get; set; }
+        public ICollection<ClassYear> ClassYears { get; set; } = new List<ClassYear>();
         public ICollection<TeacherSubject> TeacherSubjects { get; set; } = new List<TeacherSubject>();
         public ICollection<ExamScheduleDetail> ExamScheduleDetails { get; set; } = new List<ExamScheduleDetail>();
 
