@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router, Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -56,9 +57,16 @@ export default function TimetableTab() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <Stack.Screen options={{ headerShown: false }} />
       {/* Header */}
-      <View className="px-6 py-4 border-b border-gray-100">
-        <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>Timetable</Text>
+      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-50">
+        <TouchableOpacity onPress={() => router.back()} className="p-2">
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
+          Timetable
+        </Text>
+        <View className="w-10" />
       </View>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>

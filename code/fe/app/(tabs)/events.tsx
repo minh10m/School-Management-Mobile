@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router, Stack } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
 import { View, Text, FlatList, TextInput, ActivityIndicator, RefreshControl, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -60,10 +61,17 @@ export default function EventsTab() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
+      <Stack.Screen options={{ headerShown: false }} />
       {/* Header */}
-      <View className="px-6 pt-2 pb-5 bg-white border-b border-gray-100">
-        <Text className="text-black text-2xl" style={{ fontFamily: "Poppins-Bold" }}>School Events</Text>
-        <Text className="text-gray-400 text-xs" style={{ fontFamily: "Poppins-Regular" }}>Stay tuned with our campus activities</Text>
+      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-50">
+        <TouchableOpacity onPress={() => router.back()} className="p-2">
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <View className="flex-1 items-center">
+          <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>School Events</Text>
+          <Text className="text-gray-400 text-[10px]" style={{ fontFamily: "Poppins-Regular" }}>Stay tuned with our campus activities</Text>
+        </View>
+        <View className="w-10" />
       </View>
 
       {/* Tabs */}
