@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Exceptions;
@@ -185,15 +185,16 @@ namespace School_Management.API.Services
 
         }
 
-        public UserListResponse ReturnListData(AppUser user)
+        public UserListResponse ReturnListData(AppUser user, string? role)
         {
             return new UserListResponse
             {
-
                 UserId = user.Id,
                 UserName = user.UserName,
                 FullName = user.FullName,
                 LockoutEnd = user.LockoutEnd,
+                Role = role,
+                CreatedAt = user.CreatedAt
             };
         }
 
@@ -212,7 +213,13 @@ namespace School_Management.API.Services
                 query = query.Where(x => x.FullName.Contains(request.Address));
 
             if (!string.IsNullOrWhiteSpace(request.Role))
-                query = query.Where(x => x.FullName.Contains(request.Role));
+            {
+                query = from user in query
+                        join userRole in context.UserRoles on user.Id equals userRole.UserId
+                        join role in context.Roles on userRole.RoleId equals role.Id
+                        where role.Name.ToLower() == request.Role.ToLower()
+                        select user;
+            }
             
 
             //Sorting
@@ -234,16 +241,27 @@ namespace School_Management.API.Services
                 {
                     query = request.IsAscending ? query.OrderBy(x => x.Birthday) : query.OrderByDescending(x => x.Birthday);
                 }
+                else if (request.SortBy.Equals("CreatedAt", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = request.IsAscending ? query.OrderBy(x => x.CreatedAt) : query.OrderByDescending(x => x.CreatedAt);
+                }
             }
             var totalCount = await query.CountAsync();
 
             //Pagination
             var skipResults = (request.PageNumber - 1) * request.PageSize;
-            var result = await query.Skip(skipResults).Take(request.PageSize).ToListAsync();
+            var users = await query.Skip(skipResults).Take(request.PageSize).ToListAsync();
+
+            var items = new List<UserListResponse>();
+            foreach (var user in users)
+            {
+                var roles = await userManager.GetRolesAsync(user);
+                items.Add(ReturnListData(user, roles.FirstOrDefault()));
+            }
 
             return new PagedResponse<UserListResponse>
             {
-                Items = result.Select(x => ReturnListData(x)).ToList(),
+                Items = items,
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize,
                 TotalCount = totalCount
