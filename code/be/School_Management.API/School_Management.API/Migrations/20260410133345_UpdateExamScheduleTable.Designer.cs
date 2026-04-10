@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using School_Management.API.Data;
@@ -11,9 +12,11 @@ using School_Management.API.Data;
 namespace School_Management.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260410133345_UpdateExamScheduleTable")]
+    partial class UpdateExamScheduleTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -438,11 +441,6 @@ namespace School_Management.API.Migrations
                     b.Property<int>("Term")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -450,7 +448,7 @@ namespace School_Management.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Title", "Type", "Term", "Grade", "SchoolYear")
+                    b.HasIndex("Type", "Term", "Grade", "SchoolYear")
                         .IsUnique();
 
                     b.ToTable("ExamSchedule", null, t =>

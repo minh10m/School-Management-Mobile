@@ -4,6 +4,7 @@ using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 namespace School_Management.API.Repositories
 {
@@ -90,10 +91,13 @@ namespace School_Management.API.Repositories
 
         public async Task<(ExamScheduleResponse? data, string? message)> CreateExamSchedule(ExamScheduleRequest request)
         {
+            var isExisted = await context.ExamSchedule.AnyAsync(x => x.Type == request.Type && x.Term == request.Term && x.Title == request.Title
+                                                                        && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade);
+            if (isExisted) return (null, "CONFLICT_TITLE");
+
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var examschedule = new ExamSchedule();
                 if (request.IsActive)
                 {
                     var activeTrueExamSCH = await context.ExamSchedule.Where(x => x.Type == request.Type && x.Term == request.Term
@@ -101,20 +105,17 @@ namespace School_Management.API.Repositories
                                                                         && x.IsActive == true).FirstOrDefaultAsync();
                     if (activeTrueExamSCH != null)
                         activeTrueExamSCH.IsActive = false;
-                }
-                else
-                {
-                    var isExisted = await context.ExamSchedule.AnyAsync(x => x.Type == request.Type && x.Term == request.Term
-                                                                        && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade
-                                                                        && x.IsActive == request.IsActive);
-                    if (isExisted) return (null, "CONFLICT_TYPE");
+
                 }
 
+                
 
-                examschedule = new ExamSchedule
+
+                var examschedule = new ExamSchedule
                 {
                     Id = Guid.NewGuid(),
                     SchoolYear = request.SchoolYear,
+                    Title = request.Title,
                     Grade = request.Grade,
                     IsActive = request.IsActive,
                     Term = request.Term,
@@ -129,6 +130,7 @@ namespace School_Management.API.Repositories
                     ExamScheduleId = examschedule.Id,
                     SchoolYear = examschedule.SchoolYear,
                     Grade = examschedule.Grade,
+                    Title = examschedule.Title,
                     IsActive = examschedule.IsActive,
                     Term = examschedule.Term,
                     Type = examschedule.Type
@@ -169,6 +171,9 @@ namespace School_Management.API.Repositories
 
                     if (!teacherDict.TryGetValue(row.TeacherEmail, out var tId))
                         return (false, $"Dòng {currentRow} : Giá trị {row.TeacherEmail} không tồn tại");
+
+                    if (row.StartTime > row.FinishTime)
+                        return (false, $"Dòng {currentRow} : Thời gian bắt đầu không được lớn hơn thời gian kết thúc");
 
                     if (!subjectDict.TryGetValue(row.SubjectName, out var sId))
                         return (false, $"Dòng {currentRow} : Giá trị {row.SubjectName} không tồn tại");
@@ -211,6 +216,91 @@ namespace School_Management.API.Repositories
 
         }
 
+        public async Task<(PagedResponse<ExamScheduleDetailResponse>? data, string? message)> GetAllExamScheduleDetail(ExamScheduleDetailFilterRequest request, Guid examScheduleId)
+        {
+            var examSchedule = await context.ExamSchedule.FirstOrDefaultAsync(x => x.Id == examScheduleId);
+            if (examSchedule == null) return (null, "NOT_FOUND_EXAMSCHEDULE");
+            var query = context.ExamScheduleDetail.AsNoTracking().Where(x => x.ExamScheduleId == examScheduleId);
+
+            if(!string.IsNullOrWhiteSpace(request.SubjectName))
+            {
+                var name = request.SubjectName.Trim().ToLower();
+                query = query.Where(x => x.Subject.SubjectName.ToLower().Contains(name));
+            }
+            if(!string.IsNullOrWhiteSpace(request.TeacherName))
+            {
+                var name = request.TeacherName.Trim().ToLower();
+                query = query.Where(x => x.Teacher.User.FullName.ToLower().Contains(name));
+            }
+
+            query = query.OrderBy(x => x.RoomName);
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(x => new ExamScheduleDetailResponse
+                                        {
+                                            StartTime = x.StartTime,
+                                            SubjectId = x.SubjectId,
+                                            SubjectName = x.Subject.SubjectName,
+                                            ExamScheduleDetailId = x.Id,
+                                            ExamScheduleId = x.ExamScheduleId,
+                                            Date = x.Date,
+                                            FinishTime = x.FinishTime,
+                                            RoomName = x.RoomName,
+                                            TeacherId = x.TeacherId,
+                                            TeacherName = x.Teacher.User.FullName
+                                        }).ToListAsync();
+
+            return (new PagedResponse<ExamScheduleDetailResponse>
+            {
+                Items = listResult,
+                TotalCount = totalCount,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber
+            }, "SUCCESS");
+        }
+
+        public async Task<(PagedResponse<ExamStudentAssignmentResponse>? data, string? message)> GetAllExamStudentAssignment(ExamStudentAssignmentFilterRequest request, Guid examScheduleDetailId)
+        {
+            var examScheduleDetail = await context.ExamScheduleDetail.FirstOrDefaultAsync(x => x.Id == examScheduleDetailId);
+            if (examScheduleDetail == null) return (null, "NOT_FOUND_EXAM_SCHEDULE_DETAIL");
+
+            var query = context.ExamStudentAssignment.AsNoTracking().Where(x => x.ExamScheduleDetailId == examScheduleDetailId);
+
+            if (!string.IsNullOrWhiteSpace(request.IdentificationNumber))
+            {
+                var name = request.IdentificationNumber.Trim();
+                query = query.Where(x => x.IdentificationNumber.Contains(name));
+            }
+            if (!string.IsNullOrWhiteSpace(request.StudentName))
+            {
+                var name = request.StudentName.Trim().ToLower();
+                query = query.Where(x => x.Student.User.FullName.ToLower().Contains(name));
+            }
+
+            query = query.OrderBy(x => x.IdentificationNumber);
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(x => new ExamStudentAssignmentResponse
+                                        {
+                                            StudentId = x.StudentId,
+                                            StudentName = x.Student.User.FullName,
+                                            ExamStudentAssignmentId = x.Id,
+                                            IdentificationNumber = x.IdentificationNumber
+                                        }).ToListAsync();
+
+            return (new PagedResponse<ExamStudentAssignmentResponse>
+            {
+                Items = listResult,
+                TotalCount = totalCount,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber
+            }, "SUCCESS");
+        }
+
         public List<ExamScheduleDetailRequest> ReadExcelData(IFormFile file)
         {
             var list = new List<ExamScheduleDetailRequest>();
@@ -244,24 +334,92 @@ namespace School_Management.API.Repositories
             var examSchedule = await context.ExamSchedule.FirstOrDefaultAsync(x => x.Id == examScheduleId);
             if (examSchedule == null) return (null, "NOT_FOUND_EXAMSCHEDULE");
 
-            if (examSchedule.IsActive && request.IsActive)
+            var isExisted = await context.ExamSchedule.AnyAsync(x => x.Type == request.Type && x.Term == request.Term
+                                                            && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade
+                                                            && x.Id != examScheduleId && x.Title == request.Title);
+
+            if (isExisted) return (null, "CONFLICT_TITLE");
+
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
             {
+                if (request.IsActive)
+                {
+                    var currentActive = await context.ExamSchedule.FirstOrDefaultAsync(x => x.IsActive == true && x.Term == request.Term && x.Type == request.Type
+                                                                 && x.SchoolYear == request.SchoolYear && x.Grade == request.Grade && x.Id != examScheduleId);
+                    if (currentActive != null) currentActive.IsActive = false;
+                }
 
+                examSchedule.IsActive = request.IsActive;
+                examSchedule.Grade = request.Grade;
+                examSchedule.SchoolYear = request.SchoolYear;
+                examSchedule.Term = request.Term;
+                examSchedule.Title = request.Title;
+                examSchedule.Type = request.Type;
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                var result = new ExamScheduleResponse
+                {
+                    SchoolYear = examSchedule.SchoolYear,
+                    ExamScheduleId = examSchedule.Id,
+                    Title = examSchedule.Title,
+                    Grade = examSchedule.Grade,
+                    IsActive = examSchedule.IsActive,
+                    Term = examSchedule.Term,
+                    Type = examSchedule.Type
+                };
+
+                return (result, "SUCCESS");
             }
-            else if (examSchedule.IsActive && !request.IsActive)
+            catch (Exception)
             {
-
+                await transaction.RollbackAsync();
+                throw;
             }
-            else if (!examSchedule.IsActive && request.IsActive)
+            
+        }
+
+        public async Task<(ExamScheduleDetailResponse? data, string? message)> UpdateExamScheduleDetail(UpdateExamScheduleDetail request, Guid examScheduleDetailId)
+        {
+            var examScheduleDetail = await context.ExamScheduleDetail.AsNoTracking().Include(x => x.Subject)
+                                                                                    .Include(x => x.Teacher).ThenInclude(x => x.User)
+                                                                                    .FirstOrDefaultAsync(x => x.Id == examScheduleDetailId);
+            if (examScheduleDetail == null) return (null, "NOT_FOUND_EXAM_SCHEDULE_DETAIL");
+
+            var isExisted = await context.ExamScheduleDetail.AnyAsync(x => x.Id != examScheduleDetailId && x.Date == request.Date
+                                                       && (x.StartTime < request.FinishTime && x.FinishTime > request.StartTime)
+                                                       && (x.TeacherId == request.TeacherId || x.RoomName == request.RoomName));
+
+            if (request.StartTime > request.FinishTime) return (null, "CONFLICT_TIME");
+
+            if (isExisted) return (null, "CONFLICT_TEACHER_OR_ROOMNAME");
+
+            examScheduleDetail.SubjectId = request.SubjectId;
+            examScheduleDetail.TeacherId = request.TeacherId;
+            examScheduleDetail.RoomName = request.RoomName;
+            examScheduleDetail.StartTime = request.StartTime;
+            examScheduleDetail.FinishTime = request.FinishTime;
+            examScheduleDetail.Date = request.Date;
+
+            await context.SaveChangesAsync();
+
+            var result = new ExamScheduleDetailResponse
             {
+                StartTime = examScheduleDetail.StartTime,
+                SubjectId = examScheduleDetail.SubjectId,
+                ExamScheduleDetailId = examScheduleDetail.Id,
+                FinishTime = examScheduleDetail.FinishTime,
+                Date = examScheduleDetail.Date,
+                RoomName = examScheduleDetail.RoomName,
+                TeacherName = examScheduleDetail.Teacher.User.FullName,
+                SubjectName = examScheduleDetail.Subject.SubjectName,
+                TeacherId = examScheduleDetail.TeacherId,
+                ExamScheduleId = examScheduleDetail.ExamScheduleId
+            };
 
-            }
-            else if (!examSchedule.IsActive && !request.IsActive)
-            {
-
-            }
-
-            return (null, "");
+            return (result, "SUCCESS");
         }
     }
 }

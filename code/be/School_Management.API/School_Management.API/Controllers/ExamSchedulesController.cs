@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
+using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
 
@@ -60,6 +61,68 @@ namespace School_Management.API.Controllers
             {
                 success = result,
                 message = "Phân bổ học sinh vào chi tiết lịch thành công"
+            });
+        }
+
+        [HttpPatch]
+        [Route("{examScheduleId}")]
+        [Authorize(Roles = "Admin")]
+        [ValidateModel]
+        public async Task<IActionResult> UpdateExamSchedule([FromBody] ExamScheduleRequest request, [FromRoute] Guid examScheduleId)
+        {
+            var result = await examScheduleService.UpdateExamSchedule(request, examScheduleId);
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật thành công",
+                data = result
+            });
+        }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("details/{examScheduleDetailId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateExamScheduleDetail([FromBody] UpdateExamScheduleDetail request, [FromRoute] Guid examScheduleDetailId)
+        {
+            var result = await examScheduleService.UpdateExamScheduleDetail(request, examScheduleDetailId);
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật thành công",
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("{examScheduleId}/details")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllExamScheduleDetail([FromQuery] ExamScheduleDetailFilterRequest request, [FromRoute] Guid examScheduleId)
+        {
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await examScheduleService.GetAllExamScheduleDetail(request, examScheduleId);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("details/{examScheduleDetailId}/assign")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllExamStudentAssignment([FromQuery] ExamStudentAssignmentFilterRequest request, [FromRoute] Guid examScheduleDetailId)
+        {
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await examScheduleService.GetAllExamStudentAssignment(request, examScheduleDetailId);
+            return Ok(new
+            {
+                success = true,
+                data = result
             });
         }
     }

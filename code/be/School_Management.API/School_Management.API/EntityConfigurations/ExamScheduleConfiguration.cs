@@ -9,6 +9,7 @@ namespace School_Management.API.EntityConfigurations
         public void Configure(EntityTypeBuilder<ExamSchedule> builder)
         {
             builder.Property(x => x.Type).HasMaxLength(100).IsRequired();
+            builder.Property(x => x.Title).HasMaxLength(150).IsRequired();
             builder.Property(x => x.Term).IsRequired();
             builder.Property(x => x.SchoolYear).IsRequired();
             builder.Property(x => x.IsActive).IsRequired();
@@ -21,7 +22,7 @@ namespace School_Management.API.EntityConfigurations
                 x.HasCheckConstraint("CK_Grade_ExamSchedule", "\"Grade\" >= 10 AND \"Grade\" <= 12");
             });
 
-            builder.HasIndex(x => new { x.Type, x.Term, x.Grade, x.SchoolYear, x.IsActive }).IsUnique();
+            builder.HasIndex(x => new { x.Title, x.Type, x.Term, x.Grade, x.SchoolYear}).IsUnique();
         }
     }
 }
