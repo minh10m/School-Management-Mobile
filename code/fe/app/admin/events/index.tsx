@@ -117,10 +117,9 @@ export default function AdminEventsScreen() {
           </View>
         </View>
         <TouchableOpacity 
-          className="bg-bright-blue w-10 h-10 rounded-full items-center justify-center shadow-md shadow-blue-100"
           onPress={() => router.push('/admin/events/create' as any)}
         >
-          <Ionicons name="add" size={24} color="white" />
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Create</Text>
         </TouchableOpacity>
       </View>
 

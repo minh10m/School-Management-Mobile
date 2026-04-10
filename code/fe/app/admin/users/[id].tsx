@@ -204,8 +204,8 @@ export default function AdminUserDetailScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">User Detail</Text>
-        <TouchableOpacity onPress={openEdit} className="p-2">
-            <Ionicons name="pencil-outline" size={20} color="#136ADA" />
+        <TouchableOpacity onPress={openEdit}>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Edit</Text>
         </TouchableOpacity>
       </View>
 

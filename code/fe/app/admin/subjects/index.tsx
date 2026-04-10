@@ -49,7 +49,7 @@ export default function AdminSubjectsScreen() {
         </TouchableOpacity>
         <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Subject Management</Text>
         <TouchableOpacity onPress={() => router.push('/admin/subjects/create' as any)}>
-           <Ionicons name="add-circle-outline" size={26} color="#136ADA" />
+           <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Create</Text>
         </TouchableOpacity>
       </View>
 

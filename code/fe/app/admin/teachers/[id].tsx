@@ -229,10 +229,9 @@ export default function AdminTeacherDetailScreen() {
                    <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-400 text-[10px] uppercase tracking-wider">Teaching Subjects</Text>
                    <TouchableOpacity 
                     onPress={() => setShowSubjectModal(true)}
-                    className="bg-bright-blue/10 px-3 py-1 rounded-full flex-row items-center"
+                    className="bg-bright-blue/10 px-3 py-1 rounded-full items-center"
                    >
-                      <Ionicons name="add" size={14} color="#136ADA" />
-                      <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 11, color: '#136ADA' }} className="ml-0.5">Assign</Text>
+                      <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 11, color: '#136ADA' }}>Assign</Text>
                    </TouchableOpacity>
                 </View>
 

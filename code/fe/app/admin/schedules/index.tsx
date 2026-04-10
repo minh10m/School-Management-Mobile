@@ -65,7 +65,7 @@ export default function AdminSchedulesScreen() {
         </TouchableOpacity>
         <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Schedule Management</Text>
         <TouchableOpacity onPress={() => router.push('/admin/schedules/create' as any)}>
-           <Ionicons name="add-circle-outline" size={26} color="#136ADA" />
+           <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Create</Text>
         </TouchableOpacity>
       </View>
 

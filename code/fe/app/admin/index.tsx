@@ -10,6 +10,7 @@ import { teacherService } from '../../services/teacher.service';
 import { classYearService } from '../../services/classYear.service';
 import { useAuthStore } from '../../store/authStore';
 import SideMenu from '../../components/SideMenu';
+import { SCHOOL_YEAR } from '../../constants/config';
 
 export default function AdminDashboard() {
   const { userInfo } = useAuthStore();
@@ -31,11 +32,11 @@ export default function AdminDashboard() {
       const [stuRes, teaRes, claRes] = await Promise.all([
         studentService.getStudents({ pageSize: 1 }),
         teacherService.getTeachers({ pageSize: 1 }),
-        classYearService.getClassYears({ schoolYear: '2026' })
+        classYearService.getClassYears({ schoolYear: SCHOOL_YEAR })
       ]);
       setStats({
-        students: stuRes.totalCount?.toString() || '0',
-        teachers: teaRes.totalCount?.toString() || '0',
+        students: (stuRes as any).totalCount?.toString() || (stuRes as any).length?.toString() || '0',
+        teachers: (teaRes as any).totalCount?.toString() || (teaRes as any).length?.toString() || '0',
         classes: claRes.length?.toString() || '0',
         fees: '12' // Mock for now
       });
@@ -106,7 +107,7 @@ export default function AdminDashboard() {
              Hi, Welcome, {adminName} 👋
           </Text>
           <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">
-            Admin Dashboard for School Year 2025-2026
+            Admin Dashboard for School Year {SCHOOL_YEAR}
           </Text>
         </View>
 

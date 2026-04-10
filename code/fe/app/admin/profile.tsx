@@ -94,8 +94,8 @@ export default function AdminProfileScreen() {
         <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
           Admin Profile
         </Text>
-        <TouchableOpacity className="p-2" onPress={openEdit}>
-          <Ionicons name="pencil-outline" size={22} color="#136ADA" />
+        <TouchableOpacity onPress={openEdit}>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Edit</Text>
         </TouchableOpacity>
       </View>
 

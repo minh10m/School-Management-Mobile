@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { classYearService } from '../../../services/classYear.service';
 import { teacherService } from '../../../services/teacher.service';
 import { TeacherListItem } from '../../../types/teacher';
+import { SCHOOL_YEAR } from '../../../constants/config';
 
 export default function AdminCreateClassScreen() {
   const [loading, setLoading] = useState(false);
@@ -15,7 +16,7 @@ export default function AdminCreateClassScreen() {
   const [form, setForm] = useState({
     className: '',
     grade: 10,
-    schoolYear: '2026',
+    schoolYear: SCHOOL_YEAR,
     homeRoomId: ''
   });
 
@@ -103,7 +104,7 @@ export default function AdminCreateClassScreen() {
           <View>
             <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1">School Year *</Text>
             <TextInput
-              placeholder="e.g. 2026"
+              placeholder={`e.g. ${SCHOOL_YEAR}`}
               value={form.schoolYear}
               onChangeText={(t) => setForm({...form, schoolYear: t})}
               className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 text-black"

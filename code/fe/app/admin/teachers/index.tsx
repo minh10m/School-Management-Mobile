@@ -66,6 +66,9 @@ export default function AdminTeachersScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Teacher Management</Text>
+        <TouchableOpacity onPress={() => router.push('/admin/teachers/create' as any)}>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Create</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Filters */}
