@@ -17,8 +17,9 @@ export const assignmentService = {
    * AuthN(login) + AuthZ(Teacher)
    */
   getAssignments: async (params: GetAssignmentsParams): Promise<TeacherAssignmentListResponse[]> => {
-    const response = await apiClient.get<TeacherAssignmentListResponse[]>("/assignments", { params });
-    return response.data;
+    const response = await apiClient.get<any>("/assignments", { params });
+    // Backend returns PagedResponse<AssignmentListResponse> which has an Items property
+    return response.data.items || [];
   },
 
   // ─── TEACHER: GET ONE ─────────────────────────────────────────────────────────

@@ -34,7 +34,7 @@ export default function StudentAssignmentListScreen() {
       const params: any = {};
       try {
           // Fetch current class info for the student based on fixed school year
-          const myClass = await classYearService.getMyClass(SCHOOL_YEAR);
+          const myClass = await classYearService.getMyClass(parseInt(SCHOOL_YEAR, 10));
           if (myClass?.classYearId) {
               params.ClassYearId = myClass.classYearId;
           }
