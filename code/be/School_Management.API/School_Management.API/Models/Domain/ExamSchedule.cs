@@ -6,7 +6,8 @@ namespace School_Management.API.Models.Domain
     {
         [Key]
         public Guid Id { get; set; }
-        public string Type { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty; // Có 2 giá trị là Giữa kì và Cuối kì
         public int Term { get; set; }
         public int SchoolYear { get; set; }
         public int Grade { get; set; }

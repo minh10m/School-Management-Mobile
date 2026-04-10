@@ -42,7 +42,14 @@ namespace School_Management.API.Services
 
         public async Task<ExamScheduleResponse> UpdateExamSchedule(ExamScheduleRequest request, Guid examScheduleId)
         {
-            throw new NotImplementedException();
+            var (result, message) = await examScheduleRepository.UpdateExamSchedule(request, examScheduleId);
+            return message switch
+            {
+                "NOT_FOUND_EXAMSCHEDULE" => throw new NotFoundException("Không tìm thấy lịch này"),
+                "DUPLICATED_TYPE" => throw new ConflictException("Loại lịch thi đã tồn tại"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
         }
     }
 }
