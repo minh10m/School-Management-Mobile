@@ -92,5 +92,21 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("{examScheduleId}/details")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllExamScheduleDetail([FromQuery] ExamScheduleDetailFilterRequest request, [FromRoute] Guid examScheduleId)
+        {
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await examScheduleService.GetAllExamScheduleDetail(request, examScheduleId);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
     }
 }

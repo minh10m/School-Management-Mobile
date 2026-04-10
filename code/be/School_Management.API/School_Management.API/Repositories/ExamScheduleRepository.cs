@@ -215,6 +215,51 @@ namespace School_Management.API.Repositories
 
         }
 
+        public async Task<(PagedResponse<ExamScheduleDetailResponse>? data, string? message)> GetAllExamScheduleDetail(ExamScheduleDetailFilterRequest request, Guid examScheduleId)
+        {
+            var examSchedule = await context.ExamSchedule.FirstOrDefaultAsync(x => x.Id == examScheduleId);
+            if (examSchedule == null) return (null, "NOT_FOUND_EXAMSCHEDULE");
+            var query = context.ExamScheduleDetail.AsNoTracking().Where(x => x.ExamScheduleId == examScheduleId);
+
+            if(!string.IsNullOrWhiteSpace(request.SubjectName))
+            {
+                var name = request.SubjectName.Trim().ToLower();
+                query = query.Where(x => x.Subject.SubjectName.ToLower().Contains(name));
+            }
+            if(!string.IsNullOrWhiteSpace(request.TeacherName))
+            {
+                var name = request.TeacherName.Trim().ToLower();
+                query = query.Where(x => x.Teacher.User.FullName.ToLower().Contains(name));
+            }
+
+            query = query.OrderBy(x => x.RoomName);
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(x => new ExamScheduleDetailResponse
+                                        {
+                                            StartTime = x.StartTime,
+                                            SubjectId = x.SubjectId,
+                                            SubjectName = x.Subject.SubjectName,
+                                            ExamScheduleDetailId = x.Id,
+                                            ExamScheduleId = x.ExamScheduleId,
+                                            Date = x.Date,
+                                            FinishTime = x.FinishTime,
+                                            RoomName = x.RoomName,
+                                            TeacherId = x.TeacherId,
+                                            TeacherName = x.Teacher.User.FullName
+                                        }).ToListAsync();
+
+            return (new PagedResponse<ExamScheduleDetailResponse>
+            {
+                Items = listResult,
+                TotalCount = totalCount,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber
+            }, "SUCCESS");
+        }
+
         public List<ExamScheduleDetailRequest> ReadExcelData(IFormFile file)
         {
             var list = new List<ExamScheduleDetailRequest>();
@@ -297,7 +342,9 @@ namespace School_Management.API.Repositories
 
         public async Task<(ExamScheduleDetailResponse? data, string? message)> UpdateExamScheduleDetail(UpdateExamScheduleDetail request, Guid examScheduleDetailId)
         {
-            var examScheduleDetail = await context.ExamScheduleDetail.FirstOrDefaultAsync(x => x.Id == examScheduleDetailId);
+            var examScheduleDetail = await context.ExamScheduleDetail.AsNoTracking().Include(x => x.Subject)
+                                                                                    .Include(x => x.Teacher).ThenInclude(x => x.User)
+                                                                                    .FirstOrDefaultAsync(x => x.Id == examScheduleDetailId);
             if (examScheduleDetail == null) return (null, "NOT_FOUND_EXAM_SCHEDULE_DETAIL");
 
             var isExisted = await context.ExamScheduleDetail.AnyAsync(x => x.Id != examScheduleDetailId && x.Date == request.Date
@@ -325,6 +372,8 @@ namespace School_Management.API.Repositories
                 FinishTime = examScheduleDetail.FinishTime,
                 Date = examScheduleDetail.Date,
                 RoomName = examScheduleDetail.RoomName,
+                TeacherName = examScheduleDetail.Teacher.User.FullName,
+                SubjectName = examScheduleDetail.Subject.SubjectName,
                 TeacherId = examScheduleDetail.TeacherId,
                 ExamScheduleId = examScheduleDetail.ExamScheduleId
             };

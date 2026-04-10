@@ -40,6 +40,17 @@ namespace School_Management.API.Services
             return result;
         }
 
+        public async Task<PagedResponse<ExamScheduleDetailResponse>> GetAllExamScheduleDetail(ExamScheduleDetailFilterRequest request, Guid examScheduleId)
+        {
+            var (result, message) = await examScheduleRepository.GetAllExamScheduleDetail(request, examScheduleId);
+            return message switch
+            {
+                "NOT_FOUND_EXAMSCHEDULE" => throw new NotFoundException("Không tìm thấy lịch thi"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<ExamScheduleResponse> UpdateExamSchedule(ExamScheduleRequest request, Guid examScheduleId)
         {
             var (result, message) = await examScheduleRepository.UpdateExamSchedule(request, examScheduleId);

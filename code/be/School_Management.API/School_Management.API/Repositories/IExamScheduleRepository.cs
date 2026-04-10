@@ -11,6 +11,7 @@ namespace School_Management.API.Repositories
         public Task<(bool result, string? message)> AssignStudentIntoExamScheduleDetail(Guid examScheduleId);
         public Task<(ExamScheduleResponse? data, string? message)> UpdateExamSchedule(ExamScheduleRequest request, Guid examScheduleId);
         public Task<(ExamScheduleDetailResponse? data, string? message)> UpdateExamScheduleDetail(UpdateExamScheduleDetail request, Guid examScheduleDetailId);
+        public Task<(PagedResponse<ExamScheduleDetailResponse>? data, string? message)> GetAllExamScheduleDetail(ExamScheduleDetailFilterRequest request, Guid examScheduleId);
 
     }
 }
