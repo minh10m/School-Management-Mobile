@@ -1,4 +1,4 @@
-﻿using School_Management.API.Models.DTO;
+using School_Management.API.Models.DTO;
 
 namespace School_Management.API.Repositories
 {
@@ -9,6 +9,6 @@ namespace School_Management.API.Repositories
         public Task<List<SubjectResponse>> GetAllSubject(SubjectFilterRequest request);
         public Task<SubjectResponse?> GetSubjectById(Guid subjectId);
         public Task<PagedResponse<TeacherOfSubjectResponse>?> GetListTeacherBySubjectId(TeacherSubjectFilterRequest request, Guid subjectId);
-
+        public Task<bool> DeleteSubject(Guid subjectId);
     }
 }

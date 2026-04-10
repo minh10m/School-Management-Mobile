@@ -1,4 +1,4 @@
-﻿using School_Management.API.Exceptions;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
 
@@ -48,6 +48,13 @@ namespace School_Management.API.Services
                 "DUPLICATE_NAME" => throw new ConflictException("Tên môn học tồn tại, cập nhật thất bại"), 
                 _ => data!
             };
+        }
+
+        public async Task<bool> DeleteSubject(Guid subjectId)
+        {
+            var result = await subjectRepository.DeleteSubject(subjectId);
+            if (!result) throw new NotFoundException("Môn học không tồn tại");
+            return result;
         }
     }
 }

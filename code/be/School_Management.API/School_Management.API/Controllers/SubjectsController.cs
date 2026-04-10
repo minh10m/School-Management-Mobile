@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
@@ -71,6 +71,15 @@ namespace School_Management.API.Controllers
             if (request.SortBy == null) request.SortBy = "FullName";
             var result = await subjectService.GetListTeacherBySubjectId(request, subjectId);
             return Ok(result);
+        }
+    
+        [HttpDelete]
+        [Route("{subjectId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteSubject([FromRoute] Guid subjectId)
+        {
+            await subjectService.DeleteSubject(subjectId);
+            return Ok(new { message = "Xóa môn học thành công" });
         }
     }
 }
