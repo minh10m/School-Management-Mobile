@@ -4,7 +4,7 @@ export type SubmissionStatus = 'submitted' | 'graded' | 'late';
 
 /** Chi tiết bài nộp (Dùng cho Create, GetById, Grade, GetMySubmission) */
 export interface SubmissionResponse {
-  subId: string;
+  submissionId: string;
   fileTitle: string;
   timeSubmit: string;         // ISO datetime
   status: SubmissionStatus;
@@ -17,7 +17,7 @@ export interface SubmissionResponse {
 
 /** Dành cho giáo viên xem danh sách bài nộp của một bài tập */
 export interface TeacherSubmissionListResponse {
-  subId: string;
+  submissionId: string;
   fileTitle: string;
   timeSubmit: string;
   status: SubmissionStatus;
@@ -25,6 +25,14 @@ export interface TeacherSubmissionListResponse {
   fileUrl: string | null;
   studentName: string;
   score: number | null;
+}
+
+export interface TeacherSubmissionListResponseWrapper {
+  items: TeacherSubmissionListResponse[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 // ─── Query Params ──────────────────────────────────────────────────────────────

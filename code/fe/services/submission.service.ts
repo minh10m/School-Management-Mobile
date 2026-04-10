@@ -5,6 +5,7 @@ import {
   GradeSubmissionPayload,
   SubmissionResponse,
   TeacherSubmissionListResponse,
+  TeacherSubmissionListResponseWrapper,
 } from "../types/submission";
 import apiClient from "./apiClient";
 
@@ -30,8 +31,8 @@ export const submissionService = {
   getSubmissionsByAssignment: async (
     params: GetSubmissionsParams
   ): Promise<TeacherSubmissionListResponse[]> => {
-    const response = await apiClient.get<TeacherSubmissionListResponse[]>("/submissions", { params });
-    return response.data;
+    const response = await apiClient.get<TeacherSubmissionListResponseWrapper>("/submissions", { params });
+    return response.data.items;
   },
 
   // ─── TEACHER: GET ONE ────────────────────────────────────────────────────────

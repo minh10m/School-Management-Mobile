@@ -74,7 +74,7 @@ export default function TeacherResults() {
 
       // Fetch teaching classes and subjects in parallel
       const [teachingClasses, teacherSubjects] = await Promise.all([
-        classYearService.getTeachingClasses({ schoolYear: SCHOOL_YEAR.toString() }),
+        classYearService.getTeachingClasses({ schoolYear: SCHOOL_YEAR }),
         teacherService.getTeacherSubjects(currentTeacherId)
       ]);
 
@@ -179,7 +179,7 @@ export default function TeacherResults() {
         {/* Banner/Introduction */}
         <View className="px-6 py-6">
           <Text className="text-gray-400 text-xs mb-1" style={{ fontFamily: 'Poppins-Medium' }}>
-            Học kỳ {term} • {SCHOOL_YEAR} - {SCHOOL_YEAR + 1}
+            Học kỳ {term} • {SCHOOL_YEAR} - {parseInt(SCHOOL_YEAR, 10) + 1}
           </Text>
           <Text className="text-white text-2xl" style={{ fontFamily: 'Poppins-Bold' }}>Bảng điểm lớp</Text>
         </View>
