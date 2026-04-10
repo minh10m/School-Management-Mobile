@@ -77,5 +77,20 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("details/{examScheduleDetailId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateExamScheduleDetail([FromBody] UpdateExamScheduleDetail request, [FromRoute] Guid examScheduleDetailId)
+        {
+            var result = await examScheduleService.UpdateExamScheduleDetail(request, examScheduleDetailId);
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật thành công",
+                data = result
+            });
+        }
     }
 }

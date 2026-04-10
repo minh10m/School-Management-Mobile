@@ -171,6 +171,9 @@ namespace School_Management.API.Repositories
                     if (!teacherDict.TryGetValue(row.TeacherEmail, out var tId))
                         return (false, $"Dòng {currentRow} : Giá trị {row.TeacherEmail} không tồn tại");
 
+                    if (row.StartTime > row.FinishTime)
+                        return (false, $"Dòng {currentRow} : Thời gian bắt đầu không được lớn hơn thời gian kết thúc");
+
                     if (!subjectDict.TryGetValue(row.SubjectName, out var sId))
                         return (false, $"Dòng {currentRow} : Giá trị {row.SubjectName} không tồn tại");
 
@@ -290,6 +293,43 @@ namespace School_Management.API.Repositories
                 throw;
             }
             
+        }
+
+        public async Task<(ExamScheduleDetailResponse? data, string? message)> UpdateExamScheduleDetail(UpdateExamScheduleDetail request, Guid examScheduleDetailId)
+        {
+            var examScheduleDetail = await context.ExamScheduleDetail.FirstOrDefaultAsync(x => x.Id == examScheduleDetailId);
+            if (examScheduleDetail == null) return (null, "NOT_FOUND_EXAM_SCHEDULE_DETAIL");
+
+            var isExisted = await context.ExamScheduleDetail.AnyAsync(x => x.Id != examScheduleDetailId && x.Date == request.Date
+                                                       && (x.StartTime < request.FinishTime && x.FinishTime > request.StartTime)
+                                                       && (x.TeacherId == request.TeacherId || x.RoomName == request.RoomName));
+
+            if (request.StartTime > request.FinishTime) return (null, "CONFLICT_TIME");
+
+            if (isExisted) return (null, "CONFLICT_TEACHER_OR_ROOMNAME");
+
+            examScheduleDetail.SubjectId = request.SubjectId;
+            examScheduleDetail.TeacherId = request.TeacherId;
+            examScheduleDetail.RoomName = request.RoomName;
+            examScheduleDetail.StartTime = request.StartTime;
+            examScheduleDetail.FinishTime = request.FinishTime;
+            examScheduleDetail.Date = request.Date;
+
+            await context.SaveChangesAsync();
+
+            var result = new ExamScheduleDetailResponse
+            {
+                StartTime = examScheduleDetail.StartTime,
+                SubjectId = examScheduleDetail.SubjectId,
+                ExamScheduleDetailId = examScheduleDetail.Id,
+                FinishTime = examScheduleDetail.FinishTime,
+                Date = examScheduleDetail.Date,
+                RoomName = examScheduleDetail.RoomName,
+                TeacherId = examScheduleDetail.TeacherId,
+                ExamScheduleId = examScheduleDetail.ExamScheduleId
+            };
+
+            return (result, "SUCCESS");
         }
     }
 }
