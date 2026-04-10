@@ -49,14 +49,7 @@ export const scheduleService = {
    * 409: lớp đã có schedule trong khoảng thời gian này
    */
   createSchedule: async (payload: CreateSchedulePayload): Promise<ScheduleResponse> => {
-    const backendPayload = {
-      classYearId: payload.classYearId,
-      name: payload.name,
-      schoolYear: new Date().getFullYear(), // Default since UI might not pass it
-      isActive: true, // Default
-      term: parseInt(payload.term || "1", 10)
-    };
-    const response = await apiClient.post<ScheduleResponse>("/schedules", backendPayload);
+    const response = await apiClient.post<ScheduleResponse>("/schedules", payload);
     return response.data;
   },
 
@@ -72,14 +65,8 @@ export const scheduleService = {
     scheduleId: string,
     payload: CreateScheduleDetailPayload
   ): Promise<any> => {
-    const dayIndex = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(payload.dayOfWeek);
-    const backendPayload = [{
-      teacherSubjectId: payload.teacherSubjectId,
-      dayOfWeek: dayIndex >= 0 ? dayIndex : 1,
-      startTime: payload.startTime
-    }];
-    await apiClient.post(`/schedules/${scheduleId}/details`, backendPayload);
-    return { ...payload, scheduleDetailId: "dummy" }; // Mock return since backend is void
+    const response = await apiClient.post(`/schedules/${scheduleId}/details`, payload);
+    return response.data;
   },
 
   // ─── ADMIN: UPDATE SCHEDULE ───────────────────────────────────────────────────
@@ -93,14 +80,9 @@ export const scheduleService = {
     scheduleId: string,
     payload: UpdateSchedulePayload
   ): Promise<ScheduleResponse> => {
-    // Note: To match PostUpdateScheduleRequest appropriately, we may need to merge with get if needed,
-    // but assuming PATCH allows partial updates.
-    const backendPayload: any = { ...payload };
-    if (payload.term) backendPayload.term = parseInt(payload.term, 10);
-
     const response = await apiClient.patch<ScheduleResponse>(
       `/schedules/${scheduleId}`,
-      backendPayload
+      payload
     );
     return response.data;
   },
@@ -114,15 +96,11 @@ export const scheduleService = {
    * 409: trùng giờ dạy / giờ học
    */
   updateScheduleDetail: async (
-    detailId: string,
+    scheduleId: string,
     payload: UpdateScheduleDetailPayload
   ): Promise<any> => {
-    // Note: Backend uses PUT /schedules/{scheduleId}/details for batch update,
-    // which is not compatible with single detail ID patch. We will proxy this
-    // gracefully if backend does not support single patch.
-    console.warn("Single schedule detail patch not natively supported by backend void batch endpoints");
-    const dayIndex = payload.dayOfWeek ? ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(payload.dayOfWeek) : 1;
-    // Just mock it since the single detail update isn't in swagger.
+    const response = await apiClient.put(`/schedules/${scheduleId}/details`, payload);
+    return response.data;
   },
 
   // ─── ADMIN: DELETE SCHEDULE ───────────────────────────────────────────────────
@@ -136,10 +114,7 @@ export const scheduleService = {
   },
 
   deleteScheduleDetail: async (detailId: string): Promise<void> => {
-    // Missing in swagger, likely handled via PUT batch update. Use try-catch.
-    try {
-      await apiClient.delete(`/schedules/details/${detailId}`);
-    } catch (e) { console.warn(e); }
+    await apiClient.delete(`/schedules/details/${detailId}`);
   },
 
   // ─── STUDENT: GET MY CLASS SCHEDULE ──────────────────────────────────────────
@@ -161,9 +136,9 @@ export const scheduleService = {
    * AuthN(login) + AuthZ(Teacher)
    * 404: teacher không tồn tại
    */
-  getMyTeachingSchedule: async (): Promise<TeacherScheduleDetailItem[]> => {
+  getMyTeachingSchedule: async (params?: GetMyClassScheduleParams): Promise<TeacherScheduleDetailItem[]> => {
     const response = await apiClient.get<TeacherScheduleDetailItem[]>(
-      "/schedules/teacher/me"
+      "/schedules/teacher/me", { params }
     );
     return response.data;
   },

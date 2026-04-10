@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
-import React from "react";
+import { Tabs, router } from "expo-router";
+import React, { useEffect } from "react";
 import { Platform } from "react-native";
+import { useAuthStore } from "../../store/authStore";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { Colors } from "@/constants/theme";
@@ -9,6 +10,23 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { userInfo } = useAuthStore();
+
+  useEffect(() => {
+    if (!userInfo) {
+       router.replace('/login');
+       return;
+    }
+    if (userInfo.role?.toLowerCase() !== 'student') {
+       if (userInfo.role?.toLowerCase() === 'admin') {
+          router.replace('/admin');
+       } else if (userInfo.role?.toLowerCase() === 'teacher') {
+          router.replace('/teacher');
+       }
+    }
+  }, [userInfo]);
+
+  if (!userInfo || userInfo.role?.toLowerCase() !== 'student') return null;
 
   return (
     <Tabs

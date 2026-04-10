@@ -1,0 +1,476 @@
+import { assignmentService } from "@/services/assignment.service";
+import { studentService } from "@/services/student.service";
+import { submissionService } from "@/services/submission.service";
+import { AssignmentResponse } from "@/types/assignment";
+import { SubmissionResponse } from "@/types/submission";
+import { Ionicons } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
+import { Stack, router, useLocalSearchParams } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+const { width } = Dimensions.get("window");
+
+export default function StudentAssignmentDetailScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const [assignment, setAssignment] = useState<AssignmentResponse | null>(null);
+  const [submission, setSubmission] = useState<SubmissionResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [fileTitle, setFileTitle] = useState("");
+
+  const fetchData = useCallback(async () => {
+    if (!id) return;
+    try {
+      setLoading(true);
+      const assignData = await assignmentService.getAssignmentById(id);
+      setAssignment(assignData);
+
+      // Fetch current student's profile to get studentId
+      const me = await studentService.getMe();
+
+      // Try to fetch existing submission
+      try {
+        const subData = await submissionService.getMySubmission({
+          assignmentId: id,
+          studentId: me.studentId,
+        });
+        setSubmission(subData);
+      } catch (err) {
+        // If 404, it means no submission yet
+        console.log("No submission found for this assignment");
+        setSubmission(null);
+      }
+    } catch (error) {
+      console.error("Error fetching assignment detail:", error);
+      Alert.alert("Error", "Could not fetch assignment details.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchData();
+  };
+
+  const handlePickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "*/*",
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        setFileUrl(asset.uri);
+        setFileTitle(asset.name);
+      }
+    } catch (err) {
+      console.error("Error picking document:", err);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!id) return;
+    if (!fileUrl && !fileTitle) {
+      Alert.alert("Error", "Please select a file to submit.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await submissionService.submitAssignment({
+        assignmentId: id,
+        fileTitle: fileTitle || "Assignment Submission",
+        fileUrl: fileUrl,
+      });
+      Alert.alert("Success", "Assignment submitted successfully!");
+      fetchData(); // Refresh to show submission status
+    } catch (error: any) {
+      console.error("Error submitting assignment:", error);
+      const errMsg =
+        error.response?.data?.message ||
+        "Failed to submit assignment. Please try again.";
+      Alert.alert("Error", errMsg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  if (loading && !refreshing) {
+    return (
+      <SafeAreaView className="flex-1 bg-white items-center justify-center">
+        <Stack.Screen options={{ title: "Assignment Details" }} />
+        <ActivityIndicator size="large" color="#136ADA" />
+        <Text
+          className="mt-4 text-gray-400"
+          style={{ fontFamily: "Poppins-Regular" }}
+        >
+          Fetching details...
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!assignment) {
+    return (
+      <SafeAreaView className="flex-1 bg-white items-center justify-center">
+        <Text
+          className="text-gray-400"
+          style={{ fontFamily: "Poppins-Regular" }}
+        >
+          Assignment not found.
+        </Text>
+        <TouchableOpacity onPress={() => router.back()} className="mt-4">
+          <Text
+            className="text-bright-blue"
+            style={{ fontFamily: "Poppins-Bold" }}
+          >
+            Go Back
+          </Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  const isExpired = new Date() > new Date(assignment.finishTime);
+
+  return (
+    <SafeAreaView className="flex-1 bg-white">
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: assignment.subjectName,
+          headerTitleAlign: "center",
+          headerTitleStyle: { fontFamily: "Poppins-Bold", fontSize: 18 },
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} className="p-2">
+              <Ionicons name="arrow-back" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: "white" },
+        }}
+      />
+      <StatusBar style="dark" />
+
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Header Info Card */}
+        <View className="px-6 pt-2 pb-6 bg-white">
+          <View className="bg-bright-blue p-6 rounded-3xl shadow-lg shadow-blue-200">
+            <View className="flex-row items-center gap-2 mb-2">
+              <Ionicons
+                name="book-outline"
+                size={16}
+                color="rgba(255,255,255,0.7)"
+              />
+              <Text
+                className="text-white/70 text-xs uppercase"
+                style={{ fontFamily: "Poppins-Bold" }}
+              >
+                {assignment.teacherName}
+              </Text>
+            </View>
+            <Text
+              className="text-white text-2xl mb-4"
+              style={{ fontFamily: "Poppins-Bold" }}
+            >
+              {assignment.title}
+            </Text>
+
+            <View className="h-[1px] bg-white/20 w-full mb-4" />
+
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <View className="bg-white/20 p-2 rounded-full">
+                  <Ionicons name="time-outline" size={14} color="white" />
+                </View>
+                <View>
+                  <Text
+                    className="text-white/60 text-[10px]"
+                    style={{ fontFamily: "Poppins-Medium" }}
+                  >
+                    DEADLINE
+                  </Text>
+                  <Text
+                    className="text-white text-xs"
+                    style={{ fontFamily: "Poppins-Bold" }}
+                  >
+                    {formatDate(assignment.finishTime)}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="bg-white px-4 py-1.5 rounded-full shadow-sm">
+                <Text
+                  className="text-bright-blue text-xs"
+                  style={{ fontFamily: "Poppins-Bold" }}
+                >
+                  {submission
+                    ? submission.score !== null
+                      ? `Graded: ${submission.score}/10`
+                      : "Submitted"
+                    : isExpired
+                      ? "Missed"
+                      : "Open"}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Assignment Content */}
+        <View className="px-6 mt-4">
+          <Text
+            className="text-black text-lg mb-2"
+            style={{ fontFamily: "Poppins-Bold" }}
+          >
+            Instructions
+          </Text>
+          <View className="bg-gray-50/80 p-5 rounded-2xl border border-gray-100">
+            <Text
+              className="text-gray-600 leading-6"
+              style={{ fontFamily: "Poppins-Regular" }}
+            >
+              {assignment.body ||
+                "No detailed instructions provided by the teacher."}
+            </Text>
+
+            {assignment.fileUrl && (
+              <TouchableOpacity
+                className="mt-6 flex-row items-center gap-3 bg-white p-3 rounded-xl border border-gray-100"
+                onPress={() =>
+                  Alert.alert("Download", "Mock: File download started...")
+                }
+              >
+                <View className="bg-blue-50 w-10 h-10 rounded-lg items-center justify-center">
+                  <Ionicons name="document-outline" size={20} color="#136ADA" />
+                </View>
+                <View className="flex-1">
+                  <Text
+                    className="text-black text-sm"
+                    style={{ fontFamily: "Poppins-SemiBold" }}
+                  >
+                    {assignment.fileTitle || "Attachment"}
+                  </Text>
+                  <Text
+                    className="text-gray-400 text-xs"
+                    style={{ fontFamily: "Poppins-Regular" }}
+                  >
+                    Tap to view attachment
+                  </Text>
+                </View>
+                <Ionicons name="download-outline" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Submission Section */}
+        <View className="px-6 mt-8">
+          <Text
+            className="text-black text-lg mb-2"
+            style={{ fontFamily: "Poppins-Bold" }}
+          >
+            Your Submission
+          </Text>
+
+          {submission ? (
+            <View className="bg-green-50/50 p-5 rounded-2xl border border-green-100">
+              <View className="flex-row items-center gap-3 mb-4">
+                <View className="bg-green-500/10 w-10 h-10 rounded-lg items-center justify-center">
+                  <Ionicons
+                    name="checkmark-done-circle"
+                    size={24}
+                    color="#10B981"
+                  />
+                </View>
+                <View>
+                  <Text
+                    className="text-black text-sm"
+                    style={{ fontFamily: "Poppins-Bold" }}
+                  >
+                    Successfully Submitted
+                  </Text>
+                  <Text
+                    className="text-gray-400 text-xs"
+                    style={{ fontFamily: "Poppins-Regular" }}
+                  >
+                    Submitted at: {formatDate(submission.timeSubmit)}
+                  </Text>
+                </View>
+              </View>
+
+              <View className="bg-white p-4 rounded-xl border border-gray-100 mb-4">
+                <View className="flex-row items-center gap-3">
+                  <Ionicons name="attach-outline" size={20} color="#6B7280" />
+                  <Text
+                    className="text-gray-600 text-sm flex-1"
+                    style={{ fontFamily: "Poppins-Medium" }}
+                  >
+                    {submission.fileTitle || "Submitted File"}
+                  </Text>
+                </View>
+              </View>
+
+              {submission.score !== null && (
+                <View className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                  <View className="flex-row justify-between items-center mb-2">
+                    <Text
+                      className="text-black text-sm"
+                      style={{ fontFamily: "Poppins-Bold" }}
+                    >
+                      Teacher's Grade
+                    </Text>
+                    <View className="bg-bright-blue px-3 py-1 rounded-full">
+                      <Text className="text-white text-xs font-bold">
+                        {submission.score} / 10
+                      </Text>
+                    </View>
+                  </View>
+                  <Text
+                    className="text-gray-600 text-xs leading-5"
+                    style={{ fontFamily: "Poppins-Regular italic" }}
+                  >
+                    "{submission.feedback || "No feedback provided yet."}"
+                  </Text>
+                </View>
+              )}
+            </View>
+          ) : (
+            <View className="bg-gray-50/80 p-5 rounded-2xl border border-gray-100">
+              {isExpired && (
+                <View className="flex-row items-center gap-2 mb-4 bg-red-50 p-3 rounded-xl">
+                  <Ionicons name="warning-outline" size={16} color="#EF4444" />
+                  <Text
+                    className="text-red-500 text-xs"
+                    style={{ fontFamily: "Poppins-Bold" }}
+                  >
+                    Note: This assignment is past due. Submissions will be
+                    marked as late.
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                className="border-2 border-dashed border-gray-200 rounded-2xl h-40 items-center justify-center bg-white"
+                onPress={handlePickDocument}
+              >
+                {fileTitle ? (
+                  <View className="items-center px-6">
+                    <Ionicons
+                      name="document-attach"
+                      size={40}
+                      color="#136ADA"
+                    />
+                    <Text
+                      className="text-black text-sm mt-2 text-center"
+                      style={{ fontFamily: "Poppins-Bold" }}
+                    >
+                      {fileTitle}
+                    </Text>
+                    <Text
+                      className="text-gray-400 text-[10px] mt-1"
+                      style={{ fontFamily: "Poppins-Regular" }}
+                    >
+                      Tap to change file
+                    </Text>
+                  </View>
+                ) : (
+                  <View className="items-center">
+                    <View className="w-12 h-12 bg-blue-50 rounded-full items-center justify-center mb-2">
+                      <Ionicons
+                        name="cloud-upload-outline"
+                        size={24}
+                        color="#136ADA"
+                      />
+                    </View>
+                    <Text className="text-black text-sm" style={{ fontFamily: "Poppins-Bold" }}>Upload Assignment</Text>
+                    <Text className="text-gray-400 text-xs" style={{ fontFamily: "Poppins-Regular" }}>PDF, Image, Word (Max 10MB)</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+
+              <View className="mt-6">
+                <Text
+                  className="text-gray-400 text-xs mb-2 px-1"
+                  style={{ fontFamily: "Poppins-Medium" }}
+                >
+                  Assignment Title (Optional)
+                </Text>
+                <TextInput
+                  className="bg-white border border-gray-100 rounded-xl p-4 text-black text-sm"
+                  placeholder="Enter submission title..."
+                  value={fileTitle}
+                  onChangeText={setFileTitle}
+                />
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Bottom Action Button */}
+      {!submission && (
+        <View className="absolute bottom-0 left-0 right-0 p-6 bg-white/80 border-t border-gray-100">
+          <TouchableOpacity
+            className={`w-full py-4 rounded-3xl flex-row items-center justify-center shadow-lg shadow-blue-300 ${submitting ? "bg-blue-300" : "bg-bright-blue"}`}
+            onPress={handleSubmit}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <>
+                <Text className="text-white text-lg mr-2" style={{ fontFamily: "Poppins-Bold" }}>
+                    {isExpired ? 'Submit Late' : 'Submit Assignment'}
+                </Text>
+                <Ionicons name="arrow-forward" size={20} color="white" />
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+    </SafeAreaView>
+  );
+}

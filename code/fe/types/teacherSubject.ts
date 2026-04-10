@@ -12,3 +12,8 @@ export interface AssignSubjectPayload {
   teacherId: string;
   subjectId: string;
 }
+
+export interface UpdateTeacherSubjectPayload {
+  teacherId: string;
+  subjectId: string;
+}

@@ -12,7 +12,7 @@ import apiClient from "./apiClient";
 export const classYearService = {
   // ─── ADMIN: LIST ──────────────────────────────────────────────────────────────
   /**
-   * Lấy danh sách lớp theo năm học / khối (dành cho admin)
+   * Retrieves a list of classes by school year and/or grade (Admin only).
    * GET /class-years?schoolYear=&grade=
    * AuthN(login) + AuthZ(Admin)
    */
@@ -32,10 +32,10 @@ export const classYearService = {
 
   // ─── GET ONE ──────────────────────────────────────────────────────────────────
   /**
-   * Lấy thông tin lớp theo id
+   * Retrieves class information by ID.
    * GET /class-years/{id}
    * AuthN(login)
-   * 404: classYear không tồn tại
+   * 404: classYear does not exist
    */
   getClassYearById: async (classYearId: string): Promise<ClassYearResponse> => {
     const response = await apiClient.get<ClassYearResponse>(`/class-years/${classYearId}`);
@@ -44,7 +44,7 @@ export const classYearService = {
 
   // ─── TEACHER: GET MY TEACHING CLASSES ────────────────────────────────────────
   /**
-   * Giáo viên xem danh sách lớp mình đang dạy (không phải lớp chủ nhiệm)
+   * Teacher retrieves the list of classes they are teaching (not homeroom).
    * GET /class-years/teaching?schoolYear=&grade=
    * AuthN(login) + AuthZ(Teacher)
    */
@@ -62,10 +62,10 @@ export const classYearService = {
 
   // ─── GET CLASSES BY TEACHER ID ────────────────────────────────────────────────
   /**
-   * Xem danh sách lớp mà một giáo viên đang dạy (dùng khi xem profile giáo viên)
+   * Retrieves the list of classes taught by a specific teacher (used for teacher profiles).
    * GET /class-years/by-teacher/{teacherId}?schoolYear=&grade=
    * AuthN(login)
-   * 404: teacher không tồn tại
+   * 404: teacher does not exist
    */
   getClassesByTeacher: async (
     teacherId: string,
@@ -85,10 +85,10 @@ export const classYearService = {
 
   // ─── TEACHER: GET HOMEROOM CLASS ──────────────────────────────────────────────
   /**
-   * Giáo viên lấy lớp chủ nhiệm của mình
+   * Teacher retrieves their own homeroom class.
    * GET /class-years/homeroom
    * AuthN(login) + AuthZ(Teacher)
-   * 404: giáo viên không có lớp chủ nhiệm
+   * 404: teacher does not have a homeroom class
    */
   getHomeroomClass: async (): Promise<ClassYearResponse> => {
     const response = await apiClient.get<ClassYearResponse>("/class-years/homeroom");
@@ -97,24 +97,25 @@ export const classYearService = {
 
   // ─── STUDENT: GET MY CLASS ────────────────────────────────────────────────────
   /**
-   * Học sinh lấy thông tin lớp mình đang học
+   * Student retrieves information for the class they are currently enrolled in.
    * GET /class-years/my-class
    * AuthN(login) + AuthZ(Student)
-   * 404: học sinh chưa được gán lớp
+   * 404: student has not been assigned to a class
    */
-  getMyClass: async (): Promise<ClassYearResponse> => {
-    const response = await apiClient.get<ClassYearResponse>("/class-years/my-class");
+  getMyClass: async (schoolYear?: number): Promise<ClassYearResponse> => {
+    const params = schoolYear ? { SchoolYear: schoolYear } : {};
+    const response = await apiClient.get<ClassYearResponse>("/class-years/my-class", { params });
     return response.data;
   },
 
   // ─── ADMIN: CREATE ────────────────────────────────────────────────────────────
   /**
-   * Admin tạo lớp mới
+   * Admin creates a new class.
    * POST /class-years
    * AuthN(login) + AuthZ(Admin)
-   * 400: dữ liệu sai format
-   * 404: teacher không tồn tại
-   * 409: lớp đã tồn tại trong năm học
+   * 400: Invalid data format
+   * 404: Teacher does not exist
+   * 409: Class already exists in the given school year
    */
   createClassYear: async (payload: CreateClassYearPayload): Promise<ClassYearResponse> => {
     const backendPayload = {
@@ -129,11 +130,11 @@ export const classYearService = {
 
   // ─── ADMIN: UPDATE ────────────────────────────────────────────────────────────
   /**
-   * Admin sửa thông tin lớp
+   * Admin updates class information.
    * PATCH /class-years/{id}
    * AuthN(login) + AuthZ(Admin)
-   * 404: classYear / teacher không tồn tại
-   * 409: className bị trùng
+   * 404: classYear or teacher does not exist
+   * 409: className is duplicated
    */
   updateClassYear: async (
     classYearId: string,
@@ -143,33 +144,24 @@ export const classYearService = {
     if (payload.schoolYear) {
       backendPayload.schoolYear = parseInt(payload.schoolYear.split("-")[0], 10);
     }
-    const response = await apiClient.patch<ClassYearResponse>(
+    const response = await apiClient.put<ClassYearResponse>(
       `/class-years/${classYearId}`,
       backendPayload
     );
     return response.data;
   },
 
-  // ─── ADMIN: ASSIGN STUDENT ────────────────────────────────────────────────────
-  /**
-   * Admin gán học sinh vào lớp
-   * POST /class-years/{id}/students
-   * AuthN(login) + AuthZ(Admin)
-   * 404: classYear / student không tồn tại
-   * 409: học sinh đã có lớp trong năm học
-   */
   assignStudent: async (classYearId: string, payload: AssignStudentPayload): Promise<void> => {
-    // Backend API uses PATCH /students/{studentId}/classYear
-    await apiClient.patch(`/students/${payload.studentId}/classYear`, { classYearId });
+    await apiClient.post(`/class-years/${classYearId}/students`, payload);
   },
 
   // ─── ADMIN: PROMOTE ───────────────────────────────────────────────────────────
   /**
-   * Admin promote học sinh từ lớp cũ lên lớp mới (theo danh sách cặp lớp)
+   * Admin promotes students from old classes to new classes (using a mapping list).
    * POST /class-years/promote
    * AuthN(login) + AuthZ(Admin)
-   * 404: classYear không tồn tại
-   * 409: lớp không cùng grade hợp lệ (chỉ 10→11, 11→12)
+   * 404: classYear does not exist
+   * 409: Incompatible grades for promotion (e.g., must be 10→11, 11→12)
    */
   promote: async (mappings: PromoteClassPayload[]): Promise<void> => {
     await apiClient.post("/class-years/promote", mappings);

@@ -56,8 +56,10 @@ export const userService = {
    * 409: username hoặc email đã tồn tại
    */
   createUser: async (payload: CreateUserPayload): Promise<UserResponse> => {
+    const role = (payload.roleId as string).toLowerCase();
+
     // Map Frontend Payload to Backend CreateUserRequest
-    const backendPayload = {
+    const backendPayload: any = {
       username: payload.username,
       password: payload.password,
       email: payload.email,
@@ -65,11 +67,16 @@ export const userService = {
       fullName: payload.fullName,
       address: payload.address,
       birthday: payload.birthday,
-      role: payload.roleId // Assuming roleId holds the string name like "Teacher"
+      role: role,
     };
+
+    if (role === 'student') {
+      backendPayload.classYearId = payload.classYearId;
+    } else if (role === 'teacher') {
+      backendPayload.subjectId = payload.subjectId || [];
+    }
+
     const response = await apiClient.post<UserResponse>("/users", backendPayload);
-    // Note: Backend might not support assigning classYearId or subjectId during user creation directly,
-    // so we might need separate calls if the UI relies on it, but for now we map what's available.
     return response.data;
   },
 

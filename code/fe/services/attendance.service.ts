@@ -11,14 +11,13 @@ import apiClient from "./apiClient";
 export const attendanceService = {
   // ─── TEACHER: SUBMIT / UPDATE ATTENDANCE ──────────────────────────────────────
   /**
-   * Giáo viên điểm danh (hoặc cập nhật điểm danh) cho cả lớp
-   * - Nếu bản ghi chưa tồn tại → INSERT
-   * - Nếu đã tồn tại → UPDATE
-   * POST /attendances
+   * Teacher takes attendance or updates attendance records for the entire class.
+   * - INSERT if record doesn't exist
+   * - UPDATE if record already exists
    * AuthN(login) + AuthZ(Teacher)
-   * 400: dữ liệu sai format
-   * 404: classYear / student không tồn tại
-   * 409: giáo viên không phải chủ nhiệm lớp
+   * 400: Invalid data format
+   * 404: classYear or student not found
+   * 409: Teacher is not the homeroom teacher for this class
    */
   submitAttendance: async (
     payload: SubmitAttendancePayload
@@ -44,13 +43,12 @@ export const attendanceService = {
 
   // ─── TEACHER: GET CLASS ATTENDANCE ────────────────────────────────────────────
   /**
-   * Giáo viên xem danh sách học sinh + trạng thái điểm danh theo ngày
-   * (null = chưa điểm danh → hiển thị dropdown để giáo viên chọn)
-   * GET /attendances/class?classYearId={id}&date={YYYY-MM-DD}
+   * Teacher retrieves student list + attendance status for a specific date.
+   * (null = not attended yet -> display dropdown for selection)
    * AuthN(login) + AuthZ(Teacher)
-   * 400: thiếu classYearId hoặc date
-   * 404: classYear không tồn tại
-   * 409: giáo viên không phải chủ nhiệm lớp
+   * 400: Missing classYearId or date
+   * 404: classYear doesn't exist
+   * 409: Teacher is not the homeroom teacher
    */
   getClassAttendance: async (
     params: GetClassAttendanceParams
@@ -63,10 +61,9 @@ export const attendanceService = {
 
   // ─── STUDENT: GET MY ATTENDANCE HISTORY ──────────────────────────────────────
   /**
-   * Học sinh xem lịch sử điểm danh bản thân theo tháng/năm
-   * GET /attendances/student/me?month={1-12}&year={yyyy}
+   * Student views their own attendance history for a specific month/year.
    * AuthN(login) + AuthZ(Student)
-   * 404: student không tồn tại
+   * 404: student not found
    */
   getMyAttendance: async (
     params?: GetStudentAttendanceParams

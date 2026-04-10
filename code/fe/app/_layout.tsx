@@ -14,6 +14,7 @@ import {
   Poppins_600SemiBold,
   Poppins_700Bold,
 } from '@expo-google-fonts/poppins';
+import { useAuthStore } from '../store/authStore';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -42,9 +43,13 @@ export default function RootLayout() {
     'Poppins-Bold': Poppins_700Bold,
   });
 
+  const { loadAuthFromStorage } = useAuthStore();
+
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      loadAuthFromStorage().finally(() => {
+        SplashScreen.hideAsync();
+      });
     }
   }, [loaded]);
 
@@ -60,7 +65,6 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="signup" options={{ headerShown: false }} />
           <Stack.Screen name="change-password" options={{ headerShown: false }} />
           <Stack.Screen name="settings" options={{ headerShown: false }} />
           <Stack.Screen name="student" options={{ headerShown: false }} />

@@ -3,6 +3,7 @@
 export interface SubjectResponse {
   subjectId: string;
   subjectName: string;
+  maxPeriod: number;
 }
 
 export interface SubjectTeacherItem {
@@ -11,14 +12,22 @@ export interface SubjectTeacherItem {
   fullName: string;
   email: string;
   phone: string;
+  teacherSubjectId?: string; // For deletion
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────
 
 export interface CreateSubjectPayload {
   subjectName: string;
+  maxPeriod: number;
 }
 
 export interface UpdateSubjectPayload {
-  subjectName: string;
+  subjectName?: string;
+  maxPeriod?: number;
+}
+
+export interface AssignTeacherSubjectPayload {
+  teacherId: string;
+  subjectId: string;
 }

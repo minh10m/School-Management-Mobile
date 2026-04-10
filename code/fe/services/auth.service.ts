@@ -1,9 +1,8 @@
 import { useAuthStore } from "../store/authStore";
 import {
-   AuthResponse,
-   ChangePasswordPayload,
-   LoginPayload,
-   SignupPayload,
+  AuthResponse,
+  ChangePasswordPayload,
+  LoginPayload,
 } from "../types/auth";
 import apiClient from "./apiClient";
 
@@ -12,7 +11,6 @@ export const authService = {
     const response = await apiClient.post<AuthResponse>("/auth/login", payload);
     const data = response.data;
 
-    // Create UserInfo object from the root response
     const userInfo = {
       id: data.userId,
       fullName: data.fullName,
@@ -20,17 +18,11 @@ export const authService = {
       role: data.role,
     };
 
-    // Save to store
-    await useAuthStore.getState().setAuth(data.accessToken, data.refreshToken, userInfo);
+    await useAuthStore
+      .getState()
+      .setAuth(data.accessToken, data.refreshToken, userInfo);
 
     return data;
-  },
-
-  // Mocking signup since your provided API didn't include it explicitly,
-  // but we can structure it similarly. Adjust endpoint as needed.
-  signup: async (payload: SignupPayload): Promise<any> => {
-    const response = await apiClient.post("/auth/register", payload); // Adjust endpoint based on real API
-    return response.data;
   },
 
   logout: async (): Promise<void> => {
@@ -52,7 +44,7 @@ export const authService = {
     await apiClient.patch("/auth/change-password", {
       oldPassword: payload.oldPassword,
       newPassword: payload.newPassword,
-      confirmPassword: payload.confirmedPassword
+      confirmPassword: payload.confirmedPassword,
     });
   },
 };

@@ -92,11 +92,12 @@ export const useAuthStore = create<AuthState>((set: any) => ({
         userInfo = JSON.parse(userInfoStr);
       }
 
-      if (accessToken && refreshToken) {
-        set({ accessToken, refreshToken, userInfo, isLoading: false });
-      } else {
-        set({ isLoading: false });
-      }
+      set({ 
+        accessToken: accessToken || null, 
+        refreshToken: refreshToken || null, 
+        userInfo, 
+        isLoading: false 
+      });
     } catch (error) {
       console.error("Error loading auth from SecureStore:", error);
       set({ isLoading: false });

@@ -1,83 +1,76 @@
 import {
   CreateSubmissionPayload,
+  GetMySubmissionParams,
   GetSubmissionsParams,
   GradeSubmissionPayload,
-  StudentSubmissionResponse,
   SubmissionResponse,
+  TeacherSubmissionListResponse,
+  TeacherSubmissionListResponseWrapper,
 } from "../types/submission";
 import apiClient from "./apiClient";
 
 export const submissionService = {
-  // ─── TEACHER: LIST SUBMISSIONS BY ASSIGNMENT ──────────────────────────────────
+  // ─── STUDENT: SUBMIT ─────────────────────────────────────────────────────────
   /**
-   * Giáo viên lấy danh sách bài nộp theo bài tập
+   * Student submits an assignment. They can still submit past the deadline, but it will be marked as late.
+   * POST /submissions
+   * AuthN(login) + AuthZ(Student)
+   * 409: Already submitted or deadline significantly passed
+   */
+  submitAssignment: async (payload: CreateSubmissionPayload): Promise<SubmissionResponse> => {
+    const response = await apiClient.post<SubmissionResponse>("/submissions", payload);
+    return response.data;
+  },
+
+  // ─── TEACHER: LIST SUBMISSIONS ────────────────────────────────────────────────
+  /**
+   * Teacher retrieves a list of submissions for a specific assignment.
    * GET /submissions?assignmentId={id}
    * AuthN(login) + AuthZ(Teacher)
-   * 404: bài tập không tồn tại
    */
   getSubmissionsByAssignment: async (
     params: GetSubmissionsParams
-  ): Promise<SubmissionResponse[]> => {
-    const response = await apiClient.get<SubmissionResponse[]>("/submissions", { params });
-    return response.data;
+  ): Promise<TeacherSubmissionListResponse[]> => {
+    const response = await apiClient.get<TeacherSubmissionListResponseWrapper>("/submissions", { params });
+    return response.data.items;
   },
 
   // ─── TEACHER: GET ONE ────────────────────────────────────────────────────────
   /**
-   * Giáo viên lấy thông tin chi tiết một bài nộp
+   * Teacher retrieves detailed information for a specific submission.
    * GET /submissions/{id}
    * AuthN(login) + AuthZ(Teacher)
-   * 404: bài nộp không tồn tại
    */
-  getSubmissionById: async (submissionId: string): Promise<SubmissionResponse> => {
-    const response = await apiClient.get<SubmissionResponse>(`/submissions/${submissionId}`);
+  getSubmissionById: async (id: string): Promise<SubmissionResponse> => {
+    const response = await apiClient.get<SubmissionResponse>(`/submissions/${id}`);
     return response.data;
   },
 
   // ─── TEACHER: GRADE ──────────────────────────────────────────────────────────
   /**
-   * Giáo viên chấm điểm và nhận xét bài nộp
+   * Teacher grades and adds feedback to a submission.
    * PATCH /submissions/{id}/score
    * AuthN(login) + AuthZ(Teacher)
-   * 404: bài nộp không tồn tại
    */
   gradeSubmission: async (
-    submissionId: string,
+    id: string,
     payload: GradeSubmissionPayload
   ): Promise<SubmissionResponse> => {
     const response = await apiClient.patch<SubmissionResponse>(
-      `/submissions/${submissionId}/score`,
+      `/submissions/${id}/score`,
       payload
     );
     return response.data;
   },
 
-  // ─── STUDENT: SUBMIT ─────────────────────────────────────────────────────────
-  /**
-   * Học sinh nộp bài tập
-   * POST /submissions
-   * AuthN(login) + AuthZ(Student)
-   * 404: bài tập không tồn tại
-   * 409: đã nộp rồi hoặc quá hạn nộp
-   */
-  submitAssignment: async (
-    payload: CreateSubmissionPayload
-  ): Promise<StudentSubmissionResponse> => {
-    const response = await apiClient.post<StudentSubmissionResponse>("/submissions", payload);
-    return response.data;
-  },
-
   // ─── STUDENT: GET MY SUBMISSION ───────────────────────────────────────────────
   /**
-   * Học sinh xem bài nộp của mình theo bài tập
-   * GET /submissions?assignmentId={id}  (AuthZ: Student)
+   * Student retrieves their submission for a specific assignment.
+   * GET /submissions/mySubmission?assignmentId=&studentId=
    * AuthN(login) + AuthZ(Student)
-   * 404: bài tập không tồn tại
    */
-  getMySubmission: async (
-    params: GetSubmissionsParams
-  ): Promise<StudentSubmissionResponse[]> => {
-    const response = await apiClient.get<StudentSubmissionResponse[]>("/submissions", {
+  getMySubmission: async (params: GetMySubmissionParams): Promise<SubmissionResponse> => {
+    const response = await apiClient.get<SubmissionResponse>("/submissions/mySubmission", {
       params,
     });
     return response.data;

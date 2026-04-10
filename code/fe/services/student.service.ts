@@ -11,7 +11,7 @@ import apiClient from "./apiClient";
 export const studentService = {
   // ─── LIST ─────────────────────────────────────────────────────────────────────
   /**
-   * Lấy danh sách học sinh (có phân trang, search, lọc theo khối/lớp)
+   * Retrieves a list of students with pagination, search, and grade/class filtering.
    * GET /students?page=&pageSize=&search=&grade=&classId=
    * AuthN(login)
    */
@@ -22,11 +22,11 @@ export const studentService = {
 
   // ─── GET ONE ──────────────────────────────────────────────────────────────────
   /**
-   * Lấy thông tin chi tiết học sinh theo id
-   * (dành cho admin, teacher, student khác xem hồ sơ)
+   * Retrieves detailed student information by ID.
+   * (Used by admin, teacher, or other students to view profiles)
    * GET /students/{id}
    * AuthN(login)
-   * 404: học sinh không tồn tại
+   * 404: Student does not exist
    */
   getStudentById: async (studentId: string): Promise<StudentResponse> => {
     const response = await apiClient.get<StudentResponse>(`/students/${studentId}`);
@@ -35,7 +35,7 @@ export const studentService = {
 
   // ─── GET ME ───────────────────────────────────────────────────────────────────
   /**
-   * Học sinh lấy thông tin profile bản thân
+   * Student retrieves their own profile information.
    * GET /students/me
    * AuthN(login) + AuthZ(Student)
    */
@@ -46,12 +46,12 @@ export const studentService = {
 
   // ─── UPDATE (Admin / Teacher cập nhật học sinh) ───────────────────────────────
   /**
-   * Admin / Teacher chỉnh sửa thông tin học sinh
-   * - Teacher chỉ được sửa student trong lớp mình
-   * - Không được sửa lớp qua endpoint này (dùng /classYear)
+   * Admin or Teacher updates student information.
+   * - Teacher can only edit students in their own class.
+   * - Class changes are not allowed via this endpoint (use /classYear).
    * PATCH /students/{id}
    * AuthN(login) + AuthZ(Admin, Teacher)
-   * 404: học sinh không tồn tại
+   * 404: Student does not exist
    */
   updateStudent: async (
     studentId: string,
@@ -66,8 +66,8 @@ export const studentService = {
 
   // ─── UPDATE ME (Học sinh tự cập nhật) ────────────────────────────────────────
   /**
-   * Học sinh tự cập nhật thông tin bản thân
-   * (không được sửa role, không được sửa lớp)
+   * Student updates their own profile information.
+   * (Role and class changes are not allowed)
    * PATCH /students/me
    * AuthN(login) + AuthZ(Student)
    */
@@ -78,14 +78,14 @@ export const studentService = {
 
   // ─── CHANGE CLASS ─────────────────────────────────────────────────────────────
   /**
-   * Admin chuyển lớp cho học sinh
+   * Admin transfers a student to a different class.
    * PATCH /students/{id}/classYear
    * AuthN(login) + AuthZ(Admin)
-   * 400: dữ liệu sai
-   * 401: chưa đăng nhập
-   * 403: không phải admin
-   * 404: student không tồn tại / classYear không tồn tại
-   * 409: lớp không cùng năm học
+   * 400: Invalid data
+   * 401: Unauthorized
+   * 403: Forbidden (Not an admin)
+   * 404: Student or classYear does not exist
+   * 409: New class is not in the same school year
    */
   updateClass: async (
     studentId: string,

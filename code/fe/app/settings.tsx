@@ -9,10 +9,11 @@ import { Alert,
   TouchableOpacity,
   View } from "react-native";
 import { authService } from "../services/auth.service";
+import { useAuthStore } from "../store/authStore";
 
 export default function SettingsScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const { } = useAuthStore();
 
   const SettingItem = ({ icon, label, onPress, value, type = "link" }: any) => (
     <TouchableOpacity
@@ -91,13 +92,6 @@ export default function SettingsScreen() {
             label="Change Password"
             onPress={() => router.push("/change-password" as any)}
           />
-          <SettingItem
-            icon="finger-print-outline"
-            label="Biometric ID"
-            type="switch"
-            value={biometricEnabled}
-            onPress={() => setBiometricEnabled(!biometricEnabled)}
-          />
         </View>
 
         <Text className="text-gray-500 text-sm mb-2 mt-8" style={{ fontFamily: 'Poppins-Medium' }}>
@@ -121,27 +115,7 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <TouchableOpacity
-          className="mt-10 mb-10 flex-row items-center justify-center p-4 rounded-xl border border-red-100 bg-red-50"
-          onPress={() => {
-            Alert.alert("Log Out", "Are you sure you want to log out?", [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "Log Out",
-                style: "destructive",
-                onPress: async () => {
-                  await authService.logout();
-                  router.replace("/login" as any);
-                },
-              },
-            ]);
-          }}
-        >
-          <Ionicons name="log-out-outline" size={20} color="#EF4444" />
-          <Text className="text-red-500 text-base ml-2" style={{ fontFamily: 'Poppins-SemiBold' }}>
-            Log Out
-          </Text>
-        </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );

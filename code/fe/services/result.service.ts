@@ -1,10 +1,10 @@
 import {
-  ClassResultItem,
-  CreateResultEntry,
+  CreateResultRequest,
   GetClassResultsParams,
   GetStudentResultsParams,
   ResultItem,
   StudentResultSubject,
+  StudentResultForTeacherResponse,
   UpdateResultPayload,
 } from "../types/result";
 import apiClient from "./apiClient";
@@ -15,10 +15,9 @@ export const resultService = {
    * Giáo viên thêm điểm cho nhiều học sinh cùng lúc
    * POST /results
    * AuthN(login) + AuthZ(Teacher)
-   * 404: studentId / subjectId không tồn tại
    */
-  createResults: async (entries: CreateResultEntry[]): Promise<ResultItem[]> => {
-    const response = await apiClient.post<ResultItem[]>("/results", entries);
+  createResults: async (entries: CreateResultRequest[]): Promise<any> => {
+    const response = await apiClient.post<any>("/results", entries);
     return response.data;
   },
 
@@ -29,35 +28,42 @@ export const resultService = {
    * AuthN(login) + AuthZ(Teacher)
    */
   updateResult: async (resultId: string, payload: UpdateResultPayload): Promise<ResultItem> => {
-    const response = await apiClient.patch<ResultItem>(`/results/${resultId}`, payload);
-    return response.data;
+    const response = await apiClient.patch<any>(`/results/${resultId}`, payload);
+    return response.data.data;
   },
 
   // ─── STUDENT: GET MY RESULTS ──────────────────────────────────────────────────
   /**
    * Học sinh xem bảng điểm cá nhân theo kì/năm (gom theo môn)
-   * GET /results/student/{studentId}?term=&schoolYear=
+   * GET /results/student?Term=&SchoolYear=
    * AuthN(login) + AuthZ(Student)
    */
   getStudentResults: async (
-    studentId: string,
     params?: GetStudentResultsParams
   ): Promise<StudentResultSubject[]> => {
-    const response = await apiClient.get<StudentResultSubject[]>(
-      `/results/student/${studentId}`,
-      { params }
-    );
-    return response.data;
+    const response = await apiClient.get<any>("/results/student", { params });
+    return response.data.data;
   },
 
   // ─── TEACHER: GET CLASS RESULTS ───────────────────────────────────────────────
   /**
-   * Giáo viên xem bảng điểm theo lớp / môn / kì / năm
-   * GET /results/class?classYearId=&subjectId=&term=&schoolYear=
+   * Giáo viên xem bảng điểm của tất cả học sinh trong lớp
+   * GET /results/class/{classYearId}?term=
    * AuthN(login) + AuthZ(Teacher)
    */
-  getClassResults: async (params: GetClassResultsParams): Promise<ClassResultItem[]> => {
-    const response = await apiClient.get<ClassResultItem[]>("/results/class", { params });
-    return response.data;
+  getClassResults: async (classYearId: string, params: GetClassResultsParams): Promise<StudentResultForTeacherResponse[]> => {
+    const response = await apiClient.get<any>(`/results/class/${classYearId}`, { params });
+    return response.data.data;
+  },
+
+  // ─── TEACHER: GET ONE STUDENT RESULTS ─────────────────────────────────────────
+  /**
+   * Giáo viên xem bảng điểm chi tiết của một học sinh
+   * GET /results/class/{classYearId}/student/{studentId}?term=
+   * AuthN(login) + AuthZ(Teacher)
+   */
+  getOneStudentResultForTeacher: async (classYearId: string, studentId: string, params: GetClassResultsParams): Promise<StudentResultSubject[]> => {
+    const response = await apiClient.get<any>(`/results/class/${classYearId}/student/${studentId}`, { params });
+    return response.data.data;
   },
 };

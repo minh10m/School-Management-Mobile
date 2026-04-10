@@ -17,6 +17,7 @@ export interface StudentListResponse {
 }
 
 export interface ClassYearSub {
+  classYearId: string;
   grade: number;
   schoolYear: number;
   className: string;
@@ -43,7 +44,8 @@ export interface GetStudentsParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   grade?: string;   // lọc theo khối
-  classId?: string; // lọc theo lớp
+  classId?: string; // lọc theo ID lớp (backend có thể không hỗ trợ)
+  className?: string; // lọc theo tên lớp
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────
@@ -54,6 +56,7 @@ export interface UpdateStudentPayload {
   email?: string;
   phone?: string;
   birthday?: string; // ISO date string
+  address?: string;
 }
 
 /** Học sinh tự cập nhật profile (không được sửa lớp / role) */

@@ -1,52 +1,38 @@
-import {
-  CreateEventPayload,
-  EventResponse,
-  GetEventsParams,
-  UpdateEventPayload,
-} from "../types/event";
+import { CreateEventPayload, EventItem, EventListResponse, GetEventsParams } from "../types/event";
 import apiClient from "./apiClient";
 
 export const eventService = {
-  /**
-   * Lấy danh sách sự kiện theo kì / năm học
-   * GET /events?term=&schoolYear=
-   * AuthN(login)
-   */
-  getEvents: async (params?: GetEventsParams): Promise<EventResponse[]> => {
-    const response = await apiClient.get<EventResponse[]>("/events", { params });
+  getEvents: async (params?: GetEventsParams): Promise<EventListResponse> => {
+    const response = await apiClient.get<EventListResponse>("/events", { params });
     return response.data;
   },
 
-  /**
-   * Xem chi tiết sự kiện theo id
-   * GET /events/{id}
-   * AuthN(login)
-   * 404: event không tồn tại
-   */
-  getEventById: async (eventId: string): Promise<EventResponse> => {
-    const response = await apiClient.get<EventResponse>(`/events/${eventId}`);
+  createEvent: async (payload: CreateEventPayload): Promise<EventItem> => {
+    // Map to PascalCase for backend compatibility
+    const backendPayload = {
+      Title: payload.title,
+      Body: payload.body,
+      StartTime: payload.startTime,
+      FinishTime: payload.finishTime,
+      EventDate: payload.eventDate,
+      SchoolYear: payload.schoolYear,
+      Term: payload.term
+    };
+    const response = await apiClient.post<EventItem>("/events", backendPayload);
     return response.data;
   },
 
-  /**
-   * Admin tạo sự kiện
-   * POST /events
-   * AuthN(login) + AuthZ(Admin)
-   * 409: finishTime phải lớn hơn startTime | sự kiện bị trùng thời gian
-   */
-  createEvent: async (payload: CreateEventPayload): Promise<EventResponse> => {
-    const response = await apiClient.post<EventResponse>("/events", payload);
-    return response.data;
-  },
+  updateEvent: async (id: string, payload: Partial<CreateEventPayload>): Promise<EventItem> => {
+    const backendPayload: any = {};
+    if (payload.title) backendPayload.Title = payload.title;
+    if (payload.body) backendPayload.Body = payload.body;
+    if (payload.startTime) backendPayload.StartTime = payload.startTime;
+    if (payload.finishTime) backendPayload.FinishTime = payload.finishTime;
+    if (payload.eventDate) backendPayload.EventDate = payload.eventDate;
+    if (payload.schoolYear) backendPayload.SchoolYear = payload.schoolYear;
+    if (payload.term) backendPayload.Term = payload.term;
 
-  /**
-   * Admin sửa sự kiện
-   * PATCH /events/{id}
-   * AuthN(login) + AuthZ(Admin)
-   * 404: event không tồn tại
-   */
-  updateEvent: async (eventId: string, payload: UpdateEventPayload): Promise<EventResponse> => {
-    const response = await apiClient.patch<EventResponse>(`/events/${eventId}`, payload);
+    const response = await apiClient.put<EventItem>(`/events/${id}`, backendPayload);
     return response.data;
   },
 };
