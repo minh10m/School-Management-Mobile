@@ -217,6 +217,44 @@ namespace School_Management.API.Repositories
 
         }
 
+        public async Task<PagedResponse<ExamScheduleResponse>> GetAllExamSchedule(ExamScheduleFilterRequest request)
+        {
+            var query = context.ExamSchedule.AsNoTracking().Where(x => x.SchoolYear == request.SchoolYear && x.Term == request.Term
+                                                                          && x.IsActive == true)
+                                                                 .AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(request.Title))
+            {
+                var name = request.Title.Trim().ToLower();
+                query = query.Where(x => x.Title.Trim().ToLower().Contains(name));
+            }
+
+            query = query.OrderBy(x => x.Id);
+
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(g => new ExamScheduleResponse
+                                        {
+                                            ExamScheduleId = g.Id,
+                                            SchoolYear = g.SchoolYear,
+                                            Grade = g.Grade,
+                                            Title = g.Title,
+                                            IsActive = g.IsActive,
+                                            Term = g.Term,
+                                            Type = g.Type,
+                                        }).ToListAsync();
+            return new PagedResponse<ExamScheduleResponse>
+            {
+                Items = listResult,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                TotalCount = totalCount
+            };
+
+        }
+
         public async Task<(PagedResponse<ExamScheduleDetailResponse>? data, string? message)> GetAllExamScheduleDetail(ExamScheduleDetailFilterRequest request, Guid examScheduleId)
         {
             var examSchedule = await context.ExamSchedule.FirstOrDefaultAsync(x => x.Id == examScheduleId);
