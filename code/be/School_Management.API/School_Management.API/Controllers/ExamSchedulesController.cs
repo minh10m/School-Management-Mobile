@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
@@ -132,6 +132,22 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetMyExamSchedule([FromQuery] MyExamScheduleDetailRequest request)
         {
             var result = await examScheduleService.GetMyExamSchedule(request, User);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [Route("all")]
+        [Authorize(Roles = "Admin")]
+        [ValidateModel]
+        public async Task<IActionResult> GetAllExamSchedules([FromQuery] ExamScheduleFilterRequest request)
+        {
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await examScheduleService.GetAllExamSchedules(request);
             return Ok(new
             {
                 success = true,
