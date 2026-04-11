@@ -5,6 +5,7 @@ using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.InteropServices;
+using System.Security.Claims;
 
 namespace School_Management.API.Repositories
 {
@@ -299,6 +300,76 @@ namespace School_Management.API.Repositories
                 PageSize = request.PageSize,
                 PageNumber = request.PageNumber
             }, "SUCCESS");
+        }
+
+        public async Task<(List<MyExamScheduleDetailResponse>? data, string? message)> GetMyExamSchedule(MyExamScheduleDetailRequest request, ClaimsPrincipal User)
+        {
+            if(User.IsInRole("Teacher"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null) return (null, "NOT_FOUND_USER");
+                var teacherId = await context.Teacher.AsNoTracking().Where(x => x.UserId == Guid.Parse(userId)).Select(g => g.Id).FirstOrDefaultAsync();
+                if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
+
+                var listResult = await context.ExamScheduleDetail.AsNoTracking()
+                                                                 .Where(x => x.ExamSchedule.Type == request.Type && x.ExamSchedule.Term == request.Term
+                                                                          && x.ExamSchedule.SchoolYear == request.SchoolYear && x.ExamSchedule.IsActive == true
+                                                                          && x.TeacherId == teacherId)
+                                                                 .OrderBy(x => x.Date).ThenBy(x => x.StartTime)
+                                                                 .Select(g => new MyExamScheduleDetailResponse
+                                                                 {
+                                                                     StartTime = g.StartTime,
+                                                                     Date = g.Date,
+                                                                     ExamScheduleDetailId = g.Id,
+                                                                     ExamScheduleId = g.ExamScheduleId,  
+                                                                     FinishTime = g.FinishTime,
+                                                                     RoomName = g.RoomName,
+                                                                     SubjectId = g.SubjectId,
+                                                                     SubjectName = g.Subject.SubjectName ?? "",
+                                                                     TeacherId = teacherId,
+                                                                     TeacherName = g.Teacher.User.FullName ?? "",
+                                                                     IdentificationNumber = null
+                                                                 }).ToListAsync();
+
+                return (listResult, "SUCCESS");
+            }
+            else
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null) return (null, "NOT_FOUND_USER");
+
+                var studentId = await context.Student.AsNoTracking()
+                                                     .Where(x => x.UserId == Guid.Parse(userId))
+                                                     .Select(g => g.Id)
+                                                     .FirstOrDefaultAsync();
+                var grade = await context.StudentClassYear.AsNoTracking()
+                                                          .Where(x => x.StudentId == studentId && x.ClassYear.SchoolYear == request.SchoolYear)
+                                                          .Select(g => g.ClassYear.Grade)
+                                                          .FirstOrDefaultAsync();
+                if (grade == 0) return (null, "NOT_FOUND_CLASS");
+                var listResult = await context.ExamStudentAssignment.AsNoTracking()
+                                                                 
+                                                                 .Where(x => x.ExamScheduleDetail.ExamSchedule.Type == request.Type && x.ExamScheduleDetail.ExamSchedule.Term == request.Term
+                                                                          && x.ExamScheduleDetail.ExamSchedule.SchoolYear == request.SchoolYear && x.ExamScheduleDetail.ExamSchedule.IsActive == true
+                                                                          && x.ExamScheduleDetail.ExamSchedule.Grade == grade && x.StudentId == studentId)
+                                                                 .OrderBy(x => x.ExamScheduleDetail.Date).ThenBy(x => x.ExamScheduleDetail.StartTime)
+                                                                 .Select(g => new MyExamScheduleDetailResponse
+                                                                 {
+                                                                     StartTime = g.ExamScheduleDetail.StartTime,
+                                                                     Date = g.ExamScheduleDetail.Date,
+                                                                     ExamScheduleDetailId = g.ExamScheduleDetail.Id,
+                                                                     ExamScheduleId = g.ExamScheduleDetail.ExamScheduleId,
+                                                                     FinishTime = g.ExamScheduleDetail.FinishTime,
+                                                                     RoomName = g.ExamScheduleDetail.RoomName,
+                                                                     SubjectId = g.ExamScheduleDetail.SubjectId,
+                                                                     SubjectName = g.ExamScheduleDetail.Subject.SubjectName,
+                                                                     TeacherId = (Guid)g.ExamScheduleDetail.TeacherId,
+                                                                     TeacherName = g.ExamScheduleDetail.Teacher.User.FullName,
+                                                                     IdentificationNumber = g.IdentificationNumber
+                                                                 }).ToListAsync();
+
+                return (listResult, "SUCCESS");
+            }
         }
 
         public List<ExamScheduleDetailRequest> ReadExcelData(IFormFile file)

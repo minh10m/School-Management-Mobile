@@ -2,6 +2,7 @@
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
+using System.Security.Claims;
 
 namespace School_Management.API.Services
 {
@@ -58,6 +59,19 @@ namespace School_Management.API.Services
             return message switch
             {
                 "NOT_FOUND_EXAM_SCHEDULE_DETAIL" => throw new NotFoundException("Không tìm thấy chi tiết lịch thi"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
+        public async Task<List<MyExamScheduleDetailResponse>> GetMyExamSchedule(MyExamScheduleDetailRequest request, ClaimsPrincipal User)
+        {
+            var (result, message) = await examScheduleRepository.GetMyExamSchedule(request, User);
+            return message switch
+            {
+                "NOT_FOUND_USER" => throw new NotFoundException("Phiên đăng nhập hết hạn"),
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không phải là giáo viên"),
+                "NOT_FOUND_CLASS" => throw new NotFoundException("Không tìm thấy lớp học của bạn"),
                 "SUCCESS" => result!,
                 _ => throw new Exception("Lỗi không xác định")
             };
