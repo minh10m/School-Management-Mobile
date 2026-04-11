@@ -39,7 +39,7 @@ export interface GetTeachersParams {
   search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
-  subjectId?: string;
+  subjectName?: string;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────

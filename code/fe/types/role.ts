@@ -1,7 +1,7 @@
 // ─── Response Types ────────────────────────────────────────────────────────────
 
 export interface RoleResponse {
-  id: string;
+  roleId: string;
   name: string;
   normalizedName: string;
 }

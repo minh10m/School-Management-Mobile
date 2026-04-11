@@ -1,4 +1,4 @@
-﻿using School_Management.API.Exceptions;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
 
