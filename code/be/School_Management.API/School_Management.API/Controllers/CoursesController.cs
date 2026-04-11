@@ -81,5 +81,33 @@ namespace School_Management.API.Controllers
                 success = true
             });
         }
+
+        [HttpGet]
+        [Route("{courseId}")]
+        [Authorize]
+        public async Task<IActionResult> GetCourseById([FromRoute] Guid courseId)
+        {
+            var result = await courseService.GetCourseById(courseId);
+            return Ok(new
+            {
+                success = true, 
+                data = result
+            });
+        }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{courseId}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ReviseCourseForAdmin([FromRoute] Guid courseId, [FromBody] UpdateStatusCourseRequest request)
+        {
+            var result = await courseService.ReviseCourseForAdmin(courseId, request);
+            return Ok(new
+            {
+                success = true,
+                message = "Thay đổi thông tin thành công",
+                data = result
+            });
+        }
     }
 }

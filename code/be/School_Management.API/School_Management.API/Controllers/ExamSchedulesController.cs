@@ -138,5 +138,21 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("all")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllExamSchedule([FromQuery] ExamScheduleFilterRequest request)
+        {
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await examScheduleService.GetAllExamSchedule(request);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
     }
 }

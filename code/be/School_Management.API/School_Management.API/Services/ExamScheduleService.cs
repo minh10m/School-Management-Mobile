@@ -42,6 +42,11 @@ namespace School_Management.API.Services
             return result;
         }
 
+        public async Task<PagedResponse<ExamScheduleResponse>> GetAllExamSchedule(ExamScheduleFilterRequest request)
+        {
+            return await examScheduleRepository.GetAllExamSchedule(request);
+        }
+
         public async Task<PagedResponse<ExamScheduleDetailResponse>> GetAllExamScheduleDetail(ExamScheduleDetailFilterRequest request, Guid examScheduleId)
         {
             var (result, message) = await examScheduleRepository.GetAllExamScheduleDetail(request, examScheduleId);

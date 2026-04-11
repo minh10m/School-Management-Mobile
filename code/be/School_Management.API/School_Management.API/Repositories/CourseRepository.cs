@@ -62,6 +62,29 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
+        public async Task<(CourseResponse? data, string? message)> GetCourseById(Guid courseId)
+        {
+            var course = await context.Course.AsNoTracking()
+                                             .Include(x => x.TeacherSubject).ThenInclude(x => x.Teacher).ThenInclude(x => x.User)
+                                             .Include(x => x.TeacherSubject).ThenInclude(x => x.Subject)
+                                             .FirstOrDefaultAsync(x => x.Id == courseId);
+            if (course == null) return (null, "NOT_FOUND_COURSE");
+
+            return (new CourseResponse
+            {
+                Id = course.Id,
+                Description = course.Description,
+                CourseName = course.CourseName,
+                CreatedAt = course.CreatedAt,
+                Price = course.Price,
+                PublishedAt = course.PublishedAt,
+                Status = course.Status,
+                TeacherSubjectId = course.TeacherSubjectId,
+                TeacherName = course.TeacherSubject.Teacher.User.FullName,
+                SubjectName = course.TeacherSubject.Subject.SubjectName
+            }, "SUCCESS");
+        }
+
         public async Task<(PagedResponse<CourseResponse>? data, string? message)> GetMyCourseForTeacher(MyCourseFilterRequest request, Guid userId)
         {
             var teacherId = await context.Teacher.AsNoTracking().Where(x => x.UserId == userId)
@@ -106,6 +129,43 @@ namespace School_Management.API.Repositories
                 PageSize = request.PageSize,
                 Items = listResult
             }, "SUCCESS");
+        }
+
+        public async Task<(CourseResponse? data, string? message)> ReviseCourseForAdmin(Guid courseId, UpdateStatusCourseRequest request)
+        {
+            var course = await context.Course
+                .FirstOrDefaultAsync(x => x.Id == courseId);
+
+            if (course == null) return (null, "NOT_FOUND_COURSE");
+
+            course.Status = request.Status;
+
+            if (request.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+            {
+                course.PublishedAt = DateTimeOffset.UtcNow;
+            }
+
+            await context.SaveChangesAsync();
+
+            var result = await context.Course.AsNoTracking()
+                .Where(x => x.Id == courseId)
+                .Select(c => new CourseResponse
+                {
+                    Id = c.Id,
+                    Description = c.Description,
+                    CourseName = c.CourseName,
+                    CreatedAt = c.CreatedAt,
+                    Price = c.Price,
+                    PublishedAt = c.PublishedAt,
+                    Status = c.Status,
+                    TeacherSubjectId = c.TeacherSubjectId,
+                    TeacherName = c.TeacherSubject.Teacher.User.FullName,
+                    SubjectName = c.TeacherSubject.Subject.SubjectName
+                }).FirstOrDefaultAsync();
+
+            return (result, "SUCCESS");
+
+
         }
 
         public async Task<(CourseResponse? data, string? message)> UpdateCourse(CreateCourseRequest request, Guid courseId, Guid userId)
