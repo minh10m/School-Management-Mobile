@@ -62,6 +62,29 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
+        public async Task<(CourseResponse? data, string? message)> GetCourseById(Guid courseId)
+        {
+            var course = await context.Course.AsNoTracking()
+                                             .Include(x => x.TeacherSubject).ThenInclude(x => x.Teacher).ThenInclude(x => x.User)
+                                             .Include(x => x.TeacherSubject).ThenInclude(x => x.Subject)
+                                             .FirstOrDefaultAsync(x => x.Id == courseId);
+            if (course == null) return (null, "NOT_FOUND_COURSE");
+
+            return (new CourseResponse
+            {
+                Id = course.Id,
+                Description = course.Description,
+                CourseName = course.CourseName,
+                CreatedAt = course.CreatedAt,
+                Price = course.Price,
+                PublishedAt = course.PublishedAt,
+                Status = course.Status,
+                TeacherSubjectId = course.TeacherSubjectId,
+                TeacherName = course.TeacherSubject.Teacher.User.FullName,
+                SubjectName = course.TeacherSubject.Subject.SubjectName
+            }, "SUCCESS");
+        }
+
         public async Task<(PagedResponse<CourseResponse>? data, string? message)> GetMyCourseForTeacher(MyCourseFilterRequest request, Guid userId)
         {
             var teacherId = await context.Teacher.AsNoTracking().Where(x => x.UserId == userId)

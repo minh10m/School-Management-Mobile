@@ -81,5 +81,18 @@ namespace School_Management.API.Controllers
                 success = true
             });
         }
+
+        [HttpGet]
+        [Route("{courseId}")]
+        [Authorize]
+        public async Task<IActionResult> GetCourseById([FromRoute] Guid courseId)
+        {
+            var result = await courseService.GetCourseById(courseId);
+            return Ok(new
+            {
+                success = true, 
+                data = result
+            });
+        }
     }
 }
