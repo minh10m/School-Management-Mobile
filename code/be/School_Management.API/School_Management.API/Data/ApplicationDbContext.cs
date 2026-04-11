@@ -30,6 +30,7 @@ namespace School_Management.API.Data
         public DbSet<ExamSchedule> ExamSchedule { get; set; }
         public DbSet<ExamScheduleDetail> ExamScheduleDetail { get; set; }
         public DbSet<ExamStudentAssignment> ExamStudentAssignment { get; set; }
+        public DbSet<Course> Course { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
