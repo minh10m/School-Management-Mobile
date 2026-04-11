@@ -59,5 +59,27 @@ namespace School_Management.API.Controllers
                 message = "Cập nhật thành công"
             });
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("my")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetMyCourseForTeacher([FromQuery] MyCourseFilterRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await courseService.GetMyCourseForTeacher(request, Guid.Parse(userId));
+            return Ok(new
+            {
+                data = result,
+                success = true
+            });
+        }
     }
 }

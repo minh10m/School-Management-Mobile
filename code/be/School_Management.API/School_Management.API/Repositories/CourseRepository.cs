@@ -62,6 +62,52 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
+        public async Task<(PagedResponse<CourseResponse>? data, string? message)> GetMyCourseForTeacher(MyCourseFilterRequest request, Guid userId)
+        {
+            var teacherId = await context.Teacher.AsNoTracking().Where(x => x.UserId == userId)
+                                                     .Select(g => g.Id)
+                                                     .FirstOrDefaultAsync();
+
+            if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
+
+            var query = context.Course.AsNoTracking()
+                                      .Where(x => x.TeacherSubject.TeacherId == teacherId)
+                                      .AsQueryable();
+            if(!string.IsNullOrWhiteSpace(request.CourseName))
+            {
+                var name = request.CourseName.Trim().ToLower();
+                query = query.Where(x => x.CourseName.Trim().ToLower().Contains(name));
+            }
+
+            query = query.OrderByDescending(x => x.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(g => new CourseResponse
+                                        {
+                                            Id = g.Id,
+                                            CourseName = g.CourseName,
+                                            CreatedAt = g.CreatedAt,
+                                            Description = g.Description,
+                                            Price = g.Price,
+                                            PublishedAt = g.PublishedAt,
+                                            Status = g.Status,
+                                            SubjectName = g.TeacherSubject.Subject.SubjectName,
+                                            TeacherSubjectId = g.TeacherSubjectId,
+                                            TeacherName = g.TeacherSubject.Teacher.User.FullName
+                                        }).ToListAsync();
+
+            return (new PagedResponse<CourseResponse>
+            {
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                Items = listResult
+            }, "SUCCESS");
+        }
+
         public async Task<(CourseResponse? data, string? message)> UpdateCourse(CreateCourseRequest request, Guid courseId, Guid userId)
         {
 
