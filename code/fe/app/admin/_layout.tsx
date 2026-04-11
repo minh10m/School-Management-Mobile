@@ -36,6 +36,7 @@ export default function AdminLayout() {
       <Stack.Screen name="class-years/index" />
       <Stack.Screen name="class-years/create" />
       <Stack.Screen name="class-years/[id]" />
+      <Stack.Screen name="class-years/promote" />
       <Stack.Screen name="roles/index" />
       <Stack.Screen name="subjects/index" />
       <Stack.Screen name="subjects/create" />
@@ -44,6 +45,7 @@ export default function AdminLayout() {
       <Stack.Screen name="schedules/create" />
       <Stack.Screen name="schedules/[id]" />
       <Stack.Screen name="exam-schedules/index" />
+      <Stack.Screen name="exam-schedules/create" />
       <Stack.Screen name="exam-schedules/[id]" />
       <Stack.Screen name="fees/index" />
       <Stack.Screen name="fees/[id]" />

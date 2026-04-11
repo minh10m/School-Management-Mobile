@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -75,6 +75,30 @@ namespace School_Management.API.Repositories
                 TeacherName = teacherSubjectInfo.FullName,
                 SubjectName = teacherSubjectInfo.SubjectName
             }, "SUCCESS");
+        }
+
+        public async Task<List<TeacherSubjectResponse>> GetTeacherSubjects(Guid teacherId)
+        {
+            return await context.TeacherSubject
+                .Where(x => x.TeacherId == teacherId)
+                .Select(x => new TeacherSubjectResponse
+                {
+                    TeacherSubjectId = x.TeacherSubjectId,
+                    TeacherId = x.TeacherId,
+                    SubjectId = x.SubjectId,
+                    TeacherName = x.Teacher.User.FullName,
+                    SubjectName = x.Subject.SubjectName
+                }).ToListAsync();
+        }
+
+        public async Task<bool> DeleteTeacherSubject(Guid teacherSubjectId)
+        {
+            var teacherSubject = await context.TeacherSubject.FindAsync(teacherSubjectId);
+            if (teacherSubject == null) return false;
+
+            context.TeacherSubject.Remove(teacherSubject);
+            await context.SaveChangesAsync();
+            return true;
         }
     }
 }

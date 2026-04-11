@@ -51,7 +51,7 @@ export const teacherService = {
    * 404: giáo viên không tồn tại
    */
   getTeacherSubjects: async (teacherId: string): Promise<TeacherSubject[]> => {
-    const response = await apiClient.get<TeacherSubject[]>(`/teachers/${teacherId}/subjects`);
+    const response = await apiClient.get<TeacherSubject[]>(`/teacher-subjects/teacher/${teacherId}`);
     return response.data;
   },
 
