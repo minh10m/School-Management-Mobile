@@ -131,6 +131,43 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
+        public async Task<(CourseResponse? data, string? message)> ReviseCourseForAdmin(Guid courseId, UpdateStatusCourseRequest request)
+        {
+            var course = await context.Course
+                .FirstOrDefaultAsync(x => x.Id == courseId);
+
+            if (course == null) return (null, "NOT_FOUND_COURSE");
+
+            course.Status = request.Status;
+
+            if (request.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+            {
+                course.PublishedAt = DateTimeOffset.UtcNow;
+            }
+
+            await context.SaveChangesAsync();
+
+            var result = await context.Course.AsNoTracking()
+                .Where(x => x.Id == courseId)
+                .Select(c => new CourseResponse
+                {
+                    Id = c.Id,
+                    Description = c.Description,
+                    CourseName = c.CourseName,
+                    CreatedAt = c.CreatedAt,
+                    Price = c.Price,
+                    PublishedAt = c.PublishedAt,
+                    Status = c.Status,
+                    TeacherSubjectId = c.TeacherSubjectId,
+                    TeacherName = c.TeacherSubject.Teacher.User.FullName,
+                    SubjectName = c.TeacherSubject.Subject.SubjectName
+                }).FirstOrDefaultAsync();
+
+            return (result, "SUCCESS");
+
+
+        }
+
         public async Task<(CourseResponse? data, string? message)> UpdateCourse(CreateCourseRequest request, Guid courseId, Guid userId)
         {
 

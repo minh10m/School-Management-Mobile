@@ -50,6 +50,17 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<CourseResponse> ReviseCourseForAdmin(Guid courseId, UpdateStatusCourseRequest request)
+        {
+            var (result, message) = await courseRepository.ReviseCourseForAdmin(courseId, request);
+            return message switch
+            {
+                "NOT_FOUND_COURSE" => throw new NotFoundException("Khóa học không tồn tại"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<CourseResponse> UpdateCourse(CreateCourseRequest request, Guid courseId, Guid userId)
         {
             var (result, message) = await courseRepository.UpdateCourse(request, courseId, userId);

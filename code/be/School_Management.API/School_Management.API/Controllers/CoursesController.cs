@@ -94,5 +94,20 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{courseId}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ReviseCourseForAdmin([FromRoute] Guid courseId, [FromBody] UpdateStatusCourseRequest request)
+        {
+            var result = await courseService.ReviseCourseForAdmin(courseId, request);
+            return Ok(new
+            {
+                success = true,
+                message = "Thay đổi thông tin thành công",
+                data = result
+            });
+        }
     }
 }
