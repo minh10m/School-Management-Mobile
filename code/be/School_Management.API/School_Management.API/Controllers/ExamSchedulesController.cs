@@ -113,12 +113,25 @@ namespace School_Management.API.Controllers
         [HttpGet]
         [ValidateModel]
         [Route("details/{examScheduleDetailId}/assign")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Teacher")]
         public async Task<IActionResult> GetAllExamStudentAssignment([FromQuery] ExamStudentAssignmentFilterRequest request, [FromRoute] Guid examScheduleDetailId)
         {
             if (request.PageNumber <= 0) request.PageNumber = 1;
             if (request.PageSize <= 0) request.PageSize = 10;
             var result = await examScheduleService.GetAllExamStudentAssignment(request, examScheduleDetailId);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [ValidateModel]
+        [Authorize(Roles = "Teacher,Student")]
+        public async Task<IActionResult> GetMyExamSchedule([FromQuery] MyExamScheduleDetailRequest request)
+        {
+            var result = await examScheduleService.GetMyExamSchedule(request, User);
             return Ok(new
             {
                 success = true,
