@@ -1,4 +1,4 @@
-﻿using School_Management.API.Models.DTO;
+using School_Management.API.Models.DTO;
 using System.Security.Claims;
 
 namespace School_Management.API.Services
