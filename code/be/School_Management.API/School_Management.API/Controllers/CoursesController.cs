@@ -39,5 +39,25 @@ namespace School_Management.API.Controllers
                 message = "Tạo khóa học thành công"
             });
         }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{courseId}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> UpdateCourse([FromBody] CreateCourseRequest request, [FromRoute] Guid courseId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+            var result = await courseService.UpdateCourse(request, courseId, Guid.Parse(userId));
+            return Ok(new { 
+                success = true, 
+                data = result,
+                message = "Cập nhật thành công"
+            });
+        }
     }
 }
