@@ -14,7 +14,7 @@ export default function AdminTeachersScreen() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string | undefined>();
+  const [selectedSubjectName, setSelectedSubjectName] = useState<string | undefined>();
 
   const loadInitialData = async () => {
     try {
@@ -30,7 +30,7 @@ export default function AdminTeachersScreen() {
       setLoading(true);
       const res = await teacherService.getTeachers({
         search: search || undefined,
-        subjectId: selectedSubjectId,
+        subjectName: selectedSubjectName,
         pageSize: 50,
         sortBy: 'fullName',
         sortOrder: 'asc'
@@ -42,7 +42,7 @@ export default function AdminTeachersScreen() {
     } finally {
       setLoading(false);
     }
-  }, [search, selectedSubjectId]);
+  }, [search, selectedSubjectName]);
 
   useEffect(() => {
     loadInitialData();
@@ -66,9 +66,7 @@ export default function AdminTeachersScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Teacher Management</Text>
-        <TouchableOpacity onPress={() => router.push('/admin/teachers/create' as any)}>
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Create</Text>
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
       </View>
 
       {/* Filters */}
@@ -87,20 +85,20 @@ export default function AdminTeachersScreen() {
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
           <TouchableOpacity
-            onPress={() => setSelectedSubjectId(undefined)}
-            className={`px-3 py-1.5 rounded-full ${!selectedSubjectId ? 'bg-bright-blue' : 'bg-gray-100'}`}
+            onPress={() => setSelectedSubjectName(undefined)}
+            className={`px-3 py-1.5 rounded-full ${!selectedSubjectName ? 'bg-bright-blue' : 'bg-gray-100'}`}
           >
-            <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: !selectedSubjectId ? 'white' : '#6B7280' }}>
+            <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: !selectedSubjectName ? 'white' : '#6B7280' }}>
               All Subjects
             </Text>
           </TouchableOpacity>
           {(subjects || []).map(s => (
             <TouchableOpacity
               key={s.subjectId}
-              onPress={() => setSelectedSubjectId(s.subjectId)}
-              className={`px-3 py-1.5 rounded-full ${selectedSubjectId === s.subjectId ? 'bg-bright-blue' : 'bg-gray-100'}`}
+              onPress={() => setSelectedSubjectName(s.subjectName)}
+              className={`px-3 py-1.5 rounded-full ${selectedSubjectName === s.subjectName ? 'bg-bright-blue' : 'bg-gray-100'}`}
             >
-              <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: selectedSubjectId === s.subjectId ? 'white' : '#6B7280' }}>
+              <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: selectedSubjectName === s.subjectName ? 'white' : '#6B7280' }}>
                 {s.subjectName}
               </Text>
             </TouchableOpacity>

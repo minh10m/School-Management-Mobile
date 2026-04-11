@@ -1,4 +1,4 @@
-﻿using School_Management.API.Exceptions;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
 
@@ -34,6 +34,16 @@ namespace School_Management.API.Services
                 "DUPLICATE_SUBJECT" => throw new ConflictException("Giáo viên đã có môn học này"),
                 _ => throw new Exception("Lỗi hệ thống không xác định")
             };
+        }
+
+        public async Task<List<TeacherSubjectResponse>> GetTeacherSubjects(Guid teacherId)
+        {
+            return await teacherSubjectRepository.GetTeacherSubjects(teacherId);
+        }
+
+        public async Task<bool> DeleteTeacherSubject(Guid teacherSubjectId)
+        {
+            return await teacherSubjectRepository.DeleteTeacherSubject(teacherSubjectId);
         }
     }
 }
