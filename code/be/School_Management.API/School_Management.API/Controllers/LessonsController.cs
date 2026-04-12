@@ -61,5 +61,18 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [Route("{lessonId}")]
+        [Authorize]
+        public async Task<IActionResult> GetLessonById([FromRoute] Guid lessonId)
+        {
+            var result = await lessonService.GetLessonById(lessonId);
+            return Ok(new
+            {
+                success = true, 
+                data = result
+            });
+        }
     }
 }

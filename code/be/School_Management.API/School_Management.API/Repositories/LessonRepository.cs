@@ -91,6 +91,24 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
+        public async Task<(LessonResponse? data, string message)> GetLessonById(Guid lessonId)
+        {
+            var lesson = await context.Lesson.Include(x => x.Course).FirstOrDefaultAsync(x => x.Id == lessonId);
+            if (lesson == null) return (null, "NOT_FOUND_LESSON");
+
+            var result = new LessonResponse
+            {
+                Id = lesson.Id,
+                CourseId = lesson.CourseId,
+                CourseName = lesson.Course.CourseName,
+                LessonName = lesson.LessonName,
+                OrderIndex = lesson.OrderIndex
+            };
+
+            return (result, "SUCCESS");
+
+        }
+
         public async Task<(LessonResponse? data, string? message)> UpdateLesson(UpdateLessonRequest request, Guid lessonId)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
