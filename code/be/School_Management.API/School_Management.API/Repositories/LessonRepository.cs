@@ -119,12 +119,12 @@ namespace School_Management.API.Repositories
 
                 if (request.OrderIndex > lesson.OrderIndex)
                 {
-                    await context.Lesson.Where(x => x.OrderIndex > lesson.OrderIndex && x.OrderIndex <= request.OrderIndex)
+                    await context.Lesson.Where(x => x.CourseId == lesson.CourseId && x.OrderIndex > lesson.OrderIndex && x.OrderIndex <= request.OrderIndex)
                                         .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex - 1));
                 }
                 else if (request.OrderIndex < lesson.OrderIndex)
                 {
-                    await context.Lesson.Where(x => x.OrderIndex < lesson.OrderIndex && x.OrderIndex >= request.OrderIndex)
+                    await context.Lesson.Where(x => x.CourseId == lesson.CourseId && x.OrderIndex < lesson.OrderIndex && x.OrderIndex >= request.OrderIndex)
                                         .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
                 }
 

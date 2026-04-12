@@ -69,5 +69,54 @@ namespace School_Management.API.Repositories
             }
             
         }
+
+        public async Task<(LessonVideoResponse? data, string message)> UpdateLessonVideo(UpdateLessonVideoRequest request, Guid lessonVideoId)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var lessonVideo = await context.LessonVideo.Include(x => x.Lesson).FirstOrDefaultAsync(x => x.Id == lessonVideoId);
+                if (lessonVideo == null) return (null, "NOT_FOUND_LESSON_VIDEO");
+                if (request.OrderIndex > lessonVideo.OrderIndex)
+                {
+                    await context.LessonVideo.Where(x => x.LessonId == lessonVideo.LessonId && x.OrderIndex > lessonVideo.OrderIndex && x.OrderIndex <= request.OrderIndex)
+                                        .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex - 1));
+                }
+                else if (request.OrderIndex < lessonVideo.OrderIndex)
+                {
+                    await context.LessonVideo.Where(x => x.LessonId == lessonVideo.LessonId && x.OrderIndex < lessonVideo.OrderIndex && x.OrderIndex >= request.OrderIndex)
+                                        .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
+                }
+
+                lessonVideo.Duration = request.Duration;
+                lessonVideo.IsPreview = request.IsPreview;
+                lessonVideo.Name = request.Name;
+                lessonVideo.OrderIndex = request.OrderIndex;
+                lessonVideo.Url = request.Url;
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                var result = new LessonVideoResponse
+                {
+                    Id = lessonVideo.Id,
+                    Duration = lessonVideo.Duration,
+                    IsPreview = lessonVideo.IsPreview,
+                    LessonId = lessonVideo.LessonId,
+                    LessonName = lessonVideo.Lesson.LessonName,
+                    Name = lessonVideo.Name,
+                    OrderIndex = lessonVideo.OrderIndex,
+                    Url = lessonVideo.Url
+                };
+
+                return (result, "SUCCESS");
+                
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }
