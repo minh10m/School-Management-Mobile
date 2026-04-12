@@ -2,6 +2,7 @@
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
+using System.Security.Claims;
 
 namespace School_Management.API.Services
 {
@@ -25,6 +26,16 @@ namespace School_Management.API.Services
                 "SUCCESS" => result!,
                 _ => throw new Exception("Lỗi không xác định")
             };
+        }
+
+        public async Task<PagedResponse<CourseResponse>> GetAllCourseForAdmin(CourseFilterRequestAdmin request)
+        {
+            return await courseRepository.GetAllCourseForAdmin(request);
+        }
+
+        public async Task<PagedResponse<CourseResponse>> GetAllCourseForTeacherAndStudent(CourseFilterRequestTeacherAndStudent request)
+        {
+            return await courseRepository.GetAllCourseForTeacherAndStudent(request);
         }
 
         public async Task<CourseResponse> GetCourseById(Guid courseId)

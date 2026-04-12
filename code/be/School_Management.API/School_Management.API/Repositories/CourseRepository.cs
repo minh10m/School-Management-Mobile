@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using System.Security.Claims;
 
 namespace School_Management.API.Repositories
 {
@@ -60,6 +61,92 @@ namespace School_Management.API.Repositories
                 TeacherSubjectId = course.TeacherSubjectId,
                 TeacherName = teacherSubjectInfo.FullName
             }, "SUCCESS");
+        }
+
+        public async Task<PagedResponse<CourseResponse>> GetAllCourseForAdmin(CourseFilterRequestAdmin request)
+        {
+            var query = context.Course.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.CourseName))
+            {
+                var name = request.CourseName.Trim().ToLower();
+                query = query.Where(x => x.CourseName.Trim().ToLower().Contains(name));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Status))
+            {
+                var name = request.Status.Trim().ToLower();
+                query = query.Where(x => x.Status.Trim().ToLower().Contains(name));
+            }
+
+            if (request.Status == "Approved")
+                query = query.OrderByDescending(x => x.PublishedAt);
+            else
+                query = query.OrderByDescending(x => x.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(g => new CourseResponse
+                                        {
+                                            Id = g.Id,
+                                            CourseName = g.CourseName,
+                                            CreatedAt = g.CreatedAt,
+                                            Description = g.Description,
+                                            Price = g.Price,
+                                            PublishedAt = g.PublishedAt,
+                                            Status = g.Status,
+                                            SubjectName = g.TeacherSubject.Subject.SubjectName,
+                                            TeacherSubjectId = g.TeacherSubjectId,
+                                            TeacherName = g.TeacherSubject.Teacher.User.FullName
+                                        }).ToListAsync();
+
+            return new PagedResponse<CourseResponse>
+            {
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                Items = listResult
+            };
+
+        }
+
+        public async Task<PagedResponse<CourseResponse>> GetAllCourseForTeacherAndStudent(CourseFilterRequestTeacherAndStudent request)
+        {
+            var query = context.Course.AsNoTracking().Where(x => x.Status == "Approved").AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.CourseName))
+            {
+                var name = request.CourseName.Trim().ToLower();
+                query = query.Where(x => x.CourseName.Trim().ToLower().Contains(name));
+            }
+
+            query = query.OrderByDescending(x => x.PublishedAt);
+
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(g => new CourseResponse
+                                        {
+                                            Id = g.Id,
+                                            CourseName = g.CourseName,
+                                            CreatedAt = g.CreatedAt,
+                                            Description = g.Description,
+                                            Price = g.Price,
+                                            PublishedAt = g.PublishedAt,
+                                            Status = g.Status,
+                                            SubjectName = g.TeacherSubject.Subject.SubjectName,
+                                            TeacherSubjectId = g.TeacherSubjectId,
+                                            TeacherName = g.TeacherSubject.Teacher.User.FullName
+                                        }).ToListAsync();
+
+            return new PagedResponse<CourseResponse>
+            {
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                Items = listResult
+            };
         }
 
         public async Task<(CourseResponse? data, string? message)> GetCourseById(Guid courseId)
