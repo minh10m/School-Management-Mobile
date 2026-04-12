@@ -8,6 +8,7 @@ import { subjectService } from '../../../services/subject.service';
 import { teacherSubjectService } from '../../../services/teacherSubject.service';
 import { TeacherResponse, TeacherSubject } from '../../../types/teacher';
 import { SubjectResponse } from '../../../types/subject';
+import { getErrorMessage } from '../../../utils/error';
 
 export default function AdminTeacherDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -79,8 +80,7 @@ export default function AdminTeacherDetailScreen() {
       setIsEditing(false);
       Alert.alert('Success', 'Teacher details updated successfully!');
     } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Update failed.';
-      Alert.alert('Error', msg);
+      Alert.alert('Error', getErrorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -97,8 +97,7 @@ export default function AdminTeacherDetailScreen() {
       setShowSubjectModal(false);
       Alert.alert('Success', 'Subject assigned successfully!');
     } catch (err: any) {
-      const msg = err?.response?.data?.message || 'Failed to assign subject.';
-      Alert.alert('Error', msg);
+      Alert.alert('Error', getErrorMessage(err));
     } finally {
       setSubjectLoading(false);
     }
@@ -121,8 +120,7 @@ export default function AdminTeacherDetailScreen() {
               const updated = await teacherService.getTeacherSubjects(id!);
               setAssignedSubjects(updated);
             } catch (err: any) {
-              const msg = err?.response?.data?.message || 'Failed to remove subject.';
-              Alert.alert('Error', msg);
+              Alert.alert('Error', getErrorMessage(err));
             } finally {
               setSubjectLoading(false);
             }

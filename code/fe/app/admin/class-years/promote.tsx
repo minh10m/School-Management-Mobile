@@ -15,6 +15,7 @@ import { useState, useEffect, useCallback } from "react";
 import { classYearService } from "../../../services/classYear.service";
 import { ClassYearResponse } from "../../../types/classYear";
 import { SCHOOL_YEAR } from "../../../constants/config";
+import { getErrorMessage } from "../../../utils/error";
 
 interface MappingRule {
   id: string; // Internal local ID for list management
@@ -25,11 +26,14 @@ interface MappingRule {
 export default function AdminPromoteScreen() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showYearModal, setShowYearModal] = useState(false);
 
   // Years
-  const targetYearStr = SCHOOL_YEAR;
-  const sourceYearInt = parseInt(targetYearStr.split("-")[0], 10) - 1;
+  const [targetYear, setTargetYear] = useState(SCHOOL_YEAR);
+  const sourceYearInt = parseInt(targetYear.split("-")[0], 10) - 1;
   const sourceYearStr = sourceYearInt.toString();
+
+  const availableYears = ["2025", "2026", "2027", "2028"];
 
   // Data
   const [sourceClasses, setSourceClasses] = useState<ClassYearResponse[]>([]);
@@ -45,7 +49,7 @@ export default function AdminPromoteScreen() {
       setLoading(true);
       const [sourceRes, targetRes] = await Promise.all([
         classYearService.getClassYears({ schoolYear: sourceYearStr }),
-        classYearService.getClassYears({ schoolYear: targetYearStr }),
+        classYearService.getClassYears({ schoolYear: targetYear }),
       ]);
       setSourceClasses(sourceRes);
       setTargetClasses(targetRes);
@@ -55,7 +59,7 @@ export default function AdminPromoteScreen() {
     } finally {
       setLoading(false);
     }
-  }, [sourceYearStr, targetYearStr]);
+  }, [sourceYearStr, targetYear]);
 
   useEffect(() => {
     fetchData();
@@ -95,7 +99,7 @@ export default function AdminPromoteScreen() {
     try {
       setSubmitting(true);
       await classYearService.promote({
-        currentSystemYear: parseInt(targetYearStr.split("-")[0], 10),
+        currentSystemYear: parseInt(targetYear.split("-")[0], 10),
         classPromotes: validMappings.map((m) => ({
           fromClassYearId: m.fromClassYearId,
           toClassYearId: m.toClassId,
@@ -104,8 +108,7 @@ export default function AdminPromoteScreen() {
       Alert.alert("Success", "Promotion completed successfully!");
       router.back();
     } catch (err: any) {
-      const msg = err?.response?.data?.message || "Promotion failed.";
-      Alert.alert("Error", msg);
+      Alert.alert("Error", getErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -147,21 +150,41 @@ export default function AdminPromoteScreen() {
             </Text>
           </View>
           <Ionicons name="arrow-forward" size={24} color="#136ADA" />
-          <View className="items-end">
+          <TouchableOpacity
+            onPress={() => setShowYearModal(true)}
+            className="items-end bg-white px-3 py-1.5 rounded-xl border border-blue-100"
+          >
             <Text
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-blue-400 text-[10px] uppercase"
             >
               To Year
             </Text>
-            <Text
-              style={{ fontFamily: "Poppins-Bold" }}
-              className="text-blue-700 text-lg"
-            >
-              {targetYearStr}
-            </Text>
-          </View>
+            <View className="flex-row items-center gap-1">
+              <Text
+                style={{ fontFamily: "Poppins-Bold" }}
+                className="text-blue-700 text-lg"
+              >
+                {targetYear}
+              </Text>
+              <Ionicons name="caret-down" size={12} color="#1D4ED8" />
+            </View>
+          </TouchableOpacity>
         </View>
+
+        <YearModal
+          visible={showYearModal}
+          onClose={() => setShowYearModal(false)}
+          years={availableYears}
+          selectedYear={targetYear}
+          onSelect={(y) => {
+            setTargetYear(y);
+            setShowYearModal(false);
+            setMappings([
+              { id: Math.random().toString(), fromClassYearId: "", toClassId: "" },
+            ]);
+          }}
+        />
 
         <Text
           style={{ fontFamily: "Poppins-SemiBold" }}
@@ -226,7 +249,7 @@ export default function AdminPromoteScreen() {
                       style={{ fontFamily: "Poppins-Medium" }}
                       className="text-gray-500 text-[10px] mb-1 ml-1"
                     >
-                      DESTINATION CLASS ({targetYearStr})
+                      DESTINATION CLASS ({targetYear})
                     </Text>
                     <Selector
                       data={targetClasses.filter((c) => {
@@ -287,6 +310,56 @@ export default function AdminPromoteScreen() {
         </View>
       )}
     </SafeAreaView>
+  );
+}
+
+function YearModal({
+  visible,
+  onClose,
+  years,
+  selectedYear,
+  onSelect,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  years: string[];
+  selectedYear: string;
+  onSelect: (y: string) => void;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View className="flex-1 bg-black/40 justify-center px-6">
+        <View className="bg-white rounded-3xl p-6">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text style={{ fontFamily: "Poppins-Bold" }} className="text-lg">
+              Select Target Year
+            </Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
+          <View className="flex-row flex-wrap gap-2">
+            {years.map((y) => (
+              <TouchableOpacity
+                key={y}
+                onPress={() => onSelect(y)}
+                className={`px-4 py-2 rounded-xl border ${selectedYear === y ? "bg-blue-50 border-bright-blue" : "border-gray-100 bg-gray-50"}`}
+              >
+                <Text
+                  style={{
+                    fontFamily:
+                      selectedYear === y ? "Poppins-Bold" : "Poppins-Medium",
+                  }}
+                  className={selectedYear === y ? "text-bright-blue" : "text-gray-500"}
+                >
+                  {y}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
 

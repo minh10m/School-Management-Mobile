@@ -1,34 +1,39 @@
-import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState, useEffect, useCallback } from 'react';
-import { roleService } from '../../../services/role.service';
-import { RoleResponse } from '../../../types/role';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  SafeAreaView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState, useEffect, useCallback } from "react";
+import { roleService } from "../../../services/role.service";
+import { RoleResponse } from "../../../types/role";
 
 export default function AdminRolesScreen() {
   const [roles, setRoles] = useState<RoleResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [search, setSearch] = useState('');
 
   const fetchRoles = useCallback(async () => {
     try {
       setLoading(true);
       const res = await roleService.getRoles({
-        search: search || undefined,
-        sortBy: 'name',
-        sortOrder: 'asc'
+        sortBy: "name",
+        sortOrder: "asc",
       });
       // Handle both { items: [] } and direct array [] responses
       const data = Array.isArray(res) ? res : res.items || [];
       setRoles(data);
     } catch (err) {
-      console.error('Error fetching roles:', err);
+      console.error("Error fetching roles:", err);
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, []);
 
   useEffect(() => {
     fetchRoles();
@@ -41,28 +46,18 @@ export default function AdminRolesScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+    <SafeAreaView className="flex-1 bg-white">
+      {/* Synchronized Header */}
+      <View className="px-6 py-4 flex-row items-center border-b border-gray-50">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Role Management</Text>
-      </View>
-
-      {/* Search */}
-      <View className="px-6 py-3 bg-white border-b border-gray-100">
-        <View className="flex-row items-center bg-gray-50 rounded-2xl px-4 py-2 border border-gray-100">
-          <Ionicons name="search-outline" size={18} color="#9CA3AF" />
-          <TextInput
-            placeholder="Search roles..."
-            value={search}
-            onChangeText={setSearch}
-            className="flex-1 ml-2 text-black text-sm"
-            style={{ fontFamily: 'Poppins-Regular' }}
-            placeholderTextColor="#9CA3AF"
-          />
-        </View>
+        <Text
+          style={{ fontFamily: "Poppins-Bold" }}
+          className="text-xl text-black flex-1"
+        >
+          Role Management
+        </Text>
       </View>
 
       {/* List */}
@@ -73,35 +68,62 @@ export default function AdminRolesScreen() {
       ) : (
         <FlatList
           data={roles}
-          keyExtractor={(item, index) => item.id || index.toString()}
-          contentContainerStyle={{ padding: 16, gap: 12 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          keyExtractor={(item) => item.roleId}
+          contentContainerStyle={{
+            paddingHorizontal: 24,
+            paddingVertical: 16,
+            gap: 12,
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#136ADA"
+            />
+          }
           renderItem={({ item }) => (
-            <View className="bg-white rounded-3xl p-5 border border-gray-200 shadow-sm flex-row items-center justify-between">
+            <View className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm flex-row items-center justify-between">
               <View className="flex-1">
-                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-base">{item.name}</Text>
-                <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs mt-1">
-                  Normalized: {item.normalizedName}
+                <Text
+                  style={{ fontFamily: "Poppins-Bold" }}
+                  className="text-black text-base"
+                >
+                  {item.name}
+                </Text>
+                <Text
+                  style={{ fontFamily: "Poppins-Regular" }}
+                  className="text-gray-400 text-[10px] mt-0.5"
+                >
+                  Access Level: {item.normalizedName}
                 </Text>
               </View>
-              <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center">
-                 <Ionicons name="shield-checkmark" size={20} color="#136ADA" />
+              <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center border border-blue-100">
+                <Ionicons name="shield-checkmark" size={20} color="#136ADA" />
               </View>
             </View>
           )}
           ListEmptyComponent={
-            <View className="items-center py-10">
-              <Ionicons name="shield-outline" size={48} color="#D1D5DB" />
-              <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-2">No roles found</Text>
+            <View className="items-center py-20">
+              <Ionicons name="shield-outline" size={64} color="#E5E7EB" />
+              <Text
+                style={{ fontFamily: "Poppins-Medium" }}
+                className="text-gray-400 mt-4 text-center"
+              >
+                No roles found
+              </Text>
             </View>
           }
         />
       )}
 
-      {/* Note for Admin */}
-      <View className="p-6 bg-white border-t border-gray-100 italic">
-        <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-[10px] text-center">
-          Roles define access levels. Standard roles are Student, Teacher, and Admin.
+      {/* Synchronized Footer Note */}
+      <View className="p-6 bg-gray-50/50 border-t border-gray-50">
+        <Text
+          style={{ fontFamily: "Poppins-Medium" }}
+          className="text-gray-400 text-[10px] text-center italic"
+        >
+          Roles define system-wide access levels. Standard roles include Admin,
+          Teacher, and Student.
         </Text>
       </View>
     </SafeAreaView>

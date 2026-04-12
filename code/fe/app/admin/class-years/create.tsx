@@ -15,6 +15,7 @@ import { classYearService } from "../../../services/classYear.service";
 import { teacherService } from "../../../services/teacher.service";
 import { TeacherListItem } from "../../../types/teacher";
 import { SCHOOL_YEAR } from "../../../constants/config";
+import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminCreateClassScreen() {
   const [loading, setLoading] = useState(false);
@@ -31,7 +32,7 @@ export default function AdminCreateClassScreen() {
   const fetchTeachers = async () => {
     try {
       setFetching(true);
-      const res = await teacherService.getTeachers({ pageSize: 100 });
+      const res = await teacherService.getTeachers({ PageSize: 100 });
       const tdata = Array.isArray(res) ? res : (res as any).items || [];
       setTeachers(tdata);
       if (tdata.length > 0)
@@ -55,12 +56,15 @@ export default function AdminCreateClassScreen() {
 
     try {
       setLoading(true);
-      await classYearService.createClassYear(form);
+      await classYearService.createClassYear({
+        ...form,
+        schoolYear: parseInt(String(form.schoolYear), 10)
+      });
       Alert.alert("Success", "Class created successfully!", [
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (err: any) {
-      Alert.alert("Error", err?.response?.data?.message || "Creation failed.");
+      Alert.alert("Error", getErrorMessage(err));
     } finally {
       setLoading(false);
     }

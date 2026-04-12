@@ -17,15 +17,24 @@ export const classYearService = {
    * AuthN(login) + AuthZ(Admin)
    */
   getClassYears: async (params?: GetClassYearsParams): Promise<ClassYearResponse[]> => {
-    const backendParams: any = { ...params };
+    const backendParams: any = {};
     if (params?.schoolYear) {
-      backendParams.SchoolYear = parseInt(params.schoolYear.split("-")[0], 10);
-      delete backendParams.schoolYear;
+      backendParams.SchoolYear = typeof params.schoolYear === 'string' 
+        ? parseInt(params.schoolYear.split("-")[0], 10) 
+        : params.schoolYear;
+    }
+    if (params?.grade) {
+      backendParams.Grade = params.grade;
+    }
+    if (params?.className) {
+      backendParams.ClassName = params.className;
     }
     if (params?.sortOrder) {
       backendParams.IsAscending = params.sortOrder === 'asc';
-      delete backendParams.sortOrder;
     }
+    if (params?.page) backendParams.PageNumber = params.page;
+    if (params?.pageSize) backendParams.PageSize = params.pageSize;
+    if (params?.sortBy) backendParams.SortBy = params.sortBy;
     const response = await apiClient.get<any>("/class-years", { params: backendParams });
     // Handle PagedResponse structure { items: [], totalCount: n }
     const data = response.data;
@@ -53,7 +62,9 @@ export const classYearService = {
   getTeachingClasses: async (params?: GetClassYearsParams): Promise<ClassYearSummary[]> => {
     const backendParams: any = { ...params };
     if (params?.schoolYear) {
-      backendParams.SchoolYear = parseInt(params.schoolYear.split("-")[0], 10);
+      backendParams.SchoolYear = typeof params.schoolYear === 'string'
+        ? parseInt((params.schoolYear as string).split("-")[0], 10)
+        : params.schoolYear;
       delete backendParams.schoolYear;
     }
     const response = await apiClient.get<ClassYearSummary[]>("/class-years/teaching", {
@@ -75,7 +86,9 @@ export const classYearService = {
   ): Promise<ClassYearSummary[]> => {
     const backendParams: any = { ...params };
     if (params?.schoolYear) {
-      backendParams.SchoolYear = parseInt(params.schoolYear.split("-")[0], 10);
+      backendParams.SchoolYear = typeof params.schoolYear === 'string'
+        ? parseInt((params.schoolYear as string).split("-")[0], 10)
+        : params.schoolYear;
       delete backendParams.schoolYear;
     }
     const response = await apiClient.get<ClassYearSummary[]>(
@@ -124,7 +137,9 @@ export const classYearService = {
     const backendPayload = {
       className: payload.className,
       grade: payload.grade,
-      schoolYear: parseInt(payload.schoolYear.split("-")[0], 10),
+      schoolYear: typeof payload.schoolYear === 'string' 
+        ? parseInt((payload.schoolYear as string).split("-")[0], 10)
+        : payload.schoolYear,
       homeRoomId: payload.homeRoomId,
     };
     const response = await apiClient.post<ClassYearResponse>("/class-years", backendPayload);

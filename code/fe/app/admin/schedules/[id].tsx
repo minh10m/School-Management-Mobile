@@ -19,6 +19,7 @@ import { teacherService } from "../../../services/teacher.service";
 import { ScheduleDetailItem } from "../../../types/schedule";
 import { SubjectResponse } from "../../../types/subject";
 import { TeacherListItem } from "../../../types/teacher";
+import { getErrorMessage } from "../../../utils/error";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -90,10 +91,7 @@ export default function AdminScheduleDetailScreen() {
       setSelectedTeacherSubjectId("");
       fetchDetails();
     } catch (err: any) {
-      Alert.alert(
-        "Error",
-        err?.response?.data?.message || "Conflict detected.",
-      );
+      Alert.alert("Error", getErrorMessage(err));
     }
   };
 
@@ -108,7 +106,7 @@ export default function AdminScheduleDetailScreen() {
             await scheduleService.deleteScheduleDetail(detailId);
             fetchDetails();
           } catch (err: any) {
-            Alert.alert("Error", "Deletion failed.");
+            Alert.alert("Error", getErrorMessage(err));
           }
         },
       },

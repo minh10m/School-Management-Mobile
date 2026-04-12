@@ -1,104 +1,139 @@
+import { ApiResponse, PagedResponse } from "../types/common";
 import {
-  CreateExamScheduleDetailPayload,
-  CreateExamSchedulePayload,
+  ExamScheduleDetailFilterRequest,
   ExamScheduleDetailResponse,
+  ExamScheduleFilterRequest,
+  ExamScheduleRequest,
   ExamScheduleResponse,
-  GetExamSchedulesParams,
-  UpdateExamScheduleDetailPayload,
-  UpdateExamSchedulePayload,
+  ExamStudentAssignmentFilterRequest,
+  ExamStudentAssignmentResponse,
+  UpdateExamScheduleDetail,
+  MyExamScheduleDetailRequest,
+  MyExamScheduleDetailResponse,
 } from "../types/examSchedule";
 import apiClient from "./apiClient";
 
 export const examScheduleService = {
-  // ─── LIST ─────────────────────────────────────────────────────────────────────
+  // ─── ADMIN: SCHEDULES ────────────────────────────────────────────────────────
+  
   /**
-   * Lấy danh sách lịch thi (học sinh / giáo viên / admin)
-   * GET /exam-schedules?grade=&schoolYear=&term=&teacherId=
-   * AuthN(login)
+   * Lấy danh sách lịch thi (Admin)
+   * GET /api/exam-schedules/all
    */
-  getExamSchedules: async (params?: GetExamSchedulesParams): Promise<ExamScheduleResponse[]> => {
-    const response = await apiClient.get<ExamScheduleResponse[]>("/exam-schedules", { params });
-    return response.data;
+  getAllSchedules: async (params: ExamScheduleFilterRequest): Promise<PagedResponse<ExamScheduleResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<ExamScheduleResponse>>>("/exam-schedules/all", { params });
+    return response.data.data;
   },
 
-  // ─── GET DETAILS ──────────────────────────────────────────────────────────────
   /**
-   * Lấy chi tiết lịch thi theo id lịch tổng
-   * GET /exam-schedules/{id}/details
-   * AuthN(login)
-   * 404: lịch không tồn tại
+   * Tạo lịch thi mới
+   * POST /api/exam-schedules
    */
-  getExamScheduleDetails: async (
-    examScheduleId: string
-  ): Promise<ExamScheduleDetailResponse[]> => {
-    const response = await apiClient.get<ExamScheduleDetailResponse[]>(
-      `/exam-schedules/${examScheduleId}/details`
+  createSchedule: async (payload: ExamScheduleRequest): Promise<ExamScheduleResponse> => {
+    const response = await apiClient.post<ApiResponse<ExamScheduleResponse>>("/exam-schedules", payload);
+    return response.data.data;
+  },
+
+  /**
+   * Cập nhật lịch thi
+   * PATCH /api/exam-schedules/{id}
+   */
+  updateSchedule: async (id: string, payload: ExamScheduleRequest): Promise<ExamScheduleResponse> => {
+    const response = await apiClient.patch<ApiResponse<ExamScheduleResponse>>(`/exam-schedules/${id}`, payload);
+    return response.data.data;
+  },
+
+  // ─── ADMIN: DETAILS (EXAM SLOTS) ──────────────────────────────────────────
+
+  /**
+   * Lấy chi tiết các môn thi trong một lịch thi (Paginated)
+   * GET /api/exam-schedules/{id}/details
+   */
+  getScheduleDetails: async (
+    id: string,
+    params: ExamScheduleDetailFilterRequest
+  ): Promise<PagedResponse<ExamScheduleDetailResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<ExamScheduleDetailResponse>>>(
+      `/exam-schedules/${id}/details`,
+      { params }
     );
-    return response.data;
+    return response.data.data;
   },
 
-  // ─── ADMIN: CREATE SCHEDULE ───────────────────────────────────────────────────
   /**
-   * Admin tạo lịch thi
-   * POST /exam-schedules
-   * AuthN(login) + AuthZ(Admin)
+   * Import chi tiết lịch thi từ file Excel
+   * POST /api/exam-schedules/{id}/details
    */
-  createExamSchedule: async (
-    payload: CreateExamSchedulePayload
-  ): Promise<ExamScheduleResponse> => {
-    const response = await apiClient.post<ExamScheduleResponse>("/exam-schedules", payload);
-    return response.data;
+  uploadExcel: async (id: string, fileUri: string): Promise<boolean> => {
+    const formData = new FormData();
+    // @ts-ignore
+    formData.append("file", {
+      uri: fileUri,
+      name: "exam_schedule.xlsx",
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const response = await apiClient.post<ApiResponse<boolean>>(
+      `/exam-schedules/${id}/details`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    return response.data.data;
   },
 
-  // ─── ADMIN: CREATE SCHEDULE DETAIL ───────────────────────────────────────────
   /**
-   * Admin tạo chi tiết lịch thi (từng môn thi)
-   * POST /exam-schedules/{id}/details
-   * AuthN(login) + AuthZ(Admin)
-   * 409: trùng phòng thi / giáo viên / môn thi cùng giờ
+   * Cập nhật một môn thi (slot)
+   * PATCH /api/exam-schedules/details/{id}
    */
-  createExamScheduleDetail: async (
-    examScheduleId: string,
-    payload: CreateExamScheduleDetailPayload
-  ): Promise<ExamScheduleDetailResponse> => {
-    const response = await apiClient.post<ExamScheduleDetailResponse>(
-      `/exam-schedules/${examScheduleId}/details`,
+  updateDetail: async (id: string, payload: UpdateExamScheduleDetail): Promise<ExamScheduleDetailResponse> => {
+    const response = await apiClient.patch<ApiResponse<ExamScheduleDetailResponse>>(
+      `/exam-schedules/details/${id}`,
       payload
     );
-    return response.data;
+    return response.data.data;
   },
 
-  // ─── ADMIN: UPDATE SCHEDULE ───────────────────────────────────────────────────
+  // ─── ADMIN: ASSIGNMENTS ──────────────────────────────────────────────────────
+
   /**
-   * Admin sửa lịch thi
-   * PATCH /exam-schedules/{id}
-   * AuthN(login) + AuthZ(Admin)
+   * Kích hoạt tự động phân bổ học sinh vào phòng thi
+   * POST /api/exam-schedules/{id}/details/assign
    */
-  updateExamSchedule: async (
-    examScheduleId: string,
-    payload: UpdateExamSchedulePayload
-  ): Promise<ExamScheduleResponse> => {
-    const response = await apiClient.patch<ExamScheduleResponse>(
-      `/exam-schedules/${examScheduleId}`,
-      payload
-    );
-    return response.data;
+  triggerAssignment: async (id: string): Promise<boolean> => {
+    const response = await apiClient.post<ApiResponse<boolean>>(`/exam-schedules/${id}/details/assign`);
+    return response.data.data;
   },
 
-  // ─── ADMIN: UPDATE SCHEDULE DETAIL ───────────────────────────────────────────
   /**
-   * Admin sửa chi tiết lịch thi
-   * PATCH /exam-schedules/details/{id}
-   * AuthN(login) + AuthZ(Admin)
+   * Xem danh sách học sinh được phân bổ vào một môn thi cụ thể
+   * GET /api/exam-schedules/details/{id}/assign
    */
-  updateExamScheduleDetail: async (
+  getAssignments: async (
     detailId: string,
-    payload: UpdateExamScheduleDetailPayload
-  ): Promise<ExamScheduleDetailResponse> => {
-    const response = await apiClient.patch<ExamScheduleDetailResponse>(
-      `/exam-schedules/details/${detailId}`,
-      payload
+    params: ExamStudentAssignmentFilterRequest
+  ): Promise<PagedResponse<ExamStudentAssignmentResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<ExamStudentAssignmentResponse>>>(
+      `/exam-schedules/details/${detailId}/assign`,
+      { params }
     );
-    return response.data;
+    return response.data.data;
+  },
+  /**
+   * Xóa lịch thi
+   * DELETE /api/exam-schedules/{id}
+   */
+  deleteSchedule: async (id: string): Promise<boolean> => {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/exam-schedules/${id}`);
+    return response.data.data;
+  },
+  /**
+   * Lấy lịch thi cá nhân (Dành cho Giáo viên gác thi hoặc Học sinh đi thi)
+   * GET /api/exam-schedules
+   */
+  getMyExamSchedule: async (params: MyExamScheduleDetailRequest): Promise<MyExamScheduleDetailResponse[]> => {
+    const response = await apiClient.get<ApiResponse<MyExamScheduleDetailResponse[]>>("/exam-schedules", { params });
+    return response.data.data;
   },
 };

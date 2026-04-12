@@ -69,7 +69,6 @@ export default function EventsTab() {
         </TouchableOpacity>
         <View className="flex-1 items-center">
           <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>School Events</Text>
-          <Text className="text-gray-400 text-[10px]" style={{ fontFamily: "Poppins-Regular" }}>Stay tuned with our campus activities</Text>
         </View>
         <View className="w-10" />
       </View>
