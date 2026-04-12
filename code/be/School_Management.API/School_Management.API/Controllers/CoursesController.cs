@@ -109,5 +109,38 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("all/forAdmin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllCourseForAdmin([FromQuery] CourseFilterRequestAdmin request)
+        {
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await courseService.GetAllCourseForAdmin(request);
+            return Ok(new
+            {
+                success = true, 
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("all/approved")]
+        [Authorize(Roles = "Teacher,Student")]
+        public async Task<IActionResult> GetAllCourseForTeacherAndStudent([FromQuery] CourseFilterRequestTeacherAndStudent request)
+        {
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await courseService.GetAllCourseForTeacherAndStudent(request);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
+
     }
 }
