@@ -554,5 +554,37 @@ namespace School_Management.API.Repositories
 
             return (result, "SUCCESS");
         }
+        public async Task<(bool result, string? message)> DeleteExamSchedule(Guid id)
+        {
+            var examSchedule = await context.ExamSchedule.FirstOrDefaultAsync(x => x.Id == id);
+            if (examSchedule == null) return (false, "NOT_FOUND_EXAMSCHEDULE");
+
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var details = await context.ExamScheduleDetail.Where(d => d.ExamScheduleId == id).ToListAsync();
+                var detailIds = details.Select(d => d.Id).ToList();
+
+                // Delete related assignments
+                var assignments = await context.ExamStudentAssignment.Where(a => detailIds.Contains(a.ExamScheduleDetailId)).ToListAsync();
+                context.ExamStudentAssignment.RemoveRange(assignments);
+
+                // Delete related details
+                context.ExamScheduleDetail.RemoveRange(details);
+
+                // Delete the schedule
+                context.ExamSchedule.Remove(examSchedule);
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return (true, "SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return (false, ex.Message);
+            }
+        }
     }
 }

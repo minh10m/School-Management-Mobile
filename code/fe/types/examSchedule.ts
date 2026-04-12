@@ -2,10 +2,12 @@
 
 export interface ExamScheduleResponse {
   examScheduleId: string;
+  title: string;
   type: string;       // e.g. "Midterm" | "Final"
-  term: string;       // e.g. "HK1"
-  schoolYear: string; // e.g. "2025-2026"
+  term: number;       // Changed to number to match backend
+  schoolYear: number; // Changed to number to match backend
   grade: number;
+  isActive: boolean;
 }
 
 export interface ExamScheduleDetailResponse {
@@ -15,51 +17,62 @@ export interface ExamScheduleDetailResponse {
   teacherName: string;
   subjectId: string;
   subjectName: string;
-  startTime: string;   // ISO datetime
+  startTime: string;   
   finishTime: string;
   date: string;        // "YYYY-MM-DD"
   roomName: string;
 }
 
-// ─── Query Params ──────────────────────────────────────────────────────────────
+export interface ExamStudentAssignmentResponse {
+  examStudentAssignmentId: string;
+  studentId: string;
+  studentName: string;
+  identificationNumber: string;
+}
 
-export interface GetExamSchedulesParams {
+// ─── Filter Types ──────────────────────────────────────────────────────────────
+
+export interface ExamScheduleFilterRequest {
+  title?: string;
+  type?: string;
+  term?: number;
+  schoolYear?: number;
   grade?: number;
-  schoolYear?: string;
-  term?: string;
-  teacherId?: string; // dành cho giáo viên lọc lịch coi thi
+  isActive?: boolean;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+export interface ExamScheduleDetailFilterRequest {
+  subjectName?: string;
+  teacherName?: string;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+export interface ExamStudentAssignmentFilterRequest {
+  studentName?: string;
+  identificationNumber?: string;
+  pageNumber?: number;
+  pageSize?: number;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────
 
-export interface CreateExamSchedulePayload {
+export interface ExamScheduleRequest {
+  title: string;
   type: string;
-  term: string;
-  schoolYear: string;
+  term: number;
+  schoolYear: number;
   grade: number;
+  isActive: boolean;
 }
 
-export interface UpdateExamSchedulePayload {
-  type?: string;
-  term?: string;
-  schoolYear?: string;
-  grade?: number;
-}
-
-export interface CreateExamScheduleDetailPayload {
-  teacherId: string;
+export interface UpdateExamScheduleDetail {
   subjectId: string;
+  teacherId: string;
+  roomName: string;
   startTime: string;
   finishTime: string;
-  date: string;        // "YYYY-MM-DD"
-  roomName: string;
-}
-
-export interface UpdateExamScheduleDetailPayload {
-  teacherId?: string;
-  subjectId?: string;
-  startTime?: string;
-  finishTime?: string;
-  date?: string;
-  roomName?: string;
+  date: string;
 }

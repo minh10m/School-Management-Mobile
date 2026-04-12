@@ -31,12 +31,12 @@ export interface UserListResponse {
 // ─── Query Params ──────────────────────────────────────────────────────────────
 
 export interface GetUsersParams {
-  page?: number;
-  pageSize?: number;
-  search?: string;
+  PageNumber?: number;
+  PageSize?: number;
+  FullName?: string;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  role?: string;
+  isAscending?: boolean;
+  Role?: string;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────

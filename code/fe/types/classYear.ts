@@ -4,7 +4,7 @@ export interface ClassYearResponse {
   classYearId: string;
   className: string;
   grade: number;
-  schoolYear: string;       // e.g. "2025-2026"
+  schoolYear: number;
   homeRoomTeacher: string;  // teacher fullName
   homeRoomId?: string;
   studentCount: number;
@@ -15,7 +15,7 @@ export interface ClassYearSummary {
   classYearId: string;
   className: string;
   grade: number;
-  schoolYear: string;
+  schoolYear: number;
 }
 
 export interface ClassYearListResponse {
@@ -30,6 +30,7 @@ export interface ClassYearListResponse {
 export interface GetClassYearsParams {
   schoolYear?: string; // "2025-2026"
   grade?: number;
+  className?: string;
   page?: number;
   pageSize?: number;
   sortBy?: string;
@@ -41,14 +42,14 @@ export interface GetClassYearsParams {
 export interface CreateClassYearPayload {
   className: string;
   grade: number;
-  schoolYear: string;
+  schoolYear: number;
   homeRoomId: string; // teacherId của giáo viên chủ nhiệm
 }
 
 export interface UpdateClassYearPayload {
   className?: string;
   grade?: number;
-  schoolYear?: string;
+  schoolYear?: number;
   homeRoomId?: string;
 }
 

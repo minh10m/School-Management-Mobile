@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
@@ -152,6 +152,17 @@ namespace School_Management.API.Controllers
             {
                 success = true,
                 data = result
+            });
+        }
+        [HttpDelete("{examScheduleId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteExamSchedule([FromRoute] Guid examScheduleId)
+        {
+            var result = await examScheduleService.DeleteExamSchedule(examScheduleId);
+            return Ok(new
+            {
+                success = result,
+                message = "Xóa lịch thi thành công"
             });
         }
     }
