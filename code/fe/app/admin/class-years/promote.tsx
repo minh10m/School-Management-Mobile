@@ -55,7 +55,7 @@ export default function AdminPromoteScreen() {
       setTargetClasses(targetRes);
     } catch (err) {
       console.error(err);
-      Alert.alert("Error", "Failed to fetch class lists");
+      Alert.alert("Lỗi", "Không thể tải danh sách lớp học");
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ export default function AdminPromoteScreen() {
       (m) => m.fromClassYearId && m.toClassId,
     );
     if (validMappings.length === 0) {
-      Alert.alert("Validation", "Please select at least one valid class pair.");
+      Alert.alert("Xác thực", "Vui lòng chọn ít nhất một cặp lớp hợp lệ.");
       return;
     }
 
@@ -105,7 +105,7 @@ export default function AdminPromoteScreen() {
           toClassYearId: m.toClassId,
         })),
       });
-      Alert.alert("Success", "Promotion completed successfully!");
+      Alert.alert("Thành công", "Đã hoàn thành lên lớp thành công!");
       router.back();
     } catch (err: any) {
       Alert.alert("Error", getErrorMessage(err));
@@ -125,7 +125,7 @@ export default function AdminPromoteScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-black text-lg flex-1"
         >
-          Class Promotion
+          Lên lớp
         </Text>
       </View>
 
@@ -140,7 +140,7 @@ export default function AdminPromoteScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-blue-400 text-[10px] uppercase"
             >
-              From Year
+              Từ năm học
             </Text>
             <Text
               style={{ fontFamily: "Poppins-Bold" }}
@@ -158,7 +158,7 @@ export default function AdminPromoteScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-blue-400 text-[10px] uppercase"
             >
-              To Year
+              Đến năm học
             </Text>
             <View className="flex-row items-center gap-1">
               <Text
@@ -190,7 +190,7 @@ export default function AdminPromoteScreen() {
           style={{ fontFamily: "Poppins-SemiBold" }}
           className="text-gray-500 text-xs mb-4 uppercase tracking-wider"
         >
-          Promotion Rules
+          Quy tắc Lên lớp
         </Text>
 
         {loading ? (
@@ -207,7 +207,7 @@ export default function AdminPromoteScreen() {
                     style={{ fontFamily: "Poppins-Bold" }}
                     className="text-gray-300 text-xs"
                   >
-                    Rule #{index + 1}
+                    Quy tắc #{index + 1}
                   </Text>
                   {mappings.length > 1 && (
                     <TouchableOpacity onPress={() => removeMapping(mapping.id)}>
@@ -227,7 +227,7 @@ export default function AdminPromoteScreen() {
                       style={{ fontFamily: "Poppins-Medium" }}
                       className="text-gray-500 text-[10px] mb-1 ml-1"
                     >
-                      SOURCE CLASS ({sourceYearStr})
+                      LỚP NGUỒN ({sourceYearStr})
                     </Text>
                     <Selector
                       data={sourceClasses}
@@ -235,7 +235,7 @@ export default function AdminPromoteScreen() {
                       onSelect={(id) =>
                         updateMapping(mapping.id, "fromClassYearId", id)
                       }
-                      placeholder="Select source class..."
+                      placeholder="Chọn lớp nguồn..."
                     />
                   </View>
 
@@ -249,7 +249,7 @@ export default function AdminPromoteScreen() {
                       style={{ fontFamily: "Poppins-Medium" }}
                       className="text-gray-500 text-[10px] mb-1 ml-1"
                     >
-                      DESTINATION CLASS ({targetYear})
+                      LỚP ĐÍCH ({targetYear})
                     </Text>
                     <Selector
                       data={targetClasses.filter((c) => {
@@ -265,7 +265,7 @@ export default function AdminPromoteScreen() {
                       onSelect={(id) =>
                         updateMapping(mapping.id, "toClassId", id)
                       }
-                      placeholder="Select destination class..."
+                      placeholder="Chọn lớp đích..."
                     />
                   </View>
                 </View>
@@ -281,7 +281,7 @@ export default function AdminPromoteScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 ml-1"
               >
-                Add Another Rule
+                Thêm quy tắc khác
               </Text>
             </TouchableOpacity>
           </View>
@@ -303,7 +303,7 @@ export default function AdminPromoteScreen() {
                 style={{ fontFamily: "Poppins-Bold" }}
                 className="text-white text-base"
               >
-                Confirm Promotion
+                Xác nhận Lên lớp
               </Text>
             )}
           </TouchableOpacity>
@@ -332,7 +332,7 @@ function YearModal({
         <View className="bg-white rounded-3xl p-6">
           <View className="flex-row justify-between items-center mb-4">
             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-lg">
-              Select Target Year
+              Chọn Năm học Đích
             </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="black" />
@@ -391,7 +391,7 @@ function Selector({
           className={`text-sm ${selectedItem ? "text-black" : "text-gray-400"}`}
         >
           {selectedItem
-            ? `${selectedItem.className} (Grade ${selectedItem.grade})`
+            ? `${selectedItem.className} (Khối ${selectedItem.grade})`
             : placeholder}
         </Text>
         <Ionicons name="chevron-down" size={16} color="#9CA3AF" />
@@ -405,7 +405,7 @@ function Selector({
                 style={{ fontFamily: "Poppins-Bold" }}
                 className="text-lg text-black"
               >
-                Select Class
+                Chọn Lớp học
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Ionicons name="close" size={24} color="black" />
@@ -431,7 +431,7 @@ function Selector({
                     }}
                     className={`text-base ${selectedValue === item.classYearId ? "text-bright-blue" : "text-gray-700"}`}
                   >
-                    {item.className} - Grade {item.grade}
+                    {item.className} - Khối {item.grade}
                   </Text>
                 </TouchableOpacity>
               )}

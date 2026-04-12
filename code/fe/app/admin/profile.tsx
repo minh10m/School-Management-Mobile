@@ -74,10 +74,10 @@ export default function AdminProfileScreen() {
       });
       setProfile(updated);
       setEditVisible(false);
-      Alert.alert("Success", "Profile updated successfully!");
+      Alert.alert("Thành công", "Cập nhật hồ sơ thành công!");
     } catch (error: any) {
-      const msg = error?.response?.data?.message || "Update failed.";
-      Alert.alert("Error", msg);
+      const msg = error?.response?.data?.message || "Cập nhật thất bại.";
+      Alert.alert("Lỗi", msg);
     } finally {
       setSaving(false);
     }
@@ -94,14 +94,14 @@ export default function AdminProfileScreen() {
           className="text-black text-lg"
           style={{ fontFamily: "Poppins-Bold" }}
         >
-          Admin Profile
+          Hồ sơ Quản trị viên
         </Text>
         <TouchableOpacity onPress={openEdit}>
           <Text
             style={{ fontFamily: "Poppins-SemiBold" }}
             className="text-bright-blue text-sm"
           >
-            Edit
+            Sửa
           </Text>
         </TouchableOpacity>
       </View>
@@ -129,14 +129,14 @@ export default function AdminProfileScreen() {
               className="text-black text-xl mb-1"
               style={{ fontFamily: "Poppins-Bold" }}
             >
-              {profile?.fullName || "Administrator"}
+              {profile?.fullName || "Quản trị viên"}
             </Text>
             <View className="bg-indigo-100 px-4 py-1 rounded-full">
               <Text
                 className="text-indigo-700 text-[10px] uppercase"
                 style={{ fontFamily: "Poppins-Bold" }}
               >
-                SYSTEM ADMINISTRATOR
+                QUẢN TRỊ VIÊN HỆ THỐNG
               </Text>
             </View>
           </View>
@@ -144,7 +144,7 @@ export default function AdminProfileScreen() {
           {/* Details Section */}
           <View className="p-6 gap-6">
             <InfoField
-              label="Username"
+              label="Tên đăng nhập"
               value={profile?.userName ?? "—"}
               icon="person-outline"
             />
@@ -154,17 +154,17 @@ export default function AdminProfileScreen() {
               icon="mail-outline"
             />
             <InfoField
-              label="Phone"
+              label="Số điện thoại"
               value={profile?.phoneNumber ?? "—"}
               icon="call-outline"
             />
             <InfoField
-              label="Address"
+              label="Địa chỉ"
               value={profile?.address ?? "—"}
               icon="location-outline"
             />
             <InfoField
-              label="Birthday"
+              label="Ngày sinh"
               value={
                 profile?.birthday
                   ? new Date(profile.birthday).toLocaleDateString("en-GB")
@@ -189,14 +189,14 @@ export default function AdminProfileScreen() {
                 className="text-gray-500 text-base"
                 style={{ fontFamily: "Poppins-Regular" }}
               >
-                Cancel
+                Hủy
               </Text>
             </TouchableOpacity>
             <Text
               className="text-black text-base"
               style={{ fontFamily: "Poppins-Bold" }}
             >
-              Edit Admin Info
+              Sửa Thông tin Quản trị
             </Text>
             <TouchableOpacity onPress={handleSave} disabled={saving}>
               {saving ? (
@@ -206,7 +206,7 @@ export default function AdminProfileScreen() {
                   className="text-blue-600 text-base"
                   style={{ fontFamily: "Poppins-SemiBold" }}
                 >
-                  Save
+                  Lưu
                 </Text>
               )}
             </TouchableOpacity>
@@ -218,7 +218,7 @@ export default function AdminProfileScreen() {
           >
             <View className="gap-5">
               <EditInput
-                label="Full Name"
+                label="Họ và Tên"
                 value={editForm.fullName}
                 onChangeText={(v: string) =>
                   setEditForm({ ...editForm, fullName: v })
@@ -233,7 +233,7 @@ export default function AdminProfileScreen() {
                 keyboardType="email-address"
               />
               <EditInput
-                label="Phone Number"
+                label="Số điện thoại"
                 value={editForm.phoneNumber}
                 onChangeText={(v: string) =>
                   setEditForm({ ...editForm, phoneNumber: v })
@@ -241,14 +241,14 @@ export default function AdminProfileScreen() {
                 keyboardType="phone-pad"
               />
               <EditInput
-                label="Address"
+                label="Địa chỉ"
                 value={editForm.address}
                 onChangeText={(v: string) =>
                   setEditForm({ ...editForm, address: v })
                 }
               />
               <EditInput
-                label="Birthday (YYYY-MM-DD)"
+                label="Ngày sinh (YYYY-MM-DD)"
                 value={editForm.birthday}
                 onChangeText={(v: string) =>
                   setEditForm({ ...editForm, birthday: v })

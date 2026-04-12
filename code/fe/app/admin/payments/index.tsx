@@ -14,9 +14,9 @@ const MOCK_PAYMENTS = [
 ];
 
 const STATUS_CONFIG: any = {
-  success: { color: '#22C55E', bg: '#F0FDF4', label: 'Success', icon: 'checkmark-circle' },
-  pending: { color: '#F97316', bg: '#FFF7ED', label: 'Pending', icon: 'time' },
-  failed:  { color: '#EF4444', bg: '#FEF2F2', label: 'Failed',  icon: 'close-circle' },
+  success: { color: '#22C55E', bg: '#F0FDF4', label: 'Thành công', icon: 'checkmark-circle' },
+  pending: { color: '#F97316', bg: '#FFF7ED', label: 'Đang xử lý', icon: 'time' },
+  failed:  { color: '#EF4444', bg: '#FEF2F2', label: 'Thất bại',  icon: 'close-circle' },
 };
 
 export default function AdminPaymentsScreen() {
@@ -41,14 +41,14 @@ export default function AdminPaymentsScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Transactions</Text>
+        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Lịch sử Giao dịch</Text>
       </View>
 
       <View className="px-6 py-3 bg-white">
         <View className="flex-row items-center bg-gray-50 rounded-xl px-3 gap-2 border border-gray-100">
           <Ionicons name="search-outline" size={18} color="#9CA3AF" />
           <TextInput
-            placeholder="Search by name or code..."
+            placeholder="Tìm kiếm theo tên hoặc mã..."
             value={search}
             onChangeText={setSearch}
             className="flex-1 py-2 text-black text-sm"
@@ -64,8 +64,8 @@ export default function AdminPaymentsScreen() {
             key={status} onPress={() => setActiveStatus(status)}
             className={`px-3 py-1.5 rounded-full ${activeStatus === status ? 'bg-bright-blue' : 'bg-gray-100'}`}
           >
-            <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: activeStatus === status ? 'white' : '#6B7280', textTransform: 'capitalize' }}>
-              {status}
+            <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: activeStatus === status ? 'white' : '#6B7280' }}>
+              {status === 'All' ? 'Tất cả' : status === 'success' ? 'Thành công' : status === 'pending' ? 'Đang xử lý' : 'Thất bại'}
             </Text>
           </TouchableOpacity>
         ))}
@@ -92,7 +92,7 @@ export default function AdminPaymentsScreen() {
 
               <View className="flex-row justify-between items-end border-t border-gray-50 pt-3">
                  <View>
-                    <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-[10px]">Date</Text>
+                    <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-[10px]">Ngày giao dịch</Text>
                     <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600 text-[11px]">{formatDate(item.createdAt)}</Text>
                  </View>
                  <Text style={{ fontFamily: 'Poppins-Bold', color: '#136ADA' }} className="text-base">{fmt(item.amount)}</Text>
@@ -103,7 +103,7 @@ export default function AdminPaymentsScreen() {
         ListEmptyComponent={
           <View className="items-center py-10">
             <Ionicons name="card-outline" size={48} color="#D1D5DB" />
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-2">No transactions found</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-2">Không tìm thấy giao dịch nào</Text>
           </View>
         }
       />

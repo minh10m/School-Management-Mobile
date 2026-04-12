@@ -7,8 +7,8 @@ import { scheduleService } from "../../services/schedule.service";
 import { ScheduleDetailItem } from "../../types/schedule";
 
 // dayOfWeek: 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 7=Sun
-const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const DAY_FULL = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const DAY_LABELS = ["Th 2", "Th 3", "Th 4", "Th 5", "Th 6", "Th 7", "CN"];
+const DAY_FULL = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
 
 const SUBJECT_COLORS = [
   "bg-purple-100", "bg-cyan-100", "bg-blue-100",
@@ -64,7 +64,7 @@ export default function TimetableTab() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
-          Timetable
+          Lịch học
         </Text>
         <View className="w-10" />
       </View>
@@ -80,7 +80,7 @@ export default function TimetableTab() {
             <View className="flex-row items-center gap-2">
               <Ionicons name="school-outline" size={18} color="#136ADA" />
               <Text className="text-black text-sm" style={{ fontFamily: "Poppins-SemiBold" }}>
-                Term {term} · School Year {schoolYear}
+                Học kỳ {term} · Năm học {schoolYear}
               </Text>
             </View>
             <Ionicons name={showTermPicker ? "chevron-up" : "chevron-down"} size={18} color="black" />
@@ -89,7 +89,7 @@ export default function TimetableTab() {
           {showTermPicker && (
             <View className="bg-white border border-gray-100 rounded-2xl p-3 mb-4 shadow-sm gap-4">
               <View>
-                <Text className="text-gray-400 text-xs mb-2" style={{ fontFamily: "Poppins-Medium" }}>Term</Text>
+                <Text className="text-gray-400 text-xs mb-2" style={{ fontFamily: "Poppins-Medium" }}>Học kỳ</Text>
                 <View className="flex-row gap-2">
                   {TERMS.map((t) => (
                     <TouchableOpacity
@@ -98,14 +98,14 @@ export default function TimetableTab() {
                       className={`px-4 py-2 rounded-xl ${term === t ? "bg-blue-600" : "bg-gray-100"}`}
                     >
                       <Text className={`text-sm ${term === t ? "text-white" : "text-gray-600"}`} style={{ fontFamily: "Poppins-Medium" }}>
-                        Term {t}
+                        Học kỳ {t}
                       </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
               </View>
               <View>
-                <Text className="text-gray-400 text-xs mb-2" style={{ fontFamily: "Poppins-Medium" }}>School Year</Text>
+                <Text className="text-gray-400 text-xs mb-2" style={{ fontFamily: "Poppins-Medium" }}>Năm học</Text>
                 <View className="flex-row gap-2">
                   {SCHOOL_YEARS.map((y) => (
                     <TouchableOpacity
@@ -163,7 +163,7 @@ export default function TimetableTab() {
             <View className="items-center py-10">
               <Ionicons name="calendar-outline" size={48} color="#D1D5DB" />
               <Text className="text-gray-400 mt-3 text-sm" style={{ fontFamily: "Poppins-Regular" }}>
-                No classes on this day
+                Không có tiết học vào ngày này
               </Text>
             </View>
           ) : (

@@ -48,7 +48,7 @@ export default function AdminSubjectDetailScreen() {
       });
     } catch (err) {
       console.error(err);
-      Alert.alert('Error', 'Could not fetch subject details');
+      Alert.alert('Lỗi', 'Không thể tải chi tiết môn học');
     } finally {
       setLoading(false);
     }
@@ -83,7 +83,7 @@ export default function AdminSubjectDetailScreen() {
       });
       setSubject(updated);
       setIsEditing(false);
-      Alert.alert('Success', 'Subject updated successfully');
+      Alert.alert('Thành công', 'Đã cập nhật môn học thành công');
     } catch (err: any) {
       Alert.alert('Error', getErrorMessage(err));
     } finally {
@@ -98,7 +98,7 @@ export default function AdminSubjectDetailScreen() {
       await subjectService.assignTeacherToSubject(teacherId, id);
       setShowAssignModal(false);
       await fetchData(); 
-      Alert.alert('Success', 'Teacher assigned successfully');
+      Alert.alert('Thành công', 'Đã gán giáo viên thành công!');
     } catch (err: any) {
       Alert.alert('Error', getErrorMessage(err));
     } finally {
@@ -108,19 +108,19 @@ export default function AdminSubjectDetailScreen() {
 
   const handleRemoveTeacher = (teacherSubjectId: string, teacherName: string) => {
     Alert.alert(
-      'Remove Teacher',
-      `Are you sure you want to remove ${teacherName} from this subject?`,
+      'Xóa Giáo viên',
+      `Bạn có chắc chắn muốn xóa ${teacherName} khỏi môn học này?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         { 
-          text: 'Remove', 
+          text: 'Xóa', 
           style: 'destructive',
           onPress: async () => {
             try {
               await subjectService.removeTeacherFromSubject(teacherSubjectId);
               await fetchData();
             } catch (err) {
-              Alert.alert('Error', getErrorMessage(err));
+              Alert.alert('Lỗi', getErrorMessage(err));
             }
           }
         }
@@ -136,7 +136,7 @@ export default function AdminSubjectDetailScreen() {
 
   if (!subject) return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center">
-      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Subject not found</Text>
+      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Không tìm thấy môn học</Text>
     </SafeAreaView>
   );
 
@@ -147,12 +147,12 @@ export default function AdminSubjectDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black flex-1">Subject Details</Text>
+        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black flex-1">Chi tiết Môn học</Text>
         <TouchableOpacity 
           onPress={() => setIsEditing(true)}
           className="bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100"
         >
-          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xs text-[#136ADA]">Edit</Text>
+          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xs text-[#136ADA]">Chỉnh sửa</Text>
         </TouchableOpacity>
       </View>
 
@@ -170,7 +170,7 @@ export default function AdminSubjectDetailScreen() {
            </View>
            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl mb-1">{subject.subjectName}</Text>
            <View className="bg-indigo-50 px-4 py-1 rounded-full border border-indigo-100">
-              <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-indigo-600 text-[10px] uppercase tracking-wider">ACADEMIC CONTENT</Text>
+              <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-indigo-600 text-[10px] uppercase tracking-wider">NỘI DUNG ĐÀO TẠO</Text>
            </View>
         </View>
 
@@ -179,12 +179,12 @@ export default function AdminSubjectDetailScreen() {
            <View className="flex-1 bg-white p-5 rounded-[32px] shadow-sm border border-gray-100 flex-row items-center justify-evenly">
               <View className="items-center">
                  <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#136ADA] text-lg">{teachers.length}</Text>
-                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Teachers</Text>
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Giáo viên</Text>
               </View>
               <View className="w-[1px] h-8 bg-gray-100" />
               <View className="items-center">
                  <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg">{subject.maxPeriod}</Text>
-                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Periods/Wk</Text>
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Tiết/Tuần</Text>
               </View>
            </View>
         </View>
@@ -193,8 +193,8 @@ export default function AdminSubjectDetailScreen() {
            {/* Section Header */}
            <View className="flex-row items-center justify-between mb-6 px-1">
               <View>
-                 <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl">Faculty Members</Text>
-                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase">Assigned Educators</Text>
+                 <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl">Giáo viên Giảng dạy</Text>
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase">Giảng viên được phân công</Text>
               </View>
               <TouchableOpacity 
                  onPress={() => {
@@ -233,7 +233,7 @@ export default function AdminSubjectDetailScreen() {
                <View className="w-16 h-16 rounded-full bg-white items-center justify-center mb-4">
                   <Ionicons name="people-outline" size={32} color="#D1D5DB" />
                </View>
-               <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-sm">No teachers assigned as specialists</Text>
+               <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-sm">Chưa có giáo viên chuyên trách nào được phân công</Text>
              </View>
            )}
         </View>
@@ -244,7 +244,7 @@ export default function AdminSubjectDetailScreen() {
          <View className="flex-1 bg-black/50 justify-end">
             <View className="bg-white rounded-t-[40px] pt-8 px-6 pb-12 shadow-2xl">
                <View className="flex-row items-center justify-between mb-8">
-                  <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl">Edit Subject</Text>
+                  <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl">Chỉnh sửa Môn học</Text>
                   <TouchableOpacity onPress={() => setIsEditing(false)} className="bg-gray-100 p-2 rounded-full">
                      <Ionicons name="close" size={24} color="gray" />
                   </TouchableOpacity>
@@ -252,25 +252,25 @@ export default function AdminSubjectDetailScreen() {
 
                <View className="gap-6">
                   <View>
-                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-2 ml-1">Subject Title</Text>
+                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-2 ml-1">Tên Môn học</Text>
                      <TextInput
                         value={editForm.subjectName}
                         onChangeText={(t) => setEditForm({...editForm, subjectName: t})}
                         className="bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-black text-sm"
                         style={{ fontFamily: 'Poppins-Medium' }}
-                        placeholder="Enter subject name..."
+                        placeholder="Nhập tên môn học..."
                      />
                   </View>
                   
                   <View>
-                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-2 ml-1">Weekly Periods</Text>
+                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-2 ml-1">Số tiết học/tuần</Text>
                      <TextInput
                         value={editForm.maxPeriod}
                         onChangeText={(t) => setEditForm({...editForm, maxPeriod: t})}
                         keyboardType="numeric"
                         className="bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-black text-sm"
                         style={{ fontFamily: 'Poppins-Medium' }}
-                        placeholder="e.g. 5"
+                        placeholder="VD: 5"
                      />
                   </View>
 
@@ -280,7 +280,7 @@ export default function AdminSubjectDetailScreen() {
                      disabled={saving}
                   >
                      {saving ? <ActivityIndicator color="white" /> : (
-                        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Update Module</Text>
+                        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Cập nhật Môn học</Text>
                      )}
                   </TouchableOpacity>
                </View>
@@ -294,8 +294,8 @@ export default function AdminSubjectDetailScreen() {
             <View className="bg-white rounded-t-[40px] h-[80%] pt-8 px-6">
                <View className="flex-row items-center justify-between mb-6">
                   <View>
-                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl">Select Faculty</Text>
-                     <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-xs uppercase">Available Specialists</Text>
+                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl">Chọn Giảng viên</Text>
+                     <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-xs uppercase">Danh sách Giáo viên chuyên môn</Text>
                   </View>
                   <TouchableOpacity onPress={() => setShowAssignModal(false)} className="bg-gray-100 p-2 rounded-full">
                      <Ionicons name="close" size={24} color="gray" />
@@ -315,7 +315,7 @@ export default function AdminSubjectDetailScreen() {
                         <View className="flex-1">
                            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-sm">{item.fullName}</Text>
                            <Text numberOfLines={1} style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase">
-                              {item.subjectNames?.join(" • ") || "General Faculty"}
+                              {item.subjectNames?.join(" • ") || "Giáo viên chung"}
                            </Text>
                         </View>
                         <TouchableOpacity 
@@ -332,7 +332,7 @@ export default function AdminSubjectDetailScreen() {
                   ListEmptyComponent={
                      <View className="items-center py-20">
                         <Ionicons name="search-outline" size={48} color="#D1D5DB" />
-                        <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-4 text-center px-10">No additional teachers found for assignment</Text>
+                        <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-4 text-center px-10">Không tìm thấy giáo viên bổ sung nào để gán</Text>
                      </View>
                   }
                />

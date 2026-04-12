@@ -72,7 +72,7 @@ export default function StudentAssignmentListScreen() {
     // API returns status: null if not submitted, or "Submitted"/"Graded" if already turned in
     if (assignment.status !== null) {
       return {
-        label: assignment.status === "Graded" ? "Graded" : "Submitted",
+        label: assignment.status === "Graded" ? "Đã chấm điểm" : "Đã nộp",
         color: "text-green-500",
         bgColor: "bg-green-50",
         icon: "checkmark-circle-outline" as any,
@@ -81,7 +81,7 @@ export default function StudentAssignmentListScreen() {
 
     if (isLate) {
       return {
-        label: "Missed",
+        label: "Quá hạn",
         color: "text-red-500",
         bgColor: "bg-red-50",
         icon: "alert-circle-outline" as any,
@@ -89,7 +89,7 @@ export default function StudentAssignmentListScreen() {
     }
 
     return {
-      label: "Pending",
+      label: "Chưa nộp",
       color: "text-orange-500",
       bgColor: "bg-orange-50",
       icon: "time-outline" as any,
@@ -98,7 +98,7 @@ export default function StudentAssignmentListScreen() {
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
-    return d.toLocaleDateString("en-US", {
+    return d.toLocaleDateString("vi-VN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -110,7 +110,7 @@ export default function StudentAssignmentListScreen() {
       <Stack.Screen
         options={{
           headerShown: true,
-          title: "Your Assignments",
+          title: "Bài tập của bạn",
           headerTitleAlign: "center",
           headerTitleStyle: {
             fontFamily: "Poppins-Bold",
@@ -141,7 +141,7 @@ export default function StudentAssignmentListScreen() {
               className="mt-4 text-gray-400"
               style={{ fontFamily: "Poppins-Regular" }}
             >
-              Loading assignments...
+              Đang tải bài tập...
             </Text>
           </View>
         ) : !assignments || assignments.length === 0 ? (
@@ -157,13 +157,13 @@ export default function StudentAssignmentListScreen() {
               className="text-black text-lg"
               style={{ fontFamily: "Poppins-Bold" }}
             >
-              No Assignments yet
+              Chưa có bài tập nào
             </Text>
             <Text
               className="text-gray-400 text-center px-10"
               style={{ fontFamily: "Poppins-Regular" }}
             >
-              Your teacher hasn't assigned any work yet. Take a break!
+              Giáo viên chưa giao bài tập nào. Hãy nghỉ ngơi nhé!
             </Text>
           </View>
         ) : (
@@ -172,7 +172,7 @@ export default function StudentAssignmentListScreen() {
               className="text-gray-400 text-sm mb-6 uppercase tracking-wider"
               style={{ fontFamily: "Poppins-Bold" }}
             >
-              Active Tasks
+              Nhiệm vụ hiện tại
             </Text>
 
             {assignments?.map((item) => {
@@ -255,7 +255,7 @@ export default function StudentAssignmentListScreen() {
                           className="text-gray-400 text-xs"
                           style={{ fontFamily: "Poppins-Regular" }}
                         >
-                          Due: {formatDate(item.finishTime)}
+                          Hạn nộp: {formatDate(item.finishTime)}
                         </Text>
                       </View>
                     </View>

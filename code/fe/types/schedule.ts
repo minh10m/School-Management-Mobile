@@ -12,6 +12,7 @@ export interface ScheduleDetailItem {
   subjectName: string;
   dayOfWeekVietNamese: string; // e.g. "thứ hai"
   timeRange: string;           // e.g. "08:30 - 09:15"
+  roomName?: string;
 }
 
 export interface TeacherScheduleDetailItem {
@@ -23,6 +24,7 @@ export interface TeacherScheduleDetailItem {
   finishTime: string;
   dayOfWeekVietNamese: string;
   timeRange: string;
+  roomName?: string;
 }
 
 /** Schedule summary (dành cho admin list) */

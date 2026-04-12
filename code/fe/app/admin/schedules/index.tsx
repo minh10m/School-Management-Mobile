@@ -118,7 +118,7 @@ export default function AdminSchedulesScreen() {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-xl text-black"
           >
-            Schedules
+            Thời khóa biểu
           </Text>
         </View>
         <TouchableOpacity
@@ -129,7 +129,7 @@ export default function AdminSchedulesScreen() {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-[#136ADA] text-xs"
           >
-            New
+            Thêm mới
           </Text>
         </TouchableOpacity>
       </View>
@@ -139,7 +139,7 @@ export default function AdminSchedulesScreen() {
         <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100">
           <Ionicons name="search-outline" size={20} color="#9ca3af" />
           <TextInput
-            placeholder="Search class or name..."
+            placeholder="Tìm lớp hoặc tên..."
             className="flex-1 ml-2 text-black text-sm"
             style={{ fontFamily: "Poppins-Regular" }}
             value={tempSearch}
@@ -165,7 +165,7 @@ export default function AdminSchedulesScreen() {
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl max-h-[85%]">
             <View className="flex-row justify-between items-center mb-10">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Filter Schedules</Text>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Lọc Thời khóa biểu</Text>
               <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -174,7 +174,7 @@ export default function AdminSchedulesScreen() {
             <ScrollView showsVerticalScrollIndicator={false} className="mb-10">
               {/* Filter: Term */}
               <View className="mb-8">
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Academic Term</Text>
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Học kỳ</Text>
                 <View className="flex-row gap-3">
                   {["1", "2"].map((t) => (
                     <TouchableOpacity
@@ -182,7 +182,7 @@ export default function AdminSchedulesScreen() {
                       onPress={() => setTempTerm(t)}
                       className={`px-6 py-3.5 rounded-2xl items-center ${tempTerm === t ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
                     >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempTerm === t ? "#1D4ED8" : "#9CA3AF" }}>Term {t}</Text>
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempTerm === t ? "#1D4ED8" : "#9CA3AF" }}>Học kỳ {t}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -190,13 +190,13 @@ export default function AdminSchedulesScreen() {
 
               {/* Filter: Class */}
               <View className="mb-4">
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Apply to Class</Text>
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Áp dụng cho lớp</Text>
                 <View className="flex-row flex-wrap gap-3">
                   <TouchableOpacity
                     onPress={() => setTempClassId(undefined)}
                     className={`px-5 py-3 rounded-2xl items-center ${tempClassId === undefined ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
                   >
-                    <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempClassId === undefined ? "#1D4ED8" : "#9CA3AF" }}>All Classes</Text>
+                    <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempClassId === undefined ? "#1D4ED8" : "#9CA3AF" }}>Tất cả các lớp</Text>
                   </TouchableOpacity>
                   {classes.map((c) => (
                     <TouchableOpacity
@@ -217,13 +217,13 @@ export default function AdminSchedulesScreen() {
                 onPress={resetFilters}
                 className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Reset</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Đặt lại</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
                 className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Apply Filters</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -266,7 +266,7 @@ export default function AdminSchedulesScreen() {
                     className="text-black text-base"
                     numberOfLines={1}
                   >
-                    {item.name || `Schedule - ${item.className}`}
+                    {item.name || `Thời khóa biểu - ${item.className}`}
                   </Text>
                   <View className="flex-row items-center gap-2 mt-1.5">
                     <View className="bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">
@@ -277,7 +277,7 @@ export default function AdminSchedulesScreen() {
                           color: "#136ADA",
                         }}
                       >
-                        Class {item.className}
+                        Lớp {item.className}
                       </Text>
                     </View>
                     <View className="bg-gray-50 px-2.5 py-1 rounded-lg">
@@ -288,7 +288,7 @@ export default function AdminSchedulesScreen() {
                           color: "#9CA3AF",
                         }}
                       >
-                        Term {item.term}
+                        Học kỳ {item.term}
                       </Text>
                     </View>
                   </View>
@@ -303,7 +303,7 @@ export default function AdminSchedulesScreen() {
                   style={{ fontFamily: "Poppins-Bold", fontSize: 11 }}
                   className="text-[#136ADA]"
                 >
-                  Manage Periods
+                  Quản lý tiết học
                 </Text>
                 <Ionicons
                   name="chevron-forward"
@@ -323,7 +323,7 @@ export default function AdminSchedulesScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 text-center"
               >
-                No schedules found.{"\n"}Try adjusting your filters.
+                Không tìm thấy thời khóa biểu nào.{"\n"}Hãy thử điều chỉnh bộ lọc.
               </Text>
             </View>
           }

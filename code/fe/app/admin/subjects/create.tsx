@@ -24,8 +24,8 @@ export default function AdminCreateSubjectScreen() {
   const handleSubmit = async () => {
     if (!form.subjectName || form.maxPeriod <= 0) {
       Alert.alert(
-        "Missing Info",
-        "Please provide a valid Subject Name and Max Periods per week (>0).",
+        "Thiếu thông tin",
+        "Vui lòng nhập Tên môn học và Số tiết/tuần hợp lệ (>0).",
       );
       return;
     }
@@ -33,8 +33,8 @@ export default function AdminCreateSubjectScreen() {
     try {
       setLoading(true);
       await subjectService.createSubject(form);
-      Alert.alert("Success", "Subject created successfully!", [
-        { text: "OK", onPress: () => router.back() },
+      Alert.alert("Thành công", "Đã tạo môn học thành công!", [
+        { text: "Đồng ý", onPress: () => router.back() },
       ]);
     } catch (err: any) {
       Alert.alert("Error", getErrorMessage(err));
@@ -57,7 +57,7 @@ export default function AdminCreateSubjectScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-black text-xl ml-2"
         >
-          New Subject
+          Thêm Môn học
         </Text>
       </View>
 
@@ -82,12 +82,12 @@ export default function AdminCreateSubjectScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-400 text-[10px] mb-2 ml-1 uppercase tracking-widest"
             >
-              Subject Name *
+              Tên Môn học *
             </Text>
             <View className="bg-gray-50/50 border border-gray-100 rounded-2xl px-5 py-1 flex-row items-center gap-3">
               <Ionicons name="at-outline" size={18} color="#9CA3AF" />
               <TextInput
-                placeholder="e.g. Mathematics"
+                placeholder="VD: Toán học"
                 value={form.subjectName}
                 onChangeText={(t) => setForm({ ...form, subjectName: t })}
                 className="flex-1 py-4 text-black text-base"
@@ -103,12 +103,12 @@ export default function AdminCreateSubjectScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-400 text-[10px] mb-2 ml-1 uppercase tracking-widest"
             >
-              Max Periods per Week *
+              Số tiết/tuần *
             </Text>
             <View className="bg-gray-50/50 border border-gray-100 rounded-2xl px-5 py-1 flex-row items-center gap-3">
               <Ionicons name="time-outline" size={18} color="#9CA3AF" />
               <TextInput
-                placeholder="e.g. 5"
+                placeholder="VD: 5"
                 value={form.maxPeriod.toString()}
                 onChangeText={(t) =>
                   setForm({ ...form, maxPeriod: parseInt(t) || 0 })
@@ -123,8 +123,8 @@ export default function AdminCreateSubjectScreen() {
               style={{ fontFamily: "Poppins-Regular" }}
               className="text-gray-400 text-[10px] mt-2 ml-1 leading-4"
             >
-              Total number of school hours for this subject in a student's
-              weekly schedule.
+              Tổng số tiết học của môn này trong thời khóa biểu hàng tuần 
+              của học sinh.
             </Text>
           </View>
 
@@ -141,7 +141,7 @@ export default function AdminCreateSubjectScreen() {
                 style={{ fontFamily: "Poppins-Bold" }}
                 className="text-white text-lg"
               >
-                Register Subject
+                Đăng ký Môn học
               </Text>
             )}
           </TouchableOpacity>

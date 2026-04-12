@@ -17,7 +17,7 @@ export default function PaymentSuccessScreen() {
               <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex-1 items-center">
-              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Payment Review</Text>
+              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Kết quả thanh toán</Text>
           </View>
           <View className="w-10" /> 
       </View>
@@ -70,8 +70,8 @@ export default function PaymentSuccessScreen() {
 
           {/* Success Message */}
           <View className="items-center mb-10 px-6">
-              <Text className="text-black text-xl mb-2 text-center" style={{ fontFamily: 'Poppins-Bold' }}>Payment Successful</Text>
-              <Text className="text-gray-500 text-sm text-center" style={{ fontFamily: 'Poppins-Regular' }}>Fee payment successfully processed</Text>
+              <Text className="text-black text-xl mb-2 text-center" style={{ fontFamily: 'Poppins-Bold' }}>Thanh toán thành công</Text>
+              <Text className="text-gray-500 text-sm text-center" style={{ fontFamily: 'Poppins-Regular' }}>Học phí đã được thanh toán thành công</Text>
           </View>
 
       </View>
@@ -80,14 +80,14 @@ export default function PaymentSuccessScreen() {
       <View className="px-6 pb-10 gap-4">
             <TouchableOpacity className="border border-gray-200 py-4 rounded-xl items-center flex-row justify-center gap-2">
                  <Ionicons name="download-outline" size={20} color="gray" />
-                 <Text className="text-gray-600 text-base" style={{ fontFamily: 'Poppins-Medium' }}>Download Receipt</Text>
+                 <Text className="text-gray-600 text-base" style={{ fontFamily: 'Poppins-Medium' }}>Tải hóa đơn</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
                 className="bg-[#136ADA] py-4 rounded-xl items-center"
                 onPress={() => router.push('/(tabs)/home' as any)}
             >
-                <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Home</Text>
+                <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Trang chủ</Text>
             </TouchableOpacity>
       </View>
     </SafeAreaView>

@@ -91,19 +91,19 @@ export default function AdminClassYearsScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black flex-1">Class Management</Text>
+        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black flex-1">Quản lý Lớp học</Text>
         <View className="flex-row items-center gap-2">
            <TouchableOpacity 
              onPress={() => router.push('/admin/class-years/promote')}
              className="px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100"
            >
-             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-indigo-600 text-[10px] tracking-tighter">PROMOTE</Text>
+             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-indigo-600 text-[10px] tracking-tighter">LÊN LỚP</Text>
            </TouchableOpacity>
            <TouchableOpacity 
              onPress={() => router.push("/admin/class-years/create" as any)}
              className="px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100"
            >
-             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-[10px] tracking-tighter">NEW</Text>
+             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-[10px] tracking-tighter">THÊM MỚI</Text>
            </TouchableOpacity>
         </View>
       </View>
@@ -113,7 +113,7 @@ export default function AdminClassYearsScreen() {
         <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100">
           <Ionicons name="search-outline" size={20} color="#9ca3af" />
           <TextInput
-            placeholder="Search class name..."
+            placeholder="Tìm kiếm tên lớp..."
             className="flex-1 ml-2 text-black text-sm"
             style={{ fontFamily: "Poppins-Regular" }}
             value={tempSearch}
@@ -134,7 +134,7 @@ export default function AdminClassYearsScreen() {
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Filter Classes</Text>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Lọc Lớp học</Text>
               <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -142,7 +142,7 @@ export default function AdminClassYearsScreen() {
 
             {/* Filter: School Year */}
             <View className="mb-8">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Academic Year</Text>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Năm học</Text>
               <View className="bg-gray-50 border border-gray-100 rounded-3xl px-6 py-4 flex-row items-center">
                 <TextInput
                   value={tempYear}
@@ -157,13 +157,13 @@ export default function AdminClassYearsScreen() {
 
             {/* Filter: Grade */}
             <View className="mb-12">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Grade Level</Text>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Khối lớp</Text>
               <View className="flex-row items-center gap-3">
                 <TouchableOpacity
                   onPress={() => setTempGrade(undefined)}
                   className={`flex-1 py-3.5 rounded-2xl items-center ${tempGrade === undefined ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
                 >
-                  <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempGrade === undefined ? "#1D4ED8" : "#9CA3AF" }}>All Grades</Text>
+                  <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempGrade === undefined ? "#1D4ED8" : "#9CA3AF" }}>Tất cả khối</Text>
                 </TouchableOpacity>
                 {GRADES.map((g) => (
                   <TouchableOpacity
@@ -183,13 +183,13 @@ export default function AdminClassYearsScreen() {
                 onPress={resetFilters}
                 className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Reset</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Đặt lại</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
                 className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Apply Filters</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -228,9 +228,9 @@ export default function AdminClassYearsScreen() {
                   <Ionicons name="person" size={18} color="#6366F1" />
                 </View>
                 <View className="flex-1">
-                  <Text style={{ fontFamily: "Poppins-Medium", fontSize: 10 }} className="text-gray-400 uppercase tracking-tighter">Homeroom Advisor</Text>
+                  <Text style={{ fontFamily: "Poppins-Medium", fontSize: 10 }} className="text-gray-400 uppercase tracking-tighter">Giáo viên Chủ nhiệm</Text>
                   <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13 }} className="text-indigo-900" numberOfLines={1}>
-                    {item.homeRoomTeacher || (item.homeRoomId ? teachers.find((t) => t.teacherId === item.homeRoomId)?.fullName : null) || "Not Assigned"}
+                    {item.homeRoomTeacher || (item.homeRoomId ? teachers.find((t) => t.teacherId === item.homeRoomId)?.fullName : null) || "Chưa phân công"}
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
@@ -240,7 +240,7 @@ export default function AdminClassYearsScreen() {
           ListEmptyComponent={
             <View className="items-center py-20 bg-gray-50/50 rounded-[40px] border border-dashed border-gray-200 mx-6">
               <Ionicons name="business-outline" size={64} color="#D1D5DB" />
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center px-10">No classes found in the directory.{"\n"}Try refining your filters.</Text>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center px-10">Không tìm thấy lớp học nào.{"\n"}Hãy thử điều chỉnh bộ lọc.</Text>
             </View>
           }
           ListFooterComponent={<View className="h-20" />}

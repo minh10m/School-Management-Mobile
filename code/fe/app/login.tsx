@@ -47,7 +47,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!username || !password) {
-      alert("Please enter both username and password");
+      alert("Vui lòng nhập tên đăng nhập và mật khẩu");
       return;
     }
 
@@ -68,7 +68,7 @@ export default function LoginScreen() {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Login failed. Please try again.";
+        "Đăng nhập thất bại. Vui lòng thử lại.";
       alert(errorMessage);
     } finally {
       setLoading(false);
@@ -102,14 +102,14 @@ export default function LoginScreen() {
                 className="text-bright-blue text-lg text-center mb-8"
                 style={{ fontFamily: "Poppins-Regular" }}
               >
-                Hello, Login to continue using our app
+                Xin chào, Đăng nhập để tiếp tục sử dụng ứng dụng
               </Text>
 
               {/* Inputs */}
               <View className="space-y-4 w-full">
                 <View>
                   <TextInput
-                    placeholder="Username"
+                    placeholder="Tên đăng nhập"
                     placeholderTextColor="#9CA3AF"
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 text-base"
                     style={{ fontFamily: "Poppins-Regular" }}
@@ -121,7 +121,7 @@ export default function LoginScreen() {
 
                 <View className="relative justify-center mt-4">
                   <TextInput
-                    placeholder="Password"
+                    placeholder="Mật khẩu"
                     placeholderTextColor="#9CA3AF"
                     secureTextEntry={!passwordVisible}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 text-base pr-12"
@@ -149,7 +149,7 @@ export default function LoginScreen() {
                     className="text-bright-blue text-sm"
                     style={{ fontFamily: "Poppins-Regular" }}
                   >
-                    Forget password?
+                    Quên mật khẩu?
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -166,7 +166,7 @@ export default function LoginScreen() {
                   className="text-white text-lg"
                   style={{ fontFamily: "Poppins-SemiBold" }}
                 >
-                  {loading ? "Logging in..." : "Log in"}
+                  {loading ? "Đang đăng nhập..." : "Đăng nhập"}
                 </Text>
               </TouchableOpacity>
             </View>

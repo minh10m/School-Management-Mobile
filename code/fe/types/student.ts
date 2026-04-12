@@ -43,6 +43,9 @@ export interface GetStudentsParams {
   FullName?: string;
   sortBy?: string;
   isAscending?: boolean;
+  grade?: string | number;
+  classId?: string;
+  search?: string;
   Grade?: number;
   ClassName?: string;
 }

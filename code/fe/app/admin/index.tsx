@@ -14,7 +14,7 @@ import { SCHOOL_YEAR } from '../../constants/config';
 
 export default function AdminDashboard() {
   const { userInfo } = useAuthStore();
-  const adminName = userInfo?.fullName?.split(' ').at(-1) ?? 'Administrator';
+  const adminName = userInfo?.fullName?.split(' ').at(-1) ?? 'Quản trị viên';
 
   const [stats, setStats] = useState({
     students: '0',
@@ -58,23 +58,23 @@ export default function AdminDashboard() {
   };
 
   const QUICK_ACTIONS = [
-    { label: 'Users',    icon: 'people-outline',        color: 'bg-blue-100',   iconColor: '#136ADA', route: '/admin/users' },
-    { label: 'Roles',    icon: 'shield-outline',         color: 'bg-purple-100', iconColor: '#A855F7', route: '/admin/roles' },
-    { label: 'Students', icon: 'school-outline',         color: 'bg-blue-50',    iconColor: '#0ea5e9', route: '/admin/students' },
-    { label: 'Teachers', icon: 'person-circle-outline',  color: 'bg-indigo-100', iconColor: '#6366F1', route: '/admin/teachers' },
-    { label: 'Classes',  icon: 'business-outline',       color: 'bg-teal-100',   iconColor: '#14B8A6', route: '/admin/class-years' },
-    { label: 'Subjects', icon: 'book-outline',           color: 'bg-green-100',  iconColor: '#22C55E', route: '/admin/subjects' },
-    { label: 'Schedules',icon: 'calendar-outline',       color: 'bg-amber-100',  iconColor: '#D97706', route: '/admin/schedules' },
-    { label: 'Exams',    icon: 'document-text-outline',  color: 'bg-yellow-100', iconColor: '#EAB308', route: '/admin/exam-schedules' },
-    { label: 'Fees',     icon: 'cash-outline',           color: 'bg-orange-100', iconColor: '#F97316', route: '/admin/fees' },
-    { label: 'Events',   icon: 'megaphone-outline',      color: 'bg-pink-100',   iconColor: '#F43F5E', route: '/admin/events' },
+    { label: 'Người dùng',  icon: 'people-outline',        color: 'bg-blue-100',   iconColor: '#136ADA', route: '/admin/users' },
+    { label: 'Vai trò',      icon: 'shield-outline',         color: 'bg-purple-100', iconColor: '#A855F7', route: '/admin/roles' },
+    { label: 'Học sinh',    icon: 'school-outline',         color: 'bg-blue-50',    iconColor: '#0ea5e9', route: '/admin/students' },
+    { label: 'Giáo viên',    icon: 'person-circle-outline',  color: 'bg-indigo-100', iconColor: '#6366F1', route: '/admin/teachers' },
+    { label: 'Lớp học',     icon: 'business-outline',       color: 'bg-teal-100',   iconColor: '#14B8A6', route: '/admin/class-years' },
+    { label: 'Môn học',     icon: 'book-outline',           color: 'bg-green-100',  iconColor: '#22C55E', route: '/admin/subjects' },
+    { label: 'Lịch học',     icon: 'calendar-outline',       color: 'bg-amber-100',  iconColor: '#D97706', route: '/admin/schedules' },
+    { label: 'Lịch thi',     icon: 'document-text-outline',  color: 'bg-yellow-100', iconColor: '#EAB308', route: '/admin/exam-schedules' },
+    { label: 'Học phí',      icon: 'cash-outline',           color: 'bg-orange-100', iconColor: '#F97316', route: '/admin/fees' },
+    { label: 'Sự kiện',      icon: 'megaphone-outline',      color: 'bg-pink-100',   iconColor: '#F43F5E', route: '/admin/events' },
   ];
 
   const STAT_CARDS = [
-    { label: 'Students', value: stats.students, icon: 'people', color: '#136ADA', bg: 'bg-blue-50' },
-    { label: 'Teachers', value: stats.teachers, icon: 'person', color: '#A855F7', bg: 'bg-purple-50' },
-    { label: 'Classes',  value: stats.classes,  icon: 'school', color: '#14B8A6', bg: 'bg-teal-50' },
-    { label: 'Fees Due', value: stats.fees,     icon: 'cash',   color: '#F97316', bg: 'bg-orange-50' },
+    { label: 'Học sinh',  value: stats.students, icon: 'people', color: '#136ADA', bg: 'bg-blue-50' },
+    { label: 'Giáo viên', value: stats.teachers, icon: 'person', color: '#A855F7', bg: 'bg-purple-50' },
+    { label: 'Lớp học',   value: stats.classes,  icon: 'school', color: '#14B8A6', bg: 'bg-teal-50' },
+    { label: 'Học phí',   value: stats.fees,     icon: 'cash',   color: '#F97316', bg: 'bg-orange-50' },
   ];
 
   return (
@@ -88,7 +88,7 @@ export default function AdminDashboard() {
         </TouchableOpacity>
         <View className="flex-row items-center gap-2">
           <Ionicons name="book" size={24} color="#136ADA" />
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-bright-blue text-xl">Admin Panel</Text>
+          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-bright-blue text-xl">Quản trị viên</Text>
         </View>
         <TouchableOpacity onPress={() => router.push('/admin/profile' as any)}>
           <Ionicons name="person-circle-outline" size={28} color="black" />
@@ -104,16 +104,16 @@ export default function AdminDashboard() {
         {/* Welcome Greeting */}
         <View className="px-6 mt-6 mb-2">
           <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-xl">
-             Hi, Welcome, {adminName} 👋
+             Chào mừng bạn, {adminName} 👋
           </Text>
           <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">
-            Admin Dashboard for School Year {SCHOOL_YEAR}
+            Bảng điều khiển cho Năm học {SCHOOL_YEAR}
           </Text>
         </View>
 
         {/* Stats Grid */}
         <View className="px-6 mt-6 mb-5">
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Overview</Text>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Tổng quan chung</Text>
           <View className="flex-row flex-wrap gap-3">
             {STAT_CARDS.map((s) => (
               <View key={s.label} className={`${s.bg} flex-1 min-w-[44%] rounded-3xl p-5`}>
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <View className="px-6 mb-5">
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Management</Text>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Quản lý hệ thống</Text>
           <View className="flex-row flex-wrap justify-between gap-y-3">
             {QUICK_ACTIONS.map((action) => (
               <TouchableOpacity
@@ -155,10 +155,10 @@ export default function AdminDashboard() {
         {/* Bottom Banner/Note */}
         <View className="mx-6 mb-10 p-5 bg-indigo-500 rounded-3xl overflow-hidden shadow-lg shadow-indigo-200">
            <View className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10" />
-           <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Quick Report</Text>
-           <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-white/80 text-xs mt-1">Review all student marks and attendance for Term 1.</Text>
+           <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Báo cáo nhanh</Text>
+           <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-white/80 text-xs mt-1">Xem xét kết quả học tập và điểm danh Học kỳ 1.</Text>
            <TouchableOpacity className="bg-white/20 self-start px-4 py-1.5 rounded-full mt-4">
-              <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-white text-[10px]">Generate Report</Text>
+              <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-white text-[10px]">Tạo báo cáo</Text>
            </TouchableOpacity>
         </View>
 

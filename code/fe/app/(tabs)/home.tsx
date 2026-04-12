@@ -19,7 +19,7 @@ import { useAuthStore } from "../../store/authStore";
 export default function HomeScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);
   const { userInfo } = useAuthStore();
-  const firstName = userInfo?.fullName?.split(" ").at(-1) ?? "Student";
+  const firstName = userInfo?.fullName?.split(" ").at(-1) ?? "Học sinh";
 
   const [events, setEvents] = useState<any[]>([]);
   const [eventLoading, setEventLoading] = useState(false);
@@ -60,9 +60,9 @@ export default function HomeScreen() {
     const now = new Date();
     const diff = end.getTime() - now.getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    if (days < 0) return "Expired";
-    if (days === 0) return "Due today";
-    return `${days} ${days === 1 ? "day" : "days"} left`;
+    if (days < 0) return "Quá hạn";
+    if (days === 0) return "Hạn hôm nay";
+    return `Còn ${days} ngày`;
   };
 
   const latestEvent = events[0];
@@ -72,32 +72,16 @@ export default function HomeScreen() {
       const d = new Date(dateStr);
       const day = d.getDate().toString().padStart(2, "0");
       const monthNames = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
+        "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+        "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
       ];
       const month = monthNames[d.getMonth()];
       const year = d.getFullYear();
       const weekDays = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
+        "Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"
       ];
       const weekDay = weekDays[d.getDay()];
-      return `${day}, ${month}, ${year} | ${weekDay}`;
+      return `${weekDay}, ngày ${day} ${month}, ${year}`;
     } catch (e) {
       return dateStr;
     }
@@ -110,42 +94,42 @@ export default function HomeScreen() {
   const academicsData = [
     {
       id: "2",
-      title: "Exams",
+      title: "Lịch thi",
       icon: "calendar",
       color: "bg-orange-100",
       iconColor: "#F97316",
     },
     {
       id: "3",
-      title: "Fee",
+      title: "Học phí",
       icon: "cash",
       color: "bg-purple-100",
       iconColor: "#A855F7",
     },
     {
       id: "4",
-      title: "Assignments",
+      title: "Bài tập",
       icon: "document-text",
       color: "bg-teal-100",
       iconColor: "#14B8A6",
     },
     {
       id: "5",
-      title: "Results",
+      title: "Kết quả",
       icon: "pie-chart",
       color: "bg-yellow-100",
       iconColor: "#EAB308",
     },
     {
       id: "6",
-      title: "Timetable",
+      title: "Lịch học",
       icon: "time",
       color: "bg-blue-50",
       iconColor: "#3B82F6",
     },
     {
       id: "7",
-      title: "Attendance",
+      title: "Điểm danh",
       icon: "calendar",
       color: "bg-red-50",
       iconColor: "#EF4444",
@@ -183,7 +167,7 @@ export default function HomeScreen() {
             className="text-black text-xl"
             style={{ fontFamily: "Poppins-SemiBold" }}
           >
-            Hi, Welcome, {firstName} 👋
+            Chào mừng bạn, {firstName} 👋
           </Text>
         </View>
 
@@ -193,7 +177,7 @@ export default function HomeScreen() {
             className="text-black text-base mb-4"
             style={{ fontFamily: "Poppins-Medium" }}
           >
-            Academics
+            Học tập
           </Text>
           <View className="flex-row flex-wrap justify-between gap-y-4">
             {academicsData.map((item) => (
@@ -201,17 +185,17 @@ export default function HomeScreen() {
                 key={item.id}
                 className={`${item.color} w-[31%] py-6 rounded-2xl items-center justify-center gap-2`}
                 onPress={() => {
-                  if (item.title === "Assignments") {
+                  if (item.title === "Bài tập") {
                     router.push("/student/assignments" as any);
-                  } else if (item.title === "Exams") {
+                  } else if (item.title === "Lịch thi") {
                     router.push("/student/exam-schedule" as any);
-                  } else if (item.title === "Fee") {
+                  } else if (item.title === "Học phí") {
                     router.push("/student/payment" as any);
-                  } else if (item.title === "Results") {
+                  } else if (item.title === "Kết quả") {
                     router.push("/student/results" as any);
-                  } else if (item.title === "Timetable") {
+                  } else if (item.title === "Lịch học") {
                     router.push("/(tabs)/timetable" as any);
-                  } else if (item.title === "Attendance") {
+                  } else if (item.title === "Điểm danh") {
                     router.push("/(tabs)/attendance" as any);
                   }
                 }}
@@ -241,7 +225,7 @@ export default function HomeScreen() {
               className="text-black text-base"
               style={{ fontFamily: "Poppins-Medium" }}
             >
-              Assignments
+              Bài tập
             </Text>
             <TouchableOpacity
               onPress={() => router.push("/student/assignments" as any)}
@@ -250,7 +234,7 @@ export default function HomeScreen() {
                 className="text-bright-blue text-sm"
                 style={{ fontFamily: "Poppins-Medium" }}
               >
-                View all
+                Xem tất cả
               </Text>
             </TouchableOpacity>
           </View>
@@ -330,7 +314,7 @@ export default function HomeScreen() {
                       className="text-bright-blue text-sm"
                       style={{ fontFamily: "Poppins-Bold" }}
                     >
-                      Continue
+                      Tiếp tục
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -344,7 +328,7 @@ export default function HomeScreen() {
                   className="text-gray-400 mt-2 text-xs"
                   style={{ fontFamily: "Poppins-Medium" }}
                 >
-                  No assignments due
+                  Không có bài tập đến hạn
                 </Text>
               </View>
             )}
@@ -357,7 +341,7 @@ export default function HomeScreen() {
             className="text-black text-lg mb-4"
             style={{ fontFamily: "Poppins-Bold" }}
           >
-            Event updates
+            Cập nhật sự kiện
           </Text>
 
           <View className="bg-white border border-gray-100 rounded-[40px] p-6 shadow-sm overflow-hidden min-h-[190px] relative">
@@ -407,7 +391,7 @@ export default function HomeScreen() {
                   className="text-bright-blue text-xs"
                   style={{ fontFamily: "Poppins-Bold" }}
                 >
-                  Upcoming Event
+                  Sự kiện sắp tới
                 </Text>
               </View>
             </View>
