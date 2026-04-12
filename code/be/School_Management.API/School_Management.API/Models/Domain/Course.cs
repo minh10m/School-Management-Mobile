@@ -18,5 +18,6 @@ namespace School_Management.API.Models.Domain
         //Navigation properties
         [ForeignKey("TeacherSubjectId")]
         public TeacherSubject TeacherSubject { get; set; } = null!;
+        public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
     }
 }
