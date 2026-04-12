@@ -14,5 +14,6 @@ namespace School_Management.API.Models.Domain
         //Navigation properties
         [ForeignKey("CourseId")]
         public Course Course { get; set; } = null!;
+        public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
     }
 }
