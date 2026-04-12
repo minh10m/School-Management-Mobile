@@ -70,6 +70,39 @@ namespace School_Management.API.Repositories
             
         }
 
+        public async Task<(PagedResponse<LessonVideoResponse>? data, string message)> GetAllLessonVideoOfLesson(LessonVideoFilterRequest request)
+        {
+            var lesson = await context.Lesson.AsNoTracking().Where(x => x.Id == request.LessonId).Select(g => new {g.Id, g.LessonName}).FirstOrDefaultAsync();
+            if (lesson == null) return (null, "NOT_FOUND_LESSON");
+
+            var query = context.LessonVideo.AsNoTracking().AsQueryable();
+            query = query.Where(x => x.LessonId == request.LessonId);
+            query = query.OrderBy(x => x.OrderIndex);
+
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(lessonVideo => new LessonVideoResponse
+                                        {
+                                            Id = lessonVideo.Id,
+                                            Duration = lessonVideo.Duration,
+                                            IsPreview = lessonVideo.IsPreview,
+                                            LessonId = lessonVideo.LessonId,
+                                            LessonName = lesson.LessonName,
+                                            Name = lessonVideo.Name,
+                                            OrderIndex = lessonVideo.OrderIndex,
+                                            Url = lessonVideo.Url
+                                        }).ToListAsync();
+
+            return (new PagedResponse<LessonVideoResponse>
+            {
+                Items = listResult,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                TotalCount = totalCount
+            }, "SUCCESS");
+        }
+
         public async Task<(LessonVideoResponse? data, string message)> UpdateLessonVideo(UpdateLessonVideoRequest request, Guid lessonVideoId)
         {
             using var transaction = await context.Database.BeginTransactionAsync();

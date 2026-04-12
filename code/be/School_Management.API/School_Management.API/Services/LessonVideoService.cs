@@ -23,6 +23,17 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<PagedResponse<LessonVideoResponse>> GetAllLessonVideoOfLesson(LessonVideoFilterRequest request)
+        {
+            var (result, message) = await lessonVideoRepository.GetAllLessonVideoOfLesson(request);
+            return message switch
+            {
+                "NOT_FOUND_LESSON" => throw new NotFoundException("Không tìm thấy bài học này"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<LessonVideoResponse> UpdateLessonVideo(UpdateLessonVideoRequest request, Guid lessonVideoId)
         {
             var (result, message) = await lessonVideoRepository.UpdateLessonVideo(request, lessonVideoId);
