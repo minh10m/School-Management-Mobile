@@ -8,7 +8,7 @@ export default {
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "schoolmanagementapp",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true

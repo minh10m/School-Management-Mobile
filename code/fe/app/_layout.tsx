@@ -60,7 +60,7 @@ export default function RootLayout() {
   const stripeKey = Constants.expoConfig?.extra?.stripePublishableKey || Constants.manifest?.extra?.stripePublishableKey;
 
   return (
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="index" options={{ headerShown: false }} />

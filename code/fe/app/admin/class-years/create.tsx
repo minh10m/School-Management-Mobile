@@ -15,6 +15,7 @@ import { classYearService } from "../../../services/classYear.service";
 import { teacherService } from "../../../services/teacher.service";
 import { TeacherListItem } from "../../../types/teacher";
 import { SCHOOL_YEAR } from "../../../constants/config";
+import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminCreateClassScreen() {
   const [loading, setLoading] = useState(false);
@@ -31,7 +32,7 @@ export default function AdminCreateClassScreen() {
   const fetchTeachers = async () => {
     try {
       setFetching(true);
-      const res = await teacherService.getTeachers({ pageSize: 100 });
+      const res = await teacherService.getTeachers({ PageSize: 100 });
       const tdata = Array.isArray(res) ? res : (res as any).items || [];
       setTeachers(tdata);
       if (tdata.length > 0)
@@ -49,18 +50,21 @@ export default function AdminCreateClassScreen() {
 
   const handleSubmit = async () => {
     if (!form.className || !form.schoolYear || !form.homeRoomId) {
-      Alert.alert("Missing Info", "Please fill in all fields.");
+      Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ các trường dữ liệu.");
       return;
     }
 
     try {
       setLoading(true);
-      await classYearService.createClassYear(form);
-      Alert.alert("Success", "Class created successfully!", [
-        { text: "OK", onPress: () => router.back() },
+      await classYearService.createClassYear({
+        ...form,
+        schoolYear: parseInt(String(form.schoolYear), 10)
+      });
+      Alert.alert("Thành công", "Đã tạo lớp học thành công!", [
+        { text: "Đồng ý", onPress: () => router.back() },
       ]);
     } catch (err: any) {
-      Alert.alert("Error", err?.response?.data?.message || "Creation failed.");
+      Alert.alert("Error", getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -87,7 +91,7 @@ export default function AdminCreateClassScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-black text-xl ml-2"
         >
-          New Class
+          Tạo Lớp mới
         </Text>
       </View>
 
@@ -112,7 +116,7 @@ export default function AdminCreateClassScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-400 text-[10px] mb-2 ml-1 uppercase tracking-widest"
             >
-              Class Name *
+              Tên Lớp *
             </Text>
             <View className="bg-gray-50/50 border border-gray-100 rounded-2xl px-5 py-1 flex-row items-center gap-3">
               <Ionicons name="at-outline" size={18} color="#9CA3AF" />
@@ -133,7 +137,7 @@ export default function AdminCreateClassScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-400 text-[10px] mb-3 ml-1 uppercase tracking-widest"
             >
-              Select Grade *
+              Chọn Khối lớp *
             </Text>
             <View className="flex-row gap-3">
               {[10, 11, 12].map((g) => (
@@ -165,7 +169,7 @@ export default function AdminCreateClassScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-400 text-[10px] mb-2 ml-1 uppercase tracking-widest"
             >
-              School Year *
+              Năm học *
             </Text>
             <View className="bg-gray-50/50 border border-gray-100 rounded-2xl px-5 py-1 flex-row items-center gap-3">
               <Ionicons name="calendar-outline" size={18} color="#9CA3AF" />
@@ -186,7 +190,7 @@ export default function AdminCreateClassScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-400 text-[10px] mb-3 ml-1 uppercase tracking-widest"
             >
-              Advisor Teacher *
+              Giáo viên Chủ nhiệm *
             </Text>
             <View className="flex-row flex-wrap gap-2">
               {teachers.map((t) => (
@@ -213,7 +217,7 @@ export default function AdminCreateClassScreen() {
             </View>
             {teachers.length === 0 && (
               <Text className="text-gray-400 text-xs italic">
-                No teachers found
+                Không tìm thấy giáo viên
               </Text>
             )}
           </View>
@@ -231,7 +235,7 @@ export default function AdminCreateClassScreen() {
                 style={{ fontFamily: "Poppins-Bold" }}
                 className="text-white text-lg"
               >
-                Create Class
+                Tạo Lớp học
               </Text>
             )}
           </TouchableOpacity>

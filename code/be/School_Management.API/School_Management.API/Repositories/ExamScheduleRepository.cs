@@ -1,4 +1,4 @@
-﻿using ExcelDataReader;
+using ExcelDataReader;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
@@ -219,9 +219,33 @@ namespace School_Management.API.Repositories
 
         public async Task<PagedResponse<ExamScheduleResponse>> GetAllExamSchedule(ExamScheduleFilterRequest request)
         {
-            var query = context.ExamSchedule.AsNoTracking().Where(x => x.SchoolYear == request.SchoolYear && x.Term == request.Term
-                                                                          && x.IsActive == true)
-                                                                 .AsQueryable();
+            var query = context.ExamSchedule.AsNoTracking().AsQueryable();
+
+            if (request.SchoolYear.HasValue && request.SchoolYear > 0)
+            {
+                query = query.Where(x => x.SchoolYear == request.SchoolYear.Value);
+            }
+
+            if (request.Term.HasValue && request.Term > 0)
+            {
+                query = query.Where(x => x.Term == request.Term.Value);
+            }
+
+            if (request.Grade.HasValue && request.Grade > 0)
+            {
+                query = query.Where(x => x.Grade == request.Grade.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Type))
+            {
+                var type = request.Type.Trim().ToLower();
+                query = query.Where(x => x.Type.ToLower().Contains(type));
+            }
+
+            if (request.IsActive.HasValue)
+            {
+                query = query.Where(x => x.IsActive == request.IsActive.Value);
+            }
 
             if(!string.IsNullOrWhiteSpace(request.Title))
             {
@@ -529,6 +553,38 @@ namespace School_Management.API.Repositories
             };
 
             return (result, "SUCCESS");
+        }
+        public async Task<(bool result, string? message)> DeleteExamSchedule(Guid id)
+        {
+            var examSchedule = await context.ExamSchedule.FirstOrDefaultAsync(x => x.Id == id);
+            if (examSchedule == null) return (false, "NOT_FOUND_EXAMSCHEDULE");
+
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var details = await context.ExamScheduleDetail.Where(d => d.ExamScheduleId == id).ToListAsync();
+                var detailIds = details.Select(d => d.Id).ToList();
+
+                // Delete related assignments
+                var assignments = await context.ExamStudentAssignment.Where(a => detailIds.Contains(a.ExamScheduleDetailId)).ToListAsync();
+                context.ExamStudentAssignment.RemoveRange(assignments);
+
+                // Delete related details
+                context.ExamScheduleDetail.RemoveRange(details);
+
+                // Delete the schedule
+                context.ExamSchedule.Remove(examSchedule);
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return (true, "SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return (false, ex.Message);
+            }
         }
     }
 }

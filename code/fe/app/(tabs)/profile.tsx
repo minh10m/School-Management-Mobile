@@ -42,7 +42,7 @@ export default function StudentProfileScreen() {
       setProfile(data);
     } catch (error) {
       console.error("Error loading student profile:", error);
-      Alert.alert("Error", "Cannot load profile information.");
+      Alert.alert("Lỗi", "Không thể tải thông tin hồ sơ.");
     } finally {
       setLoading(false);
     }
@@ -62,7 +62,7 @@ export default function StudentProfileScreen() {
 
   const handleSave = async () => {
     if (!editForm.fullName || !editForm.email) {
-      Alert.alert("Error", "Please provide full name and email.");
+      Alert.alert("Lỗi", "Vui lòng cung cấp đầy đủ họ tên và email.");
       return;
     }
     try {
@@ -76,10 +76,10 @@ export default function StudentProfileScreen() {
       });
       setProfile(updated);
       setEditVisible(false);
-      Alert.alert("Success", "Profile updated successfully!");
+      Alert.alert("Thành công", "Cập nhật hồ sơ thành công!");
     } catch (error: any) {
-      const msg = error?.response?.data?.message || "Update failed. Please try again.";
-      Alert.alert("Error", msg);
+      const msg = error?.response?.data?.message || "Cập nhật thất bại. Vui lòng thử lại.";
+      Alert.alert("Lỗi", msg);
     } finally {
       setSaving(false);
     }
@@ -98,7 +98,7 @@ export default function StudentProfileScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
-          Student Profile
+          Hồ sơ Học sinh
         </Text>
         <TouchableOpacity className="p-2" onPress={openEdit}>
           <Ionicons name="pencil-outline" size={22} color="#136ADA" />
@@ -123,7 +123,7 @@ export default function StudentProfileScreen() {
             </Text>
             <View className="bg-indigo-100 px-4 py-1 rounded-full mt-2">
               <Text className="text-indigo-700 text-[10px] uppercase" style={{ fontFamily: "Poppins-Bold" }}>
-                STUDENT{classInfo ? ` • ${classInfo.className} (${classInfo.grade})` : ""}
+                HỌC SINH{classInfo ? ` • ${classInfo.className} (${classInfo.grade})` : ""}
               </Text>
             </View>
           </View>
@@ -131,11 +131,11 @@ export default function StudentProfileScreen() {
           {/* Details Section */}
           <View className="p-6 gap-6">
             <InfoField label="Email" value={profile?.email ?? "—"} icon="mail-outline" />
-            <InfoField label="Phone" value={(profile as any)?.phoneNumber ?? "—"} icon="call-outline" />
-            <InfoField label="Address" value={profile?.address ?? "—"} icon="location-outline" />
+            <InfoField label="Số điện thoại" value={(profile as any)?.phoneNumber ?? "—"} icon="call-outline" />
+            <InfoField label="Địa chỉ" value={profile?.address ?? "—"} icon="location-outline" />
             <InfoField
-              label="Birthday"
-              value={profile?.birthday ? new Date(profile.birthday).toLocaleDateString("en-GB") : "—"}
+              label="Ngày sinh"
+              value={profile?.birthday ? new Date(profile.birthday).toLocaleDateString("vi-VN") : "—"}
               icon="calendar-outline"
             />
           </View>
@@ -150,18 +150,18 @@ export default function StudentProfileScreen() {
           <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
             <TouchableOpacity onPress={() => setEditVisible(false)}>
               <Text className="text-gray-500 text-base" style={{ fontFamily: "Poppins-Regular" }}>
-                Cancel
+                Hủy
               </Text>
             </TouchableOpacity>
             <Text className="text-black text-base" style={{ fontFamily: "Poppins-Bold" }}>
-              Edit Profile
+              Chỉnh sửa hồ sơ
             </Text>
             <TouchableOpacity onPress={handleSave} disabled={saving}>
               {saving ? (
                 <ActivityIndicator size="small" color="#136ADA" />
               ) : (
                 <Text className="text-blue-600 text-base" style={{ fontFamily: "Poppins-SemiBold" }}>
-                  Save
+                  Lưu
                 </Text>
               )}
             </TouchableOpacity>
@@ -169,11 +169,11 @@ export default function StudentProfileScreen() {
 
           <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
             <View className="gap-5">
-              <EditInput label="Full Name" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
+              <EditInput label="Họ tên" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
               <EditInput label="Email" value={editForm.email} onChangeText={(v: string) => setEditForm({ ...editForm, email: v })} keyboardType="email-address" />
-              <EditInput label="Phone Number" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
-              <EditInput label="Address" value={editForm.address} onChangeText={(v: string) => setEditForm({ ...editForm, address: v })} />
-              <EditInput label="Birthday (YYYY-MM-DD)" value={editForm.birthday} onChangeText={(v: string) => setEditForm({ ...editForm, birthday: v })} placeholder="2005-10-10" />
+              <EditInput label="Số điện thoại" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
+              <EditInput label="Địa chỉ" value={editForm.address} onChangeText={(v: string) => setEditForm({ ...editForm, address: v })} />
+              <EditInput label="Ngày sinh (YYYY-MM-DD)" value={editForm.birthday} onChangeText={(v: string) => setEditForm({ ...editForm, birthday: v })} placeholder="2005-10-10" />
             </View>
           </ScrollView>
         </SafeAreaView>

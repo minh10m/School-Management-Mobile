@@ -19,8 +19,9 @@ import { teacherService } from "../../../services/teacher.service";
 import { ScheduleDetailItem } from "../../../types/schedule";
 import { SubjectResponse } from "../../../types/subject";
 import { TeacherListItem } from "../../../types/teacher";
+import { getErrorMessage } from "../../../utils/error";
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAYS = ["T2", "T3", "T4", "T5", "T6", "T7"];
 
 export default function AdminScheduleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -73,7 +74,7 @@ export default function AdminScheduleDetailScreen() {
 
   const handleAddPeriod = async () => {
     if (!id || !selectedTeacherSubjectId) {
-      Alert.alert("Missing Info", "Select subject and teacher.");
+      Alert.alert("Thiếu thông tin", "Vui lòng chọn môn học và giáo viên.");
       return;
     }
     try {
@@ -83,32 +84,29 @@ export default function AdminScheduleDetailScreen() {
         startTime: `${startTime}:00`,
         finishTime: `${finishTime}:00`,
       });
-      Alert.alert("Success", "Period added!");
+      Alert.alert("Thành công", "Đã thêm tiết học!");
       setAssignModal(false);
       setSelectedSubjectId("");
       setSelectedTeacherId("");
       setSelectedTeacherSubjectId("");
       fetchDetails();
     } catch (err: any) {
-      Alert.alert(
-        "Error",
-        err?.response?.data?.message || "Conflict detected.",
-      );
+      Alert.alert("Error", getErrorMessage(err));
     }
   };
 
   const handleDeletePeriod = (detailId: string) => {
-    Alert.alert("Delete", "Delete this period?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert("Xóa", "Xóa tiết học này?", [
+      { text: "Hủy", style: "cancel" },
       {
-        text: "Delete",
+        text: "Xóa",
         style: "destructive",
         onPress: async () => {
           try {
             await scheduleService.deleteScheduleDetail(detailId);
             fetchDetails();
           } catch (err: any) {
-            Alert.alert("Error", "Deletion failed.");
+            Alert.alert("Error", getErrorMessage(err));
           }
         },
       },
@@ -135,7 +133,7 @@ export default function AdminScheduleDetailScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-black text-lg flex-1"
         >
-          Periods Management
+          Quản lý Tiết học
         </Text>
         <TouchableOpacity onPress={() => setAssignModal(true)}>
           <Ionicons name="add-circle" size={26} color="#136ADA" />
@@ -208,7 +206,7 @@ export default function AdminScheduleDetailScreen() {
                       style={{ fontFamily: "Poppins-Regular" }}
                       className="text-gray-400 text-xs"
                     >
-                      Instructor: {item.teacherName}
+                      Giáo viên: {item.teacherName}
                     </Text>
                   </View>
                 </View>
@@ -227,7 +225,7 @@ export default function AdminScheduleDetailScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 mt-2"
               >
-                No periods scheduled for this day
+                Chưa có tiết học nào trong ngày này
               </Text>
             </View>
           )}
@@ -250,11 +248,11 @@ export default function AdminScheduleDetailScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 text-sm"
               >
-                Cancel
+                Hủy
               </Text>
             </TouchableOpacity>
             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-xl">
-              Add New Period
+              Thêm Tiết học mới
             </Text>
             <View className="w-10" />
           </View>
@@ -270,7 +268,7 @@ export default function AdminScheduleDetailScreen() {
                   style={{ fontFamily: "Poppins-Medium" }}
                   className="text-gray-400 text-[10px] mb-3 ml-1 uppercase tracking-widest"
                 >
-                  1. Select Subject
+                  1. Chọn Môn học
                 </Text>
                 <ScrollView
                   horizontal
@@ -311,7 +309,7 @@ export default function AdminScheduleDetailScreen() {
                     style={{ fontFamily: "Poppins-Medium" }}
                     className="text-gray-400 text-[10px] mb-3 ml-1 uppercase tracking-widest"
                   >
-                    2. Select Teacher
+                    2. Chọn Giáo viên
                   </Text>
                   <View className="flex-row flex-wrap gap-3">
                     {teachersBySubject.map((t) => (
@@ -351,14 +349,14 @@ export default function AdminScheduleDetailScreen() {
                   style={{ fontFamily: "Poppins-Medium" }}
                   className="text-gray-400 text-[10px] mb-3 ml-1 uppercase tracking-widest"
                 >
-                  3. Set Time Duration
+                  3. Thiết lập Thời gian
                 </Text>
                 <View className="flex-row gap-5">
                   <View className="flex-1">
                     <View className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 flex-row items-center gap-3">
                       <Ionicons name="time-outline" size={18} color="#9CA3AF" />
                       <View className="flex-1">
-                        <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-[10px] text-gray-400 -mb-1">Start</Text>
+                        <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-[10px] text-gray-400 -mb-1">Bắt đầu</Text>
                         <TextInput
                           placeholder="08:00"
                           value={startTime}
@@ -373,7 +371,7 @@ export default function AdminScheduleDetailScreen() {
                     <View className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 flex-row items-center gap-3">
                       <Ionicons name="hourglass-outline" size={18} color="#9CA3AF" />
                       <View className="flex-1">
-                        <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-[10px] text-gray-400 -mb-1">Finish</Text>
+                        <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-[10px] text-gray-400 -mb-1">Kết thúc</Text>
                         <TextInput
                           placeholder="08:45"
                           value={finishTime}
@@ -396,7 +394,7 @@ export default function AdminScheduleDetailScreen() {
                   style={{ fontFamily: "Poppins-Bold" }}
                   className="text-white text-lg"
                 >
-                  Confirm Addition
+                  Xác nhận Thêm
                 </Text>
               </TouchableOpacity>
             </View>

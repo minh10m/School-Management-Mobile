@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -17,13 +17,21 @@ namespace School_Management.API.Repositories
         {
             var query = context.Student.AsQueryable();
 
-            //Filtering
+            //Filtering based on latest record
             if (!string.IsNullOrWhiteSpace(request.FullName))
                 query = query.Where(x => x.User.FullName.ToLower().Contains(request.FullName.ToLower()));
-            if(!string.IsNullOrWhiteSpace(request.ClassName))
-                query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.ClassName.ToLower().Contains(request.ClassName.ToLower())));
-            if(request.Grade != 0)
-                query = query.Where(x => x.StudentClassYears.Any(scy => scy.ClassYear.Grade == request.Grade));
+
+            // Filter by the latest class year record for each student
+            if (!string.IsNullOrWhiteSpace(request.ClassName) || request.Grade != 0)
+            {
+                query = query.Where(s => s.StudentClassYears
+                    .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+                    .Take(1)
+                    .Any(latest =>
+                        (string.IsNullOrWhiteSpace(request.ClassName) || latest.ClassYear.ClassName.ToLower().Contains(request.ClassName.ToLower())) &&
+                        (request.Grade == 0 || latest.ClassYear.Grade == request.Grade)
+                    ));
+            }
                    
           
 

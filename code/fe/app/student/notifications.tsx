@@ -9,13 +9,13 @@ const { width } = Dimensions.get('window');
 
 const NOTIFICATIONS = [
   {
-    title: 'Today',
+    title: 'Hôm nay',
     data: [
       {
         id: '1',
         title: 'Maths Teacher',
         message: 'Lorem ipsum dolor sit amet, consectetur',
-        time: '15 Min',
+        time: '15 phút',
         unread: true,
         avatar: require('../../assets/images/on-boarding-1.png'),
       },
@@ -23,14 +23,14 @@ const NOTIFICATIONS = [
         id: '2',
         title: 'Science Teacher',
         message: 'Lorem ipsum dolor sit amet, consectetur',
-        time: '2 hr ago',
+        time: '2 giờ trước',
         unread: true,
         avatar: require('../../assets/images/on-boarding-2.png'),
       },
     ],
   },
   {
-    title: 'Yesterday',
+    title: 'Hôm qua',
     data: [
       {
         id: '3',
@@ -82,7 +82,7 @@ export default function NotificationScreen() {
       <Stack.Screen 
         options={{
             headerShown: true,
-            title: 'Notification',
+            title: 'Thông báo',
             headerTitleAlign: 'center',
             headerTitleStyle: {
                 fontFamily: 'Poppins-Bold',

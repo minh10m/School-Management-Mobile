@@ -1,4 +1,4 @@
-﻿using School_Management.API.Models.DTO;
+using School_Management.API.Models.DTO;
 using System.Security.Claims;
 
 namespace School_Management.API.Services
@@ -14,5 +14,6 @@ namespace School_Management.API.Services
         public Task<PagedResponse<ExamStudentAssignmentResponse>> GetAllExamStudentAssignment(ExamStudentAssignmentFilterRequest request, Guid examScheduleDetailId);
         public Task<List<MyExamScheduleDetailResponse>> GetMyExamSchedule(MyExamScheduleDetailRequest request, ClaimsPrincipal User);
         public Task<PagedResponse<ExamScheduleResponse>> GetAllExamSchedule(ExamScheduleFilterRequest request);
+        public Task<bool> DeleteExamSchedule(Guid id);
     }
 }

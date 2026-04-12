@@ -1,20 +1,33 @@
-import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState, useEffect, useCallback } from 'react';
-import { teacherService } from '../../../services/teacher.service';
-import { subjectService } from '../../../services/subject.service';
-import { TeacherListItem } from '../../../types/teacher';
-import { SubjectResponse } from '../../../types/subject';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  RefreshControl,
+  SafeAreaView,
+  Modal,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState, useEffect, useCallback } from "react";
+import { teacherService } from "../../../services/teacher.service";
+import { subjectService } from "../../../services/subject.service";
+import { TeacherListItem } from "../../../types/teacher";
+import { SubjectResponse } from "../../../types/subject";
 
 export default function AdminTeachersScreen() {
   const [teachers, setTeachers] = useState<TeacherListItem[]>([]);
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [search, setSearch] = useState('');
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  
+  const [search, setSearch] = useState("");
+  const [tempSearch, setTempSearch] = useState("");
   const [selectedSubjectName, setSelectedSubjectName] = useState<string | undefined>();
+  const [tempSubjectName, setTempSubjectName] = useState<string | undefined>();
 
   const loadInitialData = async () => {
     try {
@@ -29,11 +42,11 @@ export default function AdminTeachersScreen() {
     try {
       setLoading(true);
       const res = await teacherService.getTeachers({
-        search: search || undefined,
-        subjectName: selectedSubjectName,
-        pageSize: 50,
-        sortBy: 'fullName',
-        sortOrder: 'asc'
+        FullName: search || undefined,
+        SubjectName: selectedSubjectName,
+        PageSize: 50,
+        sortBy: "FullName",
+        isAscending: true,
       });
       const data = Array.isArray(res) ? res : (res as any).items || [];
       setTeachers(data);
@@ -52,59 +65,132 @@ export default function AdminTeachersScreen() {
     fetchTeachers();
   }, [fetchTeachers]);
 
+  const openFilter = () => {
+    setTempSearch(search);
+    setTempSubjectName(selectedSubjectName);
+    setIsFilterVisible(true);
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchTeachers();
     setRefreshing(false);
   };
 
+  const applyFilters = () => {
+    setSearch(tempSearch);
+    setSelectedSubjectName(tempSubjectName);
+    setIsFilterVisible(false);
+  };
+
+  const resetFilters = () => {
+    setTempSearch("");
+    setTempSubjectName(undefined);
+    setSearch("");
+    setSelectedSubjectName(undefined);
+    setIsFilterVisible(false);
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+    <SafeAreaView className="flex-1 bg-white">
+      {/* Header aligned with synchronised UI */}
+      <View className="px-6 py-4 flex-row items-center border-b border-gray-50">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Teacher Management</Text>
-        <View style={{ width: 40 }} />
+        <Text
+          style={{ fontFamily: "Poppins-Bold" }}
+          className="text-xl text-black"
+        >
+          Quản lý Giáo viên
+        </Text>
       </View>
 
-      {/* Filters */}
-      <View className="bg-white border-b border-gray-100 px-6 py-3 gap-3">
-        <View className="flex-row items-center bg-gray-50 rounded-2xl px-4 py-2 border border-gray-100">
-          <Ionicons name="search-outline" size={18} color="#9CA3AF" />
+      {/* Synchronized Search Bar Section */}
+      <View className="px-6 py-4 flex-row items-center gap-4 bg-white border-b border-gray-50">
+        <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100">
+          <Ionicons name="search-outline" size={20} color="#9ca3af" />
           <TextInput
-            placeholder="Search teachers..."
-            value={search}
-            onChangeText={setSearch}
+            placeholder="Tìm kiếm giáo viên..."
             className="flex-1 ml-2 text-black text-sm"
-            style={{ fontFamily: 'Poppins-Regular' }}
-            placeholderTextColor="#9CA3AF"
+            style={{ fontFamily: "Poppins-Regular" }}
+            value={tempSearch}
+            onChangeText={setTempSearch}
+            onSubmitEditing={applyFilters}
           />
         </View>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
-          <TouchableOpacity
-            onPress={() => setSelectedSubjectName(undefined)}
-            className={`px-3 py-1.5 rounded-full ${!selectedSubjectName ? 'bg-bright-blue' : 'bg-gray-100'}`}
-          >
-            <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: !selectedSubjectName ? 'white' : '#6B7280' }}>
-              All Subjects
-            </Text>
-          </TouchableOpacity>
-          {(subjects || []).map(s => (
-            <TouchableOpacity
-              key={s.subjectId}
-              onPress={() => setSelectedSubjectName(s.subjectName)}
-              className={`px-3 py-1.5 rounded-full ${selectedSubjectName === s.subjectName ? 'bg-bright-blue' : 'bg-gray-100'}`}
-            >
-              <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: selectedSubjectName === s.subjectName ? 'white' : '#6B7280' }}>
-                {s.subjectName}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <TouchableOpacity
+          onPress={openFilter}
+          className="bg-blue-50 w-11 h-11 rounded-2xl items-center justify-center border border-blue-100"
+        >
+          <Ionicons name="options-outline" size={22} color="#136ADA" />
+        </TouchableOpacity>
       </View>
+
+      {/* Advanced Filter Modal */}
+      <Modal
+        visible={isFilterVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsFilterVisible(false)}
+      >
+        <View className="flex-1 justify-end bg-black/40">
+          <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
+            <View className="flex-row justify-between items-center mb-10">
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Lọc giáo viên</Text>
+              <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
+                <Ionicons name="close" size={24} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Filter: Subject */}
+            <View className="mb-12">
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Chuyên môn môn học</Text>
+              <View className="flex-row flex-wrap gap-3">
+                <TouchableOpacity
+                  onPress={() => setTempSubjectName(undefined)}
+                  className={`px-5 py-3 rounded-2xl ${!tempSubjectName ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
+                >
+                  <Text
+                    style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: !tempSubjectName ? "#1D4ED8" : "#9CA3AF" }}
+                  >
+                    Tất cả môn học
+                  </Text>
+                </TouchableOpacity>
+                {subjects.map((s) => (
+                  <TouchableOpacity
+                    key={s.subjectId}
+                    onPress={() => setTempSubjectName(s.subjectName)}
+                    className={`px-5 py-3 rounded-2xl ${tempSubjectName === s.subjectName ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
+                  >
+                    <Text
+                      style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempSubjectName === s.subjectName ? "#1D4ED8" : "#9CA3AF" }}
+                    >
+                      {s.subjectName}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Modal Buttons */}
+            <View className="flex-row gap-4">
+              <TouchableOpacity
+                onPress={resetFilters}
+                className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
+              >
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Đặt lại</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={applyFilters}
+                className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
+              >
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* List */}
       {loading && !refreshing ? (
@@ -115,29 +201,59 @@ export default function AdminTeachersScreen() {
         <FlatList
           data={teachers}
           keyExtractor={(item, index) => item.teacherId || index.toString()}
-          contentContainerStyle={{ padding: 16, gap: 10 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16, gap: 12 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#136ADA"
+            />
+          }
           renderItem={({ item }) => (
             <TouchableOpacity
-              className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center gap-3 shadow-sm"
+              activeOpacity={0.7}
+              className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex-row items-center"
               onPress={() => router.push(`/admin/teachers/${item.teacherId}` as any)}
             >
-              <View className="w-12 h-12 rounded-full bg-purple-100 items-center justify-center">
-                <Text style={{ fontFamily: 'Poppins-Bold', color: '#A855F7' }}>{item.fullName.charAt(0)}</Text>
+              <View className="w-14 h-14 rounded-2xl bg-purple-50 items-center justify-center">
+                <Text
+                  style={{ fontFamily: "Poppins-Bold" }}
+                  className="text-purple-600 text-lg"
+                >
+                  {item.fullName.charAt(0)}
+                </Text>
               </View>
-              <View className="flex-1">
-                <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-sm">{item.fullName}</Text>
-                <View className="bg-purple-50 self-start px-2 py-0.5 rounded-full mt-1">
-                   <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 10, color: '#A855F7' }}>{item.subjectNames?.join(", ") || "No Subject"}</Text>
+              <View className="flex-1 ml-4">
+                <Text
+                  style={{ fontFamily: "Poppins-Bold" }}
+                  className="text-black text-base"
+                >
+                  {item.fullName}
+                </Text>
+                <View className="bg-purple-50 self-start px-2 py-0.5 rounded-lg mt-1">
+                  <Text
+                    style={{
+                      fontFamily: "Poppins-Medium",
+                      fontSize: 10,
+                      color: "#9333EA",
+                    }}
+                  >
+                    {item.subjectNames?.join(", ") || "Chưa có môn học"}
+                  </Text>
                 </View>
               </View>
-              <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
+              <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
             </TouchableOpacity>
           )}
           ListEmptyComponent={
-            <View className="items-center py-10">
-              <Ionicons name="people-outline" size={48} color="#D1D5DB" />
-              <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-2">No teachers found</Text>
+            <View className="items-center py-20">
+              <Ionicons name="people-outline" size={64} color="#E5E7EB" />
+              <Text
+                style={{ fontFamily: "Poppins-Medium" }}
+                className="text-gray-400 mt-4 text-center"
+              >
+                Không tìm thấy giáo viên.{"\n"}Hãy thử điều chỉnh bộ lọc.
+              </Text>
             </View>
           }
         />

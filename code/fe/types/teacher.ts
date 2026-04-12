@@ -34,12 +34,12 @@ export interface TeacherSubject {
 // ─── Query Params ──────────────────────────────────────────────────────────────
 
 export interface GetTeachersParams {
-  page?: number;
-  pageSize?: number;
-  search?: string;
+  PageNumber?: number;
+  PageSize?: number;
+  FullName?: string;
   sortBy?: string;
-  sortOrder?: "asc" | "desc";
-  subjectName?: string;
+  isAscending?: boolean;
+  SubjectName?: string;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────

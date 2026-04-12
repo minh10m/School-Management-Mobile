@@ -12,9 +12,9 @@ interface FeeData {
 }
 
 const feeData: FeeData[] = [
-  { id: '1', title: 'School Fee', amount: '18,800', status: 'pending', date: 'Due : 12.03.2024' },
-  { id: '2', title: 'School Fee', amount: '18,800', status: 'completed', date: 'Due : 12.11.2023' },
-  { id: '3', title: 'School Fee', amount: '18,800', status: 'completed', date: 'Due : 12.10.2023' },
+  { id: '1', title: 'Học phí', amount: '18,800', status: 'pending', date: 'Hạn : 12.03.2024' },
+  { id: '2', title: 'Học phí', amount: '18,800', status: 'completed', date: 'Hạn : 12.11.2023' },
+  { id: '3', title: 'Học phí', amount: '18,800', status: 'completed', date: 'Hạn : 12.10.2023' },
 ];
 
 export default function FeeScreen() {
@@ -31,7 +31,7 @@ export default function FeeScreen() {
               <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex-1 items-center">
-              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Fee Payment</Text>
+              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Thanh toán học phí</Text>
           </View>
           <View className="w-10" /> 
       </View>
@@ -85,7 +85,7 @@ export default function FeeScreen() {
                   className="bg-[#136ADA] py-4 rounded-xl items-center shadow-md shadow-blue-200"
                   onPress={() => router.push('/student/payment/payment-detail' as any)}
               >
-                  <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Payment Details</Text>
+                  <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Chi tiết thanh toán</Text>
               </TouchableOpacity>
           </View>
       </View>
@@ -96,7 +96,7 @@ export default function FeeScreen() {
 function FeeCard({ data }: { data: FeeData }) {
     const isPending = data.status === 'pending';
     const amountColor = isPending ? 'text-red-500' : 'text-green-500';
-    const statusText = isPending ? 'Payment pending' : 'Payment Completed';
+    const statusText = isPending ? 'Chưa thanh toán' : 'Đã thanh toán';
 
     return (
         <View className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-4 p-5">

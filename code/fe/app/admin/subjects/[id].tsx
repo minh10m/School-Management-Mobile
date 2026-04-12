@@ -1,107 +1,131 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, Modal, FlatList } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Modal, FlatList, RefreshControl, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { subjectService } from '../../../services/subject.service';
 import { teacherService } from '../../../services/teacher.service';
 import { SubjectResponse, SubjectTeacherItem } from '../../../types/subject';
 import { TeacherListItem } from '../../../types/teacher';
+import { getErrorMessage } from '../../../utils/error';
 
 export default function AdminSubjectDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  
   const [subject, setSubject] = useState<SubjectResponse | null>(null);
   const [teachers, setTeachers] = useState<SubjectTeacherItem[]>([]);
+  const [allTeachers, setAllTeachers] = useState<TeacherListItem[]>([]);
+  
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
-  const [assignModal, setAssignModal] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [assignLoading, setAssignLoading] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
 
-  // Edit form state
-  const [form, setForm] = useState({
+  // Edit State
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editForm, setEditForm] = useState({
     subjectName: '',
-    maxPeriod: 0
+    maxPeriod: ''
   });
 
-  // For Teacher Assignment
-  const [allTeachers, setAllTeachers] = useState<TeacherListItem[]>([]);
-  const [teacherSearch, setTeacherSearch] = useState('');
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!id) return;
     try {
       setLoading(true);
-      const [sRes, tRes] = await Promise.all([
+      const [subRes, teaRes] = await Promise.all([
         subjectService.getSubjectById(id),
         subjectService.getTeachersBySubject(id)
       ]);
-      setSubject(sRes);
-      setForm({
-        subjectName: sRes.subjectName,
-        maxPeriod: sRes.maxPeriod
+      setSubject(subRes);
+      
+      const teacherData = Array.isArray(teaRes) ? teaRes : (teaRes as any).items || [];
+      setTeachers(teacherData);
+      
+      setEditForm({
+        subjectName: subRes.subjectName,
+        maxPeriod: subRes.maxPeriod.toString()
       });
-      setTeachers(Array.isArray(tRes) ? tRes : []);
     } catch (err) {
       console.error(err);
+      Alert.alert('Lỗi', 'Không thể tải chi tiết môn học');
     } finally {
       setLoading(false);
+    }
+  }, [id]);
+
+  const fetchAllTeachers = async () => {
+    try {
+      const res = await teacherService.getTeachers({ PageSize: 100 });
+      setAllTeachers(Array.isArray(res) ? res : (res as any).items || []);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   useEffect(() => {
     fetchData();
-  }, [id]);
+  }, [fetchData]);
 
-  const handleUpdate = async () => {
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
+
+  const handleUpdateSubject = async () => {
     if (!id) return;
     try {
       setSaving(true);
-      await subjectService.updateSubject(id, form);
-      Alert.alert('Success', 'Subject updated successfully!');
-      setEditing(false);
-      fetchData();
+      const updated = await subjectService.updateSubject(id, {
+        subjectName: editForm.subjectName,
+        maxPeriod: parseInt(editForm.maxPeriod) || 0
+      });
+      setSubject(updated);
+      setIsEditing(false);
+      Alert.alert('Thành công', 'Đã cập nhật môn học thành công');
     } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.message || 'Update failed.');
+      Alert.alert('Error', getErrorMessage(err));
     } finally {
       setSaving(false);
-    }
-  };
-
-  const openAssignModal = async () => {
-    setAssignModal(true);
-    try {
-      const res = await teacherService.getTeachers({ pageSize: 100 });
-      const tdata = Array.isArray(res) ? res : (res as any).items || [];
-      setAllTeachers(tdata);
-    } catch (err) {
-      console.error(err);
     }
   };
 
   const handleAssignTeacher = async (teacherId: string) => {
     if (!id) return;
     try {
+      setAssignLoading(true);
       await subjectService.assignTeacherToSubject(teacherId, id);
-      Alert.alert('Success', 'Teacher assigned successfully!');
-      setAssignModal(false);
-      fetchData();
+      setShowAssignModal(false);
+      await fetchData(); 
+      Alert.alert('Thành công', 'Đã gán giáo viên thành công!');
     } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.message || 'Assignment failed.');
+      Alert.alert('Error', getErrorMessage(err));
+    } finally {
+      setAssignLoading(false);
     }
   };
 
-  const handleRemoveTeacher = (teacherSubjectId: string) => {
-     Alert.alert('Unassign', 'Are you sure you want to remove this teacher from this subject?', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Remove', style: 'destructive', onPress: async () => {
-           try {
+  const handleRemoveTeacher = (teacherSubjectId: string, teacherName: string) => {
+    Alert.alert(
+      'Xóa Giáo viên',
+      `Bạn có chắc chắn muốn xóa ${teacherName} khỏi môn học này?`,
+      [
+        { text: 'Hủy', style: 'cancel' },
+        { 
+          text: 'Xóa', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
               await subjectService.removeTeacherFromSubject(teacherSubjectId);
-              fetchData();
-           } catch (err: any) {
-              Alert.alert('Error', err?.response?.data?.message || 'Remove failed');
-           }
-        }}
-     ]);
+              await fetchData();
+            } catch (err) {
+              Alert.alert('Lỗi', getErrorMessage(err));
+            }
+          }
+        }
+      ]
+    );
   };
 
   if (loading) return (
@@ -112,157 +136,208 @@ export default function AdminSubjectDetailScreen() {
 
   if (!subject) return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center">
-      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Subject not found</Text>
+      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Không tìm thấy môn học</Text>
     </SafeAreaView>
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+    <SafeAreaView className="flex-1 bg-white">
+      {/* Premium Header */}
+      <View className="px-6 py-4 flex-row items-center border-b border-gray-50">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Subject Detail</Text>
-        <TouchableOpacity onPress={() => setEditing(!editing)}>
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">
-             {editing ? 'Cancel' : 'Edit'}
-          </Text>
+        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black flex-1">Chi tiết Môn học</Text>
+        <TouchableOpacity 
+          onPress={() => setIsEditing(true)}
+          className="bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100"
+        >
+          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xs text-[#136ADA]">Chỉnh sửa</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Info Card */}
-        <View className="bg-white p-6 border-b border-gray-100 items-center">
-           <View className="w-16 h-16 rounded-2xl bg-blue-100 items-center justify-center mb-3">
-              <Ionicons name="book" size={32} color="#136ADA" />
+      <ScrollView 
+        className="flex-1" 
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#136ADA" />}
+      >
+        {/* Hero Identity Section */}
+        <View className="px-6 py-8 items-center bg-gray-50/50">
+           <View className="w-24 h-24 rounded-[32px] bg-white items-center justify-center shadow-sm border border-gray-100 mb-4">
+              <View className="w-20 h-20 rounded-[28px] bg-indigo-500 items-center justify-center">
+                 <Ionicons name="book" size={44} color="white" />
+              </View>
            </View>
-           <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl">{subject.subjectName}</Text>
-           <View className="flex-row items-center gap-1 mt-1">
-              <Ionicons name="time" size={12} color="#9CA3AF" />
-              <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-sm">{subject.maxPeriod} periods per week</Text>
+           <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl mb-1">{subject.subjectName}</Text>
+           <View className="bg-indigo-50 px-4 py-1 rounded-full border border-indigo-100">
+              <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-indigo-600 text-[10px] uppercase tracking-wider">NỘI DUNG ĐÀO TẠO</Text>
            </View>
         </View>
 
-        {editing ? (
-          <View className="p-6 gap-6">
-             <View>
-                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1 ml-1">Subject Name</Text>
-                <TextInput
-                   value={form.subjectName}
-                   onChangeText={(t) => setForm({...form, subjectName: t})}
-                   className="bg-white border border-gray-200 rounded-2xl px-4 py-4 text-black text-base"
-                   style={{ fontFamily: 'Poppins-Regular' }}
-                />
-             </View>
-             
-             <View>
-                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1 ml-1">Max Periods / Week</Text>
-                <TextInput
-                   value={form.maxPeriod.toString()}
-                   onChangeText={(t) => setForm({...form, maxPeriod: parseInt(t) || 0})}
-                   keyboardType="numeric"
-                   className="bg-white border border-gray-200 rounded-2xl px-4 py-4 text-black text-base"
-                   style={{ fontFamily: 'Poppins-Regular' }}
-                />
-             </View>
+        {/* Quick Stats Dashboard */}
+        <View className="flex-row px-6 -mt-6">
+           <View className="flex-1 bg-white p-5 rounded-[32px] shadow-sm border border-gray-100 flex-row items-center justify-evenly">
+              <View className="items-center">
+                 <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#136ADA] text-lg">{teachers.length}</Text>
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Giáo viên</Text>
+              </View>
+              <View className="w-[1px] h-8 bg-gray-100" />
+              <View className="items-center">
+                 <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg">{subject.maxPeriod}</Text>
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Tiết/Tuần</Text>
+              </View>
+           </View>
+        </View>
 
-             <TouchableOpacity 
-               className="bg-bright-blue rounded-3xl py-4 items-center mt-2 shadow-lg shadow-blue-200"
-               onPress={handleUpdate}
-               disabled={saving}
-             >
-                {saving ? <ActivityIndicator color="white" /> : (
-                   <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Save Changes</Text>
-                )}
-             </TouchableOpacity>
-          </View>
-        ) : (
-          <View className="p-6">
-             <View className="flex-row items-center justify-between mb-4">
-                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg">Assigned Teachers</Text>
-                <TouchableOpacity 
-                  className="bg-blue-50 px-4 py-2 rounded-full flex-row items-center gap-1"
-                  onPress={openAssignModal}
-                >
-                   <Ionicons name="person-add" size={14} color="#136ADA" />
-                   <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 10, color: '#136ADA' }}>Assign</Text>
-                </TouchableOpacity>
-             </View>
+        <View className="px-6 pt-10 pb-20">
+           {/* Section Header */}
+           <View className="flex-row items-center justify-between mb-6 px-1">
+              <View>
+                 <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl">Giáo viên Giảng dạy</Text>
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase">Giảng viên được phân công</Text>
+              </View>
+              <TouchableOpacity 
+                 onPress={() => {
+                    fetchAllTeachers();
+                    setShowAssignModal(true);
+                 }}
+                 className="w-10 h-10 rounded-2xl bg-[#136ADA] items-center justify-center shadow-lg shadow-blue-200"
+              >
+                 <Ionicons name="add" size={24} color="white" />
+              </TouchableOpacity>
+           </View>
 
-             {teachers.map(t => (
-                <View key={t.teacherId} className="bg-white rounded-2xl p-4 border border-gray-50 mb-3 shadow-sm flex-row items-center justify-between">
-                   <View className="flex-row items-center gap-3">
-                      <View className="w-10 h-10 rounded-full bg-purple-50 items-center justify-center">
-                         <Text style={{ fontFamily: 'Poppins-Bold', color: '#A855F7' }}>{t.fullName.charAt(0)}</Text>
-                      </View>
-                      <View>
-                         <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-sm text-black">{t.fullName}</Text>
-                         <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-xs text-gray-400">{t.email}</Text>
-                      </View>
+           {/* Teacher Roll */}
+           {teachers.length > 0 ? (
+             <View className="gap-4">
+               {teachers.map(t => (
+                 <View key={t.teacherSubjectId} className="flex-row items-center p-5 bg-white border border-gray-100 rounded-[32px] shadow-sm">
+                   <View className="w-12 h-12 rounded-2xl bg-indigo-50 items-center justify-center mr-4 border border-indigo-100">
+                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-indigo-600 text-lg">{t.fullName.charAt(0)}</Text>
                    </View>
-                   {t.teacherSubjectId && (
-                      <TouchableOpacity onPress={() => handleRemoveTeacher(t.teacherSubjectId!)}>
-                         <Ionicons name="close-circle-outline" size={24} color="#F43F5E" />
-                      </TouchableOpacity>
-                   )}
-                </View>
-             ))}
-
-             {teachers.length === 0 && (
-                <Text className="text-center text-gray-400 py-10 italic">No teachers assigned to this subject</Text>
-             )}
-          </View>
-        )}
+                   <View className="flex-1 justify-center">
+                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-base leading-tight">{t.fullName}</Text>
+                     <Text numberOfLines={1} style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">{t.email}</Text>
+                   </View>
+                   <TouchableOpacity 
+                     onPress={() => handleRemoveTeacher(t.teacherSubjectId, t.fullName)}
+                     className="w-10 h-10 rounded-xl bg-red-50 items-center justify-center border border-red-100"
+                   >
+                     <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                   </TouchableOpacity>
+                 </View>
+               ))}
+             </View>
+           ) : (
+             <View className="items-center py-16 bg-gray-50 rounded-[40px] border border-dashed border-gray-200">
+               <View className="w-16 h-16 rounded-full bg-white items-center justify-center mb-4">
+                  <Ionicons name="people-outline" size={32} color="#D1D5DB" />
+               </View>
+               <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-sm">Chưa có giáo viên chuyên trách nào được phân công</Text>
+             </View>
+           )}
+        </View>
       </ScrollView>
 
-      {/* Assign Modal */}
-      <Modal visible={assignModal} animationType="slide" presentationStyle="pageSheet">
-         <SafeAreaView className="flex-1 bg-white">
-            <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
-               <TouchableOpacity onPress={() => setAssignModal(false)}>
-                  <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Close</Text>
-               </TouchableOpacity>
-               <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-lg text-black">Assign Teacher</Text>
-               <View className="w-10" />
-            </View>
+      {/* Edit Subject Bottom Sheet */}
+      <Modal visible={isEditing} animationType="slide" transparent={true}>
+         <View className="flex-1 bg-black/50 justify-end">
+            <View className="bg-white rounded-t-[40px] pt-8 px-6 pb-12 shadow-2xl">
+               <View className="flex-row items-center justify-between mb-8">
+                  <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl">Chỉnh sửa Môn học</Text>
+                  <TouchableOpacity onPress={() => setIsEditing(false)} className="bg-gray-100 p-2 rounded-full">
+                     <Ionicons name="close" size={24} color="gray" />
+                  </TouchableOpacity>
+               </View>
 
-            <View className="px-6 pt-6">
-                <View className="flex-row items-center bg-gray-100 rounded-2xl px-4 py-1 mb-4 border border-gray-100">
-                   <Ionicons name="search" size={18} color="#9CA3AF" />
-                   <TextInput
-                      placeholder="Search name..."
-                      value={teacherSearch}
-                      onChangeText={setTeacherSearch}
-                      className="flex-1 ml-2 py-3 text-black text-sm"
-                      style={{ fontFamily: 'Poppins-Regular' }}
-                   />
-                </View>
+               <View className="gap-6">
+                  <View>
+                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-2 ml-1">Tên Môn học</Text>
+                     <TextInput
+                        value={editForm.subjectName}
+                        onChangeText={(t) => setEditForm({...editForm, subjectName: t})}
+                        className="bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-black text-sm"
+                        style={{ fontFamily: 'Poppins-Medium' }}
+                        placeholder="Nhập tên môn học..."
+                     />
+                  </View>
+                  
+                  <View>
+                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-2 ml-1">Số tiết học/tuần</Text>
+                     <TextInput
+                        value={editForm.maxPeriod}
+                        onChangeText={(t) => setEditForm({...editForm, maxPeriod: t})}
+                        keyboardType="numeric"
+                        className="bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-black text-sm"
+                        style={{ fontFamily: 'Poppins-Medium' }}
+                        placeholder="VD: 5"
+                     />
+                  </View>
 
-                <FlatList
-                   data={allTeachers.filter(t => t.fullName.toLowerCase().includes(teacherSearch.toLowerCase()))}
-                   keyExtractor={t => t.teacherId}
-                   renderItem={({ item }) => (
-                      <TouchableOpacity 
-                        className="flex-row items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl mb-2 shadow-sm"
-                        onPress={() => handleAssignTeacher(item.teacherId)}
-                      >
-                         <View className="flex-row items-center gap-3">
-                            <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center">
-                               <Ionicons name="person" size={20} color="#136ADA" />
-                            </View>
-                            <View>
-                               <Text style={{ fontFamily: 'Poppins-Bold' }}>{item.fullName}</Text>
-                               <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">{item.subjectNames?.join(', ') || 'No Subject'}</Text>
-                            </View>
-                         </View>
-                         <Ionicons name="add-circle" size={24} color="#136ADA" />
-                      </TouchableOpacity>
-                   )}
-                   ListEmptyComponent={<Text className="text-center text-gray-400 py-10">No teachers found</Text>}
-                />
+                  <TouchableOpacity 
+                     className="bg-[#136ADA] rounded-3xl py-4 items-center mt-4 shadow-xl shadow-blue-200"
+                     onPress={handleUpdateSubject}
+                     disabled={saving}
+                  >
+                     {saving ? <ActivityIndicator color="white" /> : (
+                        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Cập nhật Môn học</Text>
+                     )}
+                  </TouchableOpacity>
+               </View>
             </View>
-         </SafeAreaView>
+         </View>
+      </Modal>
+
+      {/* Assign Teacher Bottom Sheet */}
+      <Modal visible={showAssignModal} animationType="slide" transparent={true}>
+         <View className="flex-1 bg-black/50 justify-end">
+            <View className="bg-white rounded-t-[40px] h-[80%] pt-8 px-6">
+               <View className="flex-row items-center justify-between mb-6">
+                  <View>
+                     <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl">Chọn Giảng viên</Text>
+                     <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-xs uppercase">Danh sách Giáo viên chuyên môn</Text>
+                  </View>
+                  <TouchableOpacity onPress={() => setShowAssignModal(false)} className="bg-gray-100 p-2 rounded-full">
+                     <Ionicons name="close" size={24} color="gray" />
+                  </TouchableOpacity>
+               </View>
+
+               <FlatList
+                  data={allTeachers.filter(at => !teachers.some(t => t.teacherId === at.teacherId))}
+                  keyExtractor={(item) => item.teacherId}
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 40 }}
+                  renderItem={({ item }) => (
+                     <View className="flex-row items-center p-4 bg-gray-50/50 rounded-[32px] border border-gray-100 mb-4">
+                        <View className="w-12 h-12 rounded-2xl bg-white border border-gray-100 items-center justify-center mr-4">
+                           <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#136ADA] text-lg">{item.fullName.charAt(0)}</Text>
+                        </View>
+                        <View className="flex-1">
+                           <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-sm">{item.fullName}</Text>
+                           <Text numberOfLines={1} style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase">
+                              {item.subjectNames?.join(" • ") || "Giáo viên chung"}
+                           </Text>
+                        </View>
+                        <TouchableOpacity 
+                           onPress={() => handleAssignTeacher(item.teacherId)}
+                           disabled={assignLoading}
+                           className="bg-blue-50 w-10 h-10 rounded-xl items-center justify-center border border-blue-100"
+                        >
+                           {assignLoading ? <ActivityIndicator size="small" color="#136ADA" /> : (
+                              <Ionicons name="add" size={24} color="#136ADA" />
+                           )}
+                        </TouchableOpacity>
+                     </View>
+                  )}
+                  ListEmptyComponent={
+                     <View className="items-center py-20">
+                        <Ionicons name="search-outline" size={48} color="#D1D5DB" />
+                        <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-4 text-center px-10">Không tìm thấy giáo viên bổ sung nào để gán</Text>
+                     </View>
+                  }
+               />
+            </View>
+         </View>
       </Modal>
     </SafeAreaView>
   );

@@ -1,64 +1,220 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  RefreshControl,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import * as DocumentPicker from "expo-document-picker";
+import { examScheduleService } from "../../../services/examSchedule.service";
+import {
+  ExamScheduleDetailResponse,
+  ExamScheduleDetailFilterRequest,
+} from "../../../types/examSchedule";
+import { PagedResponse } from "../../../types/common";
+import { getErrorMessage } from "../../../utils/error";
 
-const MOCK_EXAM_DETAILS: Record<string, any> = {
-  '1': {
-    type: 'Midterm', term: 'HK1', schoolYear: '2025-2026', grade: 10,
-    details: [
-      { subject: 'Mathematics',  teacher: 'Tran Thi Mai', date: '2025-10-15', startTime: '07:30', finishTime: '09:00', roomName: 'P.101' },
-      { subject: 'Physics',      teacher: 'Do Van Duc',   date: '2025-10-16', startTime: '07:30', finishTime: '09:00', roomName: 'P.102' },
-      { subject: 'Chemistry',    teacher: 'Pham Thi Lan', date: '2025-10-17', startTime: '07:30', finishTime: '09:00', roomName: 'P.103' },
-      { subject: 'Literature',   teacher: 'Nguyen Thi Hoa', date: '2025-10-18', startTime: '07:30', finishTime: '09:00', roomName: 'P.104' },
-      { subject: 'English',      teacher: 'Le Van Nam',   date: '2025-10-20', startTime: '07:30', finishTime: '09:00', roomName: 'P.101' },
-    ],
-  },
-};
+const ExamScheduleDetail = () => {
+  const { id, title } = useLocalSearchParams<{ id: string; title?: string }>();
+  const router = useRouter();
+  
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [data, setData] = useState<PagedResponse<ExamScheduleDetailResponse> | null>(null);
+  const [filter, setFilter] = useState<ExamScheduleDetailFilterRequest>({
+    pageNumber: 1,
+    pageSize: 20,
+  });
 
-export default function AdminExamScheduleDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const data = MOCK_EXAM_DETAILS[id ?? '1'] ?? MOCK_EXAM_DETAILS['1'];
+  const fetchData = async (isRefreshing = false) => {
+    try {
+      if (!isRefreshing) setLoading(true);
+      const result = await examScheduleService.getScheduleDetails(id, filter);
+      setData(result);
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Lỗi", "Không thể tải chi tiết ca thi");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
-  return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <View className="flex-1">
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg">{data.type} Exam · Grade {data.grade}</Text>
-          <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">{data.term} · {data.schoolYear}</Text>
+  useEffect(() => {
+    if (id) fetchData();
+  }, [id, filter]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData(true);
+  }, [id, filter]);
+
+  const handleImportExcel = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const file = result.assets[0];
+        setLoading(true);
+        const success = await examScheduleService.uploadExcel(id, file.uri);
+        if (success) {
+          Alert.alert("Thành công", "Đã nhập chi tiết ca thi từ file Excel thành công");
+          fetchData();
+        } else {
+          Alert.alert("Lỗi", "Không thể nhập file Excel");
+        }
+      }
+    } catch (error: any) {
+      console.error(error);
+      Alert.alert("Lỗi", getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAssignStudents = async () => {
+    Alert.alert(
+      "Xác nhận",
+      "Bạn có muốn tự động gán học sinh vào các phòng thi này không? Hành động này sẽ ghi đè lên các dữ liệu gán hiện có của lịch thi này.",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Gán",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              const success = await examScheduleService.triggerAssignment(id);
+              if (success) {
+                Alert.alert("Thành công", "Đã gán học sinh vào các phòng thi thành công");
+              } else {
+                Alert.alert("Thất bại", "Không thể gán học sinh");
+              }
+            } catch (error: any) {
+              Alert.alert("Lỗi", getErrorMessage(error));
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const renderSlot = ({ item }: { item: ExamScheduleDetailResponse }) => (
+    <TouchableOpacity
+      className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm"
+      onPress={() => router.push(`/admin/exam-schedules/slot/${item.examScheduleDetailId}`)}
+    >
+      <View className="flex-row justify-between items-start mb-2">
+        <View className="flex-1 mr-2">
+          <Text className="text-gray-900 font-bold text-base">{item.subjectName}</Text>
+          <Text className="text-gray-500 text-xs mt-0.5">Phòng: {item.roomName}</Text>
+        </View>
+        <View className="bg-blue-50 px-2 py-1 rounded">
+          <Text className="text-blue-600 text-[10px] font-bold">SLOT: {item.startTime.substring(0, 5)} - {item.finishTime.substring(0, 5)}</Text>
         </View>
       </View>
 
-      <ScrollView className="flex-1 px-4 py-4" showsVerticalScrollIndicator={false}>
-        {data.details.map((item: any, index: number) => (
-          <View key={index} className="bg-white rounded-2xl p-4 border border-gray-100 mb-3">
-            <View className="flex-row justify-between items-start mb-2">
-              <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-base">{item.subject}</Text>
-              <View className="bg-blue-50 px-3 py-1 rounded-full">
-                <Text style={{ fontFamily: 'Poppins-SemiBold', color: '#136ADA', fontSize: 11 }}>{item.roomName}</Text>
-              </View>
+      <View className="border-t border-gray-50 pt-2 flex-row justify-between items-center">
+        <View className="flex-row items-center">
+          <Ionicons name="person-outline" size={14} color="#6B7280" />
+          <Text className="text-gray-500 text-xs ml-1">{item.teacherName}</Text>
+        </View>
+        <Text className="text-gray-400 text-[10px] italic">{item.date}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  return (
+    <SafeAreaView className="flex-1 bg-white">
+      {/* Synchronized Header */}
+      <View className="px-6 py-4 flex-row items-center border-b border-gray-50">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <View className="flex-1">
+          <Text
+            style={{ fontFamily: "Poppins-Bold" }}
+            className="text-xl text-black"
+          >
+            {title || "Chi tiết Lịch thi"}
+          </Text>
+        </View>
+      </View>
+
+      {/* Primary Actions */}
+      <View className="px-6 py-4 flex-row gap-x-4 bg-white">
+        <TouchableOpacity
+          activeOpacity={0.8}
+          className="flex-1 bg-[#10B981] h-12 rounded-2xl flex-row items-center justify-center shadow-sm"
+          onPress={handleImportExcel}
+        >
+          <Ionicons name="cloud-upload" size={20} color="white" />
+          <Text
+            style={{ fontFamily: "Poppins-Bold" }}
+            className="text-white ml-2 text-sm"
+          >
+            Nhập dữ liệu
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          className="flex-1 bg-[#136ADA] h-12 rounded-2xl flex-row items-center justify-center shadow-sm"
+          onPress={handleAssignStudents}
+        >
+          <Ionicons name="people" size={20} color="white" />
+          <Text
+            style={{ fontFamily: "Poppins-Bold" }}
+            className="text-white ml-2 text-sm"
+          >
+            Gán
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View className="px-6 mt-4 flex-row justify-between items-center">
+        <Text className="text-gray-900 font-bold text-lg">Ca thi</Text>
+        <View className="bg-gray-200 px-2 py-0.5 rounded-full">
+          <Text className="text-gray-600 text-[10px] font-bold">{data?.totalCount || 0}</Text>
+        </View>
+      </View>
+
+      {loading && !refreshing ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#136ADA" />
+        </View>
+      ) : (
+        <FlatList
+          data={data?.items || []}
+          renderItem={renderSlot}
+          keyExtractor={(item) => item.examScheduleDetailId}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 12, paddingBottom: 100 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#136ADA" />
+          }
+          ListEmptyComponent={
+            <View className="items-center justify-center py-20 bg-white rounded-2xl mx-6 mt-4 border border-dashed border-gray-200">
+              <Ionicons name="grid-outline" size={48} color="#E5E7EB" />
+              <Text className="text-gray-400 mt-4 text-center px-6">
+                Lịch thi này chưa có ca thi nào được thiết lập.{"\n"}Vui lòng nhập dữ liệu từ file Excel mẫu.
+              </Text>
             </View>
-            <View className="flex-row items-center gap-4">
-              <View className="flex-row items-center gap-1">
-                <Ionicons name="calendar-outline" size={13} color="#9CA3AF" />
-                <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-500 text-xs">{item.date}</Text>
-              </View>
-              <View className="flex-row items-center gap-1">
-                <Ionicons name="time-outline" size={13} color="#9CA3AF" />
-                <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-500 text-xs">{item.startTime} – {item.finishTime}</Text>
-              </View>
-            </View>
-            <View className="flex-row items-center gap-1 mt-1">
-              <Ionicons name="person-outline" size={13} color="#9CA3AF" />
-              <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-500 text-xs">{item.teacher}</Text>
-            </View>
-          </View>
-        ))}
-        <View className="h-10" />
-      </ScrollView>
+          }
+        />
+      )}
     </SafeAreaView>
   );
-}
+};
+
+export default ExamScheduleDetail;

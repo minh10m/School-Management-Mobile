@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
@@ -47,7 +47,8 @@ namespace School_Management.API.Controllers
             return StatusCode(201, new
             {
                 success = result, 
-                message = "Tạo chi tiết lịch thi thành công"
+                message = "Tạo chi tiết lịch thi thành công",
+                data = result
             });
         }
 
@@ -60,7 +61,8 @@ namespace School_Management.API.Controllers
             return StatusCode(201, new
             {
                 success = result,
-                message = "Phân bổ học sinh vào chi tiết lịch thành công"
+                message = "Phân bổ học sinh vào chi tiết lịch thành công",
+                data = result
             });
         }
 
@@ -151,6 +153,18 @@ namespace School_Management.API.Controllers
             return Ok(new
             {
                 success = true,
+                data = result
+            });
+        }
+        [HttpDelete("{examScheduleId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteExamSchedule([FromRoute] Guid examScheduleId)
+        {
+            var result = await examScheduleService.DeleteExamSchedule(examScheduleId);
+            return Ok(new
+            {
+                success = result,
+                message = "Xóa lịch thi thành công",
                 data = result
             });
         }

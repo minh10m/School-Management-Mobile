@@ -47,7 +47,7 @@ export default function AdminCreateEventScreen() {
       }
     } catch (err) {
       console.log(err);
-      Alert.alert('Error', 'Unable to load event details');
+      Alert.alert('Lỗi', 'Không thể tải chi tiết sự kiện');
     } finally {
       setFetching(false);
     }
@@ -57,7 +57,7 @@ export default function AdminCreateEventScreen() {
 
   const handleSubmit = async () => {
     if (!form.title || !form.body || !form.eventDate || !form.startTime || !form.finishTime) {
-      Alert.alert('Error', 'Please fill in all required fields.');
+      Alert.alert('Thiếu thông tin', 'Vui lòng điền đầy đủ các thông tin bắt buộc.');
       return;
     }
 
@@ -68,13 +68,13 @@ export default function AdminCreateEventScreen() {
       } else {
         await eventService.createEvent(form);
       }
-      Alert.alert('Success', `Successfully ${isEdit ? 'updated' : 'created'} the event.`, [
-        { text: 'OK', onPress: () => router.back() }
+      Alert.alert('Thành công', `Đã ${isEdit ? 'cập nhật' : 'tạo'} sự kiện thành công.`, [
+        { text: 'Đồng ý', onPress: () => router.back() }
       ]);
     } catch (err: any) {
       console.log(err);
       const msg = getErrorMessage(err);
-      Alert.alert('Failed', msg);
+      Alert.alert('Thất bại', msg);
     } finally {
       setSubmitting(false);
     }
@@ -96,18 +96,18 @@ export default function AdminCreateEventScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg">
-          {isEdit ? 'Edit Event' : 'Create New Event'}
+          {isEdit ? 'Chỉnh sửa Sự kiện' : 'Thêm Sự kiện mới'}
         </Text>
       </View>
 
       <ScrollView className="flex-1 px-6 pt-5" showsVerticalScrollIndicator={false}>
         {/* Title */}
         <View className="mb-5">
-          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Event Title *</Text>
+          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Tiêu đề Sự kiện *</Text>
           <TextInput
             value={form.title}
             onChangeText={(v) => set('title', v)}
-            placeholder="Enter event title..."
+            placeholder="Nhập tiêu đề sự kiện..."
             placeholderTextColor="#9CA3AF"
             className="bg-white border border-gray-100 rounded-2xl px-4 py-3.5 text-black text-sm"
             style={{ fontFamily: 'Poppins-Regular' }}
@@ -116,11 +116,11 @@ export default function AdminCreateEventScreen() {
 
         {/* Body */}
         <View className="mb-5">
-          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Event Description *</Text>
+          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Mô tả Sự kiện *</Text>
           <TextInput
             value={form.body}
             onChangeText={(v) => set('body', v)}
-            placeholder="Describe the event details..."
+            placeholder="Mô tả chi tiết về sự kiện..."
             placeholderTextColor="#9CA3AF"
             multiline
             numberOfLines={4}
@@ -131,7 +131,7 @@ export default function AdminCreateEventScreen() {
 
         {/* Date */}
         <View className="mb-5">
-          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Event Date (YYYY-MM-DD) *</Text>
+          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Ngày diễn ra (YYYY-MM-DD) *</Text>
           <TextInput
             value={form.eventDate}
             onChangeText={(v) => set('eventDate', v)}
@@ -144,7 +144,7 @@ export default function AdminCreateEventScreen() {
         {/* Times */}
         <View className="flex-row gap-4 mb-5">
           <View className="flex-1">
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Start Time (HH:mm:ss) *</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Giờ bắt đầu (HH:mm:ss) *</Text>
             <TextInput
               value={form.startTime}
               onChangeText={(v) => set('startTime', v)}
@@ -154,7 +154,7 @@ export default function AdminCreateEventScreen() {
             />
           </View>
           <View className="flex-1">
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Finish Time (HH:mm:ss) *</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Giờ kết thúc (HH:mm:ss) *</Text>
             <TextInput
               value={form.finishTime}
               onChangeText={(v) => set('finishTime', v)}
@@ -168,7 +168,7 @@ export default function AdminCreateEventScreen() {
         {/* Year and Term */}
         <View className="flex-row gap-4 mb-5">
           <View className="flex-1">
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">School Year *</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Năm học *</Text>
             <TextInput
               value={form.schoolYear.toString()}
               onChangeText={(v) => set('schoolYear', parseInt(v) || 2026)}
@@ -178,14 +178,14 @@ export default function AdminCreateEventScreen() {
             />
           </View>
           <View className="flex-1">
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Academic Term *</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Học kỳ *</Text>
             <View className="flex-row gap-2">
               {[1, 2].map(t => (
                 <TouchableOpacity 
                   key={t} onPress={() => set('term', t)}
                   className={`flex-1 py-3.5 rounded-2xl border items-center ${form.term === t ? 'bg-bright-blue border-bright-blue' : 'bg-white border-gray-100'}`}
                 >
-                  <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 13, color: form.term === t ? 'white' : '#9CA3AF' }}>Term {t}</Text>
+                  <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 13, color: form.term === t ? 'white' : '#9CA3AF' }}>Học kỳ {t}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -202,7 +202,7 @@ export default function AdminCreateEventScreen() {
             <ActivityIndicator color="white" size="small" />
           ) : (
             <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">
-              {isEdit ? 'Update Event' : 'Save Event'}
+              {isEdit ? 'Cập nhật Sự kiện' : 'Lưu Sự kiện'}
             </Text>
           )}
         </TouchableOpacity>

@@ -44,7 +44,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Home",
+          title: "Trang chủ",
           tabBarIcon: ({ color }) => (
             <Ionicons name="home-outline" size={24} color={color} />
           ),
@@ -53,7 +53,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="attendance"
         options={{
-          title: "Attendance",
+          title: "Điểm danh",
           tabBarIcon: ({ color }) => (
             <Ionicons name="calendar-outline" size={24} color={color} />
           ),
@@ -62,7 +62,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="timetable"
         options={{
-          title: "Timetable",
+          title: "Lịch học",
           tabBarIcon: ({ color }) => (
             <Ionicons name="time-outline" size={24} color={color} />
           ),
@@ -71,7 +71,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="events"
         options={{
-          title: "Events",
+          title: "Sự kiện",
           tabBarIcon: ({ color }) => (
             <Ionicons name="megaphone-outline" size={24} color={color} />
           ),
@@ -80,7 +80,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: "Cá nhân",
           tabBarIcon: ({ color }) => (
             <Ionicons name="person-outline" size={24} color={color} />
           ),
