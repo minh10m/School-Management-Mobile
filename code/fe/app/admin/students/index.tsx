@@ -1,41 +1,42 @@
-import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState, useEffect, useCallback } from 'react';
-import { studentService } from '../../../services/student.service';
-import { classYearService } from '../../../services/classYear.service';
-import { StudentListItem } from '../../../types/student';
-import { ClassYearResponse } from '../../../types/classYear';
-import { SCHOOL_YEAR } from '../../../constants/config';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  RefreshControl,
+  SafeAreaView,
+  Modal,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState, useEffect, useCallback } from "react";
+import { studentService } from "../../../services/student.service";
+import { StudentListItem } from "../../../types/student";
+
+const GRADES = ["10", "11", "12"];
 
 export default function AdminStudentsScreen() {
   const [students, setStudents] = useState<StudentListItem[]>([]);
-  const [classes, setClasses] = useState<ClassYearResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [search, setSearch] = useState('');
-  const [selectedClassId, setSelectedClassId] = useState<string | undefined>();
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  
+  const [search, setSearch] = useState("");
+  const [tempSearch, setTempSearch] = useState("");
   const [selectedGrade, setSelectedGrade] = useState<string | undefined>();
-
-  const loadInitialData = async () => {
-    try {
-      const cls = await classYearService.getClassYears({ schoolYear: SCHOOL_YEAR });
-      setClasses(Array.isArray(cls) ? cls : []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const [tempGrade, setTempGrade] = useState<string | undefined>();
 
   const fetchStudents = useCallback(async () => {
     try {
       setLoading(true);
-      const selectedClass = classes.find(c => c.classYearId === selectedClassId);
       const res = await studentService.getStudents({
-        search,
-        className: selectedClass?.className,
-        grade: selectedGrade,
-        pageSize: 50
+        FullName: search || undefined,
+        Grade: selectedGrade ? parseInt(selectedGrade, 10) : undefined,
+        PageSize: 50,
+        sortBy: "FullName",
+        isAscending: true,
       });
       const data = Array.isArray(res) ? res : (res as any).items || [];
       setStudents(data);
@@ -44,11 +45,7 @@ export default function AdminStudentsScreen() {
     } finally {
       setLoading(false);
     }
-  }, [search, selectedClassId, selectedGrade, classes]);
-
-  useEffect(() => {
-    loadInitialData();
-  }, []);
+  }, [search, selectedGrade]);
 
   useEffect(() => {
     fetchStudents();
@@ -60,61 +57,126 @@ export default function AdminStudentsScreen() {
     setRefreshing(false);
   };
 
+  const openFilter = () => {
+    setTempSearch(search);
+    setTempGrade(selectedGrade);
+    setIsFilterVisible(true);
+  };
+
+  const applyFilters = () => {
+    setSearch(tempSearch);
+    setSelectedGrade(tempGrade);
+    setIsFilterVisible(false);
+  };
+
+  const resetFilters = () => {
+    setTempSearch("");
+    setTempGrade(undefined);
+    setSearch("");
+    setSelectedGrade(undefined);
+    setIsFilterVisible(false);
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+    <SafeAreaView className="flex-1 bg-white">
+      {/* Synchronized Header */}
+      <View className="px-6 py-4 flex-row items-center border-b border-gray-50">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Student Management</Text>
-        <TouchableOpacity onPress={() => router.push('/admin/students/promote')}>
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Promote</Text>
-        </TouchableOpacity>
-        <View className="w-4" />
-        <TouchableOpacity onPress={() => router.push('/admin/students/create' as any)}>
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Create</Text>
-        </TouchableOpacity>
+        <Text
+          style={{ fontFamily: "Poppins-Bold" }}
+          className="text-xl text-black"
+        >
+          Student Management
+        </Text>
       </View>
 
-      {/* Filters */}
-      <View className="bg-white border-b border-gray-100 px-6 py-3 gap-3">
-        {/* Search */}
-        <View className="flex-row items-center bg-gray-50 rounded-2xl px-4 py-2 border border-gray-100">
-          <Ionicons name="search-outline" size={18} color="#9CA3AF" />
+      {/* Synchronized Search Bar Section */}
+      <View className="px-6 py-4 flex-row items-center gap-4 bg-white border-b border-gray-50">
+        <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100">
+          <Ionicons name="search-outline" size={20} color="#9ca3af" />
           <TextInput
             placeholder="Search students..."
-            value={search}
-            onChangeText={setSearch}
             className="flex-1 ml-2 text-black text-sm"
-            style={{ fontFamily: 'Poppins-Regular' }}
-            placeholderTextColor="#9CA3AF"
+            style={{ fontFamily: "Poppins-Regular" }}
+            value={tempSearch}
+            onChangeText={setTempSearch}
+            onSubmitEditing={applyFilters}
           />
         </View>
-
-        {/* Class Filter */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
-           <TouchableOpacity
-              onPress={() => setSelectedClassId(undefined)}
-              className={`px-3 py-1.5 rounded-full ${!selectedClassId ? 'bg-bright-blue' : 'bg-gray-100'}`}
-            >
-              <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: !selectedClassId ? 'white' : '#6B7280' }}>
-                All Classes
-              </Text>
-            </TouchableOpacity>
-          {(classes || []).map(c => (
-            <TouchableOpacity
-              key={c.classYearId}
-              onPress={() => setSelectedClassId(c.classYearId)}
-              className={`px-3 py-1.5 rounded-full ${selectedClassId === c.classYearId ? 'bg-bright-blue' : 'bg-gray-100'}`}
-            >
-              <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11, color: selectedClassId === c.classYearId ? 'white' : '#6B7280' }}>
-                {c.className}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <TouchableOpacity
+          onPress={openFilter}
+          className="bg-blue-50 w-11 h-11 rounded-2xl items-center justify-center border border-blue-100"
+        >
+          <Ionicons name="options-outline" size={22} color="#136ADA" />
+        </TouchableOpacity>
       </View>
+
+      {/* Advanced Filter Modal */}
+      <Modal
+        visible={isFilterVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsFilterVisible(false)}
+      >
+        <View className="flex-1 justify-end bg-black/40">
+          <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
+            <View className="flex-row justify-between items-center mb-10">
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Filter Students</Text>
+              <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
+                <Ionicons name="close" size={24} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Filter: Grade */}
+            <View className="mb-12">
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Grade Level</Text>
+              <View className="flex-row items-center gap-3">
+                <TouchableOpacity
+                  onPress={() => setTempGrade(undefined)}
+                  className={`flex-1 py-3.5 rounded-2xl items-center ${!tempGrade ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
+                >
+                  <Text
+                    style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: !tempGrade ? "#1D4ED8" : "#9CA3AF" }}
+                  >
+                    All Grades
+                  </Text>
+                </TouchableOpacity>
+                {GRADES.map((g) => (
+                  <TouchableOpacity
+                    key={g}
+                    onPress={() => setTempGrade(g)}
+                    className={`flex-1 py-3.5 rounded-2xl items-center ${tempGrade === g ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
+                  >
+                    <Text
+                      style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempGrade === g ? "#1D4ED8" : "#9CA3AF" }}
+                    >
+                      {g}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Modal Buttons */}
+            <View className="flex-row gap-4">
+              <TouchableOpacity
+                onPress={resetFilters}
+                className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
+              >
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Reset</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={applyFilters}
+                className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
+              >
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Apply Filters</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* List */}
       {loading && !refreshing ? (
@@ -125,32 +187,69 @@ export default function AdminStudentsScreen() {
         <FlatList
           data={students}
           keyExtractor={(item, index) => item.studentId || index.toString()}
-          contentContainerStyle={{ padding: 16, gap: 10 }}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16, gap: 12 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#136ADA"
+            />
+          }
           renderItem={({ item }) => (
             <TouchableOpacity
-              className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center gap-3 shadow-sm"
-              onPress={() => router.push(`/admin/students/${item.studentId}` as any)}
+              activeOpacity={0.7}
+              className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex-row items-center"
+              onPress={() =>
+                router.push(`/admin/students/${item.studentId}` as any)
+              }
             >
-              <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center">
-                <Text style={{ fontFamily: 'Poppins-Bold', color: '#136ADA' }}>{item.fullName.charAt(0)}</Text>
+              <View className="w-14 h-14 rounded-2xl bg-blue-50 items-center justify-center">
+                <Text
+                  style={{ fontFamily: "Poppins-Bold" }}
+                  className="text-[#136ADA] text-lg"
+                >
+                  {item.fullName.charAt(0)}
+                </Text>
               </View>
-              <View className="flex-1">
-                <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-sm">{item.fullName}</Text>
-                <View className="flex-row items-center gap-2 mt-0.5">
-                  <View className="bg-teal-50 px-2 py-0.5 rounded-full">
-                    <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 10, color: '#0D9488' }}>Class {item.className}</Text>
+              <View className="flex-1 ml-4">
+                <Text
+                  style={{ fontFamily: "Poppins-Bold" }}
+                  className="text-black text-base"
+                >
+                  {item.fullName}
+                </Text>
+                <View className="flex-row items-center gap-2 mt-1">
+                  <View className="bg-teal-50 px-2 py-0.5 rounded-lg">
+                    <Text
+                      style={{
+                        fontFamily: "Poppins-Medium",
+                        fontSize: 10,
+                        color: "#0D9488",
+                      }}
+                    >
+                      Class {item.className}
+                    </Text>
                   </View>
-                  <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-[10px]">Grade {item.grade}</Text>
+                  <Text
+                    style={{ fontFamily: "Poppins-Regular" }}
+                    className="text-gray-400 text-[10px]"
+                  >
+                    Grade {item.grade}
+                  </Text>
                 </View>
               </View>
-              <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
+              <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
             </TouchableOpacity>
           )}
           ListEmptyComponent={
-            <View className="items-center py-10">
-              <Ionicons name="people-outline" size={48} color="#D1D5DB" />
-              <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-2">No students found</Text>
+            <View className="items-center py-20">
+              <Ionicons name="people-outline" size={64} color="#E5E7EB" />
+              <Text
+                style={{ fontFamily: "Poppins-Medium" }}
+                className="text-gray-400 mt-4 text-center"
+              >
+                No students found.{"\n"}Try adjusting your filters.
+              </Text>
             </View>
           }
         />

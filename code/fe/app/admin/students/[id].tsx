@@ -13,6 +13,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { studentService } from "../../../services/student.service";
 import { StudentResponse } from "../../../types/student";
+import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminStudentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -72,8 +73,7 @@ export default function AdminStudentDetailScreen() {
       setIsEditing(false);
       Alert.alert("Success", "Student details updated successfully!");
     } catch (err: any) {
-      const msg = err?.response?.data?.message || "Update failed.";
-      Alert.alert("Error", msg);
+      Alert.alert("Error", getErrorMessage(err));
     } finally {
       setSaving(false);
     }
