@@ -38,14 +38,13 @@ export interface StudentResponse {
 // ─── Query Params ──────────────────────────────────────────────────────────────
 
 export interface GetStudentsParams {
-  page?: number;
-  pageSize?: number;
-  search?: string;
+  PageNumber?: number;
+  PageSize?: number;
+  FullName?: string;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  grade?: string;   // lọc theo khối
-  classId?: string; // lọc theo ID lớp (backend có thể không hỗ trợ)
-  className?: string; // lọc theo tên lớp
+  isAscending?: boolean;
+  Grade?: number;
+  ClassName?: string;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────

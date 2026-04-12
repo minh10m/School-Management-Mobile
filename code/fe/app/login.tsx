@@ -68,7 +68,7 @@ export default function LoginScreen() {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Đăng nhập thất bại. Vui lòng thử lại.";
+        "Login failed. Please try again.";
       alert(errorMessage);
     } finally {
       setLoading(false);
