@@ -1,4 +1,4 @@
-﻿using School_Management.API.Models.DTO;
+using School_Management.API.Models.DTO;
 
 namespace School_Management.API.Repositories
 {
@@ -6,7 +6,7 @@ namespace School_Management.API.Repositories
     {
         public Task<(AssignmentResponse? data, string? message)> CreateAssignment(PostOrUpdateAssignmentRequest request, Guid userId);
         public Task<(AssignmentResponse? data, string? message)> UpdateAssignment(PostOrUpdateAssignmentRequest request, Guid userId, Guid assignmentId);
-        public Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request);
+        public Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request, Guid userId);
         public Task<(AssignmentResponse? data, string? message)> GetAssignmentById(Guid assignmentId);
         public Task<(PagedResponse<AssignmentResponseForStudent>? data, string? message)> GetMyAssignmentsForStudent(AssignmentForStudentRequest request, Guid userId);
 

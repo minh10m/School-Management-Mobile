@@ -1,4 +1,4 @@
-﻿using School_Management.API.Exceptions;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
 
@@ -25,9 +25,9 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request)
+        public async Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request, Guid userId)
         {
-            return await assignmentRepository.GetAllAssignment(request);
+            return await assignmentRepository.GetAllAssignment(request, userId);
         }
 
         public async Task<AssignmentResponse> GetAssignmentById(Guid assignmentId)

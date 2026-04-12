@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -71,12 +71,31 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
-        public async Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request)
+        public async Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request, Guid userId)
         {
-            var query = context.Assignment.Include(g => g.TeacherSubject).AsNoTracking()
-                                          .Where(x => x.ClassYearId == request.ClassYearId && x.TeacherSubject.SubjectId == request.SubjectId);
+            var teacher = await context.Teacher.FirstOrDefaultAsync(x => x.UserId == userId);
+            if (teacher == null) return new PagedResponse<AssignmentListResponse>
+            {
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                TotalCount = 0,
+                Items = new List<AssignmentListResponse>()
+            };
 
-            if(!string.IsNullOrWhiteSpace(request.Title))
+            var query = context.Assignment.Include(g => g.TeacherSubject).AsNoTracking()
+                                          .Where(x => x.TeacherSubject.TeacherId == teacher.Id);
+
+            if (request.ClassYearId.HasValue)
+            {
+                query = query.Where(x => x.ClassYearId == request.ClassYearId.Value);
+            }
+
+            if (request.SubjectId.HasValue)
+            {
+                query = query.Where(x => x.TeacherSubject.SubjectId == request.SubjectId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Title))
             {
                 var normalizedName = request.Title.Trim().ToLower();
                 query = query.Where(x => x.Title.ToLower().Contains(normalizedName));
