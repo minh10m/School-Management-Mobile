@@ -7,6 +7,7 @@ import { userService } from '../../../services/user.service';
 import { roleService } from '../../../services/role.service';
 import { UserResponse } from '../../../types/user';
 import { RoleResponse } from '../../../types/role';
+import { getErrorMessage } from '../../../utils/error';
 
 const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
   Admin:   { bg: '#EFF6FF', text: '#136ADA' },
@@ -86,7 +87,7 @@ export default function AdminUserDetailScreen() {
       setEditVisible(false);
       Alert.alert("Success", "User details updated.");
     } catch (error: any) {
-      Alert.alert("Error", error?.response?.data?.message || "Update failed.");
+      Alert.alert("Error", getErrorMessage(error));
     } finally {
       setSaving(false);
     }
@@ -131,7 +132,7 @@ export default function AdminUserDetailScreen() {
               await userService.resetPassword(user.userId, { newPassword: password });
               Alert.alert('Success', 'Password has been reset.');
             } catch (err: any) {
-              Alert.alert('Error', err?.response?.data?.message || 'Reset failed.');
+              Alert.alert('Error', getErrorMessage(err));
             }
           }
         }
@@ -157,7 +158,7 @@ export default function AdminUserDetailScreen() {
               Alert.alert('Success', `Account ${nextLocked ? 'locked' : 'unlocked'}.`);
               fetchUser(); // Refresh UI
             } catch (err: any) {
-              Alert.alert('Error', err?.response?.data?.message || 'Action failed.');
+              Alert.alert('Error', getErrorMessage(err));
             }
           }
         }
@@ -173,11 +174,11 @@ export default function AdminUserDetailScreen() {
         text: r.name,
         onPress: async () => {
           try {
-            await userService.updateRole(user.userId, { roleId: r.id || r.roleId }); // Use Role ID or fallback
+            await userService.updateRole(user.userId, { roleId: r.name }); 
             Alert.alert('Success', 'Role updated.');
             fetchUser();
           } catch (err: any) {
-            Alert.alert('Error', err?.response?.data?.message || 'Update failed.');
+            Alert.alert('Error', getErrorMessage(err));
           }
         }
       })).concat([{ text: 'Cancel', style: 'cancel' } as any])
@@ -235,7 +236,7 @@ export default function AdminUserDetailScreen() {
           <InfoRow icon="call-outline" label="Phone" value={user.phoneNumber} />
           <InfoRow icon="location-outline" label="Address" value={user.address} />
           <InfoRow icon="calendar-outline" label="Birthday" value={user.birthday ? user.birthday.split('T')[0] : 'N/A'} />
-          <InfoRow icon="person-outline" label="Username" value={user.username} />
+          <InfoRow icon="person-outline" label="Username" value={user.userName} />
         </View>
 
         {/* Actions */}
