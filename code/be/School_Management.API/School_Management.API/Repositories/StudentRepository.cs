@@ -21,8 +21,14 @@ namespace School_Management.API.Repositories
             if (!string.IsNullOrWhiteSpace(request.FullName))
                 query = query.Where(x => x.User.FullName.ToLower().Contains(request.FullName.ToLower()));
 
-            // Filter by the latest class year record for each student
-            if (!string.IsNullOrWhiteSpace(request.ClassName) || request.Grade != 0)
+            // Filter by ClassYearId if provided
+            if (request.ClassYearId != null && request.ClassYearId != Guid.Empty)
+            {
+                query = query.Where(s => s.StudentClassYears
+                    .Any(scy => scy.ClassYearId == request.ClassYearId));
+            }
+            // Filter by ClassName or Grade if provided (Legacy/General filtering)
+            else if (!string.IsNullOrWhiteSpace(request.ClassName) || request.Grade != 0)
             {
                 query = query.Where(s => s.StudentClassYears
                     .OrderByDescending(scy => scy.ClassYear.SchoolYear)
