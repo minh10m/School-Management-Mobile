@@ -24,12 +24,12 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
     const role = userInfo?.role?.toUpperCase() || 'STUDENT';
 
     let menuItems = [
-        { icon: 'settings-outline', label: 'Setting', route: '/settings' },
+        { icon: 'settings-outline', label: 'Cài đặt', route: '/settings' },
     ];
 
     if (role === 'STUDENT') {
         menuItems = [
-            { icon: 'card-outline', label: 'Payment History', route: '/student/payment' },
+            { icon: 'card-outline', label: 'Lịch sử thanh toán', route: '/student/payment' },
             ...menuItems
         ];
     }
@@ -73,7 +73,7 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                                     else if (role === 'TEACHER') router.push('/teacher/edit-profile');
                                     else router.push('/(tabs)/profile'); 
                                 }}>
-                                    <Text className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins-Regular' }}>View Profile</Text>
+                                    <Text className="text-gray-400 text-sm" style={{ fontFamily: 'Poppins-Regular' }}>Xem hồ sơ</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -110,7 +110,7 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                                 <View className="w-8 h-8 items-center justify-center rounded-lg border border-red-500 bg-red-50">
                                     <Ionicons name="log-out-outline" size={18} color="#EF4444" />
                                 </View>
-                                <Text className="text-red-500 text-base" style={{ fontFamily: 'Poppins-Medium' }}>Log Out</Text>
+                                <Text className="text-red-500 text-base" style={{ fontFamily: 'Poppins-Medium' }}>Đăng xuất</Text>
                             </View>
                             <Ionicons name="chevron-forward" size={20} color="#EF4444" />
                          </TouchableOpacity>

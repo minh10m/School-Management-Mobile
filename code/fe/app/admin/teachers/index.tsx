@@ -102,7 +102,7 @@ export default function AdminTeachersScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-xl text-black"
         >
-          Teacher Management
+          Quản lý Giáo viên
         </Text>
       </View>
 
@@ -111,7 +111,7 @@ export default function AdminTeachersScreen() {
         <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100">
           <Ionicons name="search-outline" size={20} color="#9ca3af" />
           <TextInput
-            placeholder="Search teachers..."
+            placeholder="Tìm kiếm giáo viên..."
             className="flex-1 ml-2 text-black text-sm"
             style={{ fontFamily: "Poppins-Regular" }}
             value={tempSearch}
@@ -137,7 +137,7 @@ export default function AdminTeachersScreen() {
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Filter Teachers</Text>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Lọc giáo viên</Text>
               <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -145,7 +145,7 @@ export default function AdminTeachersScreen() {
 
             {/* Filter: Subject */}
             <View className="mb-12">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Subject Domain</Text>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Chuyên môn môn học</Text>
               <View className="flex-row flex-wrap gap-3">
                 <TouchableOpacity
                   onPress={() => setTempSubjectName(undefined)}
@@ -154,7 +154,7 @@ export default function AdminTeachersScreen() {
                   <Text
                     style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: !tempSubjectName ? "#1D4ED8" : "#9CA3AF" }}
                   >
-                    All Subjects
+                    Tất cả môn học
                   </Text>
                 </TouchableOpacity>
                 {subjects.map((s) => (
@@ -179,13 +179,13 @@ export default function AdminTeachersScreen() {
                 onPress={resetFilters}
                 className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Reset</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Đặt lại</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
                 className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Apply Filters</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -238,7 +238,7 @@ export default function AdminTeachersScreen() {
                       color: "#9333EA",
                     }}
                   >
-                    {item.subjectNames?.join(", ") || "No Subject"}
+                    {item.subjectNames?.join(", ") || "Chưa có môn học"}
                   </Text>
                 </View>
               </View>
@@ -252,7 +252,7 @@ export default function AdminTeachersScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 mt-4 text-center"
               >
-                No teachers found.{"\n"}Try adjusting your filters.
+                Không tìm thấy giáo viên.{"\n"}Hãy thử điều chỉnh bộ lọc.
               </Text>
             </View>
           }

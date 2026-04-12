@@ -51,15 +51,15 @@ export default function AdminCreateScheduleScreen() {
 
   const handleSubmit = async () => {
     if (!form.classYearId || !form.schoolYear) {
-      Alert.alert("Missing Info", "Class and School Year are required.");
+      Alert.alert("Thiếu thông tin", "Lớp học và Năm học là bắt buộc.");
       return;
     }
 
     try {
       setLoading(true);
       await scheduleService.createSchedule(form);
-      Alert.alert("Success", "Schedule created successfully!", [
-        { text: "OK", onPress: () => router.back() },
+      Alert.alert("Thành công", "Đã khởi tạo thời khóa biểu thành công!", [
+        { text: "Đồng ý", onPress: () => router.back() },
       ]);
     } catch (err: any) {
       Alert.alert("Error", getErrorMessage(err));
@@ -89,7 +89,7 @@ export default function AdminCreateScheduleScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-black text-xl ml-2"
         >
-          Create Schedule
+          Khởi tạo TKB
         </Text>
       </View>
 
@@ -118,10 +118,10 @@ export default function AdminCreateScheduleScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-400 text-xs mb-2 ml-1 uppercase tracking-widest"
             >
-              Schedule Name (Optional)
+              Tên Thời khóa biểu (Tùy chọn)
             </Text>
             <TextInput
-              placeholder="e.g. Timetable Term 1 - 10A1"
+              placeholder="VD: TKB Học kỳ 1 - 10A1"
               value={form.name}
               onChangeText={(t) => setForm({ ...form, name: t })}
               className="bg-gray-50/50 border border-gray-100 rounded-2xl px-5 py-4 text-black text-base"
@@ -136,7 +136,7 @@ export default function AdminCreateScheduleScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-400 text-xs mb-3 ml-1 uppercase tracking-widest"
             >
-              Select Class *
+              Chọn Lớp học *
             </Text>
             <ScrollView
               horizontal
@@ -170,7 +170,7 @@ export default function AdminCreateScheduleScreen() {
               ))}
               {classes.length === 0 && (
                 <Text className="text-gray-400 text-xs italic">
-                  No classes found
+                  Không tìm thấy lớp học
                 </Text>
               )}
             </ScrollView>
@@ -183,7 +183,7 @@ export default function AdminCreateScheduleScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 text-xs mb-2 ml-1 uppercase tracking-widest"
               >
-                Term *
+                Học kỳ *
               </Text>
               <View className="flex-row gap-3">
                 {["1", "2"].map((t) => (
@@ -213,7 +213,7 @@ export default function AdminCreateScheduleScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 text-xs mb-2 ml-1 uppercase tracking-widest"
               >
-                School Year *
+                Năm học *
               </Text>
               <TextInput
                 placeholder="2026"
@@ -237,13 +237,13 @@ export default function AdminCreateScheduleScreen() {
                   style={{ fontFamily: "Poppins-Bold" }}
                   className="text-black text-base"
                 >
-                  Activate Now
+                  Kích hoạt ngay
                 </Text>
                 <Text
                   style={{ fontFamily: "Poppins-Regular" }}
                   className="text-gray-400 text-[10px]"
                 >
-                  Set as the primary schedule
+                  Đặt làm thời khóa biểu chính
                 </Text>
               </View>
             </View>
@@ -268,7 +268,7 @@ export default function AdminCreateScheduleScreen() {
                 style={{ fontFamily: "Poppins-Bold" }}
                 className="text-white text-lg"
               >
-                Initialize Schedule
+                Khởi tạo Thời khóa biểu
               </Text>
             )}
           </TouchableOpacity>

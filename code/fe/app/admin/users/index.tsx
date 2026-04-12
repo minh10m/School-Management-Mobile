@@ -15,13 +15,19 @@ import { useState, useEffect, useCallback } from "react";
 import { userService } from "../../../services/user.service";
 import { UserListItem } from "../../../types/user";
 
-const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
-  Admin: { bg: "#EFF6FF", text: "#136ADA" },
-  Teacher: { bg: "#F3E8FF", text: "#A855F7" },
-  Student: { bg: "#F0FDF4", text: "#22C55E" },
+const ROLE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
+  Admin: { bg: "#EFF6FF", text: "#136ADA", label: "Quản trị" },
+  Teacher: { bg: "#F3E8FF", text: "#A855F7", label: "Giáo viên" },
+  Student: { bg: "#F0FDF4", text: "#22C55E", label: "Học sinh" },
 };
 
-const TABS = ["All", "Admin", "Teacher", "Student"];
+const TABS = ["Tất cả", "Admin", "Teacher", "Student"];
+const TAB_LABELS: Record<string, string> = {
+  "All": "Tất cả",
+  "Admin": "Quản trị",
+  "Teacher": "Giáo viên",
+  "Student": "Học sinh"
+};
 
 export default function AdminUsersScreen() {
   const [loading, setLoading] = useState(false);
@@ -96,7 +102,7 @@ export default function AdminUsersScreen() {
         <Text
           style={{ fontFamily: "Poppins-Medium", color: c.text, fontSize: 10 }}
         >
-          {role}
+          {c.label || role}
         </Text>
       </View>
     );
@@ -114,7 +120,7 @@ export default function AdminUsersScreen() {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-xl text-black"
           >
-            User Management
+            Quản lý Người dùng
           </Text>
         </View>
         <TouchableOpacity
@@ -125,7 +131,7 @@ export default function AdminUsersScreen() {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-[#136ADA] text-xs"
           >
-            New
+            Thêm mới
           </Text>
         </TouchableOpacity>
       </View>
@@ -135,7 +141,7 @@ export default function AdminUsersScreen() {
         <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100">
           <Ionicons name="search-outline" size={20} color="#9ca3af" />
           <TextInput
-            placeholder="Search users..."
+            placeholder="Tìm kiếm người dùng..."
             className="flex-1 ml-2 text-black text-sm"
             style={{ fontFamily: "Poppins-Regular" }}
             value={tempSearch}
@@ -161,7 +167,7 @@ export default function AdminUsersScreen() {
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Filter Users</Text>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Lọc người dùng</Text>
               <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -169,7 +175,7 @@ export default function AdminUsersScreen() {
 
             {/* Filter: Role Selection */}
             <View className="mb-12">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Access Role</Text>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Quyền truy cập</Text>
               <View className="flex-row flex-wrap gap-3">
                 {TABS.map((tab) => (
                   <TouchableOpacity
@@ -180,7 +186,7 @@ export default function AdminUsersScreen() {
                     <Text
                       style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempTab === tab ? "#1D4ED8" : "#9CA3AF" }}
                     >
-                      {tab}
+                      {TAB_LABELS[tab] || tab}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -193,13 +199,13 @@ export default function AdminUsersScreen() {
                 onPress={resetFilters}
                 className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Reset</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Đặt lại</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
                 className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Apply Filters</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -273,7 +279,7 @@ export default function AdminUsersScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 mt-4 text-center"
               >
-                No users found.{"\n"}Try adjusting your filters.
+                Không tìm thấy người dùng.{"\n"}Hãy thử điều chỉnh bộ lọc.
               </Text>
             </View>
           }

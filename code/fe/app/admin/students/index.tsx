@@ -88,7 +88,7 @@ export default function AdminStudentsScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-xl text-black"
         >
-          Student Management
+          Quản lý Học sinh
         </Text>
       </View>
 
@@ -97,7 +97,7 @@ export default function AdminStudentsScreen() {
         <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100">
           <Ionicons name="search-outline" size={20} color="#9ca3af" />
           <TextInput
-            placeholder="Search students..."
+            placeholder="Tìm kiếm học sinh..."
             className="flex-1 ml-2 text-black text-sm"
             style={{ fontFamily: "Poppins-Regular" }}
             value={tempSearch}
@@ -123,7 +123,7 @@ export default function AdminStudentsScreen() {
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Filter Students</Text>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Lọc học sinh</Text>
               <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -131,7 +131,7 @@ export default function AdminStudentsScreen() {
 
             {/* Filter: Grade */}
             <View className="mb-12">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Grade Level</Text>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Khối lớp</Text>
               <View className="flex-row items-center gap-3">
                 <TouchableOpacity
                   onPress={() => setTempGrade(undefined)}
@@ -140,7 +140,7 @@ export default function AdminStudentsScreen() {
                   <Text
                     style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: !tempGrade ? "#1D4ED8" : "#9CA3AF" }}
                   >
-                    All Grades
+                    Tất cả khối
                   </Text>
                 </TouchableOpacity>
                 {GRADES.map((g) => (
@@ -165,13 +165,13 @@ export default function AdminStudentsScreen() {
                 onPress={resetFilters}
                 className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Reset</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Đặt lại</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
                 className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Apply Filters</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -227,14 +227,14 @@ export default function AdminStudentsScreen() {
                         color: "#0D9488",
                       }}
                     >
-                      Class {item.className}
+                      Lớp {item.className}
                     </Text>
                   </View>
                   <Text
                     style={{ fontFamily: "Poppins-Regular" }}
                     className="text-gray-400 text-[10px]"
                   >
-                    Grade {item.grade}
+                    Khối {item.grade}
                   </Text>
                 </View>
               </View>
@@ -248,7 +248,7 @@ export default function AdminStudentsScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 mt-4 text-center"
               >
-                No students found.{"\n"}Try adjusting your filters.
+                Không tìm thấy học sinh.{"\n"}Hãy thử điều chỉnh bộ lọc.
               </Text>
             </View>
           }

@@ -51,7 +51,7 @@ const ExamScheduleIndex = () => {
       setData(result);
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Could not fetch exam schedules");
+      Alert.alert("Lỗi", "Không thể tải lịch thi");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -113,25 +113,25 @@ const ExamScheduleIndex = () => {
 
   const handleDeleteSchedule = async (id: string, title: string) => {
     Alert.alert(
-      "Confirm Delete",
-      `Are you sure you want to delete "${title}"? This will permanently remove all exam slots and assignments for this schedule.`,
+      "Xác nhận xóa",
+      `Bạn có chắc chắn muốn xóa "${title}"? Thao tác này sẽ xóa vĩnh viễn tất cả các ca thi và phân công cho lịch thi này.`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: "Hủy", style: "cancel" },
         {
-          text: "Delete",
+          text: "Xóa",
           style: "destructive",
           onPress: async () => {
             try {
               setLoading(true);
               const success = await examScheduleService.deleteSchedule(id);
               if (success) {
-                Alert.alert("Success", "Exam schedule deleted successfully");
+                Alert.alert("Thành công", "Đã xóa lịch thi thành công");
                 fetchData();
               } else {
-                Alert.alert("Error", "Could not delete exam schedule");
+                Alert.alert("Lỗi", "Không thể xóa lịch thi");
               }
             } catch (error: any) {
-              Alert.alert("Error", error?.response?.data?.message || "An error occurred");
+              Alert.alert("Lỗi", error?.response?.data?.message || "Đã xảy ra lỗi");
             } finally {
               setLoading(false);
             }
@@ -180,7 +180,7 @@ const ExamScheduleIndex = () => {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-500 text-xs"
             >
-              Grade {item.grade} • Term {item.term} • {item.schoolYear}
+              Khối {item.grade} • Học kỳ {item.term} • {item.schoolYear}
             </Text>
           </View>
         </View>
@@ -198,7 +198,7 @@ const ExamScheduleIndex = () => {
               item.isActive ? "text-green-600" : "text-gray-500"
             }`}
           >
-            {item.isActive ? "ACTIVE" : "INACTIVE"}
+            {item.isActive ? "ĐANG HOẠT ĐỘNG" : "KHÔNG HOẠT ĐỘNG"}
           </Text>
         </View>
         <View className="flex-row items-center mt-4">
@@ -231,7 +231,7 @@ const ExamScheduleIndex = () => {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-xl text-black"
           >
-            Exam Schedule
+            Lịch thi
           </Text>
         </View>
         <TouchableOpacity
@@ -242,7 +242,7 @@ const ExamScheduleIndex = () => {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-[#136ADA] text-base"
           >
-            Create
+            Tạo mới
           </Text>
         </TouchableOpacity>
       </View>
@@ -252,7 +252,7 @@ const ExamScheduleIndex = () => {
         <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100 shadow-sm shadow-gray-100">
           <Ionicons name="search-outline" size={20} color="#9ca3af" />
           <TextInput
-            placeholder="Search by title..."
+            placeholder="Tìm theo tiêu đề..."
             className="flex-1 ml-2 text-black text-sm"
             style={{ fontFamily: "Poppins-Regular" }}
             placeholderTextColor="#9ca3af"
@@ -280,7 +280,7 @@ const ExamScheduleIndex = () => {
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Filter Schedules</Text>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Lọc Lịch thi</Text>
               <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -288,7 +288,7 @@ const ExamScheduleIndex = () => {
 
             {/* Filter: Academic Term */}
             <View className="mb-8">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Academic Term</Text>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Học kỳ</Text>
               <View className="flex-row items-center gap-3">
                  {[1, 2].map(t => (
                     <TouchableOpacity
@@ -296,21 +296,21 @@ const ExamScheduleIndex = () => {
                       onPress={() => setModalTerm(t.toString())}
                       className={`px-6 py-3.5 rounded-2xl items-center ${modalTerm === t.toString() ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
                     >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: modalTerm === t.toString() ? "#1D4ED8" : "#9CA3AF" }}>Term {t}</Text>
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: modalTerm === t.toString() ? "#1D4ED8" : "#9CA3AF" }}>Kỳ {t}</Text>
                     </TouchableOpacity>
                  ))}
                  <TouchableOpacity
                       onPress={() => setModalTerm("")}
                       className={`px-6 py-3.5 rounded-2xl items-center ${modalTerm === "" ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
                     >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: modalTerm === "" ? "#1D4ED8" : "#9CA3AF" }}>All</Text>
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: modalTerm === "" ? "#1D4ED8" : "#9CA3AF" }}>Tất cả</Text>
                 </TouchableOpacity>
               </View>
             </View>
 
             {/* Filter: Exam Type */}
             <View className="mb-8">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Exam Type</Text>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Loại kỳ thi</Text>
               <View className="flex-row flex-wrap gap-2">
                  {["Giữa Kì", "Cuối Kì"].map(type => (
                     <TouchableOpacity
@@ -325,14 +325,14 @@ const ExamScheduleIndex = () => {
                       onPress={() => setModalType("")}
                       className={`px-5 py-3 rounded-2xl items-center ${modalType === "" ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
                     >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 12, color: modalType === "" ? "#1D4ED8" : "#9CA3AF" }}>All</Text>
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 12, color: modalType === "" ? "#1D4ED8" : "#9CA3AF" }}>Tất cả</Text>
                  </TouchableOpacity>
               </View>
             </View>
 
             {/* Filter: School Year */}
             <View className="mb-12">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Academic Year</Text>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Năm học</Text>
               <TextInput
                 value={modalYear}
                 onChangeText={setModalYear}
@@ -349,13 +349,13 @@ const ExamScheduleIndex = () => {
                 onPress={resetFilters}
                 className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Reset</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Đặt lại</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
                 className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Apply Filters</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -391,7 +391,7 @@ const ExamScheduleIndex = () => {
                 color="#D1D5DB"
               />
               <Text className="text-gray-400 mt-4 font-medium text-center">
-                No exam schedules found.{"\n"}Tap (+) to create one.
+                Không tìm thấy lịch thi nào.{"\n"}Chạm (+) để tạo mới.
               </Text>
             </View>
           }

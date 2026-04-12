@@ -20,7 +20,7 @@ export default function AdminFeesScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Fee Management</Text>
+        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Quản lý Học phí</Text>
       </View>
 
       <FlatList
@@ -52,7 +52,7 @@ export default function AdminFeesScreen() {
               <View className="mb-2">
                 <View className="flex-row justify-between mb-1">
                   <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">
-                    {item.paidCount}/{item.totalCount} paid
+                    {item.paidCount}/{item.totalCount} đã đóng
                   </Text>
                   <Text style={{ fontFamily: 'Poppins-SemiBold', color: pct === 100 ? '#22C55E' : '#136ADA', fontSize: 11 }}>{pct}%</Text>
                 </View>
@@ -67,7 +67,7 @@ export default function AdminFeesScreen() {
               <View className="flex-row items-center gap-1">
                 <Ionicons name="calendar-outline" size={12} color={overdue ? '#EF4444' : '#9CA3AF'} />
                 <Text style={{ fontFamily: 'Poppins-Regular', color: overdue ? '#EF4444' : '#9CA3AF', fontSize: 11 }}>
-                  Due: {item.dueDate}{overdue ? ' · OVERDUE' : ''}
+                  Hạn: {item.dueDate}{overdue ? ' · QUÁ HẠN' : ''}
                 </Text>
               </View>
             </TouchableOpacity>

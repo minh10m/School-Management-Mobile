@@ -24,13 +24,13 @@ export default function CreateExamScheduleScreen() {
 
   const handleCreate = async () => {
     if (!type.trim() || !term.trim() || !schoolYear.trim() || !grade.trim()) {
-      Alert.alert("Error", "Please fill out all fields.");
+      Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin các trường.");
       return;
     }
 
     const numericGrade = parseInt(grade, 10);
     if (isNaN(numericGrade) || numericGrade < 1 || numericGrade > 12) {
-      Alert.alert("Error", "Please enter a valid Grade (e.g. 10, 11, 12).");
+      Alert.alert("Lỗi", "Vui lòng nhập Khối lớp hợp lệ (VD: 10, 11, 12).");
       return;
     }
 
@@ -58,12 +58,12 @@ export default function CreateExamScheduleScreen() {
         isActive: true,
       });
 
-      Alert.alert("Success", "Exam schedule created successfully", [
-        { text: "OK", onPress: () => router.back() },
+      Alert.alert("Thành công", "Đã tạo lịch thi thành công", [
+        { text: "Đồng ý", onPress: () => router.back() },
       ]);
     } catch (error: any) {
       console.error("Error creating exam schedule:", error);
-      Alert.alert("Error", getErrorMessage(error));
+      Alert.alert("Lỗi", getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -83,7 +83,7 @@ export default function CreateExamScheduleScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-xl text-black"
         >
-          New Exam Schedule
+          Lịch thi mới
         </Text>
       </View>
 
@@ -98,12 +98,12 @@ export default function CreateExamScheduleScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-700 text-sm mb-1.5 ml-1"
             >
-              Type (Exam Kind) <Text className="text-red-500">*</Text>
+              Loại kỳ thi <Text className="text-red-500">*</Text>
             </Text>
             <TextInput
               value={type}
               onChangeText={setType}
-              placeholder="e.g., Giữa Kì, Cuối Kì"
+              placeholder="VD: Giữa kỳ, Cuối kỳ"
               placeholderTextColor="#9ca3af"
               className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-black text-sm"
               style={{ fontFamily: "Poppins-Regular" }}
@@ -116,12 +116,12 @@ export default function CreateExamScheduleScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-700 text-sm mb-1.5 ml-1"
             >
-              Term <Text className="text-red-500">*</Text>
+              Học kỳ <Text className="text-red-500">*</Text>
             </Text>
             <TextInput
               value={term}
               onChangeText={setTerm}
-              placeholder="e.g., 1, 2"
+              placeholder="VD: 1, 2"
               placeholderTextColor="#9ca3af"
               className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-black text-sm"
               style={{ fontFamily: "Poppins-Regular" }}
@@ -134,12 +134,12 @@ export default function CreateExamScheduleScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-700 text-sm mb-1.5 ml-1"
             >
-              School Year <Text className="text-red-500">*</Text>
+              Năm học <Text className="text-red-500">*</Text>
             </Text>
             <TextInput
               value={schoolYear}
               onChangeText={setSchoolYear}
-              placeholder="e.g., 2026"
+              placeholder="VD: 2026"
               placeholderTextColor="#9ca3af"
               className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-black text-sm"
               style={{ fontFamily: "Poppins-Regular" }}
@@ -152,12 +152,12 @@ export default function CreateExamScheduleScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-700 text-sm mb-1.5 ml-1"
             >
-              Grade Level <Text className="text-red-500">*</Text>
+              Khối lớp <Text className="text-red-500">*</Text>
             </Text>
             <TextInput
               value={grade}
               onChangeText={setGrade}
-              placeholder="e.g., 10, 11, 12"
+              placeholder="VD: 10, 11, 12"
               keyboardType="numeric"
               placeholderTextColor="#9ca3af"
               className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-black text-sm"
@@ -194,7 +194,7 @@ export default function CreateExamScheduleScreen() {
                   style={{ fontFamily: "Poppins-Bold" }}
                   className="text-white text-base ml-2"
                 >
-                  Create Schedule
+                  Tạo Lịch thi
                 </Text>
               </>
             )}

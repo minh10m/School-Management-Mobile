@@ -9,10 +9,10 @@ import { UserResponse } from '../../../types/user';
 import { RoleResponse } from '../../../types/role';
 import { getErrorMessage } from '../../../utils/error';
 
-const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
-  Admin:   { bg: '#EFF6FF', text: '#136ADA' },
-  Teacher: { bg: '#F3E8FF', text: '#A855F7' },
-  Student: { bg: '#F0FDF4', text: '#22C55E' },
+const ROLE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
+  Admin:   { bg: '#EFF6FF', text: '#136ADA', label: "Quản trị" },
+  Teacher: { bg: '#F3E8FF', text: '#A855F7', label: "Giáo viên" },
+  Student: { bg: '#F0FDF4', text: '#22C55E', label: "Học sinh" },
 };
 
 export default function AdminUserDetailScreen() {
@@ -45,7 +45,7 @@ export default function AdminUserDetailScreen() {
       setUser(res);
     } catch (err) {
       console.error(err);
-      Alert.alert('Error', 'Could not fetch user details');
+      Alert.alert('Lỗi', 'Không thể tải thông tin người dùng');
     } finally {
       setLoading(false);
     }
@@ -85,9 +85,9 @@ export default function AdminUserDetailScreen() {
       });
       setUser(updated);
       setEditVisible(false);
-      Alert.alert("Success", "User details updated.");
+      Alert.alert("Thành công", "Đã cập nhật thông tin người dùng.");
     } catch (error: any) {
-      Alert.alert("Error", getErrorMessage(error));
+      Alert.alert("Lỗi", getErrorMessage(error));
     } finally {
       setSaving(false);
     }
@@ -101,9 +101,9 @@ export default function AdminUserDetailScreen() {
 
   if (!user) return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center">
-      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">User not found</Text>
+      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Không tìm thấy người dùng</Text>
       <TouchableOpacity onPress={() => router.back()} className="mt-4">
-        <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue">Go Back</Text>
+        <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue">Quay lại</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -113,26 +113,26 @@ export default function AdminUserDetailScreen() {
 
   const handleResetPassword = () => {
     Alert.prompt(
-      'Reset Password',
-      'Enter new password for this user:',
+      'Đặt lại mật khẩu',
+      'Nhập mật khẩu mới cho người dùng này:',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Reset',
+          text: 'Đặt lại',
           onPress: async (password?: string) => {
             if (!password) return;
 
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
             if (!passwordRegex.test(password)) {
-              Alert.alert('Invalid Password', 'Password must be at least 8 characters long and contain uppercase letters, lowercase letters, and numbers.');
+              Alert.alert('Mật khẩu không hợp lệ', 'Mật khẩu phải dài ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và chữ số.');
               return;
             }
 
             try {
               await userService.resetPassword(user.userId, { newPassword: password });
-              Alert.alert('Success', 'Password has been reset.');
+              Alert.alert('Thành công', 'Mật khẩu đã được đặt lại.');
             } catch (err: any) {
-              Alert.alert('Error', getErrorMessage(err));
+              Alert.alert('Lỗi', getErrorMessage(err));
             }
           }
         }
@@ -144,21 +144,21 @@ export default function AdminUserDetailScreen() {
   const handleToggleStatus = async () => {
     const nextLocked = !isLocked;
     Alert.alert(
-      nextLocked ? 'Lock Account' : 'Unlock Account',
-      `Are you sure you want to ${nextLocked ? 'lock' : 'unlock'} this account?`,
+      nextLocked ? 'Khóa tài khoản' : 'Mở khóa tài khoản',
+      `Bạn có chắc chắn muốn ${nextLocked ? 'khóa' : 'mở khóa'} tài khoản này không?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Confirm',
+          text: 'Xác nhận',
           onPress: async () => {
             try {
               // Lock until 2099 if nextLocked is true, else null
               const lockoutEnd = nextLocked ? new Date('2099-12-31').toISOString() : null;
               await userService.updateStatus(user.userId, { lockoutEnd });
-              Alert.alert('Success', `Account ${nextLocked ? 'locked' : 'unlocked'}.`);
+              Alert.alert('Thành công', `Đã ${nextLocked ? 'khóa' : 'mở khóa'} tài khoản.`);
               fetchUser(); // Refresh UI
             } catch (err: any) {
-              Alert.alert('Error', getErrorMessage(err));
+              Alert.alert('Lỗi', getErrorMessage(err));
             }
           }
         }
@@ -168,20 +168,20 @@ export default function AdminUserDetailScreen() {
 
   const handleChangeRole = () => {
     Alert.alert(
-      'Change Role',
-      'Select new role:',
+      'Thay đổi vai trò',
+      'Chọn vai trò mới:',
       roles.map((r: any) => ({
-        text: r.name,
+        text: r.name === 'Admin' ? 'Quản trị' : (r.name === 'Teacher' ? 'Giáo viên' : (r.name === 'Student' ? 'Học sinh' : r.name)),
         onPress: async () => {
           try {
             await userService.updateRole(user.userId, { roleId: r.name }); 
-            Alert.alert('Success', 'Role updated.');
+            Alert.alert('Thành công', 'Đã cập nhật vai trò.');
             fetchUser();
           } catch (err: any) {
-            Alert.alert('Error', getErrorMessage(err));
+            Alert.alert('Lỗi', getErrorMessage(err));
           }
         }
-      })).concat([{ text: 'Cancel', style: 'cancel' } as any])
+      })).concat([{ text: 'Hủy', style: 'cancel' } as any])
     );
   };
 
@@ -204,9 +204,9 @@ export default function AdminUserDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">User Detail</Text>
+        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Chi tiết người dùng</Text>
         <TouchableOpacity onPress={openEdit}>
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Edit</Text>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Chỉnh sửa</Text>
         </TouchableOpacity>
       </View>
 
@@ -220,28 +220,28 @@ export default function AdminUserDetailScreen() {
           </View>
           <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl mb-1 text-center">{user.fullName}</Text>
           <View style={{ backgroundColor: roleColor.bg }} className="px-3 py-1 rounded-full mb-2">
-            <Text style={{ fontFamily: 'Poppins-Medium', color: roleColor.text, fontSize: 12 }}>{user.role}</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium', color: roleColor.text, fontSize: 12 }}>{roleColor.label || user.role}</Text>
           </View>
           {isLocked && (
             <View className="flex-row items-center gap-1 bg-red-50 px-3 py-1 rounded-full">
               <Ionicons name="lock-closed" size={12} color="#EF4444" />
-              <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11 }} className="text-red-500">Account Locked</Text>
+              <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 11 }} className="text-red-500">Tài khoản bị khóa</Text>
             </View>
           )}
         </View>
 
         {/* Info */}
         <View className="bg-white mx-4 mt-3 rounded-2xl px-4 border border-gray-100">
-          <InfoRow icon="mail-outline" label="Email" value={user.email} />
-          <InfoRow icon="call-outline" label="Phone" value={user.phoneNumber} />
-          <InfoRow icon="location-outline" label="Address" value={user.address} />
-          <InfoRow icon="calendar-outline" label="Birthday" value={user.birthday ? user.birthday.split('T')[0] : 'N/A'} />
-          <InfoRow icon="person-outline" label="Username" value={user.userName} />
+          <InfoRow icon="mail-outline" label="Địa chỉ Email" value={user.email} />
+          <InfoRow icon="call-outline" label="Số điện thoại" value={user.phoneNumber} />
+          <InfoRow icon="location-outline" label="Địa chỉ" value={user.address} />
+          <InfoRow icon="calendar-outline" label="Ngày sinh" value={user.birthday ? user.birthday.split('T')[0] : 'Chưa cập nhật'} />
+          <InfoRow icon="person-outline" label="Tên đăng nhập" value={user.userName} />
         </View>
 
         {/* Actions */}
         <View className="mx-4 mt-3 gap-2 pb-10">
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-1 px-1">ACTIONS</Text>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-1 px-1">HÀNH ĐỘNG</Text>
 
           <TouchableOpacity
             className="bg-white border border-gray-100 rounded-2xl p-4 flex-row items-center gap-3 shadow-sm"
@@ -250,7 +250,7 @@ export default function AdminUserDetailScreen() {
             <View className="w-9 h-9 rounded-full bg-blue-50 items-center justify-center">
               <Ionicons name="key-outline" size={18} color="#136ADA" />
             </View>
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm flex-1">Reset Password</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm flex-1">Đặt lại mật khẩu</Text>
             <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
           </TouchableOpacity>
 
@@ -261,7 +261,7 @@ export default function AdminUserDetailScreen() {
             <View className={`w-9 h-9 rounded-full items-center justify-center ${isLocked ? 'bg-green-100' : 'bg-orange-50'}`}>
               <Ionicons name={isLocked ? 'lock-open-outline' : 'lock-closed-outline'} size={18} color={isLocked ? '#22C55E' : '#F97316'} />
             </View>
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm flex-1">{isLocked ? 'Unlock Account' : 'Lock Account'}</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm flex-1">{isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}</Text>
             <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
           </TouchableOpacity>
 
@@ -272,7 +272,7 @@ export default function AdminUserDetailScreen() {
             <View className="w-9 h-9 rounded-full bg-purple-50 items-center justify-center">
               <Ionicons name="shield-outline" size={18} color="#A855F7" />
             </View>
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm flex-1">Change Role</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm flex-1">Thay đổi vai trò</Text>
             <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
           </TouchableOpacity>
         </View>
@@ -283,23 +283,23 @@ export default function AdminUserDetailScreen() {
         <SafeAreaView className="flex-1 bg-white">
           <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
             <TouchableOpacity onPress={() => setEditVisible(false)}>
-              <Text className="text-gray-500 text-base" style={{ fontFamily: "Poppins-Regular" }}>Cancel</Text>
+              <Text className="text-gray-500 text-base" style={{ fontFamily: "Poppins-Regular" }}>Hủy</Text>
             </TouchableOpacity>
-            <Text className="text-black text-base" style={{ fontFamily: "Poppins-Bold" }}>Edit User Info</Text>
+            <Text className="text-black text-base" style={{ fontFamily: "Poppins-Bold" }}>Sửa thông tin người dùng</Text>
             <TouchableOpacity onPress={handleSaveEdit} disabled={saving}>
               {saving ? <ActivityIndicator size="small" color="#136ADA" /> : (
-                <Text className="text-blue-600 text-base" style={{ fontFamily: "Poppins-SemiBold" }}>Save</Text>
+                <Text className="text-blue-600 text-base" style={{ fontFamily: "Poppins-SemiBold" }}>Lưu</Text>
               )}
             </TouchableOpacity>
           </View>
 
           <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
             <View className="gap-5">
-              <EditInput label="Full Name" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
+              <EditInput label="Họ và tên" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
               <EditInput label="Email" value={editForm.email} onChangeText={(v: string) => setEditForm({ ...editForm, email: v })} keyboardType="email-address" />
-              <EditInput label="Phone Number" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
-              <EditInput label="Address" value={editForm.address} onChangeText={(v: string) => setEditForm({ ...editForm, address: v })} />
-              <EditInput label="Birthday (YYYY-MM-DD)" value={editForm.birthday} onChangeText={(v: string) => setEditForm({ ...editForm, birthday: v })} placeholder="1990-01-01" />
+              <EditInput label="Số điện thoại" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
+              <EditInput label="Địa chỉ" value={editForm.address} onChangeText={(v: string) => setEditForm({ ...editForm, address: v })} />
+              <EditInput label="Ngày sinh (YYYY-MM-DD)" value={editForm.birthday} onChangeText={(v: string) => setEditForm({ ...editForm, birthday: v })} placeholder="1990-01-01" />
             </View>
           </ScrollView>
         </SafeAreaView>

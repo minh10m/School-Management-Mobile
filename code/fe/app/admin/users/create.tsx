@@ -122,26 +122,26 @@ export default function AdminCreateUserScreen() {
       !form.email ||
       !form.roleId
     ) {
-      Alert.alert("Missing info", "Please fill in all required fields (*).");
+      Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ các thông tin bắt buộc (*).");
       return;
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!passwordRegex.test(form.password)) {
       Alert.alert(
-        "Invalid Password",
-        "Password must be at least 8 characters long and contain uppercase letters, lowercase letters, and numbers.",
+        "Mật khẩu không hợp lệ",
+        "Mật khẩu phải dài ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và chữ số.",
       );
       return;
     }
 
     if (isStudent && !form.classYearId) {
-      Alert.alert("Missing info", "Please select a class for the student.");
+      Alert.alert("Thiếu thông tin", "Vui lòng chọn lớp học cho học sinh.");
       return;
     }
 
     if (isTeacher && !form.subjectId) {
-      Alert.alert("Missing info", "Please select a subject for the teacher.");
+      Alert.alert("Thiếu thông tin", "Vui lòng chọn môn học chuyên môn cho giáo viên.");
       return;
     }
 
@@ -159,11 +159,11 @@ export default function AdminCreateUserScreen() {
         classYearId: form.classYearId,
         subjectId: form.subjectId ? [form.subjectId] : [],
       });
-      Alert.alert("Success", `Account created for ${form.fullName}`, [
+      Alert.alert("Thành công", `Đã tạo tài khoản cho ${form.fullName}`, [
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (err: any) {
-      Alert.alert("Error", getErrorMessage(err));
+      Alert.alert("Lỗi", getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -190,7 +190,7 @@ export default function AdminCreateUserScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-black text-xl ml-2"
         >
-          New Account
+          Tạo tài khoản mới
         </Text>
       </View>
 
@@ -202,14 +202,14 @@ export default function AdminCreateUserScreen() {
         <View className="gap-2">
            {/* Section 1: Basic Info */}
           <Field
-            label="Username *"
+            label="Tên đăng nhập *"
             icon="key-outline"
             value={form.username}
             onChangeText={(v: string) => set("username", v)}
-            placeholder="username_101"
+            placeholder="ten_dang_nhap"
           />
           <Field
-            label="Password *"
+            label="Mật khẩu *"
             icon="lock-closed-outline"
             value={form.password}
             onChangeText={(v: string) => set("password", v)}
@@ -217,35 +217,35 @@ export default function AdminCreateUserScreen() {
             secureTextEntry
           />
           <Field
-            label="Full Name *"
+            label="Họ và tên *"
             icon="person-outline"
             value={form.fullName}
             onChangeText={(v: string) => set("fullName", v)}
-            placeholder="Nguyen Van A"
+            placeholder="Nguyễn Văn A"
           />
           <Field
-            label="Email Address *"
+            label="Địa chỉ Email *"
             icon="mail-outline"
             value={form.email}
             onChangeText={(v: string) => set("email", v)}
-            placeholder="user@school.edu"
+            placeholder="user@school.edu.vn"
           />
           <Field
-            label="Phone Number"
+            label="Số điện thoại"
             icon="call-outline"
             value={form.phone}
             onChangeText={(v: string) => set("phone", v)}
             placeholder="09xxxxxxxx"
           />
           <Field
-            label="Address"
+            label="Địa chỉ"
             icon="location-outline"
             value={form.address}
             onChangeText={(v: string) => set("address", v)}
-            placeholder="123 Road ABC..."
+            placeholder="Số 123, Đường ABC..."
           />
           <Field
-            label="Birthday (YYYY-MM-DD)"
+            label="Ngày sinh (YYYY-MM-DD)"
             icon="calendar-outline"
             value={form.birthday}
             onChangeText={(v: string) => set("birthday", v)}
@@ -258,7 +258,7 @@ export default function AdminCreateUserScreen() {
               style={{ fontFamily: "Poppins-Medium" }}
               className="text-gray-400 text-[10px] mb-3 ml-1 uppercase tracking-widest"
             >
-              System Role *
+              Vai trò hệ thống *
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {roles && roles.length > 0 ? (
@@ -287,7 +287,7 @@ export default function AdminCreateUserScreen() {
                           color: isActive ? "white" : "#6B7280",
                         }}
                       >
-                        {r.name}
+                        {r.name === 'Admin' ? 'Quản trị' : (r.name === 'Teacher' ? 'Giáo viên' : (r.name === 'Student' ? 'Học sinh' : r.name))}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -304,7 +304,7 @@ export default function AdminCreateUserScreen() {
               <Text
                 style={{ fontFamily: "Poppins-Medium", fontSize: 10, color: '#9CA3AF', marginBottom: 12, marginLeft: 4, textTransform: 'uppercase', letterSpacing: 2 }}
               >
-                Assign to Class *
+                Phân vào lớp học *
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 {classes.map((c) => {
@@ -337,7 +337,7 @@ export default function AdminCreateUserScreen() {
               </View>
               {classes.length === 0 && (
                 <Text style={{ color: '#9CA3AF', fontSize: 12, fontStyle: 'italic' }}>
-                  No classes found for 2026
+                  Không tìm thấy lớp học cho năm 2026
                 </Text>
               )}
             </View>
@@ -348,7 +348,7 @@ export default function AdminCreateUserScreen() {
               <Text
                 style={{ fontFamily: "Poppins-Medium", fontSize: 10, color: '#9CA3AF', marginBottom: 12, marginLeft: 4, textTransform: 'uppercase', letterSpacing: 2 }}
               >
-                Specialize Subject *
+                Môn học chuyên môn *
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 {subjects.map((s) => {
@@ -397,7 +397,7 @@ export default function AdminCreateUserScreen() {
                 style={{ fontFamily: "Poppins-Bold" }}
                 className="text-white text-lg"
               >
-                Create Account
+                Tạo tài khoản
               </Text>
             )}
           </TouchableOpacity>

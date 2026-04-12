@@ -60,7 +60,7 @@ export default function AdminSubjectsScreen() {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-xl text-black"
           >
-            Subject Management
+            Quản lý Môn học
           </Text>
         </View>
         <TouchableOpacity
@@ -71,7 +71,7 @@ export default function AdminSubjectsScreen() {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-[#136ADA] text-xs"
           >
-            New
+            Thêm mới
           </Text>
         </TouchableOpacity>
       </View>
@@ -81,7 +81,7 @@ export default function AdminSubjectsScreen() {
         <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100">
           <Ionicons name="search-outline" size={20} color="#9ca3af" />
           <TextInput
-            placeholder="Search subjects..."
+            placeholder="Tìm kiếm môn học..."
             className="flex-1 ml-2 text-black text-sm"
             style={{ fontFamily: "Poppins-Regular" }}
             value={search}
@@ -137,7 +137,7 @@ export default function AdminSubjectsScreen() {
                       }}
                       className="ml-1"
                     >
-                      {item.maxPeriod} periods/week
+                      {item.maxPeriod} tiết/tuần
                     </Text>
                   </View>
                 </View>
@@ -154,7 +154,7 @@ export default function AdminSubjectsScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 mt-4 text-center"
               >
-                No subjects found.{"\n"}Try a different keyword.
+                Không tìm thấy môn học nào.{"\n"}Hãy thử từ khóa khác.
               </Text>
             </View>
           }

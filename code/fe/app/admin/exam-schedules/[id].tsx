@@ -40,7 +40,7 @@ const ExamScheduleDetail = () => {
       setData(result);
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Could not fetch exam slot details");
+      Alert.alert("Lỗi", "Không thể tải chi tiết ca thi");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -68,15 +68,15 @@ const ExamScheduleDetail = () => {
         setLoading(true);
         const success = await examScheduleService.uploadExcel(id, file.uri);
         if (success) {
-          Alert.alert("Success", "Exam slot details imported from Excel");
+          Alert.alert("Thành công", "Đã nhập chi tiết ca thi từ file Excel thành công");
           fetchData();
         } else {
-          Alert.alert("Error", "Could not import Excel file");
+          Alert.alert("Lỗi", "Không thể nhập file Excel");
         }
       }
     } catch (error: any) {
       console.error(error);
-      Alert.alert("Error", getErrorMessage(error));
+      Alert.alert("Lỗi", getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -84,23 +84,23 @@ const ExamScheduleDetail = () => {
 
   const handleAssignStudents = async () => {
     Alert.alert(
-      "Confirm",
-      "Do you want to automatically assign students to these exam rooms? This will overwrite any existing assignment data for this schedule.",
+      "Xác nhận",
+      "Bạn có muốn tự động gán học sinh vào các phòng thi này không? Hành động này sẽ ghi đè lên các dữ liệu gán hiện có của lịch thi này.",
       [
-        { text: "Cancel", style: "cancel" },
+        { text: "Hủy", style: "cancel" },
         {
-          text: "Assign",
+          text: "Gán",
           onPress: async () => {
             try {
               setLoading(true);
               const success = await examScheduleService.triggerAssignment(id);
               if (success) {
-                Alert.alert("Success", "Students assigned to exam rooms successfully");
+                Alert.alert("Thành công", "Đã gán học sinh vào các phòng thi thành công");
               } else {
-                Alert.alert("Failed", "Could not assign students");
+                Alert.alert("Thất bại", "Không thể gán học sinh");
               }
             } catch (error: any) {
-              Alert.alert("Error", getErrorMessage(error));
+              Alert.alert("Lỗi", getErrorMessage(error));
             } finally {
               setLoading(false);
             }
@@ -118,7 +118,7 @@ const ExamScheduleDetail = () => {
       <View className="flex-row justify-between items-start mb-2">
         <View className="flex-1 mr-2">
           <Text className="text-gray-900 font-bold text-base">{item.subjectName}</Text>
-          <Text className="text-gray-500 text-xs mt-0.5">Room: {item.roomName}</Text>
+          <Text className="text-gray-500 text-xs mt-0.5">Phòng: {item.roomName}</Text>
         </View>
         <View className="bg-blue-50 px-2 py-1 rounded">
           <Text className="text-blue-600 text-[10px] font-bold">SLOT: {item.startTime.substring(0, 5)} - {item.finishTime.substring(0, 5)}</Text>
@@ -147,7 +147,7 @@ const ExamScheduleDetail = () => {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-xl text-black"
           >
-            {title || "Schedule Detail"}
+            {title || "Chi tiết Lịch thi"}
           </Text>
         </View>
       </View>
@@ -164,7 +164,7 @@ const ExamScheduleDetail = () => {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-white ml-2 text-sm"
           >
-            Import
+            Nhập dữ liệu
           </Text>
         </TouchableOpacity>
 
@@ -178,13 +178,13 @@ const ExamScheduleDetail = () => {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-white ml-2 text-sm"
           >
-            Assign
+            Gán
           </Text>
         </TouchableOpacity>
       </View>
 
       <View className="px-6 mt-4 flex-row justify-between items-center">
-        <Text className="text-gray-900 font-bold text-lg">Exam Slots</Text>
+        <Text className="text-gray-900 font-bold text-lg">Ca thi</Text>
         <View className="bg-gray-200 px-2 py-0.5 rounded-full">
           <Text className="text-gray-600 text-[10px] font-bold">{data?.totalCount || 0}</Text>
         </View>
@@ -207,7 +207,7 @@ const ExamScheduleDetail = () => {
             <View className="items-center justify-center py-20 bg-white rounded-2xl mx-6 mt-4 border border-dashed border-gray-200">
               <Ionicons name="grid-outline" size={48} color="#E5E7EB" />
               <Text className="text-gray-400 mt-4 text-center px-6">
-                This schedule has no slots defined yet.{"\n"}Please import from the template Excel file.
+                Lịch thi này chưa có ca thi nào được thiết lập.{"\n"}Vui lòng nhập dữ liệu từ file Excel mẫu.
               </Text>
             </View>
           }

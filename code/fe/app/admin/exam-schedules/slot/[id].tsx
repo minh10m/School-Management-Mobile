@@ -85,13 +85,13 @@ const ExamSlotAssignments = () => {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-xl text-black"
           >
-            Candidate List
+            Danh sách Thí sinh
           </Text>
           <Text
             style={{ fontFamily: "Poppins-Medium" }}
             className="text-gray-400 text-[10px]"
           >
-            Exam room details
+            Chi tiết phòng thi
           </Text>
         </View>
       </View>
@@ -100,7 +100,7 @@ const ExamSlotAssignments = () => {
         <View className="bg-blue-50 p-4 rounded-2xl flex-row items-center">
           <Ionicons name="information-circle-outline" size={20} color="#136ADA" />
           <Text className="text-blue-800 text-xs ml-2 flex-1 font-medium">
-            There are {data?.totalCount || 0} students assigned to this room.
+            Có {data?.totalCount || 0} học sinh được phân công vào phòng này.
           </Text>
         </View>
       </View>
@@ -122,7 +122,7 @@ const ExamSlotAssignments = () => {
             <View className="items-center justify-center py-20">
               <Ionicons name="people-outline" size={64} color="#D1D5DB" />
               <Text className="text-gray-400 mt-4 text-center">
-                No students assigned yet.{"\n"}Please go back and trigger "Assign Students".
+                Chưa có học sinh nào được phân công.{"\n"}Vui lòng quay lại và bấm "Gán học sinh".
               </Text>
             </View>
           }

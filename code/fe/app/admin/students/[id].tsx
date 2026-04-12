@@ -46,7 +46,7 @@ export default function AdminStudentDetailScreen() {
       });
     } catch (err) {
       console.error(err);
-      Alert.alert("Error", "Could not fetch student details");
+      Alert.alert("Lỗi", "Không thể tải thông tin học sinh");
     } finally {
       setLoading(false);
     }
@@ -71,9 +71,9 @@ export default function AdminStudentDetailScreen() {
       });
       setStudent(updated);
       setIsEditing(false);
-      Alert.alert("Success", "Student details updated successfully!");
+      Alert.alert("Thành công", "Đã cập nhật thông tin học sinh thành công!");
     } catch (err: any) {
-      Alert.alert("Error", getErrorMessage(err));
+      Alert.alert("Lỗi", getErrorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -93,7 +93,7 @@ export default function AdminStudentDetailScreen() {
           style={{ fontFamily: "Poppins-Medium" }}
           className="text-gray-400"
         >
-          Student not found
+          Không tìm thấy học sinh
         </Text>
       </SafeAreaView>
     );
@@ -114,7 +114,7 @@ export default function AdminStudentDetailScreen() {
           style={{ fontFamily: "Poppins-Medium" }}
           className="text-black text-sm"
         >
-          {value || "N/A"}
+          {value || "Chưa cập nhật"}
         </Text>
       </View>
     </View>
@@ -155,14 +155,14 @@ export default function AdminStudentDetailScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-black text-lg flex-1"
         >
-          Student Detail
+          Chi tiết Học sinh
         </Text>
         <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
           <Text
             style={{ fontFamily: "Poppins-SemiBold" }}
             className="text-bright-blue text-sm"
           >
-            {isEditing ? "Cancel" : "Edit"}
+            {isEditing ? "Hủy" : "Chỉnh sửa"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -196,14 +196,14 @@ export default function AdminStudentDetailScreen() {
                   color: "#0D9488",
                 }}
               >
-                Class {student.classYearSub?.[0]?.className}
+                Lớp {student.classYearSub?.[0]?.className}
               </Text>
             </View>
             <Text
               style={{ fontFamily: "Poppins-Regular" }}
               className="text-gray-400 text-xs"
             >
-              Grade {student.classYearSub?.[0]?.grade}
+              Khối {student.classYearSub?.[0]?.grade}
             </Text>
           </View>
         </View>
@@ -211,7 +211,7 @@ export default function AdminStudentDetailScreen() {
         {isEditing ? (
           <View className="p-6">
             <EditField
-              label="Full Name"
+              label="Họ và tên"
               value={form.fullName}
               onChangeText={(t: string) => setForm({ ...form, fullName: t })}
             />
@@ -222,18 +222,18 @@ export default function AdminStudentDetailScreen() {
               keyboardType="email-address"
             />
             <EditField
-              label="Phone"
+              label="Số điện thoại"
               value={form.phone}
               onChangeText={(t: string) => setForm({ ...form, phone: t })}
               keyboardType="phone-pad"
             />
             <EditField
-              label="Address"
+              label="Địa chỉ"
               value={form.address}
               onChangeText={(t: string) => setForm({ ...form, address: t })}
             />
             <EditField
-              label="Birthday (YYYY-MM-DD)"
+              label="Ngày sinh (YYYY-MM-DD)"
               value={form.birthday}
               onChangeText={(t: string) => setForm({ ...form, birthday: t })}
               placeholder="2005-10-10"
@@ -251,7 +251,7 @@ export default function AdminStudentDetailScreen() {
                   style={{ fontFamily: "Poppins-Bold" }}
                   className="text-white text-base"
                 >
-                  Save Changes
+                  Lưu thay đổi
                 </Text>
               )}
             </TouchableOpacity>
@@ -260,33 +260,33 @@ export default function AdminStudentDetailScreen() {
           <View className="mt-4">
             <InfoRow label="Email" value={student.email} icon="mail-outline" />
             <InfoRow
-              label="Phone"
+              label="Số điện thoại"
               value={student.phoneNumber}
               icon="call-outline"
             />
             <InfoRow
-              label="Address"
+              label="Địa chỉ"
               value={student.address}
               icon="location-outline"
             />
             <InfoRow
-              label="Birthday"
+              label="Ngày sinh"
               value={
                 student.birthday
-                  ? new Date(student.birthday).toLocaleDateString("en-GB")
-                  : "N/A"
+                  ? new Date(student.birthday).toLocaleDateString("vi-VN")
+                  : "Chưa cập nhật"
               }
               icon="calendar-outline"
             />
             <InfoRow
-              label="School Year"
+              label="Năm học"
               value={
                 student.classYearSub?.[0]?.schoolYear?.toString() || "2025-2026"
               }
               icon="time-outline"
             />
             <InfoRow
-              label="User ID"
+              label="Mã người dùng"
               value={student.userId}
               icon="finger-print-outline"
             />

@@ -104,10 +104,10 @@ export default function AdminEventsScreen() {
     const s = new Date(`${item.eventDate}T${item.startTime}`);
     const f = new Date(`${item.eventDate}T${item.finishTime}`);
     if (now < s)
-      return { label: "Upcoming", color: "text-blue-500", bg: "bg-blue-50" };
+      return { label: "Sắp tới", color: "text-blue-500", bg: "bg-blue-50" };
     if (now > f)
-      return { label: "Finished", color: "text-gray-400", bg: "bg-gray-50" };
-    return { label: "Ongoing", color: "text-green-500", bg: "bg-green-50" };
+      return { label: "Đã kết thúc", color: "text-gray-400", bg: "bg-gray-50" };
+    return { label: "Đang diễn ra", color: "text-green-500", bg: "bg-green-50" };
   };
 
   return (
@@ -122,7 +122,7 @@ export default function AdminEventsScreen() {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-xl text-black"
           >
-            Events
+            Sự kiện
           </Text>
         </View>
         <TouchableOpacity
@@ -133,7 +133,7 @@ export default function AdminEventsScreen() {
             style={{ fontFamily: "Poppins-Bold" }}
             className="text-[#136ADA] text-xs"
           >
-            New
+            Thêm mới
           </Text>
         </TouchableOpacity>
       </View>
@@ -155,7 +155,7 @@ export default function AdminEventsScreen() {
                 color: activeTab === t ? "white" : "#9CA3AF",
               }}
             >
-              {t.toUpperCase()}
+              {t === "All" ? "Tất cả" : t === "Upcoming" ? "Sắp tới" : t === "Ongoing" ? "Đang diễn ra" : "Đã kết thúc"}
             </Text>
           </TouchableOpacity>
         ))}
@@ -201,7 +201,7 @@ export default function AdminEventsScreen() {
             <ScrollView showsVerticalScrollIndicator={false} className="mb-10">
               {/* Filter: Term */}
               <View className="mb-8">
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Academic Term</Text>
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Học kỳ</Text>
                 <View className="flex-row gap-3">
                   {[1, 2].map((t) => (
                     <TouchableOpacity
@@ -209,7 +209,7 @@ export default function AdminEventsScreen() {
                       onPress={() => setTempTerm(t)}
                       className={`px-6 py-3.5 rounded-2xl items-center ${tempTerm === t ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
                     >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempTerm === t ? "#1D4ED8" : "#9CA3AF" }}>Term {t}</Text>
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempTerm === t ? "#1D4ED8" : "#9CA3AF" }}>Học kỳ {t}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -217,7 +217,7 @@ export default function AdminEventsScreen() {
 
               {/* Filter: Year */}
               <View className="mb-4">
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Academic Year</Text>
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Năm học</Text>
                 <View className="flex-row flex-wrap gap-3">
                   {[2024, 2025, 2026].map((y) => (
                     <TouchableOpacity
@@ -238,13 +238,13 @@ export default function AdminEventsScreen() {
                 onPress={resetFilters}
                 className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Reset</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Thiết lập lại</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
                 className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Apply Filters</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -295,7 +295,7 @@ export default function AdminEventsScreen() {
                       className="text-gray-300 text-[10px]"
                       style={{ fontFamily: "Poppins-Medium" }}
                     >
-                      Term {item.term} · {item.schoolYear}
+                      Học kỳ {item.term} · {item.schoolYear}
                     </Text>
                   </View>
                   <Text

@@ -56,7 +56,7 @@ export default function AdminRolesScreen() {
           style={{ fontFamily: "Poppins-Bold" }}
           className="text-xl text-black flex-1"
         >
-          Role Management
+          Quản lý Vai trò
         </Text>
       </View>
 
@@ -94,7 +94,7 @@ export default function AdminRolesScreen() {
                   style={{ fontFamily: "Poppins-Regular" }}
                   className="text-gray-400 text-[10px] mt-0.5"
                 >
-                  Access Level: {item.normalizedName}
+                  Cấp độ Truy cập: {item.normalizedName}
                 </Text>
               </View>
               <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center border border-blue-100">
@@ -109,7 +109,7 @@ export default function AdminRolesScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 mt-4 text-center"
               >
-                No roles found
+                Không tìm thấy vai trò nào
               </Text>
             </View>
           }
@@ -122,8 +122,7 @@ export default function AdminRolesScreen() {
           style={{ fontFamily: "Poppins-Medium" }}
           className="text-gray-400 text-[10px] text-center italic"
         >
-          Roles define system-wide access levels. Standard roles include Admin,
-          Teacher, and Student.
+          Vai trò xác định cấp độ truy cập toàn hệ thống. Các vai trò chuẩn bao gồm Quản trị, Giáo viên và Học sinh.
         </Text>
       </View>
     </SafeAreaView>

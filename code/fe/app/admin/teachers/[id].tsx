@@ -55,7 +55,7 @@ export default function AdminTeacherDetailScreen() {
       });
     } catch (err) {
       console.error(err);
-      Alert.alert('Error', 'Could not fetch teacher details');
+      Alert.alert('Lỗi', 'Không thể tải thông tin giáo viên');
     } finally {
       setLoading(false);
     }
@@ -78,9 +78,9 @@ export default function AdminTeacherDetailScreen() {
       });
       setTeacher(updated);
       setIsEditing(false);
-      Alert.alert('Success', 'Teacher details updated successfully!');
+      Alert.alert('Thành công', 'Đã cập nhật thông tin giáo viên thành công!');
     } catch (err: any) {
-      Alert.alert('Error', getErrorMessage(err));
+      Alert.alert('Lỗi', getErrorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -95,9 +95,9 @@ export default function AdminTeacherDetailScreen() {
       const updated = await teacherService.getTeacherSubjects(id);
       setAssignedSubjects(updated);
       setShowSubjectModal(false);
-      Alert.alert('Success', 'Subject assigned successfully!');
+      Alert.alert('Thành công', 'Đã phân công môn học thành công!');
     } catch (err: any) {
-      Alert.alert('Error', getErrorMessage(err));
+      Alert.alert('Lỗi', getErrorMessage(err));
     } finally {
       setSubjectLoading(false);
     }
@@ -105,12 +105,12 @@ export default function AdminTeacherDetailScreen() {
 
   const handleRemoveSubject = (teacherSubjectId: string, subjectName: string) => {
     Alert.alert(
-      'Remove Subject',
-      `Are you sure you want to remove "${subjectName}" from this teacher?`,
+      'Gỡ bỏ môn học',
+      `Bạn có chắc chắn muốn gỡ bỏ môn học "${subjectName}" khỏi giáo viên này không?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Remove',
+          text: 'Gỡ bỏ',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -120,7 +120,7 @@ export default function AdminTeacherDetailScreen() {
               const updated = await teacherService.getTeacherSubjects(id!);
               setAssignedSubjects(updated);
             } catch (err: any) {
-              Alert.alert('Error', getErrorMessage(err));
+              Alert.alert('Lỗi', getErrorMessage(err));
             } finally {
               setSubjectLoading(false);
             }
@@ -138,7 +138,7 @@ export default function AdminTeacherDetailScreen() {
 
   if (!teacher) return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center">
-      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Teacher not found</Text>
+      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Không tìm thấy giáo viên</Text>
     </SafeAreaView>
   );
 
@@ -149,7 +149,7 @@ export default function AdminTeacherDetailScreen() {
       </View>
       <View className="flex-1">
         <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-[10px] uppercase tracking-wider">{label}</Text>
-        <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm">{value || 'N/A'}</Text>
+        <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm">{value || 'Chưa cập nhật'}</Text>
       </View>
     </View>
   );
@@ -175,10 +175,10 @@ export default function AdminTeacherDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Teacher Detail</Text>
+        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Chi tiết Giáo viên</Text>
         <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
           <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">
-             {isEditing ? 'Cancel' : 'Edit'}
+             {isEditing ? 'Hủy' : 'Chỉnh sửa'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -194,11 +194,11 @@ export default function AdminTeacherDetailScreen() {
 
         {isEditing ? (
           <View className="p-6">
-            <EditField label="Full Name" value={form.fullName} onChangeText={(t: string) => setForm({...form, fullName: t})} />
+            <EditField label="Họ và tên" value={form.fullName} onChangeText={(t: string) => setForm({...form, fullName: t})} />
             <EditField label="Email" value={form.email} onChangeText={(t: string) => setForm({...form, email: t})} keyboardType="email-address" />
-            <EditField label="Phone" value={form.phoneNumber} onChangeText={(t: string) => setForm({...form, phoneNumber: t})} keyboardType="phone-pad" />
-            <EditField label="Address" value={form.address} onChangeText={(t: string) => setForm({...form, address: t})} />
-            <EditField label="Birthday (YYYY-MM-DD)" value={form.birthday} onChangeText={(t: string) => setForm({...form, birthday: t})} placeholder="1980-05-15" />
+            <EditField label="Số điện thoại" value={form.phoneNumber} onChangeText={(t: string) => setForm({...form, phoneNumber: t})} keyboardType="phone-pad" />
+            <EditField label="Địa chỉ" value={form.address} onChangeText={(t: string) => setForm({...form, address: t})} />
+            <EditField label="Ngày sinh (YYYY-MM-DD)" value={form.birthday} onChangeText={(t: string) => setForm({...form, birthday: t})} placeholder="1980-05-15" />
 
             <TouchableOpacity 
               className="bg-bright-blue rounded-3xl py-4 items-center mt-4 shadow-md shadow-blue-200"
@@ -206,37 +206,37 @@ export default function AdminTeacherDetailScreen() {
               disabled={saving}
             >
               {saving ? <ActivityIndicator color="white" /> : (
-                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Save Changes</Text>
+                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Lưu thay đổi</Text>
               )}
             </TouchableOpacity>
           </View>
         ) : (
           <View className="mt-4">
              <View className="px-6 py-2">
-                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-400 text-[10px] uppercase tracking-wider">Basic Information</Text>
+                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-400 text-[10px] uppercase tracking-wider">Thông tin cơ bản</Text>
              </View>
              <InfoRow label="Email" value={teacher.email} icon="mail-outline" />
-             <InfoRow label="Phone" value={teacher.phoneNumber} icon="call-outline" />
-             <InfoRow label="Address" value={teacher.address} icon="location-outline" />
-             <InfoRow label="Birthday" value={teacher.birthday ? new Date(teacher.birthday).toLocaleDateString('en-GB') : 'N/A'} icon="calendar-outline" />
-             <InfoRow label="User ID" value={teacher.userId} icon="finger-print-outline" />
+             <InfoRow label="Số điện thoại" value={teacher.phoneNumber} icon="call-outline" />
+             <InfoRow label="Địa chỉ" value={teacher.address} icon="location-outline" />
+             <InfoRow label="Ngày sinh" value={teacher.birthday ? new Date(teacher.birthday).toLocaleDateString('vi-VN') : 'Chưa cập nhật'} icon="calendar-outline" />
+             <InfoRow label="Mã người dùng" value={teacher.userId} icon="finger-print-outline" />
 
              {/* Subject Management Section */}
              <View className="px-6 py-4 mt-2">
                 <View className="flex-row justify-between items-center mb-3">
-                   <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-400 text-[10px] uppercase tracking-wider">Teaching Subjects</Text>
+                   <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-400 text-[10px] uppercase tracking-wider">Môn học giảng dạy</Text>
                    <TouchableOpacity 
                     onPress={() => setShowSubjectModal(true)}
                     className="bg-bright-blue/10 px-3 py-1 rounded-full items-center"
                    >
-                      <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 11, color: '#136ADA' }}>Assign</Text>
+                      <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 11, color: '#136ADA' }}>Phân công</Text>
                    </TouchableOpacity>
                 </View>
 
                 {subjectLoading && assignedSubjects.length === 0 ? (
                   <ActivityIndicator size="small" color="#136ADA" />
                 ) : assignedSubjects.length === 0 ? (
-                  <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs italic">No subjects assigned</Text>
+                  <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs italic">Chưa phân công môn học</Text>
                 ) : (
                   <View className="flex-row flex-wrap gap-2">
                     {assignedSubjects.map(sub => (
@@ -264,7 +264,7 @@ export default function AdminTeacherDetailScreen() {
         <View className="flex-1 bg-black/50 justify-end">
           <View className="bg-white rounded-t-[40px] h-[60%] p-6">
             <View className="flex-row justify-between items-center mb-6">
-              <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl">Assign Subject</Text>
+              <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl">Phân công môn học</Text>
               <TouchableOpacity onPress={() => setShowSubjectModal(false)}>
                 <Ionicons name="close" size={24} color="black" />
               </TouchableOpacity>
@@ -289,7 +289,7 @@ export default function AdminTeacherDetailScreen() {
               )}
               ListEmptyComponent={
                 <View className="items-center py-10">
-                   <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400">All subjects have been assigned</Text>
+                   <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400">Tất cả môn học đã được phân công</Text>
                 </View>
               }
             />

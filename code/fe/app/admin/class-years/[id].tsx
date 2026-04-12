@@ -72,11 +72,11 @@ export default function AdminClassDetailScreen() {
     if (!id) return;
     
     if (!form.className.trim()) {
-      Alert.alert('Validation Error', 'Class Name is required.');
+      Alert.alert('Lỗi xác thực', 'Tên lớp không được để trống.');
       return;
     }
     if (!form.homeRoomId) {
-      Alert.alert('Validation Error', 'Please select an Advisor (Homeroom Teacher).');
+      Alert.alert('Lỗi xác thực', 'Vui lòng chọn Giáo viên Chủ nhiệm.');
       return;
     }
 
@@ -85,7 +85,7 @@ export default function AdminClassDetailScreen() {
         ...form,
         schoolYear: parseInt(String(form.schoolYear), 10)
       });
-      Alert.alert('Success', 'Class updated successfully!');
+      Alert.alert('Thành công', 'Cập nhật lớp học thành công!');
       setEditing(false);
       fetchData();
     } catch (err: any) {
@@ -102,7 +102,7 @@ export default function AdminClassDetailScreen() {
 
   if (!classData) return (
     <SafeAreaView className="flex-1 bg-white items-center justify-center">
-      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Class not found</Text>
+      <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Không tìm thấy lớp học</Text>
     </SafeAreaView>
   );
 
@@ -113,12 +113,12 @@ export default function AdminClassDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black flex-1">Class Details</Text>
+        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black flex-1">Chi tiết Lớp học</Text>
         <TouchableOpacity 
           onPress={() => setEditing(!editing)}
           className={`px-4 py-1.5 rounded-full ${editing ? 'bg-gray-100' : 'bg-blue-50 border border-blue-100'}`}
         >
-          <Text style={{ fontFamily: "Poppins-Bold" }} className={`text-xs ${editing ? 'text-gray-500' : 'text-[#136ADA]'}`}>{editing ? 'Cancel' : 'Edit'}</Text>
+          <Text style={{ fontFamily: "Poppins-Bold" }} className={`text-xs ${editing ? 'text-gray-500' : 'text-[#136ADA]'}`}>{editing ? 'Hủy' : 'Chỉnh sửa'}</Text>
         </TouchableOpacity>
       </View>
 
@@ -132,7 +132,7 @@ export default function AdminClassDetailScreen() {
            </View>
            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-2xl mb-1">{classData.className}</Text>
            <View className="bg-blue-50 px-4 py-1 rounded-full border border-blue-100">
-              <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#136ADA] text-[10px]">GRADE {classData.grade}</Text>
+              <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#136ADA] text-[10px]">KHỐI {classData.grade}</Text>
            </View>
         </View>
 
@@ -141,12 +141,12 @@ export default function AdminClassDetailScreen() {
            <View className="flex-1 bg-white p-5 rounded-[32px] shadow-sm border border-gray-100 flex-row items-center justify-evenly">
               <View className="items-center">
                  <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#136ADA] text-lg">{studentsInClass.length}</Text>
-                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Students</Text>
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Học sinh</Text>
               </View>
               <View className="w-[1px] h-8 bg-gray-100" />
               <View className="items-center">
                  <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg">{classData.schoolYear ? String(classData.schoolYear).split('-')[0] : 'N/A'}</Text>
-                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Year</Text>
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Năm học</Text>
               </View>
            </View>
         </View>
@@ -154,18 +154,18 @@ export default function AdminClassDetailScreen() {
         {editing ? (
           <View className="p-8 gap-6">
              <View>
-                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-2 ml-1">Class Name</Text>
+                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-2 ml-1">Tên Lớp</Text>
                 <TextInput
                    value={form.className}
                    onChangeText={(t) => setForm({...form, className: t})}
                    className="bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-black text-sm"
                    style={{ fontFamily: 'Poppins-Medium' }}
-                   placeholder="Enter class name..."
+                   placeholder="Nhập tên lớp..."
                 />
              </View>
              
              <View>
-                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-3 ml-1">Grade Level</Text>
+                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-3 ml-1">Khối lớp</Text>
                 <View className="flex-row gap-3">
                    {[10, 11, 12].map(g => (
                       <TouchableOpacity key={g} 
@@ -179,7 +179,7 @@ export default function AdminClassDetailScreen() {
              </View>
 
              <View>
-                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-3 ml-1 text-center">Select Advisor</Text>
+                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-900 text-sm mb-3 ml-1 text-center">Chọn Chủ nhiệm</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row pb-2">
                    {teachers.map(t => (
                       <TouchableOpacity key={t.teacherId} 
@@ -198,13 +198,13 @@ export default function AdminClassDetailScreen() {
                className="bg-[#136ADA] rounded-3xl py-4 items-center mt-4 shadow-xl shadow-blue-200"
                onPress={handleUpdate}
              >
-                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Save Configuration</Text>
+                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Lưu Cấu hình</Text>
              </TouchableOpacity>
           </View>
         ) : (
           <View className="px-6 py-10">
              {/* Advisor Information Card */}
-             <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-400 text-[10px] uppercase tracking-widest mb-4 ml-1">Advisory Information</Text>
+             <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-gray-400 text-[10px] uppercase tracking-widest mb-4 ml-1">Thông tin Chủ nhiệm</Text>
              <TouchableOpacity 
                 activeOpacity={0.7}
                 onPress={() => {
@@ -219,9 +219,9 @@ export default function AdminClassDetailScreen() {
                 </View>
                 <View className="flex-1">
                    <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg">
-                     {classData.homeRoomTeacher || (classData.homeRoomId ? teachers.find(t => t.teacherId === classData.homeRoomId)?.fullName : null) || 'Not Assigned'}
+                     {classData.homeRoomTeacher || (classData.homeRoomId ? teachers.find(t => t.teacherId === classData.homeRoomId)?.fullName : null) || 'Chưa phân công'}
                    </Text>
-                   <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-xs text-uppercase">Homeroom Advisor</Text>
+                   <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-xs text-uppercase">Giáo viên Chủ nhiệm</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#E5E7EB" />
              </TouchableOpacity>
@@ -229,8 +229,8 @@ export default function AdminClassDetailScreen() {
              {/* Students List Roll */}
              <View className="flex-row items-center justify-between mb-6 px-1">
                 <View>
-                   <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl">Class Roll</Text>
-                   <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">{studentsInClass.length} STUDENTS ENROLLED</Text>
+                   <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl">Danh sách Lớp</Text>
+                   <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">{studentsInClass.length} HỌC SINH ĐÃ NHẬP HỌC</Text>
                 </View>
              </View>
 
@@ -243,7 +243,7 @@ export default function AdminClassDetailScreen() {
                      </View>
                      <View className="flex-1 justify-center">
                        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-base leading-tight">{s.fullName}</Text>
-                       <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Student Enrolled</Text>
+                       <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">Học sinh</Text>
                      </View>
                      <Ionicons name="checkmark-circle" size={20} color="#10B981" />
                    </View>
@@ -252,7 +252,7 @@ export default function AdminClassDetailScreen() {
              ) : (
                <View className="items-center py-12 bg-gray-50 rounded-[40px] border border-dashed border-gray-200">
                  <Ionicons name="people-outline" size={48} color="#D1D5DB" />
-                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-4">No students assigned yet</Text>
+                 <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 mt-4">Chưa có học sinh trong lớp này</Text>
                </View>
              )}
           </View>
