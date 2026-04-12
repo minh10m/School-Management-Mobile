@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { scheduleService } from "../../../services/schedule.service";
 import { classYearService } from "../../../services/classYear.service";
 import { ClassYearResponse } from "../../../types/classYear";
+import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminCreateScheduleScreen() {
   const [loading, setLoading] = useState(false);
@@ -61,7 +62,7 @@ export default function AdminCreateScheduleScreen() {
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (err: any) {
-      Alert.alert("Error", err?.response?.data?.message || "Creation failed.");
+      Alert.alert("Error", getErrorMessage(err));
     } finally {
       setLoading(false);
     }
