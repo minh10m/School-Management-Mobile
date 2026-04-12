@@ -6,5 +6,6 @@ namespace School_Management.API.Services
     {
         public Task<LessonResponse> CreateLesson(LessonRequest request);
         public Task<LessonResponse> UpdateLesson(UpdateLessonRequest request, Guid lessonId);
+        public Task<PagedResponse<LessonResponse>> GetAllLessonOfCourse(LessonFilterRequest request);
     }
 }

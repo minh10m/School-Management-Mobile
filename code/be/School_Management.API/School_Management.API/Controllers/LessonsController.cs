@@ -46,5 +46,20 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Authorize]
+        public async Task<IActionResult> GetAllLessonOfCourse([FromQuery] LessonFilterRequest request)
+        {
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await lessonService.GetAllLessonOfCourse(request);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
     }
 }

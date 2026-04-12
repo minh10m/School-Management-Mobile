@@ -61,6 +61,36 @@ namespace School_Management.API.Repositories
             }
         }
 
+        public async Task<(PagedResponse<LessonResponse>? data, string? message)> GetAllLessonOfCourse(LessonFilterRequest request)
+        {
+            var course = await context.Course.FirstOrDefaultAsync(x => x.Id == request.CourseId);
+            if (course == null) return (null, "NOT_FOUND_COURSE");
+            var query = context.Lesson.AsNoTracking().Include(x => x.Course).AsQueryable();
+            query = query.Where(x => x.CourseId == request.CourseId);
+
+            query = query.OrderBy(x => x.OrderIndex);
+
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(lesson => new LessonResponse
+                                        {
+                                            Id = lesson.Id,
+                                            CourseId = lesson.CourseId,
+                                            CourseName = lesson.Course.CourseName,
+                                            LessonName = lesson.LessonName,
+                                            OrderIndex = lesson.OrderIndex
+                                        }).ToListAsync();
+
+            return (new PagedResponse<LessonResponse>
+            {
+                Items = listResult,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                TotalCount = totalCount
+            }, "SUCCESS");
+        }
+
         public async Task<(LessonResponse? data, string? message)> UpdateLesson(UpdateLessonRequest request, Guid lessonId)
         {
             using var transaction = await context.Database.BeginTransactionAsync();

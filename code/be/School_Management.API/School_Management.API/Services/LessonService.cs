@@ -23,6 +23,17 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<PagedResponse<LessonResponse>> GetAllLessonOfCourse(LessonFilterRequest request)
+        {
+            var (result, message) = await lessonRepository.GetAllLessonOfCourse(request);
+            return message switch
+            {
+                "NOT_FOUND_COURSE" => throw new NotFoundException("Không tìm thấy khóa học"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<LessonResponse> UpdateLesson(UpdateLessonRequest request, Guid lessonId)
         {
             var (result, message) = await lessonRepository.UpdateLesson(request, lessonId);
