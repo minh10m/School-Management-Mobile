@@ -11,7 +11,7 @@ export default function EventsTab() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<'All' | 'Upcoming' | 'Ongoing' | 'Finished'>('All');
+  const [activeTab, setActiveTab] = useState<'Tất cả' | 'Sắp tới' | 'Đang diễn ra' | 'Đã kết thúc'>('Tất cả');
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -43,19 +43,19 @@ export default function EventsTab() {
     const now = new Date();
     const s = new Date(`${item.eventDate}T${item.startTime}`);
     const f = new Date(`${item.eventDate}T${item.finishTime}`);
-    if (now < s) return { label: 'Upcoming', color: 'text-blue-500', bg: 'bg-blue-50' };
-    if (now > f) return { label: 'Finished', color: 'text-gray-400', bg: 'bg-gray-50' };
-    return { label: 'Ongoing', color: 'text-green-500', bg: 'bg-green-50' };
+    if (now < s) return { label: 'Sắp tới', color: 'text-blue-500', bg: 'bg-blue-50' };
+    if (now > f) return { label: 'Đã kết thúc', color: 'text-gray-400', bg: 'bg-gray-50' };
+    return { label: 'Đang diễn ra', color: 'text-green-500', bg: 'bg-green-50' };
   };
 
   const filteredEvents = events.filter(e => {
-    if (activeTab === 'All') return true;
+    if (activeTab === 'Tất cả') return true;
     const now = new Date();
     const s = new Date(`${e.eventDate}T${e.startTime}`);
     const f = new Date(`${e.eventDate}T${e.finishTime}`);
-    if (activeTab === 'Upcoming') return now < s;
-    if (activeTab === 'Finished') return now > f;
-    if (activeTab === 'Ongoing') return now >= s && now <= f;
+    if (activeTab === 'Sắp tới') return now < s;
+    if (activeTab === 'Đã kết thúc') return now > f;
+    if (activeTab === 'Đang diễn ra') return now >= s && now <= f;
     return true;
   });
 
@@ -68,14 +68,14 @@ export default function EventsTab() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>School Events</Text>
+          <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>Sự kiện trường học</Text>
         </View>
         <View className="w-10" />
       </View>
 
       {/* Tabs */}
       <View className="flex-row bg-white border-b border-gray-100 px-6 py-2 gap-2">
-         {['All', 'Upcoming', 'Ongoing', 'Finished'].map((t: any) => (
+         {['Tất cả', 'Sắp tới', 'Đang diễn ra', 'Đã kết thúc'].map((t: any) => (
            <TouchableOpacity 
               key={t} onPress={() => setActiveTab(t)}
               className={`px-4 py-1.5 rounded-full ${activeTab === t ? 'bg-bright-blue' : 'bg-gray-50'}`}
@@ -90,7 +90,7 @@ export default function EventsTab() {
         <View className="bg-gray-50 rounded-2xl px-4 py-1 flex-row items-center gap-3 border border-gray-100">
           <Ionicons name="search-outline" size={18} color="#9CA3AF" />
           <TextInput
-            placeholder="Search events by title..."
+            placeholder="Tìm kiếm sự kiện theo tên..."
             placeholderTextColor="#9CA3AF"
             className="text-black py-2.5 flex-1 text-sm pt-3"
             style={{ fontFamily: 'Poppins-Regular' }}
@@ -114,7 +114,7 @@ export default function EventsTab() {
                 <View className={`${status.bg} px-2.5 py-1 rounded-full px-3`}>
                   <Text className={`${status.color} text-[10px]`} style={{ fontFamily: "Poppins-Bold" }}>{status.label.toUpperCase()}</Text>
                 </View>
-                <Text className="text-gray-300 text-[10px]" style={{ fontFamily: "Poppins-Medium" }}>Term {item.term} · {item.schoolYear}</Text>
+                <Text className="text-gray-300 text-[10px]" style={{ fontFamily: "Poppins-Medium" }}>Học kỳ {item.term} · {item.schoolYear}</Text>
               </View>
 
               <Text className="text-black text-lg mb-1" style={{ fontFamily: "Poppins-Bold" }}>{item.title}</Text>
@@ -124,7 +124,7 @@ export default function EventsTab() {
                 <View className="flex-row items-center gap-1.5">
                   <Ionicons name="calendar-outline" size={14} color="#136ADA" />
                   <Text className="text-gray-600 text-[11px]" style={{ fontFamily: "Poppins-Medium" }}>
-                    {new Date(item.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {new Date(item.eventDate).toLocaleDateString('vi-VN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </Text>
                 </View>
 
@@ -144,8 +144,8 @@ export default function EventsTab() {
               <View className="bg-gray-100 w-20 h-20 rounded-full items-center justify-center mb-4">
                 <Ionicons name="calendar-outline" size={40} color="#D1D5DB" />
               </View>
-              <Text className="text-gray-400 text-center" style={{ fontFamily: "Poppins-Medium" }}>No events found</Text>
-              <Text className="text-gray-300 text-[10px] mt-1 text-center" style={{ fontFamily: "Poppins-Regular" }}>Try adjusting your filters or search terms</Text>
+              <Text className="text-gray-400 text-center" style={{ fontFamily: "Poppins-Medium" }}>Không tìm thấy sự kiện</Text>
+              <Text className="text-gray-300 text-[10px] mt-1 text-center" style={{ fontFamily: "Poppins-Regular" }}>Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm</Text>
             </View>
           )
         }

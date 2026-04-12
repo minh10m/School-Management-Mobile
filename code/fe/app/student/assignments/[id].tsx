@@ -58,7 +58,7 @@ export default function StudentAssignmentDetailScreen() {
       }
     } catch (error) {
       console.error("Error fetching assignment detail:", error);
-      Alert.alert("Error", "Could not fetch assignment details.");
+      Alert.alert("Lỗi", "Không thể tải thông tin chi tiết bài tập.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -94,7 +94,7 @@ export default function StudentAssignmentDetailScreen() {
   const handleSubmit = async () => {
     if (!id) return;
     if (!fileUrl && !fileTitle) {
-      Alert.alert("Error", "Please select a file to submit.");
+      Alert.alert("Lỗi", "Vui lòng chọn file để nộp.");
       return;
     }
 
@@ -105,14 +105,14 @@ export default function StudentAssignmentDetailScreen() {
         fileTitle: fileTitle || "Assignment Submission",
         fileUrl: fileUrl,
       });
-      Alert.alert("Success", "Assignment submitted successfully!");
+      Alert.alert("Thành công", "Nộp bài tập thành công!");
       fetchData(); // Refresh to show submission status
     } catch (error: any) {
       console.error("Error submitting assignment:", error);
       const errMsg =
         error.response?.data?.message ||
-        "Failed to submit assignment. Please try again.";
-      Alert.alert("Error", errMsg);
+        "Nộp bài thất bại. Vui lòng thử lại.";
+      Alert.alert("Lỗi", errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -121,7 +121,7 @@ export default function StudentAssignmentDetailScreen() {
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "";
     const d = new Date(dateStr);
-    return d.toLocaleDateString("en-US", {
+    return d.toLocaleDateString("vi-VN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -139,7 +139,7 @@ export default function StudentAssignmentDetailScreen() {
           className="mt-4 text-gray-400"
           style={{ fontFamily: "Poppins-Regular" }}
         >
-          Fetching details...
+          Đang tải chi tiết...
         </Text>
       </SafeAreaView>
     );
@@ -152,14 +152,14 @@ export default function StudentAssignmentDetailScreen() {
           className="text-gray-400"
           style={{ fontFamily: "Poppins-Regular" }}
         >
-          Assignment not found.
+          Không tìm thấy bài tập.
         </Text>
         <TouchableOpacity onPress={() => router.back()} className="mt-4">
           <Text
             className="text-bright-blue"
             style={{ fontFamily: "Poppins-Bold" }}
           >
-            Go Back
+            Quay lại
           </Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -230,7 +230,7 @@ export default function StudentAssignmentDetailScreen() {
                     className="text-white/60 text-[10px]"
                     style={{ fontFamily: "Poppins-Medium" }}
                   >
-                    DEADLINE
+                    HẠN NỘP
                   </Text>
                   <Text
                     className="text-white text-xs"
@@ -248,11 +248,11 @@ export default function StudentAssignmentDetailScreen() {
                 >
                   {submission
                     ? submission.score !== null
-                      ? `Graded: ${submission.score}/10`
-                      : "Submitted"
+                      ? `Đã chấm: ${submission.score}/10`
+                      : "Đã nộp"
                     : isExpired
-                      ? "Missed"
-                      : "Open"}
+                      ? "Quá hạn"
+                      : "Đang mở"}
                 </Text>
               </View>
             </View>
@@ -265,7 +265,7 @@ export default function StudentAssignmentDetailScreen() {
             className="text-black text-lg mb-2"
             style={{ fontFamily: "Poppins-Bold" }}
           >
-            Instructions
+            HƯỚNG DẪN
           </Text>
           <View className="bg-gray-50/80 p-5 rounded-2xl border border-gray-100">
             <Text
@@ -273,14 +273,14 @@ export default function StudentAssignmentDetailScreen() {
               style={{ fontFamily: "Poppins-Regular" }}
             >
               {assignment.body ||
-                "No detailed instructions provided by the teacher."}
+                "Giáo viên không cung cấp hướng dẫn chi tiết."}
             </Text>
 
             {assignment.fileUrl && (
               <TouchableOpacity
                 className="mt-6 flex-row items-center gap-3 bg-white p-3 rounded-xl border border-gray-100"
                 onPress={() =>
-                  Alert.alert("Download", "Mock: File download started...")
+                  Alert.alert("Tải xuống", "Đang bắt đầu tải xuống file...")
                 }
               >
                 <View className="bg-blue-50 w-10 h-10 rounded-lg items-center justify-center">
@@ -291,13 +291,13 @@ export default function StudentAssignmentDetailScreen() {
                     className="text-black text-sm"
                     style={{ fontFamily: "Poppins-SemiBold" }}
                   >
-                    {assignment.fileTitle || "Attachment"}
+                    {assignment.fileTitle || "Tệp đính kèm"}
                   </Text>
                   <Text
                     className="text-gray-400 text-xs"
                     style={{ fontFamily: "Poppins-Regular" }}
                   >
-                    Tap to view attachment
+                    Nhấn để xem đính kèm
                   </Text>
                 </View>
                 <Ionicons name="download-outline" size={20} color="#9CA3AF" />
@@ -312,7 +312,7 @@ export default function StudentAssignmentDetailScreen() {
             className="text-black text-lg mb-2"
             style={{ fontFamily: "Poppins-Bold" }}
           >
-            Your Submission
+            Bài nộp của bạn
           </Text>
 
           {submission ? (
@@ -330,13 +330,13 @@ export default function StudentAssignmentDetailScreen() {
                     className="text-black text-sm"
                     style={{ fontFamily: "Poppins-Bold" }}
                   >
-                    Successfully Submitted
+                    Đã nộp bài thành công
                   </Text>
                   <Text
                     className="text-gray-400 text-xs"
                     style={{ fontFamily: "Poppins-Regular" }}
                   >
-                    Submitted at: {formatDate(submission.timeSubmit)}
+                    Nộp lúc: {formatDate(submission.timeSubmit)}
                   </Text>
                 </View>
               </View>
@@ -348,7 +348,7 @@ export default function StudentAssignmentDetailScreen() {
                     className="text-gray-600 text-sm flex-1"
                     style={{ fontFamily: "Poppins-Medium" }}
                   >
-                    {submission.fileTitle || "Submitted File"}
+                    {submission.fileTitle || "Tệp đã nộp"}
                   </Text>
                 </View>
               </View>
@@ -360,7 +360,7 @@ export default function StudentAssignmentDetailScreen() {
                       className="text-black text-sm"
                       style={{ fontFamily: "Poppins-Bold" }}
                     >
-                      Teacher's Grade
+                      Điểm của giáo viên
                     </Text>
                     <View className="bg-bright-blue px-3 py-1 rounded-full">
                       <Text className="text-white text-xs font-bold">
@@ -372,7 +372,7 @@ export default function StudentAssignmentDetailScreen() {
                     className="text-gray-600 text-xs leading-5"
                     style={{ fontFamily: "Poppins-Regular italic" }}
                   >
-                    "{submission.feedback || "No feedback provided yet."}"
+                    "{submission.feedback || "Chưa có nhận xét nào."}"
                   </Text>
                 </View>
               )}
@@ -386,8 +386,7 @@ export default function StudentAssignmentDetailScreen() {
                     className="text-red-500 text-xs"
                     style={{ fontFamily: "Poppins-Bold" }}
                   >
-                    Note: This assignment is past due. Submissions will be
-                    marked as late.
+                    Lưu ý: Bài tập này đã quá hạn. Bài nộp của bạn sẽ bị đánh dấu là nộp muộn.
                   </Text>
                 </View>
               )}
@@ -413,7 +412,7 @@ export default function StudentAssignmentDetailScreen() {
                       className="text-gray-400 text-[10px] mt-1"
                       style={{ fontFamily: "Poppins-Regular" }}
                     >
-                      Tap to change file
+                      Nhấn để đổi tệp
                     </Text>
                   </View>
                 ) : (
@@ -425,7 +424,7 @@ export default function StudentAssignmentDetailScreen() {
                         color="#136ADA"
                       />
                     </View>
-                    <Text className="text-black text-sm" style={{ fontFamily: "Poppins-Bold" }}>Upload Assignment</Text>
+                    <Text className="text-black text-sm" style={{ fontFamily: "Poppins-Bold" }}>Tải lên bài tập</Text>
                     <Text className="text-gray-400 text-xs" style={{ fontFamily: "Poppins-Regular" }}>PDF, Image, Word (Max 10MB)</Text>
                   </View>
                 )}
@@ -436,11 +435,11 @@ export default function StudentAssignmentDetailScreen() {
                   className="text-gray-400 text-xs mb-2 px-1"
                   style={{ fontFamily: "Poppins-Medium" }}
                 >
-                  Assignment Title (Optional)
+                  Tiêu đề bài nộp (Tùy chọn)
                 </Text>
                 <TextInput
                   className="bg-white border border-gray-100 rounded-xl p-4 text-black text-sm"
-                  placeholder="Enter submission title..."
+                  placeholder="Nhập tiêu đề cho bài nộp..."
                   value={fileTitle}
                   onChangeText={setFileTitle}
                 />
@@ -463,7 +462,7 @@ export default function StudentAssignmentDetailScreen() {
             ) : (
               <>
                 <Text className="text-white text-lg mr-2" style={{ fontFamily: "Poppins-Bold" }}>
-                    {isExpired ? 'Submit Late' : 'Submit Assignment'}
+                    {isExpired ? 'Nộp muộn' : 'Nộp bài tập'}
                 </Text>
                 <Ionicons name="arrow-forward" size={20} color="white" />
               </>

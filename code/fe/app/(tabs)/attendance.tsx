@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { attendanceService } from "../../services/attendance.service";
 import { StudentAttendanceRecord, StudentAttendanceResponse } from "../../types/attendance";
 
-const DAYS_OF_WEEK = ["S", "M", "T", "W", "T", "F", "S"];
+const DAYS_OF_WEEK = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 
 function getStatusStyle(status: string | undefined) {
   if (status === "absent" || status === "Vắng mặt")
@@ -59,9 +59,7 @@ export default function AttendanceTab() {
     attendanceMap[day] = rec;
   });
 
-  const monthLabel = new Date(year, month - 1).toLocaleString("en-US", {
-    month: "long", year: "numeric",
-  });
+  const monthLabel = `Tháng ${month}, ${year}`;
 
   const presentPct =
     data && data.totalPresent + data.totalAbsent > 0
@@ -77,7 +75,7 @@ export default function AttendanceTab() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
-          Attendance
+          Điểm danh
         </Text>
         <View className="w-10" />
       </View>
@@ -128,9 +126,9 @@ export default function AttendanceTab() {
           {/* Legend */}
           <View className="flex-row justify-center gap-5 mb-6">
             {[
-              { color: "bg-green-500", label: "Present" },
-              { color: "bg-red-500", label: "Absent" },
-              { color: "bg-orange-400", label: "Late" },
+              { color: "bg-green-500", label: "Có mặt" },
+              { color: "bg-red-500", label: "Vắng mặt" },
+              { color: "bg-orange-400", label: "Đi trễ" },
             ].map((item) => (
               <View key={item.label} className="flex-row items-center">
                 <View className={`w-3 h-3 rounded-full ${item.color} mr-2`} />
@@ -143,17 +141,17 @@ export default function AttendanceTab() {
           <View className="bg-blue-500 rounded-2xl p-5 flex-row items-center justify-around shadow-md">
             <View className="items-center">
               <Text className="text-white text-2xl" style={{ fontFamily: "Poppins-Bold" }}>{data?.totalPresent ?? 0}</Text>
-              <Text className="text-blue-100 text-xs" style={{ fontFamily: "Poppins-Regular" }}>Present</Text>
+              <Text className="text-blue-100 text-xs" style={{ fontFamily: "Poppins-Regular" }}>Có mặt</Text>
             </View>
             <View className="w-px h-10 bg-blue-300" />
             <View className="items-center">
               <Text className="text-white text-2xl" style={{ fontFamily: "Poppins-Bold" }}>{data?.totalAbsent ?? 0}</Text>
-              <Text className="text-blue-100 text-xs" style={{ fontFamily: "Poppins-Regular" }}>Absent</Text>
+              <Text className="text-blue-100 text-xs" style={{ fontFamily: "Poppins-Regular" }}>Vắng mặt</Text>
             </View>
             <View className="w-px h-10 bg-blue-300" />
             <View className="items-center">
               <Text className="text-white text-2xl" style={{ fontFamily: "Poppins-Bold" }}>{presentPct}%</Text>
-              <Text className="text-blue-100 text-xs" style={{ fontFamily: "Poppins-Regular" }}>Attendance</Text>
+              <Text className="text-blue-100 text-xs" style={{ fontFamily: "Poppins-Regular" }}>Tỷ lệ chuyên cần</Text>
             </View>
           </View>
         </View>

@@ -5,11 +5,11 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function PaymentDetailScreen() {
   const feeDetails = [
-    { label: 'Course Fees', amount: '15,000' },
-    { label: 'School Bus', amount: '2,000' },
-    { label: 'Sport Fees', amount: '1,000' },
-    { label: 'ID card amount', amount: '300' },
-    { label: 'Computer Lab Fees', amount: '500' },
+    { label: 'Học phí khóa học', amount: '15,000' },
+    { label: 'Xe đưa đón', amount: '2,000' },
+    { label: 'Phí thể thao', amount: '1,000' },
+    { label: 'Phí thẻ học sinh', amount: '300' },
+    { label: 'Phí phòng máy tính', amount: '500' },
   ];
 
   const totalAmount = '18,800';
@@ -27,7 +27,7 @@ export default function PaymentDetailScreen() {
               <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
           <View className="flex-1 items-center">
-              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Payment Review</Text>
+              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Kiểm tra thanh toán</Text>
           </View>
           <View className="w-10" /> 
       </View>
@@ -68,13 +68,13 @@ export default function PaymentDetailScreen() {
 
               {/* Your Pending Payment */}
               <View className="items-center mb-10">
-                  <Text className="text-black text-base mb-2" style={{ fontFamily: 'Poppins-Medium' }}>Your Pending Payment</Text>
+                  <Text className="text-black text-base mb-2" style={{ fontFamily: 'Poppins-Medium' }}>Số tiền cần thanh toán</Text>
                   <Text className="text-[#136ADA] text-3xl" style={{ fontFamily: 'Poppins-Bold' }}>₹ {totalAmount}</Text>
               </View>
 
               {/* Fee Details List */}
               <View className="px-6">
-                  <Text className="text-black text-lg mb-6" style={{ fontFamily: 'Poppins-Bold' }}>Fees Details</Text>
+                  <Text className="text-black text-lg mb-6" style={{ fontFamily: 'Poppins-Bold' }}>Chi tiết học phí</Text>
                   
                   <View className="space-y-5 gap-5">
                       {feeDetails.map((item, index) => (
@@ -92,7 +92,7 @@ export default function PaymentDetailScreen() {
 
                       {/* Total Fees */}
                       <View className="flex-row justify-between items-center">
-                           <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Total Fees</Text>
+                           <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Tổng cộng</Text>
                            <Text className="text-[#136ADA] text-lg" style={{ fontFamily: 'Poppins-Bold' }}>₹ {totalAmount}</Text>
                       </View>
                   </View>
@@ -106,7 +106,7 @@ export default function PaymentDetailScreen() {
                   className="bg-[#136ADA] py-4 rounded-xl items-center shadow-md shadow-blue-200"
                   onPress={() => router.push('/student/payment/success' as any)}
               >
-                  <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Pay Now</Text>
+                  <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Thanh toán ngay</Text>
               </TouchableOpacity>
           </View>
       </View>

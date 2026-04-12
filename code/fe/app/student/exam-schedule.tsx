@@ -41,7 +41,7 @@ export default function ExamScheduleScreen() {
         setData(res);
       } catch (error) {
         console.error(error);
-        Alert.alert("Error", getErrorMessage(error));
+        Alert.alert("Lỗi", getErrorMessage(error));
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -72,7 +72,7 @@ export default function ExamScheduleScreen() {
           className="text-black text-lg ml-2"
           style={{ fontFamily: "Poppins-Bold" }}
         >
-          Exam Schedule
+          Lịch thi
         </Text>
       </View>
 
@@ -109,8 +109,8 @@ export default function ExamScheduleScreen() {
                 style={{ fontFamily: "Poppins-SemiBold" }}
                 className="text-gray-400 mt-4 text-center"
               >
-                No exam schedule found for{"\n"}
-                {type} - Term {term}
+                Không tìm thấy lịch thi cho{"\n"}
+                {type} - Học kỳ {term}
               </Text>
             </View>
           ) : (
@@ -194,7 +194,7 @@ function TermDropdown({
           className="text-gray-600 text-sm"
           style={{ fontFamily: "Poppins-Medium" }}
         >
-          Term {value}
+          Học kỳ {value}
         </Text>
         <Ionicons name="chevron-down" size={14} color="#6B7280" />
       </TouchableOpacity>
@@ -212,7 +212,7 @@ function TermDropdown({
                   className={`text-sm ${value === opt ? "text-blue-700" : "text-gray-700"}`}
                   style={{ fontFamily: value === opt ? "Poppins-SemiBold" : "Poppins-Regular" }}
                 >
-                  Term {opt}
+                  Học kỳ {opt}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -243,7 +243,7 @@ function ExamCard({ data }: { data: MyExamScheduleDetailResponse }) {
               className="text-gray-400 text-xs"
               style={{ fontFamily: "Poppins-Medium" }}
             >
-              Room: <Text className="text-gray-600">{data.roomName}</Text>
+              Phòng: <Text className="text-gray-600">{data.roomName}</Text>
             </Text>
           </View>
           <View className="bg-blue-50 px-3 py-1.5 rounded-xl items-center border border-blue-100">
@@ -276,14 +276,14 @@ function ExamCard({ data }: { data: MyExamScheduleDetailResponse }) {
                 className="text-gray-400 text-[9px] uppercase"
                 style={{ fontFamily: "Poppins-Medium" }}
               >
-                Date
+                Ngày
               </Text>
               <Text
                 className="text-black text-xs"
                 style={{ fontFamily: "Poppins-Bold" }}
               >
                 {data.date
-                  ? new Date(data.date).toLocaleDateString("en-GB", {
+                  ? new Date(data.date).toLocaleDateString("vi-VN", {
                       day: "2-digit",
                       month: "2-digit",
                       year: "numeric",
@@ -302,7 +302,7 @@ function ExamCard({ data }: { data: MyExamScheduleDetailResponse }) {
                 className="text-gray-400 text-[9px] uppercase"
                 style={{ fontFamily: "Poppins-Medium" }}
               >
-                Time
+                Giờ thi
               </Text>
               <Text
                 className="text-black text-xs"
@@ -322,7 +322,7 @@ function ExamCard({ data }: { data: MyExamScheduleDetailResponse }) {
             className="text-gray-500 text-[11px] ml-2"
             style={{ fontFamily: "Poppins-Medium" }}
           >
-            Supervisor: <Text className="text-black">{data.teacherName}</Text>
+            Giám thị: <Text className="text-black">{data.teacherName}</Text>
           </Text>
         </View>
       </View>
