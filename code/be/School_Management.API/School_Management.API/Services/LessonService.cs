@@ -22,5 +22,16 @@ namespace School_Management.API.Services
                 _ => throw new Exception("Lỗi không xác định")
             };
         }
+
+        public async Task<LessonResponse> UpdateLesson(UpdateLessonRequest request, Guid lessonId)
+        {
+            var (result, message) = await lessonRepository.UpdateLesson(request, lessonId);
+            return message switch
+            {
+                "NOT_FOUND_LESSON" => throw new NotFoundException("Không tìm thấy bài học này"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
     }
 }

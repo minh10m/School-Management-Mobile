@@ -60,5 +60,49 @@ namespace School_Management.API.Repositories
                 throw;
             }
         }
+
+        public async Task<(LessonResponse? data, string? message)> UpdateLesson(UpdateLessonRequest request, Guid lessonId)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var lesson = await context.Lesson.Include(x => x.Course).FirstOrDefaultAsync(x => x.Id == lessonId);
+                if (lesson == null) return (null, "NOT_FOUND_LESSON");
+
+                if (request.OrderIndex > lesson.OrderIndex)
+                {
+                    await context.Lesson.Where(x => x.OrderIndex > lesson.OrderIndex && x.OrderIndex <= request.OrderIndex)
+                                        .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex - 1));
+                }
+                else if (request.OrderIndex < lesson.OrderIndex)
+                {
+                    await context.Lesson.Where(x => x.OrderIndex < lesson.OrderIndex && x.OrderIndex >= request.OrderIndex)
+                                        .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
+                }
+
+                lesson.LessonName = request.LessonName;
+                lesson.OrderIndex = request.OrderIndex;
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                var result = new LessonResponse
+                {
+                    Id = lesson.Id,
+                    CourseId = lesson.CourseId,
+                    CourseName = lesson.Course.CourseName,
+                    LessonName= lesson.LessonName,
+                    OrderIndex = lesson.OrderIndex
+                };
+
+                return (result, "SUCCESS");
+
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }

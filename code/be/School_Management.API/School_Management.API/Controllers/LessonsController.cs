@@ -31,5 +31,20 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{lessonId}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> UpdateLesson([FromBody] UpdateLessonRequest request, [FromRoute] Guid lessonId)
+        {
+            var result = await lessonService.UpdateLesson(request, lessonId);
+            return Ok(new
+            {
+                success = true, 
+                message = "Cập nhật thành công",
+                data = result
+            });
+        }
     }
 }
