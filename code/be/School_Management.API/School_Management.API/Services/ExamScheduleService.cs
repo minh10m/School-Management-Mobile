@@ -1,4 +1,4 @@
-﻿using School_Management.API.Exceptions;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
@@ -104,6 +104,16 @@ namespace School_Management.API.Services
                 "SUCCESS" => result!,
                 "CONFLICT_TIME" => throw new BadRequestException("Thời gian bắt đầu không được lớn hơn thời gian kết thúc"),
                 _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+        public async Task<bool> DeleteExamSchedule(Guid id)
+        {
+            var (result, message) = await examScheduleRepository.DeleteExamSchedule(id);
+            return message switch
+            {
+                "NOT_FOUND_EXAMSCHEDULE" => throw new NotFoundException("Không tìm thấy lịch thi"),
+                "SUCCESS" => result,
+                _ => throw new Exception(message ?? "Lỗi không xác định")
             };
         }
     }
