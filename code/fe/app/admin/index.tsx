@@ -30,8 +30,8 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       const [stuRes, teaRes, claRes] = await Promise.all([
-        studentService.getStudents({ pageSize: 1 }),
-        teacherService.getTeachers({ pageSize: 1 }),
+        studentService.getStudents({ PageSize: 1 }),
+        teacherService.getTeachers({ PageSize: 1 }),
         classYearService.getClassYears({ schoolYear: SCHOOL_YEAR })
       ]);
       setStats({
