@@ -8,6 +8,8 @@ import {
   ExamStudentAssignmentFilterRequest,
   ExamStudentAssignmentResponse,
   UpdateExamScheduleDetail,
+  MyExamScheduleDetailRequest,
+  MyExamScheduleDetailResponse,
 } from "../types/examSchedule";
 import apiClient from "./apiClient";
 
@@ -124,6 +126,14 @@ export const examScheduleService = {
    */
   deleteSchedule: async (id: string): Promise<boolean> => {
     const response = await apiClient.delete<ApiResponse<boolean>>(`/exam-schedules/${id}`);
+    return response.data.data;
+  },
+  /**
+   * Lấy lịch thi cá nhân (Dành cho Giáo viên gác thi hoặc Học sinh đi thi)
+   * GET /api/exam-schedules
+   */
+  getMyExamSchedule: async (params: MyExamScheduleDetailRequest): Promise<MyExamScheduleDetailResponse[]> => {
+    const response = await apiClient.get<ApiResponse<MyExamScheduleDetailResponse[]>>("/exam-schedules", { params });
     return response.data.data;
   },
 };

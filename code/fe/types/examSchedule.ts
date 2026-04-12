@@ -23,6 +23,20 @@ export interface ExamScheduleDetailResponse {
   roomName: string;
 }
 
+export interface MyExamScheduleDetailResponse {
+  examScheduleDetailId: string;
+  examScheduleId: string;
+  teacherId: string;
+  teacherName: string;
+  subjectId: string;
+  subjectName: string;
+  startTime: string;
+  finishTime: string;
+  date: string;
+  roomName: string;
+  identificationNumber: string;
+}
+
 export interface ExamStudentAssignmentResponse {
   examStudentAssignmentId: string;
   studentId: string;
@@ -55,6 +69,12 @@ export interface ExamStudentAssignmentFilterRequest {
   identificationNumber?: string;
   pageNumber?: number;
   pageSize?: number;
+}
+
+export interface MyExamScheduleDetailRequest {
+  type: string;
+  term: number;
+  schoolYear: number;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────
