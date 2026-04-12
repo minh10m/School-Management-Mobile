@@ -26,7 +26,7 @@ namespace School_Management.API.Controllers
             var result = await lessonVideoService.CreateLessonVideo(request);
             return StatusCode(201, new
             {
-                success = true, 
+                success = true,
                 message = "Tạo video bài học thành công",
                 data = result
 
@@ -56,6 +56,19 @@ namespace School_Management.API.Controllers
             if (request.PageNumber <= 0) request.PageNumber = 1;
             if (request.PageSize <= 0) request.PageSize = 10;
             var result = await lessonVideoService.GetAllLessonVideoOfLesson(request);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [Route("{lessonVideoId}")]
+        [Authorize]
+        public async Task<IActionResult> GetLessonVideoById([FromRoute] Guid lessonVideoId)
+        {
+            var result = await lessonVideoService.GetLessonVideoById(lessonVideoId);
             return Ok(new
             {
                 success = true,

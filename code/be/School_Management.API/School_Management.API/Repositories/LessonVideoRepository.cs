@@ -103,6 +103,26 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
+        public async Task<(LessonVideoResponse? data, string message)> GetLessonVideoById(Guid lessonVideoId)
+        {
+            var lessonVideo = await context.LessonVideo.Include(x => x.Lesson).FirstOrDefaultAsync(x => x.Id == lessonVideoId);
+            if (lessonVideo == null) return (null, "NOT_FOUND_LESSONVIDEO");
+
+            var result = new LessonVideoResponse
+            {
+                Id = lessonVideo.Id,
+                Duration = lessonVideo.Duration,
+                IsPreview = lessonVideo.IsPreview,
+                LessonId = lessonVideo.LessonId,
+                LessonName = lessonVideo.Lesson.LessonName,
+                Name = lessonVideo.Name,
+                OrderIndex = lessonVideo.OrderIndex,
+                Url = lessonVideo.Url
+            };
+
+            return (result, "SUCCESS");
+        }
+
         public async Task<(LessonVideoResponse? data, string message)> UpdateLessonVideo(UpdateLessonVideoRequest request, Guid lessonVideoId)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
