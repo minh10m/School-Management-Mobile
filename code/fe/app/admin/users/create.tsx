@@ -27,6 +27,8 @@ const Field = ({
   placeholder,
   icon,
   secureTextEntry = false,
+  isPasswordField = false,
+  onToggleSecure,
 }: any) => (
   <View className="mb-6">
     <Text
@@ -46,6 +48,11 @@ const Field = ({
         className="flex-1 py-4 text-black text-base"
         style={{ fontFamily: "Poppins-Regular" }}
       />
+      {isPasswordField && (
+        <TouchableOpacity onPress={onToggleSecure} className="pr-2">
+           <Ionicons name={secureTextEntry ? "eye-outline" : "eye-off-outline"} size={20} color="#9CA3AF" />
+        </TouchableOpacity>
+      )}
     </View>
   </View>
 );
@@ -63,6 +70,8 @@ export default function AdminCreateUserScreen() {
     classYearId: "",
     subjectId: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
 
   const [roles, setRoles] = useState<RoleResponse[]>([]);
   const [classes, setClasses] = useState<ClassYearResponse[]>([]);
@@ -214,7 +223,9 @@ export default function AdminCreateUserScreen() {
             value={form.password}
             onChangeText={(v: string) => set("password", v)}
             placeholder="••••••••"
-            secureTextEntry
+            secureTextEntry={!showPassword}
+            isPasswordField
+            onToggleSecure={() => setShowPassword(!showPassword)}
           />
           <Field
             label="Họ và tên *"
@@ -304,37 +315,77 @@ export default function AdminCreateUserScreen() {
               <Text
                 style={{ fontFamily: "Poppins-Medium", fontSize: 10, color: '#9CA3AF', marginBottom: 12, marginLeft: 4, textTransform: 'uppercase', letterSpacing: 2 }}
               >
-                Phân vào lớp học *
+                Chọn Khối *
               </Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {classes.map((c) => {
-                  const isActive = form.classYearId === c.classYearId;
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+                {Array.from(new Set(classes.map(c => c.grade))).sort((a, b) => a - b).map((grade) => {
+                  const isActive = selectedGrade === grade;
                   return (
                     <TouchableOpacity
-                      key={c.classYearId}
-                      onPress={() => set("classYearId", c.classYearId)}
+                      key={grade}
+                      onPress={() => setSelectedGrade(grade)}
                       style={{
-                        paddingHorizontal: 16,
-                        paddingVertical: 8,
+                        paddingHorizontal: 20,
+                        paddingVertical: 10,
                         borderRadius: 12,
                         borderWidth: 1,
-                        backgroundColor: isActive ? '#4F46E5' : '#F9FAFB',
-                        borderColor: isActive ? '#4F46E5' : '#F3F4F6',
+                        backgroundColor: isActive ? '#136ADA' : '#F9FAFB',
+                        borderColor: isActive ? '#136ADA' : '#F3F4F6',
                       }}
                     >
                       <Text
                         style={{
                           fontFamily: "Poppins-Bold",
-                          fontSize: 11,
+                          fontSize: 12,
                           color: isActive ? "white" : "#6B7280",
                         }}
                       >
-                        {c.className} ({c.grade})
+                        Khối {grade}
                       </Text>
                     </TouchableOpacity>
                   );
                 })}
               </View>
+
+              {selectedGrade && (
+                <>
+                  <Text
+                    style={{ fontFamily: "Poppins-Medium", fontSize: 10, color: '#9CA3AF', marginBottom: 12, marginLeft: 4, textTransform: 'uppercase', letterSpacing: 2 }}
+                  >
+                    Chọn Lớp (Khối {selectedGrade}) *
+                  </Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                    {classes.filter(c => c.grade === selectedGrade).map((c) => {
+                      const isActive = form.classYearId === c.classYearId;
+                      return (
+                        <TouchableOpacity
+                          key={c.classYearId}
+                          onPress={() => set("classYearId", c.classYearId)}
+                          style={{
+                            paddingHorizontal: 16,
+                            paddingVertical: 8,
+                            borderRadius: 12,
+                            borderWidth: 1,
+                            backgroundColor: isActive ? '#4F46E5' : '#F9FAFB',
+                            borderColor: isActive ? '#4F46E5' : '#F3F4F6',
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontFamily: "Poppins-Bold",
+                              fontSize: 11,
+                              color: isActive ? "white" : "#6B7280",
+                            }}
+                          >
+                            {c.className}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </>
+              )}
+
               {classes.length === 0 && (
                 <Text style={{ color: '#9CA3AF', fontSize: 12, fontStyle: 'italic' }}>
                   Không tìm thấy lớp học cho năm 2026
