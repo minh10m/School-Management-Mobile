@@ -31,5 +31,20 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{courseAssignmentId}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> UpdateCourseAssignment([FromBody] UpdateCourseAssignmentRequest request, [FromRoute] Guid courseAssignmentId)
+        {
+            var result = await courseAssignmentService.UpdateCourseAssignment(request, courseAssignmentId);
+            return Ok(new
+            {
+                success = true, 
+                message = "Cập nhật thông tin thành công",
+                data = result
+            });
+        }
     }
 }

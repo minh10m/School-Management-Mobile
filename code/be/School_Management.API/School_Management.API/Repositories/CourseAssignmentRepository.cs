@@ -69,5 +69,55 @@ namespace School_Management.API.Repositories
             }
             
         }
+
+        public async Task<(CourseAssignmentResponse? data, string mesaage)> UpdateCourseAssignment(UpdateCourseAssignmentRequest request, Guid courseAssignmentId)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var courseAssignment = await context.CourseAssignment.Include(x => x.Lesson).FirstOrDefaultAsync(x => x.Id == courseAssignmentId);
+                if (courseAssignment == null) return (null, "NOT_FOUND_COURSE_ASSIGNMENT");
+
+                var isExisted = await context.CourseAssignment.AnyAsync(x => x.LessonId == courseAssignment.LessonId && x.Id != courseAssignmentId
+                                                                          && x.Title.Trim().ToLower() == request.Title.Trim().ToLower());
+                if (isExisted) return (null, "CONFLICT_TITLE");
+
+                if (request.OrderIndex > courseAssignment.OrderIndex)
+                    await context.CourseAssignment.Where(x => x.LessonId == courseAssignment.LessonId && x.OrderIndex > courseAssignment.OrderIndex
+                                                           && x.OrderIndex <= request.OrderIndex)
+                                                  .ExecuteUpdateAsync(g => g.SetProperty(l => l.OrderIndex, l => l.OrderIndex - 1));
+
+                else if(request.OrderIndex < courseAssignment.OrderIndex)
+                    await context.CourseAssignment.Where(x => x.LessonId == courseAssignment.LessonId && x.OrderIndex < courseAssignment.OrderIndex
+                                                           && x.OrderIndex >= request.OrderIndex)
+                                                  .ExecuteUpdateAsync(g => g.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
+
+                courseAssignment.FileTitle = request.FileTitle ?? "Không có dữ liệu";
+                courseAssignment.FileUrl = request.FileUrl ?? "Không có dữ liệu";
+                courseAssignment.OrderIndex = request.OrderIndex;
+                courseAssignment.Title = request.Title;
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                var result = new CourseAssignmentResponse
+                {
+                    Id = courseAssignment.Id,
+                    FileTitle = courseAssignment.FileTitle,
+                    FileUrl = courseAssignment.FileUrl,
+                    LessonId = courseAssignment.LessonId,
+                    LessonName = courseAssignment.Lesson.LessonName,
+                    OrderIndex = courseAssignment.OrderIndex,
+                    Title = courseAssignment.Title
+                };
+
+                return (result, "SUCCESS");
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }

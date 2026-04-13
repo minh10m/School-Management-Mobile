@@ -5,5 +5,6 @@ namespace School_Management.API.Services
     public interface ICourseAssignmentService
     {
         public Task<CourseAssignmentResponse> CreateCourseAssignment(CourseAssignmentRequest request);
+        public Task<CourseAssignmentResponse> UpdateCourseAssignment(UpdateCourseAssignmentRequest request, Guid courseAssignmentId);
     }
 }
