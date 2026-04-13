@@ -49,8 +49,8 @@ namespace School_Management.API.Repositories
                 TeacherSubjectId = teacherSubject.TeacherSubjectId,
                 Title = request.Title.Trim(),
                 ClassYearId = request.ClassYearId,
-                FileTitle = request.FileTitle?.Trim(),
-                FileUrl = request.FileUrl?.Trim()
+                FileTitle = request.FileTitle?.Trim() ?? "Không có dữ liệu",
+                FileUrl = request.FileUrl?.Trim() ?? "Không có dữ liệu"
             };
 
             context.Assignment.Add(assignment);
@@ -219,8 +219,8 @@ namespace School_Management.API.Repositories
             assignment.Title = request.Title;
             assignment.StartTime = officialStartTime.ToUniversalTime();
             assignment.FinishTime = officialFinishTime.ToUniversalTime();
-            assignment.FileUrl = request.FileUrl;
-            assignment.FileTitle = request.FileTitle;
+            assignment.FileUrl = request.FileUrl ?? assignment.FileUrl;
+            assignment.FileTitle = request.FileTitle ?? assignment.FileTitle;
             assignment.TeacherSubjectId = teacherSubject.TeacherSubjectId;
             assignment.ClassYearId = request.ClassYearId;
             await context.Entry(assignment).Reference(x => x.ClassYear).LoadAsync();

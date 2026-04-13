@@ -18,6 +18,8 @@ namespace School_Management.API.Repositories
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
+                var course = await context.Course.FirstOrDefaultAsync(x => x.Id == request.CourseId);
+                if (course == null) return (null, "NOT_FOUND_COURSE");
 
                 var maxOrder = await context.Lesson
                                     .Where(x => x.CourseId == request.CourseId)
@@ -37,9 +39,6 @@ namespace School_Management.API.Repositories
                     LessonName = request.LessonName,
                     OrderIndex = request.OrderIndex
                 };
-
-                var course = await context.Course.FirstOrDefaultAsync(x => x.Id == request.CourseId);
-                if (course == null) return (null, "NOT_FOUND_COURSE");
 
                 context.Lesson.Add(newLesson);
                 await context.SaveChangesAsync();

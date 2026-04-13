@@ -15,5 +15,6 @@ namespace School_Management.API.Models.Domain
         [ForeignKey("CourseId")]
         public Course Course { get; set; } = null!;
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
+        public ICollection<CourseAssignment> CourseAssignments { get; set; } = new List<CourseAssignment>();
     }
 }

@@ -1,0 +1,76 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using School_Management.API.CustomActionFilter;
+using School_Management.API.Models.DTO;
+using School_Management.API.Services;
+
+namespace School_Management.API.Controllers
+{
+    [Route("api/course-assignments")]
+    [ApiController]
+    public class CourseAssignmentsController : ControllerBase
+    {
+        private readonly ICourseAssignmentService courseAssignmentService;
+
+        public CourseAssignmentsController(ICourseAssignmentService courseAssignmentService)
+        {
+            this.courseAssignmentService = courseAssignmentService;
+        }
+
+        [HttpPost]
+        [ValidateModel]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> CreateCourseAssignment([FromBody] CourseAssignmentRequest request)
+        {
+            var result = await courseAssignmentService.CreateCourseAssignment(request);
+            return StatusCode(201, new
+            {
+                success = true,
+                message = "Tạo bài tập cho khóa học thành công",
+                data = result
+            });
+        }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{courseAssignmentId}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> UpdateCourseAssignment([FromBody] UpdateCourseAssignmentRequest request, [FromRoute] Guid courseAssignmentId)
+        {
+            var result = await courseAssignmentService.UpdateCourseAssignment(request, courseAssignmentId);
+            return Ok(new
+            {
+                success = true, 
+                message = "Cập nhật thông tin thành công",
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [ValidateModel]
+        [Authorize]
+        public async Task<IActionResult> GetAllCourseAssignment([FromQuery] CourseAssignmentFilterRequest request)
+        {
+            var result = await courseAssignmentService.GetAllCourseAssigment(request);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [Route("{courseAssignmentId}")]
+        [Authorize]
+        public async Task<IActionResult> GetCourseAssignmentById([FromRoute] Guid courseAssignmentId)
+        {
+            var result = await courseAssignmentService.GetCourseAssignmentById(courseAssignmentId);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
+    }
+}
