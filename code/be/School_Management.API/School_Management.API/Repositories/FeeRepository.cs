@@ -115,5 +115,41 @@ namespace School_Management.API.Repositories
                 TotalCount = totalCount
             };
         }
+
+        public async Task<PagedResponse<FeeDetailResponse>> GetAllFeeDetailOfFee(FeeDetailFilterRequest request)
+        {
+            var query = context.FeeDetail.AsNoTracking().Where(x => x.FeeId == request.FeeId);
+
+            if(!string.IsNullOrWhiteSpace(request.StudentName))
+            {
+                var name = request.StudentName.Trim().ToLower();
+                query = query.Where(x => x.Student.User.FullName.Trim().ToLower().Contains(name));
+            }
+
+            query = query.OrderBy(x => x.Id);
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(g => new FeeDetailResponse
+                                        {
+                                            Id = g.Id,
+                                            AmountDue = g.AmountDue,
+                                            AmountPaid = g.AmountPaid,
+                                            FeeId = g.FeeId,
+                                            PaidAt = g.PaidAt,
+                                            Reason = g.Reason,
+                                            Status = g.Status,
+                                            StudentId = g.StudentId,
+                                            StudentName = g.Student.User.FullName
+                                        }).ToListAsync();
+
+            return new PagedResponse<FeeDetailResponse>
+            {
+                Items = listResult,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                TotalCount = totalCount
+            };
+        }
     }
 }

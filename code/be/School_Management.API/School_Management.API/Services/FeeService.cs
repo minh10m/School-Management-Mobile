@@ -29,5 +29,10 @@ namespace School_Management.API.Services
         {
             return await feeRepository.GetAllFee(request);
         }
+
+        public async Task<PagedResponse<FeeDetailResponse>> GetAllFeeDetailOfFee(FeeDetailFilterRequest request)
+        {
+            return await feeRepository.GetAllFeeDetailOfFee(request);
+        }
     }
 }
