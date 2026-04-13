@@ -6,5 +6,7 @@ namespace School_Management.API.Services
     {
         public Task<CourseAssignmentResponse> CreateCourseAssignment(CourseAssignmentRequest request);
         public Task<CourseAssignmentResponse> UpdateCourseAssignment(UpdateCourseAssignmentRequest request, Guid courseAssignmentId);
+        public Task<PagedResponse<CourseAssignmentResponse>> GetAllCourseAssigment(CourseAssignmentFilterRequest request);
+
     }
 }

@@ -46,5 +46,18 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Authorize]
+        public async Task<IActionResult> GetAllCourseAssignment([FromQuery] CourseAssignmentFilterRequest request)
+        {
+            var result = await courseAssignmentService.GetAllCourseAssigment(request);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
     }
 }

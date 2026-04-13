@@ -70,6 +70,38 @@ namespace School_Management.API.Repositories
             
         }
 
+        public async Task<(PagedResponse<CourseAssignmentResponse>? data, string message)> GetAllCourseAssigment(CourseAssignmentFilterRequest request)
+        {
+            var lesson = await context.Lesson.AsNoTracking().Where(x => x.Id == request.LessonId).Select(g => new { g.Id, g.LessonName }).FirstOrDefaultAsync();
+            if (lesson == null) return (null, "NOT_FOUND_LESSON");
+
+            var query = context.CourseAssignment.AsNoTracking().AsQueryable();
+            query = query.Where(x => x.LessonId == request.LessonId);
+            query = query.OrderBy(x => x.OrderIndex);
+
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(courseAssignment => new CourseAssignmentResponse
+                                        {
+                                            Id = courseAssignment.Id,
+                                            FileTitle = courseAssignment.FileTitle,
+                                            FileUrl = courseAssignment.FileUrl,
+                                            LessonId = courseAssignment.LessonId,
+                                            LessonName = lesson.LessonName,
+                                            OrderIndex = courseAssignment.OrderIndex,
+                                            Title = courseAssignment.Title
+                                        }).ToListAsync();
+
+            return (new PagedResponse<CourseAssignmentResponse>
+            {
+                Items = listResult,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                TotalCount = totalCount
+            }, "SUCCESS");
+        }
+
         public async Task<(CourseAssignmentResponse? data, string mesaage)> UpdateCourseAssignment(UpdateCourseAssignmentRequest request, Guid courseAssignmentId)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
