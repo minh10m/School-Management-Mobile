@@ -7,5 +7,6 @@ namespace School_Management.API.Services
         public Task<FeeResponse> CreateFee(FeeRequest request);
         public Task<PagedResponse<FeeResponse>> GetAllFee(FeeFilterRequest request);
         public Task<PagedResponse<FeeDetailResponse>> GetAllFeeDetailOfFee(FeeDetailFilterRequest request);
+        public Task<FeeResponse> UpdateFee(UpdateFeeRequest request, Guid feeId);
     }
 }

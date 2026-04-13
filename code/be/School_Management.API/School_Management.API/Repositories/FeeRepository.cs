@@ -37,7 +37,7 @@ namespace School_Management.API.Repositories
                 var fee = new Fee
                 {
                     Id = Guid.NewGuid(),
-                    DueDate = request.DueDate,
+                    DueDate = request.DueDate.ToUniversalTime(),
                     Amount = request.Amount,
                     ClassYearId = request.ClassYearId,
                     SchoolYear = request.SchoolYear,
@@ -150,6 +150,47 @@ namespace School_Management.API.Repositories
                 PageNumber = request.PageNumber,
                 TotalCount = totalCount
             };
+        }
+
+        public async Task<(FeeResponse? data, string message)> UpdateFee(UpdateFeeRequest request, Guid feeId)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var fee = await context.Fee.Include(x => x.ClassYear).FirstOrDefaultAsync(x => x.Id == feeId);
+                if (fee == null) return (null, "NOT_FOUND_FEE");
+
+                var isExisting = await context.Fee.AnyAsync(x => x.Id != feeId && x.ClassYearId == fee.ClassYearId && x.Title.Trim().ToLower() == request.Title.Trim().ToLower());
+                if (isExisting) return (null, "CONFLICT_TITLE");
+
+                if (request.Title != fee.Title)
+                    await context.FeeDetail.Where(x => x.FeeId == fee.Id)
+                                           .ExecuteUpdateAsync(g => g.SetProperty(l => l.Reason, l => request.Title));
+
+                fee.Title = request.Title;
+                fee.DueDate = request.DueDate.ToUniversalTime();
+
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                var result = new FeeResponse
+                {
+                    Id = fee.Id,
+                    DueDate = fee.DueDate,
+                    Amount = fee.Amount,
+                    ClassYearId = fee.ClassYearId,
+                    SchoolYear = fee.SchoolYear,
+                    Title = fee.Title,
+                    ClassName = fee.ClassYear.ClassName ?? ""
+                };
+
+                return (result, "SUCCESS");
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
     }
 }

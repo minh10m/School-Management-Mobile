@@ -34,5 +34,17 @@ namespace School_Management.API.Services
         {
             return await feeRepository.GetAllFeeDetailOfFee(request);
         }
+
+        public async Task<FeeResponse> UpdateFee(UpdateFeeRequest request, Guid feeId)
+        {
+            var (result, message) = await feeRepository.UpdateFee(request, feeId);
+            return message switch
+            {
+                "NOT_FOUND_FEE" => throw new NotFoundException("Không tìm thấy phí này"),
+                "CONFLICT_TITLE" => throw new ConflictException("Tên tiêu đề phí này đã tồn tại"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
     }
 }
