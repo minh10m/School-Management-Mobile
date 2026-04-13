@@ -1,3 +1,8 @@
+export interface BaseRequestSecond {
+  pageNumber?: number;
+  pageSize?: number;
+}
+
 export interface PagedResponse<T> {
   items: T[];
   totalCount: number;
@@ -11,3 +16,4 @@ export interface ApiResponse<T> {
   message?: string;
   data: T;
 }
+

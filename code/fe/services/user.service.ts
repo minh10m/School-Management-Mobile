@@ -60,13 +60,13 @@ export const userService = {
 
     // Map Frontend Payload to Backend CreateUserRequest
     const backendPayload: any = {
-      username: payload.username,
-      password: payload.password,
-      email: payload.email,
-      phoneNumber: payload.phone,
-      fullName: payload.fullName,
-      address: payload.address,
-      birthday: payload.birthday,
+      username: payload.username?.trim(),
+      password: payload.password, // Don't trim password
+      email: payload.email?.trim(),
+      phoneNumber: payload.phone?.trim(),
+      fullName: payload.fullName?.trim(),
+      address: payload.address?.trim(),
+      birthday: payload.birthday?.trim(),
       role: role,
     };
 
