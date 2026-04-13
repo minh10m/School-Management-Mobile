@@ -8,5 +8,11 @@ namespace School_Management.API.Models.DTO
 
         [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Tên khóa học không được chỉ chứa khoảng trắng")]
         public string CourseName { get; set; } = string.Empty;
+
+        public Guid? SubjectId { get; set; }
+
+        public decimal? MinPrice { get; set; }
+
+        public decimal? MaxPrice { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
@@ -77,6 +77,21 @@ namespace School_Management.API.Repositories
             {
                 var name = request.Status.Trim().ToLower();
                 query = query.Where(x => x.Status.Trim().ToLower().Contains(name));
+            }
+            
+            if (request.SubjectId.HasValue)
+            {
+                query = query.Where(x => x.TeacherSubject.SubjectId == request.SubjectId.Value);
+            }
+
+            if (request.MinPrice.HasValue)
+            {
+                query = query.Where(x => x.Price >= request.MinPrice.Value);
+            }
+
+            if (request.MaxPrice.HasValue)
+            {
+                query = query.Where(x => x.Price <= request.MaxPrice.Value);
             }
 
             if (request.Status == "Approved")
