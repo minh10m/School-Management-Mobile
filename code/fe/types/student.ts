@@ -48,6 +48,7 @@ export interface GetStudentsParams {
   search?: string;
   Grade?: number;
   ClassName?: string;
+  ClassYearId?: string;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────

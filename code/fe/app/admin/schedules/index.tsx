@@ -241,7 +241,8 @@ export default function AdminSchedulesScreen() {
           keyExtractor={(item, index) => item.scheduleId || index.toString()}
           contentContainerStyle={{
             paddingHorizontal: 24,
-            paddingVertical: 16,
+            paddingTop: 16,
+            paddingBottom: 100,
             gap: 12,
           }}
           refreshControl={

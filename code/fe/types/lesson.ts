@@ -1,10 +1,19 @@
+import { PagedResponse } from "./common";
+
 // ─── Lesson ───────────────────────────────────────────────────────────────────
 
 export interface LessonResponse {
-  lessonId: string;
+  id: string;
   lessonName: string;
   courseId: string;
+  courseName: string;
   orderIndex: number;
+}
+
+export interface LessonFilterRequest {
+  courseId: string;
+  pageNumber?: number;
+  pageSize?: number;
 }
 
 export interface CreateLessonPayload {
@@ -14,51 +23,61 @@ export interface CreateLessonPayload {
 }
 
 export interface UpdateLessonPayload {
-  lessonName?: string;
-  orderIndex?: number;
+  lessonName: string;
+  orderIndex: number;
 }
 
 // ─── LessonVideo ──────────────────────────────────────────────────────────────
 
 export interface LessonVideoResponse {
-  videoId: number;
-  name: string;
+  id: string;
   url: string;
-  duration: number; // seconds
   isPreview: boolean;
-  lessonId: number;
+  name: string;
+  lessonId: string;
+  lessonName: string;
+  duration: number;
+  orderIndex: number;
+}
+
+export interface LessonVideoFilterRequest {
+  lessonId: string;
+  pageNumber?: number;
+  pageSize?: number;
 }
 
 export interface CreateLessonVideoPayload {
-  name: string;
   url: string;
-  duration: number;
   isPreview: boolean;
-  lessonId: number;
+  name: string;
+  lessonId: string;
+  duration: number;
+  orderIndex: number;
 }
 
 export interface UpdateLessonVideoPayload {
-  name?: string;
-  url?: string;
-  duration?: number;
-  isPreview?: boolean;
+  url: string;
+  isPreview: boolean;
+  name: string;
+  duration: number;
+  orderIndex: number;
 }
 
 // ─── LessonAssignment ─────────────────────────────────────────────────────────
 
 export interface LessonAssignmentResponse {
-  assignmentId: number;
+  id: string;
   title: string;
   body: string;
   fileUrl: string | null;
-  lessonId: number;
+  lessonId: string;
 }
 
 export interface CreateLessonAssignmentPayload {
   title: string;
   body: string;
   fileUrl?: string;
-  lessonId: number;
+  lessonId: string;
 }
 
 export interface UpdateLessonAssignmentPayload {
@@ -66,3 +85,4 @@ export interface UpdateLessonAssignmentPayload {
   body?: string;
   fileUrl?: string;
 }
+

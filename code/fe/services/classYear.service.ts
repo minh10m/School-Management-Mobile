@@ -67,10 +67,11 @@ export const classYearService = {
         : params.schoolYear;
       delete backendParams.schoolYear;
     }
-    const response = await apiClient.get<ClassYearSummary[]>("/class-years/teaching", {
+    const response = await apiClient.get<any>("/class-years/teaching", {
       params: backendParams,
     });
-    return response.data;
+    const data = response.data;
+    return Array.isArray(data) ? data : (data?.items || []);
   },
 
   // ─── GET CLASSES BY TEACHER ID ────────────────────────────────────────────────
@@ -91,11 +92,12 @@ export const classYearService = {
         : params.schoolYear;
       delete backendParams.schoolYear;
     }
-    const response = await apiClient.get<ClassYearSummary[]>(
+    const response = await apiClient.get<any>(
       `/class-years/by-teacher/${teacherId}`,
       { params: backendParams }
     );
-    return response.data;
+    const data = response.data;
+    return Array.isArray(data) ? data : (data?.items || []);
   },
 
   // ─── TEACHER: GET HOMEROOM CLASS ──────────────────────────────────────────────

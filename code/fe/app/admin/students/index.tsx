@@ -187,7 +187,7 @@ export default function AdminStudentsScreen() {
         <FlatList
           data={students}
           keyExtractor={(item, index) => item.studentId || index.toString()}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 16, gap: 12 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 100, gap: 12 }}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

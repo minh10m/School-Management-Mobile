@@ -7,8 +7,8 @@ import { scheduleService } from "../../services/schedule.service";
 import { ScheduleDetailItem } from "../../types/schedule";
 
 // dayOfWeek: 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 7=Sun
-const DAY_LABELS = ["Th 2", "Th 3", "Th 4", "Th 5", "Th 6", "Th 7", "CN"];
-const DAY_FULL = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
+const DAY_LABELS = ["Th 2", "Th 3", "Th 4", "Th 5", "Th 6"];
+const DAY_FULL = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu"];
 
 const SUBJECT_COLORS = [
   "bg-purple-100", "bg-cyan-100", "bg-blue-100",

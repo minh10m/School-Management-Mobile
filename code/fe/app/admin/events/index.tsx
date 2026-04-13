@@ -107,7 +107,11 @@ export default function AdminEventsScreen() {
       return { label: "Sắp tới", color: "text-blue-500", bg: "bg-blue-50" };
     if (now > f)
       return { label: "Đã kết thúc", color: "text-gray-400", bg: "bg-gray-50" };
-    return { label: "Đang diễn ra", color: "text-green-500", bg: "bg-green-50" };
+    return {
+      label: "Đang diễn ra",
+      color: "text-green-500",
+      bg: "bg-green-50",
+    };
   };
 
   return (
@@ -155,7 +159,13 @@ export default function AdminEventsScreen() {
                 color: activeTab === t ? "white" : "#9CA3AF",
               }}
             >
-              {t === "All" ? "Tất cả" : t === "Upcoming" ? "Sắp tới" : t === "Ongoing" ? "Đang diễn ra" : "Đã kết thúc"}
+              {t === "All"
+                ? "Tất cả"
+                : t === "Upcoming"
+                  ? "Sắp tới"
+                  : t === "Ongoing"
+                    ? "Đang diễn ra"
+                    : "Đã kết thúc"}
             </Text>
           </TouchableOpacity>
         ))}
@@ -192,8 +202,16 @@ export default function AdminEventsScreen() {
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Filter Schedules</Text>
-              <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
+              <Text
+                style={{ fontFamily: "Poppins-Bold" }}
+                className="text-3xl text-black"
+              >
+                Filter Schedules
+              </Text>
+              <TouchableOpacity
+                onPress={() => setIsFilterVisible(false)}
+                className="bg-gray-100 p-2 rounded-full"
+              >
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
@@ -201,7 +219,12 @@ export default function AdminEventsScreen() {
             <ScrollView showsVerticalScrollIndicator={false} className="mb-10">
               {/* Filter: Term */}
               <View className="mb-8">
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Học kỳ</Text>
+                <Text
+                  style={{ fontFamily: "Poppins-Medium" }}
+                  className="text-gray-500 text-sm mb-4 ml-1"
+                >
+                  Học kỳ
+                </Text>
                 <View className="flex-row gap-3">
                   {[1, 2].map((t) => (
                     <TouchableOpacity
@@ -209,7 +232,15 @@ export default function AdminEventsScreen() {
                       onPress={() => setTempTerm(t)}
                       className={`px-6 py-3.5 rounded-2xl items-center ${tempTerm === t ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
                     >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempTerm === t ? "#1D4ED8" : "#9CA3AF" }}>Học kỳ {t}</Text>
+                      <Text
+                        style={{
+                          fontFamily: "Poppins-Bold",
+                          fontSize: 13,
+                          color: tempTerm === t ? "#1D4ED8" : "#9CA3AF",
+                        }}
+                      >
+                        Học kỳ {t}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -217,7 +248,12 @@ export default function AdminEventsScreen() {
 
               {/* Filter: Year */}
               <View className="mb-4">
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Năm học</Text>
+                <Text
+                  style={{ fontFamily: "Poppins-Medium" }}
+                  className="text-gray-500 text-sm mb-4 ml-1"
+                >
+                  Năm học
+                </Text>
                 <View className="flex-row flex-wrap gap-3">
                   {[2024, 2025, 2026].map((y) => (
                     <TouchableOpacity
@@ -225,7 +261,15 @@ export default function AdminEventsScreen() {
                       onPress={() => setTempYear(y)}
                       className={`px-5 py-3 rounded-2xl items-center ${tempYear === y ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
                     >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempYear === y ? "#1D4ED8" : "#9CA3AF" }}>{y}</Text>
+                      <Text
+                        style={{
+                          fontFamily: "Poppins-Bold",
+                          fontSize: 13,
+                          color: tempYear === y ? "#1D4ED8" : "#9CA3AF",
+                        }}
+                      >
+                        {y}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -238,13 +282,23 @@ export default function AdminEventsScreen() {
                 onPress={resetFilters}
                 className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Thiết lập lại</Text>
+                <Text
+                  style={{ fontFamily: "Poppins-Bold", fontSize: 16 }}
+                  className="text-gray-400"
+                >
+                  Thiết lập lại
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
                 className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
+                <Text
+                  style={{ fontFamily: "Poppins-Bold", fontSize: 16 }}
+                  className="text-white"
+                >
+                  Áp dụng
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -257,8 +311,8 @@ export default function AdminEventsScreen() {
         keyExtractor={(item) => item.eventId}
         contentContainerStyle={{
           paddingHorizontal: 24,
-          paddingVertical: 16,
-          paddingBottom: 40,
+          paddingTop: 16,
+          paddingBottom: 150,
         }}
         refreshControl={
           <RefreshControl
