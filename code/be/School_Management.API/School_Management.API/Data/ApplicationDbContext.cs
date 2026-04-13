@@ -33,6 +33,7 @@ namespace School_Management.API.Data
         public DbSet<Lesson> Lesson { get; set; }
         public DbSet<Course> Course { get; set; }
         public DbSet<LessonVideo> LessonVideo { get; set; }
+        public DbSet<CourseAssignment> CourseAssignment { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

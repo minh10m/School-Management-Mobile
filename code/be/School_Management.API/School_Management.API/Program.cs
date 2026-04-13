@@ -92,6 +92,8 @@ builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<ILessonService, LessonService>();
 builder.Services.AddScoped<ILessonVideoService, LessonVideoService>();
 builder.Services.AddScoped<ILessonVideoRepository, LessonVideoRepository>();
+builder.Services.AddScoped<ICourseAssignmentRepository, CourseAssignmentRepository>();
+builder.Services.AddScoped<ICourseAssignmentService, CourseAssignmentService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
