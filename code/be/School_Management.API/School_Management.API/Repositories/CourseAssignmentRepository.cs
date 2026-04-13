@@ -102,6 +102,25 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
+        public async Task<(CourseAssignmentResponse? data, string message)> GetCourseAssignmentById(Guid courseAssignmentId)
+        {
+            var courseAssignment = await context.CourseAssignment.Include(x => x.Lesson).FirstOrDefaultAsync(x => x.Id == courseAssignmentId);
+            if (courseAssignment == null) return (null, "NOT_FOUND_COURSE_ASSIGNMENT");
+
+            var result = new CourseAssignmentResponse
+            {
+                Id = courseAssignment.Id,
+                FileTitle = courseAssignment.FileTitle,
+                FileUrl = courseAssignment.FileUrl,
+                LessonId = courseAssignment.LessonId,
+                LessonName = courseAssignment.Lesson.LessonName,
+                OrderIndex = courseAssignment.OrderIndex,
+                Title = courseAssignment.Title
+            };
+
+            return (result, "SUCCESS");
+        }
+
         public async Task<(CourseAssignmentResponse? data, string mesaage)> UpdateCourseAssignment(UpdateCourseAssignmentRequest request, Guid courseAssignmentId)
         {
             using var transaction = await context.Database.BeginTransactionAsync();

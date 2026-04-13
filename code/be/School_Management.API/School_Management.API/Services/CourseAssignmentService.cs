@@ -36,6 +36,17 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<CourseAssignmentResponse> GetCourseAssignmentById(Guid courseAssignmentId)
+        {
+            var (result, message) = await courseAssignmentRepository.GetCourseAssignmentById(courseAssignmentId);
+            return message switch
+            {
+                "NOT_FOUND_COURSE_ASSIGNMENT" => throw new NotFoundException("Không tìm thấy bài tập của bài học này"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<CourseAssignmentResponse> UpdateCourseAssignment(UpdateCourseAssignmentRequest request, Guid courseAssignmentId)
         {
             var (result, message) = await courseAssignmentRepository.UpdateCourseAssignment(request, courseAssignmentId);
