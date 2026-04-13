@@ -68,6 +68,7 @@ export default function AdminDashboard() {
     { label: 'Lịch thi',     icon: 'document-text-outline',  color: 'bg-yellow-100', iconColor: '#EAB308', route: '/admin/exam-schedules' },
     { label: 'Học phí',      icon: 'cash-outline',           color: 'bg-orange-100', iconColor: '#F97316', route: '/admin/fees' },
     { label: 'Sự kiện',      icon: 'megaphone-outline',      color: 'bg-pink-100',   iconColor: '#F43F5E', route: '/admin/events' },
+    { label: 'Khóa học',     icon: 'journal-outline',        color: 'bg-rose-100',   iconColor: '#E11D48', route: '/admin/courses' },
   ];
 
   const STAT_CARDS = [
