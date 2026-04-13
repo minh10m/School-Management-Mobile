@@ -31,5 +31,20 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [ValidateModel]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllFee([FromQuery] FeeFilterRequest request)
+        {
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await feeService.GetAllFee(request);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
     }
 }

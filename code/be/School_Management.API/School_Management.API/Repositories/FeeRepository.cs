@@ -85,5 +85,35 @@ namespace School_Management.API.Repositories
                 throw;
             }
         }
+
+        public async Task<PagedResponse<FeeResponse>> GetAllFee(FeeFilterRequest request)
+        {
+            var query = context.Fee.AsNoTracking().AsQueryable();
+            query = query.Where(x => x.SchoolYear == request.SchoolYear);
+            query = query.OrderBy(x => x.Title);
+
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(fee => new FeeResponse
+                                        {
+                                            Id = fee.Id,
+                                            DueDate = fee.DueDate,
+                                            Amount = fee.Amount,
+                                            ClassYearId = fee.ClassYearId,
+                                            SchoolYear = fee.SchoolYear,
+                                            Title = fee.Title,
+                                            ClassName = fee.ClassYear.ClassName ?? ""
+                                        }).ToListAsync();
+
+            return new PagedResponse<FeeResponse>
+            {
+                Items = listResult,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                TotalCount = totalCount
+            };
+        }
     }
 }

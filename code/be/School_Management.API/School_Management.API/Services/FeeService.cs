@@ -24,5 +24,10 @@ namespace School_Management.API.Services
                 _ => throw new Exception("Lỗi không xác định")
             };
         }
+
+        public async Task<PagedResponse<FeeResponse>> GetAllFee(FeeFilterRequest request)
+        {
+            return await feeRepository.GetAllFee(request);
+        }
     }
 }
