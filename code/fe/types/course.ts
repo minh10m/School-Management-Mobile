@@ -28,6 +28,9 @@ export interface EnrolledCourseResponse extends CourseResponse {
 export interface CourseFilterRequestAdmin extends BaseRequestSecond {
   status?: string;
   courseName?: string;
+  subjectId?: string;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 export interface CourseFilterRequestTeacherAndStudent extends BaseRequestSecond {

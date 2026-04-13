@@ -1,7 +1,7 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
+import { AdminLayout } from "../../../components/ui/AdminLayout";
 
 const MOCK_FEES = [
   { feeId: '1', title: 'Học phí HK1', amount: 2500000, dueDate: '2025-09-30', className: '10A1', schoolYear: '2025-2026', paidCount: 28, totalCount: 35 },
@@ -15,65 +15,88 @@ const fmt = (n: number) => n.toLocaleString('vi-VN') + 'đ';
 
 export default function AdminFeesScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="black" />
+    <AdminLayout 
+      title="Quản lý Học phí"
+      rightComponent={
+        <TouchableOpacity
+          onPress={() => {}}
+          className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
+        >
+          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xs">Tạo mới</Text>
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Quản lý Học phí</Text>
-      </View>
-
+      }
+      searchProps={{
+        value: "",
+        onChangeText: () => {},
+        placeholder: "Tìm kiếm khoản phí...",
+      }}
+    >
+      <Stack.Screen options={{ headerShown: false }} />
       <FlatList
         data={MOCK_FEES}
         keyExtractor={item => item.feeId}
-        contentContainerStyle={{ padding: 16, gap: 10 }}
+        className="flex-1 bg-white"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 20, gap: 16 }}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           const pct = Math.round((item.paidCount / item.totalCount) * 100);
           const overdue = new Date(item.dueDate) < new Date();
           return (
             <TouchableOpacity
-              className="bg-white rounded-2xl p-4 border border-gray-100"
+              activeOpacity={0.8}
+              className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm"
               onPress={() => router.push(`/admin/fees/${item.feeId}` as any)}
             >
-              <View className="flex-row items-start justify-between mb-3">
+              <View className="flex-row items-start justify-between mb-4">
                 <View className="flex-1">
-                  <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-sm mb-0.5">{item.title}</Text>
+                  <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 16 }} className="text-black mb-1">{item.title}</Text>
                   <View className="flex-row items-center gap-2">
-                    <View className="bg-blue-50 px-2 py-0.5 rounded-full">
-                      <Text style={{ fontFamily: 'Poppins-Medium', color: '#136ADA', fontSize: 10 }}>{item.className}</Text>
+                    <View className="bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">
+                      <Text style={{ fontFamily: 'Poppins-Bold', color: '#136ADA', fontSize: 10 }}>LỚP {item.className}</Text>
                     </View>
-                    <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">{item.schoolYear}</Text>
+                    <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px]">{item.schoolYear}</Text>
                   </View>
                 </View>
-                <Text style={{ fontFamily: 'Poppins-Bold', color: '#136ADA' }} className="text-base">{fmt(item.amount)}</Text>
+                <View className="bg-indigo-50 px-3 py-1.5 rounded-2xl border border-indigo-100">
+                  <Text style={{ fontFamily: 'Poppins-Bold', color: '#6366F1', fontSize: 14 }}>{fmt(item.amount)}</Text>
+                </View>
               </View>
 
-              {/* Progress Bar */}
-              <View className="mb-2">
-                <View className="flex-row justify-between mb-1">
-                  <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">
-                    {item.paidCount}/{item.totalCount} đã đóng
+              {/* Progress Bar Section */}
+              <View className="bg-gray-50/50 p-4 rounded-2xl mb-4 border border-gray-100/50">
+                <View className="flex-row justify-between mb-2 items-center">
+                  <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[11px]">
+                    Tiến độ: <Text className="text-black font-bold">{item.paidCount}/{item.totalCount}</Text>
                   </Text>
-                  <Text style={{ fontFamily: 'Poppins-SemiBold', color: pct === 100 ? '#22C55E' : '#136ADA', fontSize: 11 }}>{pct}%</Text>
+                  <Text style={{ fontFamily: 'Poppins-Bold', color: pct === 100 ? '#16A34A' : '#136ADA', fontSize: 12 }}>{pct}%</Text>
                 </View>
-                <View className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <View className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
                   <View
-                    className={`h-full rounded-full ${pct === 100 ? 'bg-green-400' : 'bg-bright-blue'}`}
+                    className={`h-full rounded-full ${pct === 100 ? 'bg-green-500' : 'bg-[#136ADA]'}`}
                     style={{ width: `${pct}%` }}
                   />
                 </View>
               </View>
 
-              <View className="flex-row items-center gap-1">
-                <Ionicons name="calendar-outline" size={12} color={overdue ? '#EF4444' : '#9CA3AF'} />
-                <Text style={{ fontFamily: 'Poppins-Regular', color: overdue ? '#EF4444' : '#9CA3AF', fontSize: 11 }}>
-                  Hạn: {item.dueDate}{overdue ? ' · QUÁ HẠN' : ''}
-                </Text>
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center gap-1.5">
+                  <View className={`${overdue ? 'bg-red-50' : 'bg-gray-50'} px-2.5 py-1 rounded-lg flex-row items-center gap-1`}>
+                    <Ionicons name="calendar-outline" size={12} color={overdue ? '#EF4444' : '#9CA3AF'} />
+                    <Text style={{ fontFamily: 'Poppins-Bold', color: overdue ? '#EF4444' : '#9CA3AF', fontSize: 10 }}>
+                      HẠN: {item.dueDate}{overdue ? ' · QUÁ HẠN' : ''}
+                    </Text>
+                  </View>
+                </View>
+                <View className="flex-row items-center gap-1">
+                  <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11 }} className="text-[#136ADA]">Chi tiết</Text>
+                  <Ionicons name="chevron-forward" size={14} color="#136ADA" />
+                </View>
               </View>
             </TouchableOpacity>
           );
         }}
+        ListFooterComponent={<View className="h-20 bg-white" />}
       />
-    </SafeAreaView>
+    </AdminLayout>
   );
 }

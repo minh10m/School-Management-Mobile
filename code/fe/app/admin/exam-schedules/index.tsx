@@ -13,7 +13,8 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, Stack } from "expo-router";
+import { AdminLayout } from "../../../components/ui/AdminLayout";
 import { examScheduleService } from "../../../services/examSchedule.service";
 import {
   ExamScheduleResponse,
@@ -33,8 +34,8 @@ const ExamScheduleIndex = () => {
   const [filter, setFilter] = useState<ExamScheduleFilterRequest>({
     pageNumber: 1,
     pageSize: 10,
-    term: 0, // Set to 0 to fetch all (Backend logic: skip filter if <= 0)
-    schoolYear: 0, // Set to 0 to fetch all (Backend logic: skip filter if <= 0)
+    term: parseInt(TERM.toString(), 10),
+    schoolYear: parseInt(SCHOOL_YEAR, 10),
   });
 
   const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -141,134 +142,26 @@ const ExamScheduleIndex = () => {
     );
   };
 
-  const renderItem = ({ item }: { item: ExamScheduleResponse }) => (
-    <View
-      className="bg-white rounded-3xl p-5 mb-4 shadow-sm border border-gray-100 flex-row items-center"
-    >
-      <TouchableOpacity
-        activeOpacity={0.7}
-        className="flex-1 flex-row items-center"
-        onPress={() =>
-          router.push({
-            pathname: "/admin/exam-schedules/[id]",
-            params: { id: item.examScheduleId, title: item.title },
-          })
-        }
-      >
-        <View
-          className={`w-14 h-14 rounded-2xl items-center justify-center ${
-            item.isActive ? "bg-blue-50" : "bg-gray-50"
-          }`}
-        >
-          <Ionicons
-            name="calendar"
-            size={28}
-            color={item.isActive ? "#136ADA" : "#9ca3af"}
-          />
-        </View>
-
-        <View className="flex-1 ml-4">
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-gray-900 text-base mb-1"
-            numberOfLines={1}
-          >
-            {item.title}
-          </Text>
-          <View className="flex-row items-center">
-            <Text
-              style={{ fontFamily: "Poppins-Medium" }}
-              className="text-gray-500 text-xs"
-            >
-              Khối {item.grade} • Học kỳ {item.term} • {item.schoolYear}
-            </Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-
-      <View className="items-end ml-4">
-        <View
-          className={`px-3 py-1 rounded-full ${
-            item.isActive ? "bg-green-50" : "bg-gray-100"
-          }`}
-        >
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className={`text-[10px] ${
-              item.isActive ? "text-green-600" : "text-gray-500"
-            }`}
-          >
-            {item.isActive ? "ĐANG HOẠT ĐỘNG" : "KHÔNG HOẠT ĐỘNG"}
-          </Text>
-        </View>
-        <View className="flex-row items-center mt-4">
-          <TouchableOpacity
-            onPress={() => handleDeleteSchedule(item.examScheduleId, item.title)}
-            className="p-1"
-          >
-            <Ionicons name="trash-outline" size={20} color="#EF4444" />
-          </TouchableOpacity>
-          <Ionicons
-            name="chevron-forward"
-            size={20}
-            color="#D1D5DB"
-            style={{ marginLeft: 8 }}
-          />
-        </View>
-      </View>
-    </View>
-  );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Main Header */}
-      <View className="px-6 py-4 flex-row items-center justify-between border-b border-gray-50">
-        <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
-            <Ionicons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-xl text-black"
-          >
-            Lịch thi
-          </Text>
-        </View>
+    <AdminLayout
+      title="Lịch thi"
+      rightComponent={
         <TouchableOpacity
           onPress={() => router.push("/admin/exam-schedules/create")}
-          className="p-1"
+          className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
         >
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-[#136ADA] text-base"
-          >
-            Tạo mới
-          </Text>
+          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xs">Thêm mới</Text>
         </TouchableOpacity>
-      </View>
-
-      {/* Search Bar Section */}
-      <View className="px-6 py-4 flex-row items-center gap-x-4 bg-white border-b border-gray-50">
-        <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100 shadow-sm shadow-gray-100">
-          <Ionicons name="search-outline" size={20} color="#9ca3af" />
-          <TextInput
-            placeholder="Tìm theo tiêu đề..."
-            className="flex-1 ml-2 text-black text-sm"
-            style={{ fontFamily: "Poppins-Regular" }}
-            placeholderTextColor="#9ca3af"
-            value={searchTitle}
-            onChangeText={setSearchTitle}
-            onSubmitEditing={applySearch}
-          />
-        </View>
-        <TouchableOpacity
-          onPress={openFilter}
-          activeOpacity={0.7}
-          className="bg-blue-50 w-11 h-11 rounded-2xl items-center justify-center border border-blue-100"
-        >
-          <Ionicons name="options-outline" size={22} color="#136ADA" />
-        </TouchableOpacity>
-      </View>
+      }
+      searchProps={{
+        value: searchTitle,
+        onChangeText: setSearchTitle,
+        placeholder: "Tìm kiếm môn thi...",
+        onFilterPress: openFilter,
+      }}
+    >
+      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Advanced Filter Modal */}
       <Modal
@@ -280,124 +173,183 @@ const ExamScheduleIndex = () => {
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Lọc Lịch thi</Text>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Bộ lọc</Text>
               <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
 
-            {/* Filter: Academic Term */}
-            <View className="mb-8">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Học kỳ</Text>
-              <View className="flex-row items-center gap-3">
-                 {[1, 2].map(t => (
+            <ScrollView showsVerticalScrollIndicator={false} className="mb-10">
+              {/* Filter: Academic Term */}
+              <View className="mb-8">
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">HỌC KỲ</Text>
+                <View className="flex-row gap-2">
+                  <TouchableOpacity
+                    onPress={() => setModalTerm("")}
+                    className={`px-4 py-2 rounded-xl border ${modalTerm === "" ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
+                  >
+                    <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: modalTerm === "" ? "#1D4ED8" : "#9CA3AF" }}>
+                      TẤT CẢ
+                    </Text>
+                  </TouchableOpacity>
+                  {[1, 2].map(t => (
                     <TouchableOpacity
                       key={t}
                       onPress={() => setModalTerm(t.toString())}
-                      className={`px-6 py-3.5 rounded-2xl items-center ${modalTerm === t.toString() ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
+                      className={`px-4 py-2 rounded-xl border ${modalTerm === t.toString() ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
                     >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: modalTerm === t.toString() ? "#1D4ED8" : "#9CA3AF" }}>Kỳ {t}</Text>
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: modalTerm === t.toString() ? "#1D4ED8" : "#9CA3AF" }}>
+                        HỌC KỲ {t}
+                      </Text>
                     </TouchableOpacity>
-                 ))}
-                 <TouchableOpacity
-                      onPress={() => setModalTerm("")}
-                      className={`px-6 py-3.5 rounded-2xl items-center ${modalTerm === "" ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
-                    >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: modalTerm === "" ? "#1D4ED8" : "#9CA3AF" }}>Tất cả</Text>
-                </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
 
-            {/* Filter: Exam Type */}
-            <View className="mb-8">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Loại kỳ thi</Text>
-              <View className="flex-row flex-wrap gap-2">
-                 {["Giữa Kì", "Cuối Kì"].map(type => (
+              {/* Filter: Exam Type */}
+              <View className="mb-8">
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">LOẠI KỲ THI</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  <TouchableOpacity
+                    onPress={() => setModalType("")}
+                    className={`px-4 py-2 rounded-xl border ${modalType === "" ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
+                  >
+                    <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: modalType === "" ? "#1D4ED8" : "#9CA3AF" }}>
+                      TẤT CẢ
+                    </Text>
+                  </TouchableOpacity>
+                  {["Giữa Kì", "Cuối Kì"].map(type => (
                     <TouchableOpacity
                       key={type}
                       onPress={() => setModalType(type)}
-                      className={`px-5 py-3 rounded-2xl items-center ${modalType === type ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
+                      className={`px-4 py-2 rounded-xl border ${modalType === type ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
                     >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 12, color: modalType === type ? "#1D4ED8" : "#9CA3AF" }}>{type}</Text>
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: modalType === type ? "#1D4ED8" : "#9CA3AF" }}>
+                        {type.toUpperCase()}
+                      </Text>
                     </TouchableOpacity>
-                 ))}
-                 <TouchableOpacity
-                      onPress={() => setModalType("")}
-                      className={`px-5 py-3 rounded-2xl items-center ${modalType === "" ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
-                    >
-                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 12, color: modalType === "" ? "#1D4ED8" : "#9CA3AF" }}>Tất cả</Text>
-                 </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
 
-            {/* Filter: School Year */}
-            <View className="mb-12">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Năm học</Text>
-              <TextInput
-                value={modalYear}
-                onChangeText={setModalYear}
-                placeholder="2026"
-                keyboardType="numeric"
-                className="bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-black text-sm"
-                style={{ fontFamily: "Poppins-SemiBold" }}
-              />
-            </View>
+              {/* Filter: School Year */}
+              <View className="mb-4">
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">NĂM HỌC</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  <TouchableOpacity
+                    onPress={() => setModalYear("")}
+                    className={`px-4 py-2 rounded-xl border ${modalYear === "" ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
+                  >
+                    <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: modalYear === "" ? "#1D4ED8" : "#9CA3AF" }}>
+                      TẤT CẢ
+                    </Text>
+                  </TouchableOpacity>
+                  {["2024", "2025", "2026"].map(y => (
+                    <TouchableOpacity
+                      key={y}
+                      onPress={() => setModalYear(y)}
+                      className={`px-4 py-2 rounded-xl border ${modalYear === y ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
+                    >
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: modalYear === y ? "#1D4ED8" : "#9CA3AF" }}>
+                        {y}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
 
             {/* Modal Buttons */}
             <View className="flex-row gap-4">
               <TouchableOpacity
                 onPress={resetFilters}
-                className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
+                className="flex-1 bg-gray-50 h-16 rounded-[22px] items-center justify-center"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Đặt lại</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 15 }} className="text-gray-400">Thiết lập lại</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
-                className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
+                className="flex-1 bg-[#136ADA] h-16 rounded-[22px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 15 }} className="text-white">Áp dụng</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
+      {/* Standardized Exam Schedule List */}
       {loading && !refreshing ? (
-        <View className="flex-1 items-center justify-center">
+        <View className="flex-1 items-center justify-center bg-white">
           <ActivityIndicator size="large" color="#136ADA" />
         </View>
       ) : (
         <FlatList
           data={data?.items || []}
-          renderItem={renderItem}
           keyExtractor={(item) => item.examScheduleId}
-          contentContainerStyle={{
-            paddingHorizontal: 24,
-            paddingBottom: 100,
-            paddingTop: 10,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#136ADA"
-            />
-          }
+          className="bg-white"
+          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 20, gap: 16 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#136ADA" />}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="bg-white rounded-[32px] p-5 shadow-sm border border-gray-100"
+              onPress={() =>
+                router.push({
+                  pathname: "/admin/exam-schedules/[id]",
+                  params: { id: item.examScheduleId, title: item.title },
+                })
+              }
+            >
+              <View className="flex-row justify-between items-start mb-4">
+                <View className="flex-1">
+                  <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-black mb-1">
+                    {item.title}
+                  </Text>
+                  <View className="flex-row items-center gap-2 mt-1.5 flex-wrap">
+                    <View className="bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 10, color: "#136ADA" }}>HỌC KỲ {item.term}</Text>
+                    </View>
+                    <View className={`px-2.5 py-1 rounded-xl border ${item.isActive ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`}>
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 10, color: item.isActive ? "#16A34A" : "#9CA3AF" }}>
+                        {item.isActive ? "ĐANG HOẠT ĐỘNG" : "KHÔNG HOẠT ĐỘNG"}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <View className="w-12 h-12 rounded-2xl bg-indigo-50 items-center justify-center border border-indigo-100">
+                  <Ionicons name="document-text-outline" size={24} color="#6366F1" />
+                </View>
+              </View>
+
+              <View className="flex-row items-center justify-between pt-3 border-t border-gray-50/50">
+                <View className="flex-row items-center gap-2">
+                  <Text style={{ fontFamily: "Poppins-Medium", fontSize: 11 }} className="text-gray-400">
+                    Khối {item.grade} • {item.schoolYear}
+                  </Text>
+                </View>
+                <View className="flex-row items-center gap-3">
+                   <TouchableOpacity onPress={() => handleDeleteSchedule(item.examScheduleId, item.title)}>
+                      <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                   </TouchableOpacity>
+                   <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
           ListEmptyComponent={
-            <View className="items-center justify-center py-20">
-              <Ionicons
-                name="document-text-outline"
-                size={64}
-                color="#D1D5DB"
-              />
-              <Text className="text-gray-400 mt-4 font-medium text-center">
+            <View className="items-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200 mx-6">
+              <Ionicons name="document-text-outline" size={64} color="#D1D5DB" />
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center px-10">
                 Không tìm thấy lịch thi nào.{"\n"}Chạm (+) để tạo mới.
               </Text>
             </View>
           }
+          ListFooterComponent={<View className="h-20 bg-white" />}
         />
       )}
-    </SafeAreaView>
+    </AdminLayout>
   );
 };
 

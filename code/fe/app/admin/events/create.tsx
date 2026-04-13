@@ -1,8 +1,9 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { eventService } from '../../../services/event.service';
 import { getErrorMessage } from '../../../utils/error';
 
@@ -22,6 +23,11 @@ export default function AdminCreateEventScreen() {
     term: 1
   });
 
+  // Picker States
+  const [showPicker, setShowPicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
+  const [pickerType, setPickerType] = useState<'date' | 'start' | 'finish'>('date');
+
   useEffect(() => {
     if (isEdit) {
       loadEvent();
@@ -31,8 +37,7 @@ export default function AdminCreateEventScreen() {
   const loadEvent = async () => {
     try {
       setFetching(true);
-      // Fetch specifically by id or search within the list
-      const res = await eventService.getEvents({ Title: '' }); // Simplified: Fetch all and find
+      const res = await eventService.getEvents({ Title: '' });
       const event = res.items.find(e => e.eventId === id);
       if (event) {
         setForm({
@@ -78,6 +83,32 @@ export default function AdminCreateEventScreen() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handlePickerChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') setShowPicker(false);
+    if (selectedDate) {
+      if (pickerType === 'date') {
+        const formattedDate = selectedDate.toISOString().split('T')[0];
+        set('eventDate', formattedDate);
+      } else if (pickerType === 'start') {
+        const hh = selectedDate.getHours().toString().padStart(2, '0');
+        const mm = selectedDate.getMinutes().toString().padStart(2, '0');
+        set('startTime', `${hh}:${mm}:00`);
+      } else if (pickerType === 'finish') {
+        const hh = selectedDate.getHours().toString().padStart(2, '0');
+        const mm = selectedDate.getMinutes().toString().padStart(2, '0');
+        set('finishTime', `${hh}:${mm}:00`);
+      }
+    }
+  };
+
+  const currentPickerValue = () => {
+    if (pickerType === 'date') return new Date(form.eventDate);
+    const [h, m] = (pickerType === 'start' ? form.startTime : form.finishTime).split(':');
+    const d = new Date();
+    d.setHours(parseInt(h), parseInt(m), 0);
+    return d;
   };
 
   if (fetching) {
@@ -129,39 +160,57 @@ export default function AdminCreateEventScreen() {
           />
         </View>
 
-        {/* Date */}
+        {/* Date Picker Trigger */}
         <View className="mb-5">
-          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Ngày diễn ra (YYYY-MM-DD) *</Text>
-          <TextInput
-            value={form.eventDate}
-            onChangeText={(v) => set('eventDate', v)}
-            placeholder="2026-04-02"
-            placeholderTextColor="#D1D5DB"
-            className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-sm text-black"
-          />
+          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Ngày diễn ra *</Text>
+          <TouchableOpacity
+            onPress={() => {
+              setPickerType('date');
+              setPickerMode('date');
+              setShowPicker(true);
+            }}
+            className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 flex-row items-center justify-between"
+          >
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm">
+              {form.eventDate}
+            </Text>
+            <Ionicons name="calendar-outline" size={20} color="#136ADA" />
+          </TouchableOpacity>
         </View>
 
-        {/* Times */}
+        {/* Times Pickers */}
         <View className="flex-row gap-4 mb-5">
           <View className="flex-1">
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Giờ bắt đầu (HH:mm:ss) *</Text>
-            <TextInput
-              value={form.startTime}
-              onChangeText={(v) => set('startTime', v)}
-              placeholder="09:00:00"
-              placeholderTextColor="#D1D5DB"
-              className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-xs text-black"
-            />
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Giờ bắt đầu *</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setPickerType('start');
+                setPickerMode('time');
+                setShowPicker(true);
+              }}
+              className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 flex-row items-center justify-between"
+            >
+              <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm">
+                {form.startTime.substring(0, 5)}
+              </Text>
+              <Ionicons name="time-outline" size={20} color="#136ADA" />
+            </TouchableOpacity>
           </View>
           <View className="flex-1">
-            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Giờ kết thúc (HH:mm:ss) *</Text>
-            <TextInput
-              value={form.finishTime}
-              onChangeText={(v) => set('finishTime', v)}
-              placeholder="11:30:00"
-              placeholderTextColor="#D1D5DB"
-              className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-xs text-black"
-            />
+            <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-500 text-xs mb-1.5 ml-1">Giờ kết thúc *</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setPickerType('finish');
+                setPickerMode('time');
+                setShowPicker(true);
+              }}
+              className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 flex-row items-center justify-between"
+            >
+              <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm">
+                {form.finishTime.substring(0, 5)}
+              </Text>
+              <Ionicons name="time-outline" size={20} color="#136ADA" />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -194,7 +243,7 @@ export default function AdminCreateEventScreen() {
 
         {/* Submit */}
         <TouchableOpacity
-          className={`${submitting ? 'bg-blue-300' : 'bg-bright-blue'} rounded-2xl py-4 items-center mt-6 mb-10 shadow-sm shadow-blue-100`}
+          className={`${submitting ? 'bg-blue-300' : 'bg-[#136ADA]'} rounded-2xl py-4 items-center mt-6 mb-10 shadow-sm shadow-blue-100`}
           onPress={handleSubmit}
           disabled={submitting}
         >
@@ -207,6 +256,42 @@ export default function AdminCreateEventScreen() {
           )}
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Date/Time Picker Modal (iOS Style) */}
+      {showPicker && Platform.OS === 'ios' && (
+        <View className="absolute inset-0 bg-black/40 z-50 justify-end">
+          <View className="bg-white rounded-t-3xl p-6 pb-10">
+            <View className="flex-row justify-between items-center mb-4">
+              <TouchableOpacity onPress={() => setShowPicker(false)}>
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500">Hủy</Text>
+              </TouchableOpacity>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-lg">
+                {pickerMode === 'date' ? 'Chọn ngày' : 'Chọn giờ'}
+              </Text>
+              <TouchableOpacity onPress={() => setShowPicker(false)}>
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-blue-600">Xong</Text>
+              </TouchableOpacity>
+            </View>
+            <DateTimePicker
+              value={currentPickerValue()}
+              mode={pickerMode}
+              display="spinner"
+              onChange={handlePickerChange}
+              locale="vi-VN"
+            />
+          </View>
+        </View>
+      )}
+
+      {/* Date/Time Picker (Android Style) */}
+      {showPicker && Platform.OS === 'android' && (
+        <DateTimePicker
+          value={currentPickerValue()}
+          mode={pickerMode}
+          display="default"
+          onChange={handlePickerChange}
+        />
+      )}
     </SafeAreaView>
   );
 }

@@ -13,10 +13,14 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
+import { AdminLayout } from "../../../components/ui/AdminLayout";
 import { useState, useEffect, useCallback } from "react";
 import { courseService } from "../../../services/course.service";
+import { subjectService } from "../../../services/subject.service";
 import { CourseResponse } from "../../../types/course";
+import { SubjectResponse } from "../../../types/subject";
 import { StatusBar } from "expo-status-bar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Status = "pending" | "approved" | "rejected";
 
@@ -58,6 +62,29 @@ export default function AdminCoursesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<CourseResponse | null>(null);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+
+  // New Filters
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | undefined>();
+  const [minPrice, setMinPrice] = useState<number | undefined>();
+  const [maxPrice, setMaxPrice] = useState<number | undefined>();
+  const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
+
+  // Local Modal States
+  const [tempSearch, setTempSearch] = useState("");
+  const [tempStatus, setTempStatus] = useState("all");
+  const [tempSubjectId, setTempSubjectId] = useState<string | undefined>();
+  const [tempMinPrice, setTempMinPrice] = useState<string>("");
+  const [tempMaxPrice, setTempMaxPrice] = useState<string>("");
+
+  const fetchInitialData = async () => {
+    try {
+      const subList = await subjectService.getSubjects();
+      setSubjects(subList);
+    } catch (err) {
+      console.error("Error fetching initial data:", err);
+    }
+  };
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -65,19 +92,25 @@ export default function AdminCoursesScreen() {
       const res = await courseService.getAllCourseForAdmin({
         status: activeTab === "all" ? undefined : activeTab,
         courseName: search || undefined,
+        subjectId: selectedSubjectId,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
         pageSize: 50,
         pageNumber: 1,
       });
       setCourses(res.items || []);
     } catch (err) {
       console.error("Error fetching courses:", err);
-      // Fallback if API fails or is not ready
       setCourses([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [activeTab, search]);
+  }, [activeTab, search, selectedSubjectId, minPrice, maxPrice]);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
 
   useEffect(() => {
     fetchCourses();
@@ -86,6 +119,39 @@ export default function AdminCoursesScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     fetchCourses();
+  };
+
+  const openFilter = () => {
+    setTempSearch(search);
+    setTempStatus(activeTab);
+    setTempSubjectId(selectedSubjectId);
+    setTempMinPrice(minPrice?.toString() || "");
+    setTempMaxPrice(maxPrice?.toString() || "");
+    setIsFilterVisible(true);
+  };
+
+  const applyFilters = () => {
+    setSearch(tempSearch);
+    setActiveTab(tempStatus);
+    setSelectedSubjectId(tempSubjectId);
+    setMinPrice(tempMinPrice ? parseFloat(tempMinPrice) : undefined);
+    setMaxPrice(tempMaxPrice ? parseFloat(tempMaxPrice) : undefined);
+    setIsFilterVisible(false);
+  };
+
+  const resetFilters = () => {
+    setTempSearch("");
+    setTempStatus("all");
+    setTempSubjectId(undefined);
+    setTempMinPrice("");
+    setTempMaxPrice("");
+    
+    setSearch("");
+    setActiveTab("all");
+    setSelectedSubjectId(undefined);
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    setIsFilterVisible(false);
   };
 
   const fmt = (n: number) => n.toLocaleString("vi-VN") + "đ";
@@ -121,66 +187,145 @@ export default function AdminCoursesScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar hidden />
+    <AdminLayout
+      title="Quản lý Khóa học"
+      searchProps={{
+        value: search,
+        onChangeText: setSearch,
+        placeholder: "Tìm tên khóa học...",
+        onFilterPress: openFilter,
+      }}
+    >
       <Stack.Screen options={{ headerShown: false }} />
-      
-      {/* Header */}
-      <View className="px-6 py-4 flex-row items-center border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <View className="flex-1">
-          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black">
-            Quản lý Khóa học
-          </Text>
-        </View>
-      </View>
 
-      {/* Search Bar */}
-      <View className="px-6 py-4 bg-white">
-        <View className="bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100 shadow-sm shadow-gray-100">
-          <Ionicons name="search-outline" size={20} color="#9ca3af" />
-          <TextInput
-            placeholder="Tìm tên khóa học..."
-            className="flex-1 ml-2 text-black text-sm"
-            style={{ fontFamily: "Poppins-Regular" }}
-            value={search}
-            onChangeText={setSearch}
-            onSubmitEditing={fetchCourses}
-          />
-        </View>
-      </View>
-
-      {/* Filter Tabs */}
-      <View className="bg-white pb-4">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 24, gap: 10 }}
-        >
-          {TABS.map((tab) => (
-            <TouchableOpacity
-              key={tab.id}
-              onPress={() => setActiveTab(tab.id)}
-              className={`px-6 py-2 rounded-full border ${activeTab === tab.id ? "bg-[#136ADA] border-[#136ADA]" : "bg-white border-gray-100"}`}
-            >
+      {/* Filter Modal */}
+      <Modal
+        visible={isFilterVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsFilterVisible(false)}
+      >
+        <View className="flex-1 justify-end bg-black/40">
+          <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
+            <View className="flex-row justify-between items-center mb-10">
               <Text
-                style={{
-                  fontFamily: "Poppins-Bold",
-                  fontSize: 12,
-                  color: activeTab === tab.id ? "white" : "#9CA3AF",
-                }}
+                style={{ fontFamily: "Poppins-Bold" }}
+                className="text-3xl text-black"
               >
-                {tab.label}
+                Bộ lọc
               </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+              <TouchableOpacity
+                onPress={() => setIsFilterVisible(false)}
+                className="bg-gray-100 p-2 rounded-full"
+              >
+                <Ionicons name="close" size={24} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
 
-      {loading && !refreshing && courses.length === 0 ? (
-        <View className="flex-1 items-center justify-center">
+            <ScrollView showsVerticalScrollIndicator={false} className="mb-10">
+              {/* Filter: Subject */}
+              <View className="mb-6">
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">MÔN HỌC</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  <TouchableOpacity
+                    onPress={() => setTempSubjectId(undefined)}
+                    className={`px-4 py-2 rounded-xl border ${!tempSubjectId ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
+                  >
+                    <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: !tempSubjectId ? "#1D4ED8" : "#9CA3AF" }}>TẤT CẢ</Text>
+                  </TouchableOpacity>
+                  {subjects.map((sub) => (
+                    <TouchableOpacity
+                      key={sub.subjectId}
+                      onPress={() => setTempSubjectId(sub.subjectId)}
+                      className={`px-4 py-2 rounded-xl border ${tempSubjectId === sub.subjectId ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
+                    >
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: tempSubjectId === sub.subjectId ? "#1D4ED8" : "#9CA3AF" }}>
+                        {sub.subjectName.toUpperCase()}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Filter: Price Range */}
+              <View className="mb-6">
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">KHOẢNG GIÁ (VNĐ)</Text>
+                <View className="flex-row items-center gap-3">
+                  <View className="flex-1 bg-gray-50 px-4 py-3 rounded-2xl border border-gray-100">
+                    <TextInput
+                      placeholder="Từ"
+                      keyboardType="numeric"
+                      className="text-black text-sm"
+                      style={{ fontFamily: "Poppins-Regular" }}
+                      value={tempMinPrice}
+                      onChangeText={setTempMinPrice}
+                    />
+                  </View>
+                  <View className="w-4 h-[1px] bg-gray-200" />
+                  <View className="flex-1 bg-gray-50 px-4 py-3 rounded-2xl border border-gray-100">
+                    <TextInput
+                      placeholder="Đến"
+                      keyboardType="numeric"
+                      className="text-black text-sm"
+                      style={{ fontFamily: "Poppins-Regular" }}
+                      value={tempMaxPrice}
+                      onChangeText={setTempMaxPrice}
+                    />
+                  </View>
+                </View>
+              </View>
+
+              {/* Filter: Status */}
+              <View className="mb-4">
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">TRẠNG THÁI</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {TABS.map((tab) => (
+                    <TouchableOpacity
+                      key={tab.id}
+                      onPress={() => setTempStatus(tab.id)}
+                      className={`px-4 py-2 rounded-xl border ${tempStatus === tab.id ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
+                    >
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: tempStatus === tab.id ? "#1D4ED8" : "#9CA3AF" }}>
+                        {tab.label.toUpperCase()}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+
+            {/* Modal Buttons */}
+            <View className="flex-row gap-4">
+              <TouchableOpacity
+                onPress={resetFilters}
+                className="flex-1 bg-gray-50 h-16 rounded-[22px] items-center justify-center"
+              >
+                <Text
+                  style={{ fontFamily: "Poppins-Bold", fontSize: 15 }}
+                  className="text-gray-400"
+                >
+                  Thiết lập lại
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={applyFilters}
+                className="flex-1 bg-[#136ADA] h-16 rounded-[22px] items-center justify-center shadow-lg shadow-blue-200"
+              >
+                <Text
+                  style={{ fontFamily: "Poppins-Bold", fontSize: 15 }}
+                  className="text-white"
+                >
+                  Áp dụng
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Courses List */}
+      {loading && !refreshing ? (
+        <View className="flex-1 items-center justify-center bg-white">
           <ActivityIndicator size="large" color="#136ADA" />
         </View>
       ) : (
@@ -188,6 +333,7 @@ export default function AdminCoursesScreen() {
           data={courses}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ padding: 24, gap: 16, paddingBottom: 150 }}
+          className="bg-white"
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -260,6 +406,6 @@ export default function AdminCoursesScreen() {
           }
         />
       )}
-    </SafeAreaView>
+    </AdminLayout>
   );
 }
