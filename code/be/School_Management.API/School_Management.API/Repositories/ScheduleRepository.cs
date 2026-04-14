@@ -98,14 +98,19 @@ namespace School_Management.API.Repositories
         };
         public async Task<List<ScheduleDetailResponse>> GetMyScheduleForStudent(ScheduleDetailIsActiveRequest request, Guid studentId)
         {
-            var classYearId = await context.ClassYear
-                                           .Where(x => x.StudentClassYears.Any(sc => sc.Student.Id == studentId) && x.SchoolYear == request.SchoolYear)
-                                           .Select(x => x.Id)
-                                           .FirstOrDefaultAsync();
-            if (classYearId == Guid.Empty) return null;
+            // 1. Tìm thông tin lớp (Tên lớp & Khối) mà học sinh đang học trong năm này
+            var studentClassInfo = await context.ClassYear
+                                                .Where(x => x.StudentClassYears.Any(sc => sc.StudentId == studentId) && x.SchoolYear == request.SchoolYear)
+                                                .Select(x => new { x.Grade, x.ClassName })
+                                                .FirstOrDefaultAsync();
 
+            if (studentClassInfo == null) return null;
+
+            // 2. Tìm lịch học có trạng thái Đang Sử Dụng khớp với Tên lớp + Khối + Học kỳ + Năm học
+            // Cách này đảm bảo kể cả khi có ID lớp bị trùng lặp, học sinh vẫn thấy được lịch đúng
             var scheduleDetailList = await context.ScheduleDetail
-                                                  .Where(x => x.Schedule.ClassYearId == classYearId
+                                                  .Where(x => x.Schedule.ClassYear.Grade == studentClassInfo.Grade
+                                                  && x.Schedule.ClassYear.ClassName == studentClassInfo.ClassName
                                                   && x.Schedule.Term == request.Term
                                                   && x.Schedule.SchoolYear == request.SchoolYear
                                                   && x.Schedule.IsActive == true)
@@ -116,8 +121,12 @@ namespace School_Management.API.Repositories
                                                      StartTime = g.StartTime,
                                                      FinishTime = g.FinishTime,
                                                      TeacherSubjectId = g.TeacherSubjectId,
-                                                     TeacherName = g.TeacherSubject.Teacher.User.FullName,
-                                                     SubjectName = g.TeacherSubject.Subject.SubjectName,
+                                                     TeacherName = g.TeacherSubject != null && g.TeacherSubject.Teacher != null && g.TeacherSubject.Teacher.User != null 
+                                                                   ? g.TeacherSubject.Teacher.User.FullName 
+                                                                   : "Chưa phân công",
+                                                     SubjectName = g.TeacherSubject != null && g.TeacherSubject.Subject != null 
+                                                                   ? g.TeacherSubject.Subject.SubjectName 
+                                                                   : "Môn học trống",
                                                      DayOfWeek = g.DayOfWeek,
                                                   })
                                                   .OrderBy(x => x.DayOfWeek)
