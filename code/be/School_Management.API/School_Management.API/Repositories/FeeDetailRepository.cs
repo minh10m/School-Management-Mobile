@@ -55,6 +55,45 @@ namespace School_Management.API.Repositories
             return (result, "SUCCESS");
         }
 
+        public async Task<(PagedResponse<FeeDetailResponse>? data, string message)> GetAllMyFeeForStudent(MyFeeDetailFilterRequest request, Guid userId)
+        {
+            var studentInfo = await context.Student.AsNoTracking().Where(x => x.UserId == userId).Select(g => new { g.Id, g.User.FullName }).FirstOrDefaultAsync();
+            if (studentInfo == null) return (null, "NOT_FOUND_STUDENT");
+
+            var query = context.FeeDetail.AsNoTracking().Where(x => x.StudentId == studentInfo.Id && x.SchoolYear == request.SchoolYear).AsQueryable();
+            if(!string.IsNullOrWhiteSpace(request.Reason))
+            {
+                var reason = request.Reason.Trim().ToLower();
+                query = query.Where(x => x.Reason.Trim().ToLower().Contains(reason));
+            }
+
+            query = query.OrderBy(x => x.Id);
+            var totalCount = await query.CountAsync();
+            var skipsResult = (request.PageNumber - 1) * request.PageSize;
+            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
+                                        .Select(feeDetail => new FeeDetailResponse
+                                        {
+                                            Id = feeDetail.Id,
+                                            AmountDue = feeDetail.AmountDue,
+                                            AmountPaid = feeDetail.AmountPaid,
+                                            FeeId = feeDetail.FeeId,
+                                            PaidAt = feeDetail.PaidAt,
+                                            Reason = feeDetail.Reason,
+                                            SchoolYear = feeDetail.SchoolYear,
+                                            Status = feeDetail.Status,
+                                            StudentId = feeDetail.StudentId,
+                                            StudentName = studentInfo.FullName
+                                        }).ToListAsync();
+
+            return (new PagedResponse<FeeDetailResponse>
+            {
+                Items = listResult,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                TotalCount = totalCount
+            }, "SUCCESS");
+        }
+
         public async Task<(FeeDetailResponse? data, string message)> UpdateFeeDetailForStudent(UpdateFeeDetailRequest request, Guid feeDetailId)
         {
             var feeDetail = await context.FeeDetail.Include(x => x.Student.User)

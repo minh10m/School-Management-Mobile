@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
+using System.Security.Claims;
 
 namespace School_Management.API.Controllers
 {
@@ -43,6 +44,29 @@ namespace School_Management.API.Controllers
             {
                 success = true,
                 message = "Cập nhật thông tin thành công",
+                data = result
+            });
+        }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("my")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetAllFeeDetailForStudent([FromQuery] MyFeeDetailFilterRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await feeDetailService.GetAllMyFeeForStudent(request, Guid.Parse(userId));
+
+            return Ok(new
+            {
+                success = true,
                 data = result
             });
         }
