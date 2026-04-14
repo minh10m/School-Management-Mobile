@@ -31,5 +31,20 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{feeDetailId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateFeeDetailForStudent([FromBody] UpdateFeeDetailRequest request, [FromRoute] Guid feeDetailId)
+        {
+            var result = await feeDetailService.UpdateFeeDetailForStudent(request, feeDetailId);
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật thông tin thành công",
+                data = result
+            });
+        }
     }
 }

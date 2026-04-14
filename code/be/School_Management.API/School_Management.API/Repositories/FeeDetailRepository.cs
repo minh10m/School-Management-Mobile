@@ -54,5 +54,46 @@ namespace School_Management.API.Repositories
             };
             return (result, "SUCCESS");
         }
+
+        public async Task<(FeeDetailResponse? data, string message)> UpdateFeeDetailForStudent(UpdateFeeDetailRequest request, Guid feeDetailId)
+        {
+            var feeDetail = await context.FeeDetail.Include(x => x.Student.User)
+                                           .FirstOrDefaultAsync(x => x.Id == feeDetailId);
+            if (feeDetail == null) return (null, "NOT_FOUND_FEE_DETAIL");
+
+            if (feeDetail.AmountPaid > 0 && feeDetail.AmountDue != request.AmountDue)
+            {
+                return (null, "CANNOT_UPDATE_AMOUNT_ALREADY_PAID");
+            }
+
+            var cleanReason = request.Reason.Trim();
+            var isExisted = await context.FeeDetail.AnyAsync(x => x.Id != feeDetailId
+                                                               && x.StudentId == feeDetail.StudentId
+                                                               && x.SchoolYear == request.SchoolYear
+                                                               && x.Reason.ToLower().Trim() == cleanReason.ToLower());
+            if (isExisted) return (null, "CONFLICT_REASON");
+
+            feeDetail.AmountDue = request.AmountDue;
+            feeDetail.Reason = cleanReason;
+            feeDetail.SchoolYear = request.SchoolYear;
+
+            await context.SaveChangesAsync();
+
+            var result = new FeeDetailResponse
+            {
+                Id = feeDetail.Id,
+                AmountDue = feeDetail.AmountDue,
+                AmountPaid = feeDetail.AmountPaid,
+                FeeId = feeDetail.FeeId,
+                PaidAt = feeDetail.PaidAt,
+                Reason = feeDetail.Reason,
+                SchoolYear = feeDetail.SchoolYear,
+                Status = feeDetail.Status,
+                StudentId = feeDetail.StudentId,
+                StudentName = feeDetail.Student.User.FullName
+            };
+
+            return (result, "SUCCESS");
+        }
     }
 }

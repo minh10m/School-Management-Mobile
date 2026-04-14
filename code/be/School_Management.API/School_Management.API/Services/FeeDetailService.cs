@@ -23,5 +23,18 @@ namespace School_Management.API.Services
                 _ => throw new Exception("Lỗi không xác định")
             };
         }
+
+        public async Task<FeeDetailResponse> UpdateFeeDetailForStudent(UpdateFeeDetailRequest request, Guid feeDetailId)
+        {
+            var (result, message) = await feeDetailRepository.UpdateFeeDetailForStudent(request, feeDetailId);
+            return message switch
+            {
+                "NOT_FOUND_FEE_DETAIL" => throw new NotFoundException("Không tìm thấy chi tiết phí này"),
+                "CANNOT_UPDATE_AMOUNT_ALREADY_PAID" => throw new ForbiddenException("Không thể cập nhật số tiền phí vì học sinh đã đóng rồi"),
+                "CONFLICT_REASON" => throw new ConflictException("Tiêu đề phí của học sinh này đã tồn tại trong năm"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
     }
 }
