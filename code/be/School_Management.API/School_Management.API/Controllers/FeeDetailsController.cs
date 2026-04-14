@@ -70,5 +70,18 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpGet]
+        [Route("{feeDetailId}")]
+        [Authorize]
+        public async Task<IActionResult> GetFeeDetailById([FromRoute] Guid feeDetailId)
+        {
+            var result = await feeDetailService.GetFeeDetailById(feeDetailId);
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
     }
 }

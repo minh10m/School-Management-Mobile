@@ -7,5 +7,6 @@ namespace School_Management.API.Services
         public Task<FeeDetailResponse> CreateFeeDetailForStudent(FeeDetailRequest request);
         public Task<FeeDetailResponse> UpdateFeeDetailForStudent(UpdateFeeDetailRequest request, Guid feeDetailId);
         public Task<PagedResponse<FeeDetailResponse>> GetAllMyFeeForStudent(MyFeeDetailFilterRequest request, Guid userId);
+        public Task<FeeDetailResponse> GetFeeDetailById(Guid feeDetailId);
     }
 }

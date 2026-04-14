@@ -7,6 +7,7 @@ namespace School_Management.API.Repositories
         public Task<(FeeDetailResponse? data, string message)> CreateFeeDetailForStudent(FeeDetailRequest request);
         public Task<(FeeDetailResponse? data, string message)> UpdateFeeDetailForStudent(UpdateFeeDetailRequest request, Guid feeDetailId);
         public Task<(PagedResponse<FeeDetailResponse>? data, string message)> GetAllMyFeeForStudent(MyFeeDetailFilterRequest request, Guid userId);
+        public Task<(FeeDetailResponse? data, string message)> GetFeeDetailById(Guid feeDetailId);
 
     }
 }

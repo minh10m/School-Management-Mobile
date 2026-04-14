@@ -36,6 +36,17 @@ namespace School_Management.API.Services
 
         }
 
+        public async Task<FeeDetailResponse> GetFeeDetailById(Guid feeDetailId)
+        {
+            var (result, message) = await feeDetailRepository.GetFeeDetailById(feeDetailId);
+            return message switch
+            {
+                "NOT_FOUND_FEE_DETAIL" => throw new NotFoundException("Không tìm thấy chi tiết phí này"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<FeeDetailResponse> UpdateFeeDetailForStudent(UpdateFeeDetailRequest request, Guid feeDetailId)
         {
             var (result, message) = await feeDetailRepository.UpdateFeeDetailForStudent(request, feeDetailId);
