@@ -1,7 +1,8 @@
 import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, Modal, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { AdminPageWrapper } from '../../../components/ui/AdminPageWrapper';
 import { useState, useEffect } from 'react';
 import { teacherService } from '../../../services/teacher.service';
 import { subjectService } from '../../../services/subject.service';
@@ -11,6 +12,7 @@ import { SubjectResponse } from '../../../types/subject';
 import { getErrorMessage } from '../../../utils/error';
 
 export default function AdminTeacherDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [teacher, setTeacher] = useState<TeacherResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -169,19 +171,16 @@ export default function AdminTeacherDetailScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Chi tiết Giáo viên</Text>
+    <AdminPageWrapper
+      title="Chi tiết Giáo viên"
+      rightComponent={
         <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
           <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">
              {isEditing ? 'Hủy' : 'Chỉnh sửa'}
           </Text>
         </TouchableOpacity>
-      </View>
+      }
+    >
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Profile Card */}
@@ -296,6 +295,6 @@ export default function AdminTeacherDetailScreen() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

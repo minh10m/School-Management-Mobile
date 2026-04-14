@@ -9,13 +9,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect } from "react";
 import { studentService } from "../../../services/student.service";
 import { StudentResponse } from "../../../types/student";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminStudentDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [student, setStudent] = useState<StudentResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -145,18 +147,9 @@ export default function AdminStudentDetailScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text
-          style={{ fontFamily: "Poppins-Bold" }}
-          className="text-black text-lg flex-1"
-        >
-          Chi tiết Học sinh
-        </Text>
+    <AdminPageWrapper
+      title="Chi tiết Học sinh"
+      rightComponent={
         <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
           <Text
             style={{ fontFamily: "Poppins-SemiBold" }}
@@ -165,7 +158,8 @@ export default function AdminStudentDetailScreen() {
             {isEditing ? "Hủy" : "Chỉnh sửa"}
           </Text>
         </TouchableOpacity>
-      </View>
+      }
+    >
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Profile Card */}
@@ -293,6 +287,6 @@ export default function AdminStudentDetailScreen() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

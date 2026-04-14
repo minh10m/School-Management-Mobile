@@ -1,7 +1,8 @@
 import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Modal, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { AdminPageWrapper } from '../../../components/ui/AdminPageWrapper';
 import { useEffect, useState } from 'react';
 import { userService } from '../../../services/user.service';
 import { roleService } from '../../../services/role.service';
@@ -16,6 +17,7 @@ const ROLE_COLORS: Record<string, { bg: string; text: string; label: string }> =
 };
 
 export default function AdminUserDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [user, setUser] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -198,17 +200,14 @@ export default function AdminUserDetailScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Chi tiết người dùng</Text>
+    <AdminPageWrapper
+      title="Chi tiết người dùng"
+      rightComponent={
         <TouchableOpacity onPress={openEdit}>
           <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-bright-blue text-sm">Chỉnh sửa</Text>
         </TouchableOpacity>
-      </View>
+      }
+    >
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Profile Card */}
@@ -304,7 +303,7 @@ export default function AdminUserDetailScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }
 

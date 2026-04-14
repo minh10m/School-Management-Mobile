@@ -1,26 +1,27 @@
-import { Stack, router } from 'expo-router';
-import { useAuthStore } from '../../store/authStore';
-import { useEffect } from 'react';
+import { Stack, useRouter } from "expo-router";
+import { useAuthStore } from "../../store/authStore";
+import { useEffect } from "react";
 
 export default function AdminLayout() {
   const { userInfo } = useAuthStore();
+  const router = useRouter();
 
   useEffect(() => {
     if (!userInfo) {
-       router.replace('/login');
-       return;
+      router.replace("/login");
+      return;
     }
-    if (userInfo.role?.toLowerCase() !== 'admin') {
-       // If not admin, send back to home/teacher
-       if (userInfo.role?.toLowerCase() === 'teacher') {
-          router.replace('/teacher');
-       } else {
-          router.replace('/home');
-       }
+    if (userInfo.role?.toLowerCase() !== "admin") {
+      // If not admin, send back to home/teacher
+      if (userInfo.role?.toLowerCase() === "teacher") {
+        router.replace("/teacher");
+      } else {
+        router.replace("/home");
+      }
     }
   }, [userInfo]);
 
-  if (!userInfo || userInfo.role?.toLowerCase() !== 'admin') return null;
+  if (!userInfo || userInfo.role?.toLowerCase() !== "admin") return null;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

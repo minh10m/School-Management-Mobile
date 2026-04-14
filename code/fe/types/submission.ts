@@ -12,7 +12,6 @@ export interface SubmissionResponse {
   fileUrl: string | null;
   studentId: string;
   score: number | null;
-  feedback?: string | null;
 }
 
 /** Dành cho giáo viên xem danh sách bài nộp của một bài tập */
@@ -56,5 +55,4 @@ export interface CreateSubmissionPayload {
 
 export interface GradeSubmissionPayload {
   score: number;
-  feedback: string;
 }

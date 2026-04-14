@@ -10,7 +10,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { classYearService } from "../../../services/classYear.service";
 import { ClassYearResponse } from "../../../types/classYear";
@@ -24,6 +25,7 @@ interface MappingRule {
 }
 
 export default function AdminPromoteScreen() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showYearModal, setShowYearModal] = useState(false);
@@ -115,19 +117,9 @@ export default function AdminPromoteScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text
-          style={{ fontFamily: "Poppins-Bold" }}
-          className="text-black text-lg flex-1"
-        >
-          Lên lớp
-        </Text>
-      </View>
+    <AdminPageWrapper
+      title="Lên lớp"
+    >
 
       <ScrollView
         className="flex-1"
@@ -309,7 +301,7 @@ export default function AdminPromoteScreen() {
           </TouchableOpacity>
         </View>
       )}
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }
 

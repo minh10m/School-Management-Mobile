@@ -1,7 +1,8 @@
 import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { AdminPageWrapper } from '../../components/ui/AdminPageWrapper';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState, useCallback } from 'react';
 import { authService } from '../../services/auth.service';
@@ -13,6 +14,7 @@ import SideMenu from '../../components/SideMenu';
 import { SCHOOL_YEAR } from '../../constants/config';
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const { userInfo } = useAuthStore();
   const adminName = userInfo?.fullName?.split(' ').at(-1) ?? 'Quản trị viên';
 
@@ -79,23 +81,19 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <StatusBar hidden />
-
-      {/* Header */}
-      <View className="flex-row justify-between items-center px-6 pt-4 mb-6">
+    <AdminPageWrapper
+      showLogo={true}
+      leftComponent={
         <TouchableOpacity onPress={() => setMenuVisible(true)}>
           <Ionicons name="menu-outline" size={28} color="black" />
         </TouchableOpacity>
-        <View className="flex-row items-center gap-2">
-          <Ionicons name="book" size={24} color="#136ADA" />
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-bright-blue text-xl">Quản trị viên</Text>
-        </View>
-        <TouchableOpacity onPress={() => router.push('/admin/profile' as any)}>
-          <Ionicons name="person-circle-outline" size={28} color="black" />
+      }
+      rightComponent={
+        <TouchableOpacity onPress={() => router.push('/admin/notifications' as any)}>
+          <Ionicons name="notifications-outline" size={28} color="black" />
         </TouchableOpacity>
-      </View>
-
+      }
+    >
       <ScrollView 
         className="flex-1" 
         showsVerticalScrollIndicator={false}
@@ -165,6 +163,6 @@ export default function AdminDashboard() {
 
       </ScrollView>
       <SideMenu visible={isMenuVisible} onClose={() => setMenuVisible(false)} />
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }
