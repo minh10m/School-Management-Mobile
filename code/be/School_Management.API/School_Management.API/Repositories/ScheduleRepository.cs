@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -107,6 +107,7 @@ namespace School_Management.API.Repositories
             var scheduleDetailList = await context.ScheduleDetail
                                                   .Where(x => x.Schedule.ClassYearId == classYearId
                                                   && x.Schedule.Term == request.Term
+                                                  && x.Schedule.SchoolYear == request.SchoolYear
                                                   && x.Schedule.IsActive == true)
                                                   .Select(g => new ScheduleDetailResponse
                                                   {
