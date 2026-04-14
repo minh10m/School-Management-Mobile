@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   Switch,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,6 +24,7 @@ export default function AdminCreateScheduleScreen() {
   const [loading, setLoading] = useState(false);
   const [classes, setClasses] = useState<ClassYearResponse[]>([]);
   const [fetching, setFetching] = useState(true);
+  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -80,188 +82,189 @@ export default function AdminCreateScheduleScreen() {
   return (
     <AdminPageWrapper
       title="Khởi tạo TKB"
+      leftComponent={
+        <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
+          <Text style={{ fontFamily: "Poppins-Regular", color: '#6B7280', fontSize: 16 }}>
+            Hủy
+          </Text>
+        </TouchableOpacity>
+      }
     >
-
       <ScrollView
-        className="flex-1"
+        className="flex-1 bg-gray-50/30"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingHorizontal: 24,
-          paddingTop: 32,
-          paddingBottom: 100,
+          paddingHorizontal: 20,
+          paddingTop: 10,
+          paddingBottom: 40,
         }}
       >
-        <View className="gap-8">
-          {/* Hero Icon */}
-          <View className="items-center mb-4">
-            <View className="w-24 h-24 bg-blue-50/50 items-center justify-center rounded-[32px]">
-              <View className="w-16 h-16 bg-white shadow-sm items-center justify-center rounded-[24px]">
-                <Ionicons name="calendar" size={36} color="#136ADA" />
+        {/* Hero Section */}
+        <View className="items-center mb-8 mt-4">
+           <View className="w-24 h-24 bg-blue-100/50 rounded-[32px] items-center justify-center shadow-sm">
+             <View className="w-16 h-16 bg-white rounded-2xl items-center justify-center shadow-md">
+               <Ionicons name="calendar-outline" size={38} color="#1D4ED8" />
+             </View>
+           </View>
+           <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-gray-900 mt-4">Tạo Thời khóa biểu</Text>
+           <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-xs mt-1">Thiết lập kế hoạch học tập mới cho học sinh</Text>
+        </View>
+
+        {/* Card 1: General Info */}
+        <View className="bg-white rounded-[32px] p-6 mb-6 shadow-sm border border-gray-100">
+          <View className="flex-row items-center gap-2 mb-6">
+            <View className="w-8 h-8 bg-blue-50 rounded-lg items-center justify-center">
+              <Ionicons name="information-circle-outline" size={18} color="#1D4ED8" />
+            </View>
+            <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-900 text-base">Cấu hình chung</Text>
+          </View>
+
+          <View className="space-y-5">
+            <View>
+              <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-500 text-[10px] mb-2 uppercase tracking-wider ml-1">Tên Thời khóa biểu</Text>
+              <TextInput
+                placeholder="VD: TKB Học kỳ 1 - 2026"
+                value={form.name}
+                onChangeText={(t) => setForm({ ...form, name: t })}
+                className="bg-gray-50 border border-gray-100 rounded-2xl px-5 py-4 text-black text-sm"
+                style={{ fontFamily: "Poppins-Regular" }}
+                placeholderTextColor="#9CA3AF"
+              />
+            </View>
+
+            <View className="flex-row gap-4">
+              <View className="flex-1">
+                 <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-500 text-[10px] mb-2 uppercase tracking-wider ml-1">Năm học *</Text>
+                 <TextInput
+                   placeholder="2026"
+                   value={form.schoolYear}
+                   onChangeText={(t) => setForm({ ...form, schoolYear: t })}
+                   keyboardType="numeric"
+                   className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-black text-sm text-center shadow-sm"
+                   style={{ fontFamily: "Poppins-Bold" }}
+                 />
+              </View>
+              <View className="flex-1">
+                 <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-500 text-[10px] mb-2 uppercase tracking-wider ml-1">Học kỳ *</Text>
+                 <TextInput
+                   placeholder="1"
+                   value={form.term}
+                   onChangeText={(t) => setForm({ ...form, term: t })}
+                   keyboardType="numeric"
+                   className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-black text-sm text-center shadow-sm"
+                   style={{ fontFamily: "Poppins-Bold" }}
+                 />
               </View>
             </View>
           </View>
+        </View>
 
-          {/* Schedule Name */}
-          <View>
-            <Text
-              style={{ fontFamily: "Poppins-Medium" }}
-              className="text-gray-400 text-xs mb-2 ml-1 uppercase tracking-widest"
-            >
-              Tên Thời khóa biểu (Tùy chọn)
-            </Text>
-            <TextInput
-              placeholder="VD: TKB Học kỳ 1 - 10A1"
-              value={form.name}
-              onChangeText={(t) => setForm({ ...form, name: t })}
-              className="bg-gray-50/50 border border-gray-100 rounded-2xl px-5 py-4 text-black text-base"
-              style={{ fontFamily: "Poppins-Regular" }}
-              placeholderTextColor="#9CA3AF"
-            />
+        {/* Card 2: Class Selection & Status */}
+        <View className="bg-white rounded-[32px] p-6 mb-8 shadow-sm border border-gray-100">
+          <View className="flex-row items-center gap-2 mb-6">
+            <View className="w-8 h-8 bg-purple-50 rounded-lg items-center justify-center">
+              <Ionicons name="people-outline" size={18} color="#7C3AED" />
+            </View>
+            <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-900 text-base">Đối tượng & Trạng thái</Text>
           </View>
 
-          {/* Class Selection */}
-          <View>
-            <Text
-              style={{ fontFamily: "Poppins-Medium" }}
-              className="text-gray-400 text-xs mb-3 ml-1 uppercase tracking-widest"
-            >
-              Chọn Lớp học *
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 12, paddingBottom: 4 }}
-            >
-              {classes.map((c) => (
+          <View className="mb-8">
+            <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-500 text-[10px] mb-3 uppercase tracking-wider ml-1">Chọn Khối lớp *</Text>
+            <View className="flex-row gap-3">
+              {[10, 11, 12].map((g) => (
                 <TouchableOpacity
-                  key={c.classYearId}
-                  onPress={() =>
-                    setForm({ ...form, classYearId: c.classYearId })
-                  }
-                  className={`px-6 py-3.5 rounded-2xl border ${
-                    form.classYearId === c.classYearId
-                      ? "bg-bright-blue border-bright-blue shadow-lg shadow-blue-200"
+                  key={g}
+                  onPress={() => {
+                    setSelectedGrade(g);
+                    setForm({ ...form, classYearId: "" }); // Reset class when grade changes
+                  }}
+                  className={`flex-1 py-3.5 rounded-2xl border items-center ${
+                    selectedGrade === g 
+                      ? "bg-blue-600 border-blue-600 shadow-md shadow-blue-100" 
                       : "bg-white border-gray-100 shadow-sm"
                   }`}
                 >
-                  <Text
-                    style={{
-                      fontFamily: "Poppins-Bold",
-                      color:
-                        form.classYearId === c.classYearId
-                          ? "white"
-                          : "#6B7280",
-                    }}
-                  >
-                    {c.className}
-                  </Text>
+                  <Text style={{ 
+                    fontFamily: "Poppins-Bold", 
+                    fontSize: 13,
+                    color: selectedGrade === g ? "white" : "#6B7280" 
+                  }}>Khối {g}</Text>
                 </TouchableOpacity>
               ))}
-              {classes.length === 0 && (
-                <Text className="text-gray-400 text-xs italic">
-                  Không tìm thấy lớp học
-                </Text>
-              )}
-            </ScrollView>
+            </View>
           </View>
 
-          {/* Term & Year */}
-          <View className="flex-row gap-5">
-            <View className="flex-1">
-              <Text
-                style={{ fontFamily: "Poppins-Medium" }}
-                className="text-gray-400 text-xs mb-2 ml-1 uppercase tracking-widest"
-              >
-                Học kỳ *
-              </Text>
-              <View className="flex-row gap-3">
-                {["1", "2"].map((t) => (
+          {selectedGrade && (
+            <View className="mb-6">
+              <View className="flex-row items-center justify-between mb-3 ml-1">
+                <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-500 text-[10px] uppercase tracking-wider">Danh sách Lớp học - Khối {selectedGrade}</Text>
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-blue-600 text-[10px]">{classes.filter(c => c.grade === selectedGrade).length} lớp</Text>
+              </View>
+              <View className="flex-row flex-wrap gap-2.5">
+                {classes.filter(c => c.grade === selectedGrade).map((c) => (
                   <TouchableOpacity
-                    key={t}
-                    onPress={() => setForm({ ...form, term: t })}
-                    className={`flex-1 py-4 rounded-2xl border items-center shadow-sm ${
-                      form.term === t
-                        ? "bg-bright-blue border-bright-blue"
+                    key={c.classYearId}
+                    onPress={() => setForm({ ...form, classYearId: c.classYearId })}
+                    className={`px-5 py-3 rounded-xl border ${
+                      form.classYearId === c.classYearId 
+                        ? "bg-blue-50 border-blue-200" 
                         : "bg-white border-gray-100"
                     }`}
                   >
-                    <Text
-                      style={{
-                        fontFamily: "Poppins-Bold",
-                        color: form.term === t ? "white" : "#6B7280",
-                      }}
-                    >
-                      {t}
-                    </Text>
+                    <Text style={{ 
+                      fontFamily: "Poppins-Bold", 
+                      fontSize: 12,
+                      color: form.classYearId === c.classYearId ? "#1D4ED8" : "#475569" 
+                    }}>{c.className}</Text>
                   </TouchableOpacity>
                 ))}
+                {classes.filter(c => c.grade === selectedGrade).length === 0 && (
+                  <Text className="text-gray-400 text-xs italic py-2">Không tìm thấy lớp học cho khối này</Text>
+                )}
               </View>
             </View>
-            <View className="flex-1">
-              <Text
-                style={{ fontFamily: "Poppins-Medium" }}
-                className="text-gray-400 text-xs mb-2 ml-1 uppercase tracking-widest"
-              >
-                Năm học *
-              </Text>
-              <TextInput
-                placeholder="2026"
-                keyboardType="numeric"
-                value={form.schoolYear}
-                onChangeText={(t) => setForm({ ...form, schoolYear: t })}
-                className="bg-white border border-gray-100 rounded-2xl px-4 py-4 text-black text-base text-center shadow-sm"
-                style={{ fontFamily: "Poppins-Bold" }}
-              />
-            </View>
-          </View>
+          )}
 
-          {/* Active Switch */}
-          <View className="bg-gray-50/50 p-5 rounded-[32px] border border-gray-100 flex-row items-center justify-between">
-            <View className="flex-row items-center gap-4">
-              <View className="w-12 h-12 bg-white rounded-2xl items-center justify-center shadow-sm">
-                <Ionicons name="flash" size={20} color="#136ADA" />
-              </View>
-              <View>
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-black text-base"
-                >
-                  Kích hoạt ngay
-                </Text>
-                <Text
-                  style={{ fontFamily: "Poppins-Regular" }}
-                  className="text-gray-400 text-[10px]"
-                >
-                  Đặt làm thời khóa biểu chính
-                </Text>
-              </View>
+          <View className="bg-gray-50 p-4 rounded-2xl flex-row items-center justify-between border border-gray-100">
+            <View className="flex-row items-center gap-3">
+               <View className="w-10 h-10 bg-white rounded-xl items-center justify-center shadow-sm">
+                 <Ionicons name="flash" size={18} color="#1D4ED8" />
+               </View>
+               <View>
+                 <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-900 text-sm">Kích hoạt</Text>
+                 <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px]">Làm TKB chính thức</Text>
+               </View>
             </View>
             <Switch
               value={form.isActive}
               onValueChange={(v) => setForm({ ...form, isActive: v })}
-              trackColor={{ false: "#E5E7EB", true: "#136ADA" }}
+              trackColor={{ false: "#E5E7EB", true: "#1D4ED8" }}
               thumbColor="white"
             />
           </View>
-
-          {/* Submit Button */}
-          <TouchableOpacity
-            className="bg-bright-blue rounded-[24px] py-5 items-center mt-4 shadow-xl shadow-blue-200"
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text
-                style={{ fontFamily: "Poppins-Bold" }}
-                className="text-white text-lg"
-              >
-                Khởi tạo Thời khóa biểu
-              </Text>
-            )}
-          </TouchableOpacity>
         </View>
+
+        {/* Action Button */}
+        <TouchableOpacity
+          onPress={handleSubmit}
+          disabled={loading}
+          className={`h-16 rounded-[24px] flex-row items-center justify-center shadow-lg shadow-blue-200 ${
+            loading ? "bg-blue-300" : "bg-blue-700"
+          }`}
+        >
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-lg mr-2">Khởi tạo ngay</Text>
+              <Ionicons name="arrow-forward" size={20} color="white" />
+            </>
+          )}
+        </TouchableOpacity>
+
+        <Text style={{ fontFamily: "Poppins-Regular" }} className="text-center text-gray-400 text-[10px] mt-6 px-10">
+          Lưu ý: Bạn có thể chỉnh sửa chi tiết các tiết học của Thời khóa biểu này sau khi đã khởi tạo thành công.
+        </Text>
       </ScrollView>
     </AdminPageWrapper>
   );

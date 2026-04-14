@@ -9,7 +9,7 @@ import {
   ViewStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import { AppLogo } from "./AppLogo";
 
 interface AdminPageWrapperProps {
@@ -40,36 +40,29 @@ export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({
   children,
   containerStyle,
 }) => {
-  const router = useRouter();
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       {/* Standardized Header */}
       <View className="px-6 py-4 flex-row items-center justify-between border-b border-gray-100 bg-white min-h-[64px]">
-        {/* Left Section */}
-        <View className="flex-1 flex-row items-center">
+        {/* Left Section (Title & Back) */}
+        <View className="flex-[4] flex-row items-center">
           {leftComponent ? (
             <View>{leftComponent}</View>
-          ) : onBack ? (
+          ) : (
             <TouchableOpacity
-              onPress={onBack}
+              onPress={onBack || (() => router.back())}
               className="p-1"
             >
               <Ionicons name="arrow-back" size={24} color="black" />
             </TouchableOpacity>
-          ) : router.canGoBack() ? (
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="p-1"
-            >
-              <Ionicons name="arrow-back" size={24} color="black" />
-            </TouchableOpacity>
-          ) : null}
-          
+          )}
+
           {title && !showLogo && (
             <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
               style={{ fontFamily: "Poppins-Bold" }}
-              className="text-xl text-black ml-3"
+              className="text-xl text-black ml-3 flex-1"
             >
               {title}
             </Text>
@@ -77,7 +70,10 @@ export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({
         </View>
 
         {/* Center Section */}
-        <View className="absolute left-0 right-0 items-center justify-center pointer-events-none" style={{ height: 64 }}>
+        <View
+          className="absolute left-0 right-0 items-center justify-center pointer-events-none"
+          style={{ height: 64 }}
+        >
           {showLogo ? (
             <AppLogo size="medium" />
           ) : centerComponent ? (
