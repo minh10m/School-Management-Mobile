@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, router, Stack } from "expo-router";
+import { useLocalSearchParams, useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { courseService } from "../../../services/course.service";
 import { lessonService } from "../../../services/lesson.service";
@@ -18,6 +19,7 @@ import { LessonResponse } from "../../../types/lesson";
 import { StatusBar } from "expo-status-bar";
 
 export default function AdminCourseDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [course, setCourse] = useState<CourseResponse | null>(null);
   const [lessons, setLessons] = useState<LessonResponse[]>([]);
@@ -93,20 +95,9 @@ export default function AdminCourseDetailScreen() {
   if (!course) return null;
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
-      <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Header */}
-      <View className="px-6 py-4 flex-row items-center justify-between border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="p-1">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-lg text-black">
-          Chi tiết duyệt khóa học
-        </Text>
-        <View className="w-8" />
-      </View>
+    <AdminPageWrapper
+      title="Chi tiết duyệt khóa học"
+    >
 
       <ScrollView
         className="flex-1"
@@ -251,6 +242,6 @@ export default function AdminCourseDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

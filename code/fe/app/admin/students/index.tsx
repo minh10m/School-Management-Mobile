@@ -11,8 +11,8 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { studentService } from "../../../services/student.service";
 import { StudentListItem } from "../../../types/student";
@@ -20,6 +20,7 @@ import { StudentListItem } from "../../../types/student";
 const GRADES = ["10", "11", "12"];
 
 export default function AdminStudentsScreen() {
+  const router = useRouter();
   const [students, setStudents] = useState<StudentListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -80,7 +81,7 @@ export default function AdminStudentsScreen() {
   };
 
   return (
-    <AdminLayout
+    <AdminPageWrapper
       title="Quản lý Học sinh"
       searchProps={{
         value: search,
@@ -203,6 +204,6 @@ export default function AdminStudentsScreen() {
           ListFooterComponent={<View className="h-20 bg-white" />}
         />
       )}
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 }

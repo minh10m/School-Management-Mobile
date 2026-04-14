@@ -10,12 +10,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { StatusBar } from "expo-status-bar";
 import { examScheduleService } from "../../../services/examSchedule.service";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function CreateExamScheduleScreen() {
+  const router = useRouter();
   const [type, setType] = useState("");
   const [term, setTerm] = useState("");
   const [schoolYear, setSchoolYear] = useState("");
@@ -70,22 +72,9 @@ export default function CreateExamScheduleScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <StatusBar hidden />
-      <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Header aligned with Index/Management design */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text
-          style={{ fontFamily: "Poppins-Bold" }}
-          className="text-xl text-black"
-        >
-          Lịch thi mới
-        </Text>
-      </View>
+    <AdminPageWrapper
+      title="Lịch thi mới"
+    >
 
       <ScrollView
         className="flex-1 px-6 py-4"
@@ -201,6 +190,6 @@ export default function CreateExamScheduleScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

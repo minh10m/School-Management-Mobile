@@ -1,13 +1,15 @@
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { AdminPageWrapper } from '../../../components/ui/AdminPageWrapper';
 import { useState, useEffect } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { eventService } from '../../../services/event.service';
 import { getErrorMessage } from '../../../utils/error';
 
 export default function AdminCreateEventScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const isEdit = !!id;
   const [fetching, setFetching] = useState(false);
@@ -120,16 +122,9 @@ export default function AdminCreateEventScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 border-b border-gray-100 bg-white">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg">
-          {isEdit ? 'Chỉnh sửa Sự kiện' : 'Thêm Sự kiện mới'}
-        </Text>
-      </View>
+    <AdminPageWrapper
+      title={isEdit ? 'Chỉnh sửa Sự kiện' : 'Thêm Sự kiện mới'}
+    >
 
       <ScrollView className="flex-1 px-6 pt-5" showsVerticalScrollIndicator={false}>
         {/* Title */}
@@ -292,6 +287,6 @@ export default function AdminCreateEventScreen() {
           onChange={handlePickerChange}
         />
       )}
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

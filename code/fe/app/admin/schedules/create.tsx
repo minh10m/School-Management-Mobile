@@ -10,7 +10,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect } from "react";
 import { scheduleService } from "../../../services/schedule.service";
 import { classYearService } from "../../../services/classYear.service";
@@ -18,6 +19,7 @@ import { ClassYearResponse } from "../../../types/classYear";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminCreateScheduleScreen() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [classes, setClasses] = useState<ClassYearResponse[]>([]);
   const [fetching, setFetching] = useState(true);
@@ -76,22 +78,9 @@ export default function AdminCreateScheduleScreen() {
     );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 border-b border-gray-50">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="w-10 h-10 items-center justify-center -ml-2"
-        >
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text
-          style={{ fontFamily: "Poppins-Bold" }}
-          className="text-black text-xl ml-2"
-        >
-          Khởi tạo TKB
-        </Text>
-      </View>
+    <AdminPageWrapper
+      title="Khởi tạo TKB"
+    >
 
       <ScrollView
         className="flex-1"
@@ -274,6 +263,6 @@ export default function AdminCreateScheduleScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

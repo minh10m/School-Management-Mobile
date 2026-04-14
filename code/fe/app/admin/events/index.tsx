@@ -11,14 +11,15 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { eventService } from "../../../services/event.service";
 import { EventItem } from "../../../types/event";
 import { SCHOOL_YEAR, TERM } from "../../../constants/config";
 
 export default function AdminEventsScreen() {
+  const router = useRouter();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -116,7 +117,7 @@ export default function AdminEventsScreen() {
   };
 
   return (
-    <AdminLayout
+    <AdminPageWrapper
       title="Sự kiện"
       rightComponent={
         <TouchableOpacity
@@ -321,6 +322,6 @@ export default function AdminEventsScreen() {
           ListFooterComponent={<View className="h-20 bg-white" />}
         />
       )}
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 }

@@ -12,8 +12,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { courseService } from "../../../services/course.service";
 import { subjectService } from "../../../services/subject.service";
@@ -56,6 +56,7 @@ const TABS: { id: string; label: string }[] = [
 ];
 
 export default function AdminCoursesScreen() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("all");
   const [courses, setCourses] = useState<CourseResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -187,7 +188,7 @@ export default function AdminCoursesScreen() {
   };
 
   return (
-    <AdminLayout
+    <AdminPageWrapper
       title="Quản lý Khóa học"
       searchProps={{
         value: search,
@@ -406,6 +407,6 @@ export default function AdminCoursesScreen() {
           }
         />
       )}
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 }

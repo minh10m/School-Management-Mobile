@@ -15,6 +15,7 @@ import SideMenu from "@/components/SideMenu";
 import { assignmentService } from "../../services/assignment.service";
 import { eventService } from "../../services/event.service";
 import { useAuthStore } from "../../store/authStore";
+import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
 
 export default function HomeScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);
@@ -144,29 +145,23 @@ export default function HomeScreen() {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <AdminPageWrapper
+      showLogo={true}
+      leftComponent={
+        <TouchableOpacity onPress={() => setMenuVisible(true)}>
+          <Ionicons name="menu-outline" size={28} color="black" />
+        </TouchableOpacity>
+      }
+      rightComponent={
+        <TouchableOpacity
+          onPress={() => router.push("/student/notifications" as any)}
+        >
+          <Ionicons name="notifications-outline" size={28} color="black" />
+        </TouchableOpacity>
+      }
+    >
       <StatusBar hidden />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="flex-row justify-between items-center px-6 pt-4 mb-6">
-          <TouchableOpacity onPress={() => setMenuVisible(true)}>
-            <Ionicons name="menu-outline" size={28} color="black" />
-          </TouchableOpacity>
-          <View className="flex-row items-center gap-2">
-            <Ionicons name="book" size={24} color="#136ADA" />
-            <Text
-              className="text-bright-blue text-xl"
-              style={{ fontFamily: "Poppins-Bold" }}
-            >
-              EDU Manage
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => router.push("/student/notifications" as any)}
-          >
-            <Ionicons name="notifications-outline" size={28} color="black" />
-          </TouchableOpacity>
-        </View>
 
         {/* Greeting */}
         <View className="px-6 mb-8">
@@ -422,6 +417,6 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
       <SideMenu visible={isMenuVisible} onClose={() => setMenuVisible(false)} />
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

@@ -12,7 +12,8 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { StatusBar } from "expo-status-bar";
 import { useState, useEffect } from "react";
 import { userService } from "../../../services/user.service";
@@ -66,6 +67,7 @@ const Field = ({
 );
 
 export default function AdminCreateUserScreen() {
+  const router = useRouter();
   const [form, setForm] = useState({
     username: "",
     password: "",
@@ -179,30 +181,9 @@ export default function AdminCreateUserScreen() {
     );
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'white' }}>
-      <StatusBar hidden />
-
-      {/* Header - Unified Style */}
-      <View style={{ 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        justifyContent: 'space-between', 
-        paddingHorizontal: 24, 
-        paddingVertical: 16, 
-        paddingTop: Math.max(insets.top, 16),
-        borderBottomWidth: 1, 
-        borderBottomColor: '#F3F4F6',
-        backgroundColor: 'white'
-      }}>
-        <TouchableOpacity 
-          onPress={() => router.back()} 
-          style={{ padding: 8 }}
-        >
-          <Ionicons name="close" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={{ fontFamily: "Poppins-Bold", fontSize: 18, color: 'black' }}>
-          Tạo tài khoản mới
-        </Text>
+    <AdminPageWrapper
+      title="Tạo tài khoản mới"
+      rightComponent={
         <TouchableOpacity 
           onPress={handleSubmit} 
           disabled={loading}
@@ -216,8 +197,8 @@ export default function AdminCreateUserScreen() {
             </Text>
           )}
         </TouchableOpacity>
-      </View>
-
+      }
+    >
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"} 
         style={{ flex: 1 }}
@@ -442,6 +423,6 @@ export default function AdminCreateUserScreen() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </AdminPageWrapper>
   );
 }

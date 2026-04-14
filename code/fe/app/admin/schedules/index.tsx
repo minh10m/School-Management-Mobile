@@ -11,8 +11,8 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { scheduleService } from "../../../services/schedule.service";
 import { classYearService } from "../../../services/classYear.service";
@@ -20,6 +20,7 @@ import { ScheduleSummary } from "../../../types/schedule";
 import { ClassYearResponse } from "../../../types/classYear";
 
 export default function AdminSchedulesScreen() {
+  const router = useRouter();
   const [schedules, setSchedules] = useState<ScheduleSummary[]>([]);
   const [classes, setClasses] = useState<ClassYearResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -108,7 +109,7 @@ export default function AdminSchedulesScreen() {
   );
 
   return (
-    <AdminLayout
+    <AdminPageWrapper
       title="Thời khóa biểu"
       rightComponent={
         <TouchableOpacity
@@ -263,6 +264,6 @@ export default function AdminSchedulesScreen() {
           ListFooterComponent={<View className="h-20 bg-white" />}
         />
       )}
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 }

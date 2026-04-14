@@ -11,8 +11,8 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { teacherService } from "../../../services/teacher.service";
 import { subjectService } from "../../../services/subject.service";
@@ -20,6 +20,7 @@ import { TeacherListItem } from "../../../types/teacher";
 import { SubjectResponse } from "../../../types/subject";
 
 export default function AdminTeachersScreen() {
+  const router = useRouter();
   const [teachers, setTeachers] = useState<TeacherListItem[]>([]);
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -94,7 +95,7 @@ export default function AdminTeachersScreen() {
   };
 
   return (
-    <AdminLayout
+    <AdminPageWrapper
       title="Quản lý Giáo viên"
       searchProps={{
         value: search,
@@ -228,6 +229,6 @@ export default function AdminTeachersScreen() {
           ListFooterComponent={<View className="h-20 bg-white" />}
         />
       )}
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 }

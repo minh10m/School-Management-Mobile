@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect } from "react";
 import { scheduleService } from "../../../services/schedule.service";
 import { subjectService } from "../../../services/subject.service";
@@ -24,6 +25,7 @@ import { getErrorMessage } from "../../../utils/error";
 const DAYS = ["T2", "T3", "T4", "T5", "T6", "T7"];
 
 export default function AdminScheduleDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [details, setDetails] = useState<ScheduleDetailItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,22 +125,14 @@ export default function AdminScheduleDetailScreen() {
   const filteredDetails = details.filter((d) => d.dayOfWeek === selectedDay);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text
-          style={{ fontFamily: "Poppins-Bold" }}
-          className="text-black text-lg flex-1"
-        >
-          Quản lý Tiết học
-        </Text>
+    <AdminPageWrapper
+      title="Quản lý Tiết học"
+      rightComponent={
         <TouchableOpacity onPress={() => setAssignModal(true)}>
           <Ionicons name="add-circle" size={26} color="#136ADA" />
         </TouchableOpacity>
-      </View>
+      }
+    >
 
       {/* Day Selector */}
       <View className="bg-white border-b border-gray-100 py-3">
@@ -401,6 +395,6 @@ export default function AdminScheduleDetailScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

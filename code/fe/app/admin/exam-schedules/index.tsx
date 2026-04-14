@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { examScheduleService } from "../../../services/examSchedule.service";
 import {
   ExamScheduleResponse,
@@ -144,7 +144,7 @@ const ExamScheduleIndex = () => {
 
 
   return (
-    <AdminLayout
+    <AdminPageWrapper
       title="Lịch thi"
       rightComponent={
         <TouchableOpacity
@@ -349,7 +349,7 @@ const ExamScheduleIndex = () => {
           ListFooterComponent={<View className="h-20 bg-white" />}
         />
       )}
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 };
 

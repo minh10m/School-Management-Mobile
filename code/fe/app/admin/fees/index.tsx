@@ -1,7 +1,7 @@
 import { View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router, Stack } from 'expo-router';
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from 'expo-router';
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 
 const MOCK_FEES = [
   { feeId: '1', title: 'Học phí HK1', amount: 2500000, dueDate: '2025-09-30', className: '10A1', schoolYear: '2025-2026', paidCount: 28, totalCount: 35 },
@@ -14,8 +14,9 @@ const MOCK_FEES = [
 const fmt = (n: number) => n.toLocaleString('vi-VN') + 'đ';
 
 export default function AdminFeesScreen() {
+  const router = useRouter();
   return (
-    <AdminLayout 
+    <AdminPageWrapper 
       title="Quản lý Học phí"
       rightComponent={
         <TouchableOpacity
@@ -97,6 +98,6 @@ export default function AdminFeesScreen() {
         }}
         ListFooterComponent={<View className="h-20 bg-white" />}
       />
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 }

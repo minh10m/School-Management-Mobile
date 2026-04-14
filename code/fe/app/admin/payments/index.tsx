@@ -1,8 +1,8 @@
 import { View, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router, Stack } from 'expo-router';
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from 'expo-router';
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState } from 'react';
 
 const MOCK_PAYMENTS = [
@@ -21,6 +21,7 @@ const STATUS_CONFIG: any = {
 };
 
 export default function AdminPaymentsScreen() {
+  const router = useRouter();
   const [activeStatus, setActiveStatus] = useState('All');
   const [search, setSearch] = useState('');
 
@@ -37,7 +38,7 @@ export default function AdminPaymentsScreen() {
   };
 
   return (
-    <AdminLayout
+    <AdminPageWrapper
       title="Lịch sử Giao dịch"
       searchProps={{
         value: search,
@@ -121,6 +122,6 @@ export default function AdminPaymentsScreen() {
         }
         ListFooterComponent={<View className="h-20 bg-white" />}
       />
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 }

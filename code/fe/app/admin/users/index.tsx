@@ -11,8 +11,8 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { userService } from "../../../services/user.service";
 import { UserListItem } from "../../../types/user";
@@ -33,6 +33,7 @@ const TAB_LABELS: Record<string, string> = {
 };
 
 export default function AdminUsersScreen() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -112,7 +113,7 @@ export default function AdminUsersScreen() {
   };
 
   return (
-    <AdminLayout
+    <AdminPageWrapper
       title="Quản lý Người dùng"
       rightComponent={
         <TouchableOpacity
@@ -251,6 +252,6 @@ export default function AdminUsersScreen() {
           ListFooterComponent={<View className="h-20 bg-white" />}
         />
       )}
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 }

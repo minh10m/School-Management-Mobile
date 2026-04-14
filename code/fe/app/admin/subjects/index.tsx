@@ -9,13 +9,14 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { subjectService } from "../../../services/subject.service";
 import { SubjectResponse } from "../../../types/subject";
 
 export default function AdminSubjectsScreen() {
+  const router = useRouter();
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -50,7 +51,7 @@ export default function AdminSubjectsScreen() {
   );
 
   return (
-    <AdminLayout
+    <AdminPageWrapper
       title="Quản lý Môn học"
       rightComponent={
         <TouchableOpacity
@@ -114,6 +115,6 @@ export default function AdminSubjectsScreen() {
           ListFooterComponent={<View className="h-20 bg-white" />}
         />
       )}
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 }

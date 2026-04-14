@@ -1,8 +1,8 @@
 import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router, Stack } from 'expo-router';
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from 'expo-router';
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from 'react';
 import { classYearService } from '../../../services/classYear.service';
 import { teacherService } from '../../../services/teacher.service';
@@ -13,6 +13,7 @@ import { SCHOOL_YEAR } from '../../../constants/config';
 const GRADES = [10, 11, 12];
 
 export default function AdminClassYearsScreen() {
+  const router = useRouter();
   const [classes, setClasses] = useState<ClassYearResponse[]>([]);
   const [teachers, setTeachers] = useState<TeacherListItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,7 +87,7 @@ export default function AdminClassYearsScreen() {
   );
 
   return (
-    <AdminLayout
+    <AdminPageWrapper
       title="Quản lý Lớp học"
       rightComponent={
         <View className="flex-row items-center gap-2">
@@ -185,6 +186,63 @@ export default function AdminClassYearsScreen() {
         </View>
       </Modal>
 
-    </AdminLayout>
+      {/* Class Year List */}
+      {loading && !refreshing ? (
+        <View className="flex-1 items-center justify-center bg-white">
+          <ActivityIndicator size="large" color="#136ADA" />
+        </View>
+      ) : (
+        <FlatList
+          data={filteredClasses}
+          keyExtractor={(item) => item.classYearId}
+          className="flex-1 bg-white"
+          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 20, gap: 16 }}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              className="bg-white rounded-[32px] p-5 border border-gray-100 shadow-sm"
+              onPress={() => router.push(`/admin/class-years/${item.classYearId}` as any)}
+            >
+              <View className="flex-row items-center justify-between mb-4">
+                <View className="flex-1">
+                  <Text style={{ fontFamily: "Poppins-Bold", fontSize: 18 }} className="text-black mb-1">Lớp {item.className}</Text>
+                  <View className="flex-row items-center gap-2">
+                    <View className="bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">
+                      <Text style={{ fontFamily: "Poppins-Bold", color: "#136ADA", fontSize: 10 }}>KHỐI {item.grade}</Text>
+                    </View>
+                    <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px]">{item.schoolYear}</Text>
+                  </View>
+                </View>
+                <View className="w-12 h-12 rounded-2xl bg-indigo-50 items-center justify-center border border-indigo-100">
+                  <Ionicons name="business-outline" size={24} color="#6366F1" />
+                </View>
+              </View>
+
+              <View className="flex-row items-center justify-between pt-3 border-t border-gray-50/50">
+                <View className="flex-row items-center gap-2">
+                  <Ionicons name="person-outline" size={14} color="#9CA3AF" />
+                  <Text style={{ fontFamily: "Poppins-Medium", fontSize: 11 }} className="text-gray-400">
+                    GVCN: {item.homeRoomTeacher || (item.homeRoomId ? teachers.find(t => t.teacherId === item.homeRoomId)?.fullName : null) || "Chưa phân công"}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+              </View>
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            <View className="items-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200 mx-6">
+              <Ionicons name="business-outline" size={64} color="#D1D5DB" />
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center px-10">
+                Không tìm thấy lớp học nào.{"\n"}Hãy thử điều chỉnh bộ lọc.
+              </Text>
+            </View>
+          }
+          ListFooterComponent={<View className="h-20 bg-white" />}
+        />
+      )}
+    </AdminPageWrapper>
   );
 }

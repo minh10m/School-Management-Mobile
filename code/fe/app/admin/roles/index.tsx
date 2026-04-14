@@ -8,13 +8,14 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
-import { AdminLayout } from "../../../components/ui/AdminLayout";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { roleService } from "../../../services/role.service";
 import { RoleResponse } from "../../../types/role";
 
 export default function AdminRolesScreen() {
+  const router = useRouter();
   const [roles, setRoles] = useState<RoleResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -47,7 +48,7 @@ export default function AdminRolesScreen() {
   };
 
   return (
-    <AdminLayout title="Quản lý Vai trò">
+    <AdminPageWrapper title="Quản lý Vai trò">
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Standardized Role List */}
@@ -98,6 +99,6 @@ export default function AdminRolesScreen() {
           }
         />
       )}
-    </AdminLayout>
+    </AdminPageWrapper>
   );
 }

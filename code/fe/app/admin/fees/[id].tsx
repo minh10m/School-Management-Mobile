@@ -1,7 +1,8 @@
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { AdminPageWrapper } from '../../../components/ui/AdminPageWrapper';
 
 const MOCK_FEE_DETAILS: Record<string, any> = {
   '1': {
@@ -21,6 +22,7 @@ const MOCK_FEE_DETAILS: Record<string, any> = {
 const fmt = (n: number) => n.toLocaleString('vi-VN') + 'đ';
 
 export default function AdminFeeDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const data = MOCK_FEE_DETAILS[id ?? '1'] ?? MOCK_FEE_DETAILS['1'];
 
@@ -28,14 +30,9 @@ export default function AdminFeeDetailScreen() {
   const pct = Math.round((paidCount / data.students.length) * 100);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">{data.title}</Text>
-      </View>
+    <AdminPageWrapper
+      title={data.title}
+    >
 
       {/* Summary card */}
       <View className="mx-4 mt-4 mb-2 bg-bright-blue rounded-2xl p-4">
@@ -93,6 +90,6 @@ export default function AdminFeeDetailScreen() {
           </View>
         )}
       />
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }
