@@ -10,7 +10,10 @@ import {
   Platform,
   Pressable,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
@@ -47,7 +50,9 @@ const Field = ({
   <View className="mb-6">
     <FormLabel>{label}</FormLabel>
     <View className="bg-gray-50 p-4 rounded-2xl flex-row items-center border border-gray-50">
-      {icon && <Ionicons name={icon} size={20} color="#9CA3AF" className="mr-3" />}
+      {icon && (
+        <Ionicons name={icon} size={20} color="#9CA3AF" className="mr-3" />
+      )}
       <TextInput
         value={value}
         onChangeText={onChangeText}
@@ -59,7 +64,11 @@ const Field = ({
       />
       {isPasswordField && (
         <TouchableOpacity onPress={onToggleSecure} className="pl-2">
-           <Ionicons name={secureTextEntry ? "eye-outline" : "eye-off-outline"} size={20} color="#9CA3AF" />
+          <Ionicons
+            name={secureTextEntry ? "eye-outline" : "eye-off-outline"}
+            size={20}
+            color="#9CA3AF"
+          />
         </TouchableOpacity>
       )}
     </View>
@@ -102,15 +111,23 @@ export default function AdminCreateUserScreen() {
         classYearService.getClassYears({ schoolYear: "2026" }),
       ]);
 
-      const rolesData = Array.isArray(roleRes) ? roleRes : (roleRes as any).items || [];
-      const subjectsData = Array.isArray(subjectRes) ? subjectRes : (subjectRes as any).items || [];
-      const classesData = Array.isArray(classRes) ? classRes : (classRes as any).items || [];
+      const rolesData = Array.isArray(roleRes)
+        ? roleRes
+        : (roleRes as any).items || [];
+      const subjectsData = Array.isArray(subjectRes)
+        ? subjectRes
+        : (subjectRes as any).items || [];
+      const classesData = Array.isArray(classRes)
+        ? classRes
+        : (classRes as any).items || [];
 
       setRoles(rolesData);
       setSubjects(subjectsData);
       setClasses(classesData);
 
-      const studentRole = rolesData.find((r: any) => r.name.toLowerCase() === "student");
+      const studentRole = rolesData.find(
+        (r: any) => r.name.toLowerCase() === "student",
+      );
       if (studentRole) setForm((f) => ({ ...f, roleId: studentRole.name }));
     } catch (err) {
       console.error(err);
@@ -132,8 +149,18 @@ export default function AdminCreateUserScreen() {
   const isTeacher = form.roleId.toLowerCase() === "teacher";
 
   const handleSubmit = async () => {
-    if (!form.username || !form.password || !form.fullName || !form.email || !form.roleId || !form.address) {
-      Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ các thông tin bắt buộc (*).");
+    if (
+      !form.username ||
+      !form.password ||
+      !form.fullName ||
+      !form.email ||
+      !form.roleId ||
+      !form.address
+    ) {
+      Alert.alert(
+        "Thiếu thông tin",
+        "Vui lòng điền đầy đủ các thông tin bắt buộc (*).",
+      );
       return;
     }
 
@@ -143,7 +170,10 @@ export default function AdminCreateUserScreen() {
     }
 
     if (isTeacher && !form.subjectId) {
-      Alert.alert("Thiếu thông tin", "Vui lòng chọn môn học chuyên môn cho giáo viên.");
+      Alert.alert(
+        "Thiếu thông tin",
+        "Vui lòng chọn môn học chuyên môn cho giáo viên.",
+      );
       return;
     }
 
@@ -175,7 +205,15 @@ export default function AdminCreateUserScreen() {
 
   if (fetching)
     return (
-      <View style={{ flex: 1, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', paddingTop: 100 }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "white",
+          alignItems: "center",
+          justifyContent: "center",
+          paddingTop: 100,
+        }}
+      >
         <ActivityIndicator size="large" color="#136ADA" />
       </View>
     );
@@ -185,35 +223,51 @@ export default function AdminCreateUserScreen() {
       title="Tạo tài khoản mới"
       leftComponent={
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
-          <Text style={{ fontFamily: "Poppins-Regular", color: '#6B7280', fontSize: 16 }}>
+          <Text
+            style={{
+              fontFamily: "Poppins-Regular",
+              color: "#6B7280",
+              fontSize: 16,
+            }}
+          >
             Hủy
           </Text>
         </TouchableOpacity>
       }
       rightComponent={
-        <TouchableOpacity 
-          onPress={handleSubmit} 
+        <TouchableOpacity
+          onPress={handleSubmit}
           disabled={loading}
           style={{ padding: 8 }}
         >
           {loading ? (
-             <ActivityIndicator size="small" color="#136ADA" />
+            <ActivityIndicator size="small" color="#136ADA" />
           ) : (
-            <Text style={{ fontFamily: "Poppins-Bold", color: '#3B82F6', fontSize: 16 }}>
+            <Text
+              style={{
+                fontFamily: "Poppins-Bold",
+                color: "#3B82F6",
+                fontSize: 16,
+              }}
+            >
               Tạo
             </Text>
           )}
         </TouchableOpacity>
       }
     >
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         <ScrollView
           style={{ flex: 1 }}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 32, paddingBottom: 100 }}
+          contentContainerStyle={{
+            paddingHorizontal: 24,
+            paddingTop: 32,
+            paddingBottom: 100,
+          }}
         >
           {/* Section: Basic Credentials */}
           <Field
@@ -236,8 +290,13 @@ export default function AdminCreateUserScreen() {
 
           {/* Section: Personal Info */}
           <View className="mb-4">
-            <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-base mb-6">Thông tin cá nhân</Text>
-            
+            <Text
+              style={{ fontFamily: "Poppins-Bold" }}
+              className="text-black text-base mb-6"
+            >
+              Thông tin cá nhân
+            </Text>
+
             <Field
               label="Họ và tên *"
               icon="person-outline"
@@ -278,14 +337,26 @@ export default function AdminCreateUserScreen() {
           {/* Role Selection - Modern Chips */}
           <View style={{ marginBottom: 40 }}>
             <FormLabel>Vai trò hệ thống *</FormLabel>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}>
+            <View
+              style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}
+            >
               {roles.map((r: any) => {
                 const roleLower = r.name.toLowerCase();
                 const isActive = form.roleId.toLowerCase() === roleLower;
-                const roleName = r.name === 'Admin' ? 'Quản trị' : (r.name === 'Teacher' ? 'Giáo viên' : (r.name === 'Student' ? 'Học sinh' : r.name));
-                
+                const roleName =
+                  r.name === "Admin"
+                    ? "Quản trị"
+                    : r.name === "Teacher"
+                      ? "Giáo viên"
+                      : r.name === "Student"
+                        ? "Học sinh"
+                        : r.name;
+
                 return (
-                  <View key={r.roleId || r.name} style={{ marginRight: 10, marginBottom: 10 }}>
+                  <View
+                    key={r.roleId || r.name}
+                    style={{ marginRight: 10, marginBottom: 10 }}
+                  >
                     <Pressable
                       onPress={() => set("roleId", r.name)}
                       style={{
@@ -293,8 +364,8 @@ export default function AdminCreateUserScreen() {
                         paddingVertical: 14,
                         borderRadius: 16,
                         borderWidth: 1,
-                        backgroundColor: isActive ? '#2563EB' : '#FFFFFF',
-                        borderColor: isActive ? '#2563EB' : '#F3F4F6',
+                        backgroundColor: isActive ? "#2563EB" : "#FFFFFF",
+                        borderColor: isActive ? "#2563EB" : "#F3F4F6",
                         shadowColor: "#000",
                         shadowOffset: { width: 0, height: 1 },
                         shadowOpacity: isActive ? 0.2 : 0,
@@ -303,10 +374,10 @@ export default function AdminCreateUserScreen() {
                       }}
                     >
                       <Text
-                        style={{ 
+                        style={{
                           fontFamily: "Poppins-Bold",
                           fontSize: 12,
-                          color: isActive ? "white" : "#6B7280"
+                          color: isActive ? "white" : "#6B7280",
                         }}
                       >
                         {roleName}
@@ -320,35 +391,66 @@ export default function AdminCreateUserScreen() {
 
           {/* Dynamic Sections */}
           {isStudent && (
-            <View style={{ marginBottom: 40, backgroundColor: '#F8FAFC', padding: 24, borderRadius: 32, borderWidth: 1, borderColor: '#E2E8F0' }}>
-              <Text style={{ fontFamily: "Poppins-Bold", color: '#1E3A8A', fontSize: 13, marginBottom: 20, textTransform: 'uppercase', letterSpacing: 1 }}>Gán lớp học học sinh</Text>
-              
+            <View
+              style={{
+                marginBottom: 40,
+                backgroundColor: "#F8FAFC",
+                padding: 24,
+                borderRadius: 32,
+                borderWidth: 1,
+                borderColor: "#E2E8F0",
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "Poppins-Bold",
+                  color: "#1E3A8A",
+                  fontSize: 13,
+                  marginBottom: 20,
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                }}
+              >
+                Gán lớp học học sinh
+              </Text>
+
               <FormLabel>Chọn khối lớp</FormLabel>
-              <View style={{ flexDirection: 'row', marginTop: 8, marginBottom: 14 }}>
+              <View
+                style={{ flexDirection: "row", marginTop: 8, marginBottom: 14 }}
+              >
                 {[10, 11, 12].map((grade) => (
-                  <View key={grade} style={{ flex: 1, marginRight: grade === 12 ? 0 : 8, marginBottom: 12 }}>
+                  <View
+                    key={grade}
+                    style={{
+                      flex: 1,
+                      marginRight: grade === 12 ? 0 : 8,
+                      marginBottom: 12,
+                    }}
+                  >
                     <Pressable
                       onPress={() => setSelectedGrade(grade)}
                       style={{
                         paddingVertical: 12,
                         borderRadius: 16,
                         borderWidth: 1.5,
-                        backgroundColor: selectedGrade === grade ? '#2563EB' : '#FFFFFF',
-                        borderColor: selectedGrade === grade ? '#2563EB' : '#F1F5F9',
+                        backgroundColor:
+                          selectedGrade === grade ? "#2563EB" : "#FFFFFF",
+                        borderColor:
+                          selectedGrade === grade ? "#2563EB" : "#F1F5F9",
                         shadowColor: "#000",
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: selectedGrade === grade ? 0.2 : 0.05,
                         shadowRadius: 4,
                         elevation: selectedGrade === grade ? 4 : 1,
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
                       <Text
-                        style={{ 
-                          fontFamily: "Poppins-Bold", 
+                        style={{
+                          fontFamily: "Poppins-Bold",
                           fontSize: 11,
-                          color: selectedGrade === grade ? 'white' : '#64748B'
+                          color: selectedGrade === grade ? "white" : "#64748B",
                         }}
                       >
                         Khối {grade}
@@ -361,33 +463,54 @@ export default function AdminCreateUserScreen() {
               {selectedGrade && (
                 <>
                   <FormLabel>Danh sách lớp</FormLabel>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}>
-                    {classes.filter(c => c.grade === selectedGrade).map((c) => (
-                      <View key={c.classYearId} style={{ marginRight: 8, marginBottom: 8 }}>
-                        <Pressable
-                          onPress={() => set("classYearId", c.classYearId)}
-                          style={{
-                            paddingHorizontal: 18,
-                            paddingVertical: 10,
-                            borderRadius: 14,
-                            borderWidth: 1,
-                            backgroundColor: form.classYearId === c.classYearId ? '#2563EB' : '#FFFFFF',
-                            borderColor: form.classYearId === c.classYearId ? '#2563EB' : '#E2E8F0',
-                            elevation: form.classYearId === c.classYearId ? 3 : 1,
-                          }}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      flexWrap: "wrap",
+                      marginTop: 8,
+                    }}
+                  >
+                    {classes
+                      .filter((c) => c.grade === selectedGrade)
+                      .map((c) => (
+                        <View
+                          key={c.classYearId}
+                          style={{ marginRight: 8, marginBottom: 8 }}
                         >
-                          <Text
-                            style={{ 
-                              fontFamily: "Poppins-Bold", 
-                              fontSize: 11,
-                              color: form.classYearId === c.classYearId ? 'white' : '#475569'
+                          <Pressable
+                            onPress={() => set("classYearId", c.classYearId)}
+                            style={{
+                              paddingHorizontal: 18,
+                              paddingVertical: 10,
+                              borderRadius: 14,
+                              borderWidth: 1,
+                              backgroundColor:
+                                form.classYearId === c.classYearId
+                                  ? "#2563EB"
+                                  : "#FFFFFF",
+                              borderColor:
+                                form.classYearId === c.classYearId
+                                  ? "#2563EB"
+                                  : "#E2E8F0",
+                              elevation:
+                                form.classYearId === c.classYearId ? 3 : 1,
                             }}
                           >
-                            {c.className}
-                          </Text>
-                        </Pressable>
-                      </View>
-                    ))}
+                            <Text
+                              style={{
+                                fontFamily: "Poppins-Bold",
+                                fontSize: 11,
+                                color:
+                                  form.classYearId === c.classYearId
+                                    ? "white"
+                                    : "#475569",
+                              }}
+                            >
+                              {c.className}
+                            </Text>
+                          </Pressable>
+                        </View>
+                      ))}
                   </View>
                 </>
               )}
@@ -395,12 +518,37 @@ export default function AdminCreateUserScreen() {
           )}
 
           {isTeacher && (
-            <View style={{ marginBottom: 40, backgroundColor: '#F5F3FF', padding: 24, borderRadius: 32, borderWidth: 1, borderColor: '#EDE9FE' }}>
-               <Text style={{ fontFamily: "Poppins-Bold", color: '#4C1D95', fontSize: 13, marginBottom: 20, textTransform: 'uppercase', letterSpacing: 1 }}>Chuyên môn giáo viên</Text>
-               <FormLabel>Chọn môn học giảng dạy</FormLabel>
-               <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}>
+            <View
+              style={{
+                marginBottom: 40,
+                backgroundColor: "#F5F3FF",
+                padding: 24,
+                borderRadius: 32,
+                borderWidth: 1,
+                borderColor: "#EDE9FE",
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "Poppins-Bold",
+                  color: "#4C1D95",
+                  fontSize: 13,
+                  marginBottom: 20,
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                }}
+              >
+                Chuyên môn giáo viên
+              </Text>
+              <FormLabel>Chọn môn học giảng dạy</FormLabel>
+              <View
+                style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 8 }}
+              >
                 {subjects.map((s) => (
-                  <View key={s.subjectId} style={{ marginRight: 10, marginBottom: 10 }}>
+                  <View
+                    key={s.subjectId}
+                    style={{ marginRight: 10, marginBottom: 10 }}
+                  >
                     <Pressable
                       onPress={() => set("subjectId", s.subjectId)}
                       style={{
@@ -408,16 +556,25 @@ export default function AdminCreateUserScreen() {
                         paddingVertical: 12,
                         borderRadius: 16,
                         borderWidth: 1,
-                        backgroundColor: form.subjectId === s.subjectId ? '#4F46E5' : '#FFFFFF',
-                        borderColor: form.subjectId === s.subjectId ? '#4F46E5' : '#F1F5F9',
+                        backgroundColor:
+                          form.subjectId === s.subjectId
+                            ? "#4F46E5"
+                            : "#FFFFFF",
+                        borderColor:
+                          form.subjectId === s.subjectId
+                            ? "#4F46E5"
+                            : "#F1F5F9",
                         elevation: form.subjectId === s.subjectId ? 3 : 1,
                       }}
                     >
                       <Text
-                        style={{ 
+                        style={{
                           fontFamily: "Poppins-Bold",
                           fontSize: 11,
-                          color: form.subjectId === s.subjectId ? "white" : "#6B7280"
+                          color:
+                            form.subjectId === s.subjectId
+                              ? "white"
+                              : "#6B7280",
                         }}
                       >
                         {s.subjectName}

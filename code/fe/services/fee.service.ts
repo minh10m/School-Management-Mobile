@@ -1,12 +1,14 @@
+import { ApiResponse, PagedResponse } from "../types/common";
 import {
-  CreateFeeDetailPayload,
-  CreateFeePayload,
+  CreateFeeRequest,
+  FeeDetailFilterRequest,
+  FeeDetailRequest,
   FeeDetailResponse,
+  FeeFilterRequest,
   FeeResponse,
-  GetFeesParams,
-  StudentFeeDetailResponse,
-  UpdateFeeDetailPayload,
-  UpdateFeePayload,
+  MyFeeDetailFilterRequest,
+  UpdateFeeDetailRequest,
+  UpdateFeeRequest,
 } from "../types/fee";
 import apiClient from "./apiClient";
 
@@ -15,49 +17,47 @@ import apiClient from "./apiClient";
 export const feeService = {
   /**
    * Admin lấy danh sách phí trong năm học
-   * GET /fees?schoolYear=
-   * AuthN(login) + AuthZ(Admin)
+   * GET /api/fees
    */
-  getFees: async (params?: GetFeesParams): Promise<FeeResponse[]> => {
-    const response = await apiClient.get<FeeResponse[]>("/fees", { params });
-    return response.data;
+  getFees: async (params: FeeFilterRequest): Promise<PagedResponse<FeeResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<FeeResponse>>>("/fees", { params });
+    return response.data.data;
+  },
+
+  /**
+   * Admin lấy thông tin chi tiết của một loại phí theo ID
+   * GET /api/fees/{id}
+   */
+  getFeeById: async (feeId: string): Promise<FeeResponse> => {
+    const response = await apiClient.get<ApiResponse<FeeResponse>>(`/fees/${feeId}`);
+    return response.data.data;
   },
 
   /**
    * Admin xem danh sách học sinh và trạng thái đóng phí của một loại phí
-   * GET /fees/{id}/details
-   * AuthN(login) + AuthZ(Admin)
-   * 404: fee không tồn tại
+   * GET /api/fees/details
    */
-  getFeeDetails: async (feeId: string): Promise<FeeDetailResponse[]> => {
-    const response = await apiClient.get<FeeDetailResponse[]>(`/fees/${feeId}/details`);
-    return response.data;
+  getAllFeeDetails: async (params: FeeDetailFilterRequest): Promise<PagedResponse<FeeDetailResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<FeeDetailResponse>>>("/fees/details", { params });
+    return response.data.data;
   },
 
   /**
    * Admin tạo phí cho một lớp
-   * (Backend tự động tạo FeeDetail cho từng học sinh trong lớp)
-   * POST /fees
-   * AuthN(login) + AuthZ(Admin)
-   * 404: classYear không tồn tại
-   * 409: phí cho lớp đã tồn tại trong năm học
-   * 409: dueDate nhỏ hơn ngày hiện tại
+   * POST /api/fees
    */
-  createFee: async (payload: CreateFeePayload): Promise<FeeResponse> => {
-    const response = await apiClient.post<FeeResponse>("/fees", payload);
-    return response.data;
+  createFee: async (payload: CreateFeeRequest): Promise<FeeResponse> => {
+    const response = await apiClient.post<ApiResponse<FeeResponse>>("/fees", payload);
+    return response.data.data;
   },
 
   /**
    * Admin sửa thông tin phí
-   * ⚠ Không nên sửa amount sau khi đã tạo FeeDetail
-   * PATCH /fees/{id}
-   * AuthN(login) + AuthZ(Admin)
-   * 404: fee / classYear không tồn tại
+   * PATCH /api/fees/{id}
    */
-  updateFee: async (feeId: string, payload: UpdateFeePayload): Promise<FeeResponse> => {
-    const response = await apiClient.patch<FeeResponse>(`/fees/${feeId}`, payload);
-    return response.data;
+  updateFee: async (feeId: string, payload: UpdateFeeRequest): Promise<FeeResponse> => {
+    const response = await apiClient.patch<ApiResponse<FeeResponse>>(`/fees/${feeId}`, payload);
+    return response.data.data;
   },
 };
 
@@ -66,54 +66,44 @@ export const feeService = {
 export const feeDetailService = {
   /**
    * Học sinh xem danh sách các loại phí của mình
-   * GET /fee-details/my
-   * AuthN(login) + AuthZ(Student)
+   * GET /api/fee-details/my
    */
-  getMyFees: async (): Promise<StudentFeeDetailResponse[]> => {
-    const response = await apiClient.get<StudentFeeDetailResponse[]>("/fee-details/my");
-    return response.data;
+  getMyFees: async (params: MyFeeDetailFilterRequest): Promise<PagedResponse<FeeDetailResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<FeeDetailResponse>>>("/fee-details/my", { params });
+    return response.data.data;
   },
 
   /**
    * Xem chi tiết một phí theo id
-   * GET /fee-details/{id}
-   * AuthN(login) + AuthZ(Admin, Student)
-   * 404: feeDetail không tồn tại
+   * GET /api/fee-details/{id}
    */
   getFeeDetailById: async (feeDetailId: string): Promise<FeeDetailResponse> => {
-    const response = await apiClient.get<FeeDetailResponse>(`/fee-details/${feeDetailId}`);
-    return response.data;
+    const response = await apiClient.get<ApiResponse<FeeDetailResponse>>(`/fee-details/${feeDetailId}`);
+    return response.data.data;
   },
 
   /**
    * Admin tạo phí riêng lẻ cho một học sinh
-   * (Dùng khi phí không theo lớp)
-   * POST /fee-details
-   * AuthN(login) + AuthZ(Admin)
-   * status mặc định = unpaid, amountPaid mặc định = 0
-   * 404: student không tồn tại
-   * 409: học sinh đã có phí này
+   * POST /api/fee-details
    */
-  createFeeDetail: async (payload: CreateFeeDetailPayload): Promise<FeeDetailResponse> => {
-    const response = await apiClient.post<FeeDetailResponse>("/fee-details", payload);
-    return response.data;
+  createFeeDetail: async (payload: FeeDetailRequest): Promise<FeeDetailResponse> => {
+    const response = await apiClient.post<ApiResponse<FeeDetailResponse>>("/fee-details", payload);
+    return response.data.data;
   },
 
   /**
    * Admin miễn giảm phí cho học sinh (thay đổi amountDue)
-   * PATCH /fee-details/{id}
-   * AuthN(login) + AuthZ(Admin)
-   * 400: amountDue không hợp lệ
-   * 404: feeDetail không tồn tại
+   * PATCH /api/fee-details/{id}
    */
   updateFeeDetail: async (
     feeDetailId: string,
-    payload: UpdateFeeDetailPayload
+    payload: UpdateFeeDetailRequest
   ): Promise<FeeDetailResponse> => {
-    const response = await apiClient.patch<FeeDetailResponse>(
+    const response = await apiClient.patch<ApiResponse<FeeDetailResponse>>(
       `/fee-details/${feeDetailId}`,
       payload
     );
-    return response.data;
+    return response.data.data;
   },
 };
+
