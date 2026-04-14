@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography.X509Certificates;
 
 namespace School_Management.API.Models.Domain
 {
@@ -12,6 +13,7 @@ namespace School_Management.API.Models.Domain
         public string Status { get; set; } = string.Empty;
         public decimal AmountDue { get; set; }
         public decimal AmountPaid { get; set; }
+        public int SchoolYear { get; set; }
         public DateTimeOffset? PaidAt { get; set; }
         public string Reason { get; set; } = string.Empty;
 

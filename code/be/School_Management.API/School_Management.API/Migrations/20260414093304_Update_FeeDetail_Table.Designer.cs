@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using School_Management.API.Data;
@@ -11,9 +12,11 @@ using School_Management.API.Data;
 namespace School_Management.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414093304_Update_FeeDetail_Table")]
+    partial class Update_FeeDetail_Table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -661,7 +664,7 @@ namespace School_Management.API.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<Guid?>("FeeId")
+                    b.Property<Guid>("FeeId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("PaidAt")
@@ -1247,7 +1250,9 @@ namespace School_Management.API.Migrations
                 {
                     b.HasOne("School_Management.API.Models.Domain.Fee", "Fee")
                         .WithMany("FeeDetails")
-                        .HasForeignKey("FeeId");
+                        .HasForeignKey("FeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("School_Management.API.Models.Domain.Student", "Student")
                         .WithMany("FeeDetails")

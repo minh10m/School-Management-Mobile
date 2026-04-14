@@ -15,6 +15,7 @@ namespace School_Management.API.EntityConfigurations
             builder.Property(x => x.AmountPaid).IsRequired().HasPrecision(18, 2);
             builder.Property(x => x.Reason).IsRequired().HasMaxLength(200);
             builder.HasIndex(x => x.StudentId);
+            builder.Property(x => x.SchoolYear).IsRequired();
             builder.HasIndex(x => x.FeeId);
 
             builder.ToTable("FeeDetail", t =>

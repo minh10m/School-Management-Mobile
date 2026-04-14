@@ -96,6 +96,8 @@ builder.Services.AddScoped<ICourseAssignmentRepository, CourseAssignmentReposito
 builder.Services.AddScoped<ICourseAssignmentService, CourseAssignmentService>();
 builder.Services.AddScoped<IFeeService, FeeService>();
 builder.Services.AddScoped<IFeeRepository, FeeRepository>();
+builder.Services.AddScoped<IFeeDetailRepository, FeeDetailRepository>();
+builder.Services.AddScoped<IFeeDetailService, FeeDetailService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()

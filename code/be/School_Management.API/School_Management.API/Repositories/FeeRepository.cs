@@ -57,6 +57,7 @@ namespace School_Management.API.Repositories
                         PaidAt = null,
                         Reason = request.Title,
                         Status = "Chưa đóng",
+                        SchoolYear = request.SchoolYear,
                         StudentId = studentId
                     };
                     listFeeDetail.Add(feeDetail);
@@ -118,7 +119,7 @@ namespace School_Management.API.Repositories
 
         public async Task<PagedResponse<FeeDetailResponse>> GetAllFeeDetailOfFee(FeeDetailFilterRequest request)
         {
-            var query = context.FeeDetail.AsNoTracking().Where(x => x.FeeId == request.FeeId);
+            var query = context.FeeDetail.AsNoTracking().Where(x => x.FeeId == request.FeeId && x.SchoolYear == request.SchoolYear);
 
             if(!string.IsNullOrWhiteSpace(request.StudentName))
             {
