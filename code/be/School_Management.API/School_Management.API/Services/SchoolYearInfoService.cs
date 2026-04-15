@@ -1,4 +1,4 @@
-﻿using School_Management.API.Exceptions;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
 using System.ComponentModel.DataAnnotations;
@@ -24,7 +24,7 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<SchoolYearInfoResponse> GetSchoolYearInfo()
+        public async Task<SchoolYearInfoResponse?> GetSchoolYearInfo()
         {
             return await schoolYearInfoRepository.GetSchoolYearInfo();
         }

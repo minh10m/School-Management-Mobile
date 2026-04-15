@@ -95,8 +95,8 @@ export default function HomeScreen() {
   const STUDENT_STATS = [
     { label: "Điểm TB", value: "8.5", icon: "stats-chart", color: "#136ADA", bg: "bg-blue-50" },
     { label: "Chuyên cần", value: "98%", icon: "calendar-clear", color: "#10B981", bg: "bg-emerald-50" },
-    { label: "Bài tập nộp", value: assignments.filter(a => a.status === 'Submitted').length.toString().padStart(2, '0'), icon: "document-text", color: "#A855F7", bg: "bg-purple-50" },
-    { label: "Sự kiện", value: events.length.toString().padStart(2, '0'), icon: "megaphone", color: "#F97316", bg: "bg-orange-50" },
+    { label: "Bài tập nộp", value: (Array.isArray(assignments) ? assignments : []).filter(a => a.status === 'Submitted').length.toString().padStart(2, '0'), icon: "document-text", color: "#A855F7", bg: "bg-purple-50" },
+    { label: "Sự kiện", value: (events?.length || 0).toString().padStart(2, '0'), icon: "megaphone", color: "#F97316", bg: "bg-orange-50" },
   ];
 
   const academicsData = [

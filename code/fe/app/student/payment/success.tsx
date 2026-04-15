@@ -1,95 +1,116 @@
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useRef } from 'react';
 
 export default function PaymentSuccessScreen() {
+  const insets = useSafeAreaInsets();
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 8,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       <Stack.Screen options={{ headerShown: false }} />
       
       {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 relative">
-          <TouchableOpacity 
-              className="absolute left-6 z-10 p-2"
-              onPress={() => router.back()}
-          >
-              <Ionicons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
-          <View className="flex-1 items-center">
-              <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Kết quả thanh toán</Text>
-          </View>
-          <View className="w-10" /> 
+      <View 
+        className="px-6 pb-4 flex-row items-center justify-between"
+        style={{ paddingTop: insets.top + 10 }}
+      >
+        <TouchableOpacity 
+          onPress={() => router.replace('/student/payment')}
+          className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center border border-gray-100"
+        >
+          <Ionicons name="close" size={20} color="black" />
+        </TouchableOpacity>
+        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#1E293B] text-lg">Kết quả</Text>
+        <View className="w-10" />
       </View>
 
-      <View className="flex-1 items-center">
-          
-          {/* Stepper */}
-          <View className="px-6 py-6 items-center justify-center w-full">
-               <View className="flex-row items-center w-full justify-center px-10 relative">
-                    <View className="flex-row justify-between w-full relative">
-                        {/* Dotted Line Background */}
-                        <View className="absolute w-full top-1/2 -z-10 border-t border-blue-500" style={{ borderStyle: 'dotted' }} />
-
-                        {/* Step 1 - Completed */}
-                        <View className="items-center">
-                            <View className="w-8 h-8 rounded-full border border-blue-500 items-center justify-center bg-white">
-                                <View className="w-4 h-4 rounded-full bg-blue-500" />
-                            </View>
-                        </View>
-
-                         {/* Step 2 - Completed */}
-                         <View className="items-center">
-                            <View className="w-8 h-8 rounded-full border border-blue-500 items-center justify-center bg-white">
-                                 <View className="w-4 h-4 rounded-full bg-blue-500" />
-                            </View>
-                        </View>
-
-                        {/* Step 3 - Active/Completed */}
-                        <View className="items-center">
-                            <View className="w-9 h-9 rounded-full border border-[#136ADA] items-center justify-center bg-white">
-                                <View className="w-4 h-4 rounded-full bg-[#136ADA]" />
-                            </View>
-                        </View>
-                    </View>
-               </View>
-          </View>
-
-          {/* Illustration/Image */}
-            <View className="w-64 h-64 my-10 items-center justify-center">
-                {/* 
-                  Using Ionicons as a placeholder if no image is available. 
-                  Ideally, this should be the card illustration from the design.
-                */}
-                <Image 
-                    source={require('../../../assets/images/on-boarding-1.png')} 
-                    style={{ width: '100%', height: '100%' }}
-                    resizeMode="contain"
-                />
+      <View className="flex-1 items-center justify-center px-10">
+        <Animated.View 
+          style={{ 
+            opacity: fadeAnim, 
+            transform: [{ scale: scaleAnim }],
+            alignItems: 'center' 
+          }}
+        >
+          {/* Modern Success Illustration */}
+          <View className="relative items-center justify-center mb-10">
+            <View className="w-40 h-40 bg-green-50 rounded-full items-center justify-center">
+              <View className="w-28 h-28 bg-green-100 rounded-full items-center justify-center">
+                <View className="w-20 h-20 bg-green-500 rounded-full items-center justify-center shadow-lg shadow-green-200">
+                  <Ionicons name="checkmark" size={48} color="white" />
+                </View>
+              </View>
             </View>
-
-          {/* Success Message */}
-          <View className="items-center mb-10 px-6">
-              <Text className="text-black text-xl mb-2 text-center" style={{ fontFamily: 'Poppins-Bold' }}>Thanh toán thành công</Text>
-              <Text className="text-gray-500 text-sm text-center" style={{ fontFamily: 'Poppins-Regular' }}>Học phí đã được thanh toán thành công</Text>
+            
+            {/* Floating particles (Decorative) */}
+            <View className="absolute -top-2 -right-2 w-6 h-6 bg-blue-100 rounded-full" />
+            <View className="absolute bottom-4 -left-4 w-4 h-4 bg-purple-100 rounded-full" />
+            <View className="absolute -bottom-2 -right-4 w-5 h-5 bg-yellow-100 rounded-full" />
           </View>
 
+          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#1E293B] text-2xl text-center mb-3">
+            Thanh toán thành công!
+          </Text>
+          <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-center leading-relaxed">
+            Học phí của bạn đã được ghi nhận vào hệ thống. Cảm ơn bạn đã hoàn thành đúng hạn.
+          </Text>
+
+          {/* Info Card */}
+          <View className="w-full bg-[#F8FAFC] rounded-[32px] p-6 mt-10 border border-gray-100">
+            <View className="flex-row justify-between mb-4">
+               <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-xs">Thời gian</Text>
+               <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#1E293B] text-xs">
+                 {new Date().toLocaleString('vi-VN')}
+               </Text>
+            </View>
+            <View className="flex-row justify-between">
+               <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-xs">Mã giao dịch</Text>
+               <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-blue-600 text-xs uppercase">
+                 TRX-{Math.random().toString(36).substring(7).toUpperCase()}
+               </Text>
+            </View>
+          </View>
+        </Animated.View>
       </View>
 
-      {/* Bottom Buttons */}
-      <View className="px-6 pb-10 gap-4">
-            <TouchableOpacity className="border border-gray-200 py-4 rounded-xl items-center flex-row justify-center gap-2">
-                 <Ionicons name="download-outline" size={20} color="gray" />
-                 <Text className="text-gray-600 text-base" style={{ fontFamily: 'Poppins-Medium' }}>Tải hóa đơn</Text>
-            </TouchableOpacity>
+      {/* Bottom Actions */}
+      <View 
+        className="px-6 pb-6 gap-4"
+        style={{ paddingBottom: insets.bottom + 10 }}
+      >
+        <TouchableOpacity className="bg-white border border-gray-100 py-4 rounded-[20px] flex-row items-center justify-center shadow-sm">
+          <Ionicons name="cloud-download-outline" size={20} color="#64748B" className="mr-2" />
+          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#64748B] text-sm">TẢI HÓA ĐƠN PDF</Text>
+        </TouchableOpacity>
 
-            <TouchableOpacity 
-                className="bg-[#136ADA] py-4 rounded-xl items-center"
-                onPress={() => router.push('/(tabs)/home' as any)}
-            >
-                <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>Trang chủ</Text>
-            </TouchableOpacity>
+        <TouchableOpacity 
+          className="bg-blue-600 py-5 rounded-[24px] items-center shadow-xl shadow-blue-200"
+          onPress={() => router.replace('/student/payment')}
+        >
+          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-sm tracking-widest uppercase">Hoàn tất</Text>
+        </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
+

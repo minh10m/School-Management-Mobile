@@ -100,7 +100,7 @@ export default function AdminUsersScreen() {
     const c = ROLE_COLORS[role] ?? { bg: "#F9FAFB", text: "#9CA3AF" };
     return (
       <View
-        style={{ borderColor: c.text + '40' }}
+        style={{ borderColor: c.text + "40" }}
         className="px-2.5 py-1 rounded-xl border"
       >
         <Text
@@ -120,7 +120,12 @@ export default function AdminUsersScreen() {
           onPress={() => router.push("/admin/users/create" as any)}
           className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
         >
-          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xs">Thêm mới</Text>
+          <Text
+            style={{ fontFamily: "Poppins-Bold" }}
+            className="text-[#136ADA] text-xs"
+          >
+            Thêm mới
+          </Text>
         </TouchableOpacity>
       }
       searchProps={{
@@ -141,8 +146,16 @@ export default function AdminUsersScreen() {
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Bộ lọc</Text>
-              <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-white p-2 rounded-full border border-gray-100">
+              <Text
+                style={{ fontFamily: "Poppins-Bold" }}
+                className="text-3xl text-black"
+              >
+                Bộ lọc
+              </Text>
+              <TouchableOpacity
+                onPress={() => setIsFilterVisible(false)}
+                className="bg-white p-2 rounded-full border border-gray-100"
+              >
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
@@ -150,7 +163,12 @@ export default function AdminUsersScreen() {
             <ScrollView showsVerticalScrollIndicator={false} className="mb-10">
               {/* Filter: Role Selection */}
               <View className="mb-12">
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">QUYỀN TRUY CẬP</Text>
+                <Text
+                  style={{ fontFamily: "Poppins-Medium" }}
+                  className="text-gray-500 text-xs mb-3 ml-1"
+                >
+                  QUYỀN TRUY CẬP
+                </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {TABS.map((tab) => (
                     <TouchableOpacity
@@ -159,7 +177,11 @@ export default function AdminUsersScreen() {
                       className={`px-5 py-2.5 rounded-2xl border ${tempTab === tab ? "bg-blue-50 border-blue-200" : "bg-white border-gray-100"}`}
                     >
                       <Text
-                        style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: tempTab === tab ? "#1D4ED8" : "#9CA3AF" }}
+                        style={{
+                          fontFamily: "Poppins-Bold",
+                          fontSize: 11,
+                          color: tempTab === tab ? "#1D4ED8" : "#9CA3AF",
+                        }}
                       >
                         {(TAB_LABELS[tab] || tab).toUpperCase()}
                       </Text>
@@ -175,13 +197,23 @@ export default function AdminUsersScreen() {
                 onPress={resetFilters}
                 className="flex-1 bg-gray-50 h-16 rounded-[22px] items-center justify-center border border-gray-100"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 15 }} className="text-gray-400">Thiết lập lại</Text>
+                <Text
+                  style={{ fontFamily: "Poppins-Bold", fontSize: 15 }}
+                  className="text-gray-400"
+                >
+                  Thiết lập lại
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
                 className="flex-1 bg-[#136ADA] h-16 rounded-[22px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 15 }} className="text-white">Áp dụng</Text>
+                <Text
+                  style={{ fontFamily: "Poppins-Bold", fontSize: 15 }}
+                  className="text-white"
+                >
+                  Áp dụng
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -198,7 +230,11 @@ export default function AdminUsersScreen() {
           data={users}
           keyExtractor={(item) => item.userId}
           className="flex-1 bg-white"
-          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 20, gap: 16 }}
+          contentContainerStyle={{
+            paddingHorizontal: 24,
+            paddingVertical: 20,
+            gap: 16,
+          }}
           onRefresh={onRefresh}
           refreshing={refreshing}
           showsVerticalScrollIndicator={false}
@@ -223,12 +259,22 @@ export default function AdminUsersScreen() {
 
               <View className="flex-1 ml-4">
                 <View className="flex-row items-center gap-2 mb-1">
-                  <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-black">{item.fullName}</Text>
+                  <Text
+                    style={{ fontFamily: "Poppins-Bold", fontSize: 16 }}
+                    className="text-black"
+                  >
+                    {item.fullName}
+                  </Text>
                   {item.lockoutEnd && (
                     <Ionicons name="lock-closed" size={14} color="#EF4444" />
                   )}
                 </View>
-                <Text style={{ fontFamily: "Poppins-Medium", fontSize: 11 }} className="text-gray-400 mb-2.5">@{item.userName}</Text>
+                <Text
+                  style={{ fontFamily: "Poppins-Medium", fontSize: 11 }}
+                  className="text-gray-400 mb-2.5"
+                >
+                  @{item.userName}
+                </Text>
                 <View className="flex-row">
                   <RoleBadge role={item.role ?? "User"} />
                 </View>
