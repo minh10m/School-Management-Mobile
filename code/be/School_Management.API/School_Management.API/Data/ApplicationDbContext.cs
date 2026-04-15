@@ -36,6 +36,7 @@ namespace School_Management.API.Data
         public DbSet<CourseAssignment> CourseAssignment { get; set; }
         public DbSet<Fee> Fee { get; set; }
         public DbSet<FeeDetail> FeeDetail { get; set; }
+        public DbSet<SchoolYearInfo> SchoolYearInfo { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
