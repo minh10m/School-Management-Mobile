@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -37,9 +37,10 @@ namespace School_Management.API.Repositories
             return (result, "SUCCESS");
         }
 
-        public async Task<SchoolYearInfoResponse> GetSchoolYearInfo()
+        public async Task<SchoolYearInfoResponse?> GetSchoolYearInfo()
         {
             var result = await context.SchoolYearInfo.FirstOrDefaultAsync();
+            if (result == null) return null;
             var resultResponse = new SchoolYearInfoResponse
             {
                 Id = result.Id,

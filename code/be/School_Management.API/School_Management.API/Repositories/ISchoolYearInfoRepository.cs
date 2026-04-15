@@ -1,4 +1,4 @@
-﻿using School_Management.API.Models.DTO;
+using School_Management.API.Models.DTO;
 
 namespace School_Management.API.Repositories
 {
@@ -6,6 +6,6 @@ namespace School_Management.API.Repositories
     {
         public Task<(SchoolYearInfoResponse? data, string message)> CreateSchoolYearInfo(SchoolYearInfoRequest request);
         public Task<(SchoolYearInfoResponse? data, string message)> UpdateSchoolYearInfo(SchoolYearInfoRequest request, Guid schoolYearInfoId);
-        public Task<SchoolYearInfoResponse> GetSchoolYearInfo();
+        public Task<SchoolYearInfoResponse?> GetSchoolYearInfo();
     }
 }
