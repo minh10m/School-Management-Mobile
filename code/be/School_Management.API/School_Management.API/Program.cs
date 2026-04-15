@@ -98,6 +98,8 @@ builder.Services.AddScoped<IFeeService, FeeService>();
 builder.Services.AddScoped<IFeeRepository, FeeRepository>();
 builder.Services.AddScoped<IFeeDetailRepository, FeeDetailRepository>();
 builder.Services.AddScoped<IFeeDetailService, FeeDetailService>();
+builder.Services.AddScoped<ISchoolYearInfoService, SchoolYearInfoService>();
+builder.Services.AddScoped<ISchoolYearInfoRepository, SchoolYearInfoRepository>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
