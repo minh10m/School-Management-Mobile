@@ -19,5 +19,8 @@ namespace School_Management.API.Models.Domain
         [ForeignKey("TeacherSubjectId")]
         public TeacherSubject TeacherSubject { get; set; } = null!;
         public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        public ICollection<EnrollCourse> EnrollCourses { get; set; } = new List<EnrollCourse>();
+
     }
 }

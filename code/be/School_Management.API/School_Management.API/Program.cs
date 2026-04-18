@@ -56,6 +56,9 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+//SignIR
+builder.Services.AddSignalR();
+
 //Dependency Injection
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -100,6 +103,8 @@ builder.Services.AddScoped<IFeeDetailRepository, FeeDetailRepository>();
 builder.Services.AddScoped<IFeeDetailService, FeeDetailService>();
 builder.Services.AddScoped<ISchoolYearInfoService, SchoolYearInfoService>();
 builder.Services.AddScoped<ISchoolYearInfoRepository, SchoolYearInfoRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
@@ -175,6 +180,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.MapHub<PaymentHub>("/paymentHub");
 
 app.MapControllers();
 

@@ -19,5 +19,6 @@ namespace School_Management.API.Models.Domain
         public ICollection<Result> Results { get; set; } = new List<Result>();
         public ICollection<ExamStudentAssignment> ExamStudentAssignments { get; set; } = new List<ExamStudentAssignment>();
         public ICollection<FeeDetail> FeeDetails { get; set; } = new List<FeeDetail>();
+        public ICollection<EnrollCourse> EnrollCourses { get; set; } = new List<EnrollCourse>();
     }
 }
