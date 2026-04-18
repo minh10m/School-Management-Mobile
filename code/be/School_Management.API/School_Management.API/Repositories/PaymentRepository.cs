@@ -96,36 +96,40 @@ namespace School_Management.API.Repositories
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var match = Regex.Match(request.Content, @"Bill\d+");
-                if (!match.Success) return (false, "ORDER_CODE_NOT_FOUND");
+                var orderCode = request.Content?.Trim();
+                if (string.IsNullOrEmpty(orderCode)) return (false, "ORDER_CODE_NOT_FOUND");
 
-                string orderCode = match.Value;
+                var payment = await context.Payment
+                    .FirstOrDefaultAsync(x => x.OrderCode.ToLower() == orderCode.ToLower() && x.Status == "Chưa đóng");
 
-                var payment = await context.Payment.FirstOrDefaultAsync(x => x.OrderCode == orderCode && x.Status == "Pending");
                 if (payment == null) return (false, "PAYMENT_NOT_FOUND");
 
                 string userId = payment.UserId.ToString();
 
                 if (request.TransferAmount < payment.Amount)
                 {
-                    await SendPaymentNotify(userId, false, $"Bạn chuyển thiếu tiền rồi! Cần {payment.Amount:N0}đ nhưng chỉ nhận được {request.TransferAmount:N0}đ.");
+                    await SendPaymentNotify(userId, false, $"Bạn chuyển thiếu tiền! Cần {payment.Amount:N0}đ nhưng nhận được {request.TransferAmount:N0}đ.");
                     return (false, "INSUFFICIENT_AMOUNT");
                 }
 
-                var isExisted = await context.Payment.AnyAsync(x => x.TransactionId.ToLower().Trim() == request.ReferenceCode.ToLower().Trim());
+                var sepayId = request.Id.ToString();
+                var isExisted = await context.Payment.AnyAsync(x => x.TransactionId == sepayId);
                 if (isExisted) return (false, "DUPLICATE_TRANSACTION");
 
                 payment.Status = "Đã đóng";
-                payment.PaidAt = request.TransferDate.ToUniversalTime();
+                payment.PaidAt = DateTimeOffset.UtcNow.ToUniversalTime();
                 payment.ActualAmount = request.TransferAmount;
-                payment.TransactionId = request.ReferenceCode;
+                payment.TransactionId = sepayId;
 
                 if (payment.CourseId.HasValue)
                 {
-                    var studentId = await context.Student.AsNoTracking().Where(x => x.UserId == payment.UserId).Select(g => g.Id).FirstOrDefaultAsync();
+                    var studentId = await context.Student.AsNoTracking()
+                        .Where(x => x.UserId == payment.UserId)
+                        .Select(g => g.Id).FirstOrDefaultAsync();
+
                     if (studentId == Guid.Empty)
                     {
-                        await SendPaymentNotify(userId, false, "Đã nhận tiền nhưng không tìm thấy thông tin sinh viên để mở khóa học. Vui lòng báo Admin.");
+                        await SendPaymentNotify(userId, false, "Không tìm thấy thông tin sinh viên.");
                         return (false, "NOT_FOUND_STUDENT");
                     }
 
@@ -134,38 +138,35 @@ namespace School_Management.API.Repositories
                         Id = Guid.NewGuid(),
                         CourseId = payment.CourseId.Value,
                         StudentId = studentId,
-                        EnrolledAt = DateTimeOffset.UtcNow
+                        EnrolledAt = DateTimeOffset.UtcNow.ToUniversalTime()
                     });
                 }
                 else if (payment.FeeDetailId.HasValue)
                 {
                     var feeDetail = await context.FeeDetail.FirstOrDefaultAsync(x => x.Id == payment.FeeDetailId.Value);
-                    if (feeDetail == null)
+                    if (feeDetail != null)
                     {
-                        await SendPaymentNotify(userId, false, "Đã nhận tiền đóng học phí nhưng không tìm thấy chi tiết khoản phí. Vui lòng báo Admin.");
-                        return (false, "NOT_FOUND_FEE_DETAIL");
+                        feeDetail.AmountPaid = payment.ActualAmount;
+                        feeDetail.PaidAt = DateTimeOffset.UtcNow.ToUniversalTime();
+                        feeDetail.Status = "Đã đóng";
                     }
-                    feeDetail.AmountPaid = payment.ActualAmount;
-                    feeDetail.PaidAt = DateTimeOffset.UtcNow;
-                    feeDetail.Status = "Đã đóng";
                 }
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                await SendPaymentNotify(userId, true, "Thanh toán thành công! Chào mừng bạn bắt đầu học.");
+                await SendPaymentNotify(userId, true, "Thanh toán thành công!");
                 return (true, "SUCCESS");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                throw;
+                return (false, "INTERNAL_ERROR");
             }
         }
 
         private async Task SendPaymentNotify(string userId, bool isSuccess, string msg)
         {
-            // Bắn tin qua SignalR tới Group mang tên UserId
             await _hubContext.Clients.Group(userId).SendAsync("ReceivePaymentStatus", new
             {
                 status = isSuccess ? "Success" : "Error",
