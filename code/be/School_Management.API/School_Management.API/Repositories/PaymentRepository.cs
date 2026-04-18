@@ -85,7 +85,7 @@ namespace School_Management.API.Repositories
                 Bin = "970418",
                 OrderCode = payment.OrderCode,
                 PaymentId = payment.Id,
-                QrCodeUrl = $"https://qr.sepay.vn/img?bank=BIDV&acc=6201438366&template=compact&amount={payment.Amount}&des={payment.OrderCode}"
+                QrCodeUrl = $"https://qr.sepay.vn/img?bank=BIDV&acc=96247TUANUIT111&template=compact&amount={payment.Amount}&des={payment.OrderCode}"
             };
 
             return (result, "SUCCESS");
