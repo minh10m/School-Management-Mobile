@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using School_Management.API.Data;
@@ -11,9 +12,11 @@ using School_Management.API.Data;
 namespace School_Management.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260418071050_CreatePaymentTable")]
+    partial class CreatePaymentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -450,31 +453,6 @@ namespace School_Management.API.Migrations
                         {
                             t.HasCheckConstraint("CK_OrderIndex_CourseAssignment", "\"OrderIndex\" > 0");
                         });
-                });
-
-            modelBuilder.Entity("School_Management.API.Models.Domain.EnrollCourse", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("EnrolledAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("CourseId", "StudentId")
-                        .IsUnique();
-
-                    b.ToTable("EnrollCourse");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Event", b =>
@@ -1303,25 +1281,6 @@ namespace School_Management.API.Migrations
                     b.Navigation("Lesson");
                 });
 
-            modelBuilder.Entity("School_Management.API.Models.Domain.EnrollCourse", b =>
-                {
-                    b.HasOne("School_Management.API.Models.Domain.Course", "Course")
-                        .WithMany("EnrollCourses")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("School_Management.API.Models.Domain.Student", "Student")
-                        .WithMany("EnrollCourses")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("School_Management.API.Models.Domain.ExamScheduleDetail", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.ExamSchedule", "ExamSchedule")
@@ -1607,8 +1566,6 @@ namespace School_Management.API.Migrations
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Course", b =>
                 {
-                    b.Navigation("EnrollCourses");
-
                     b.Navigation("Lessons");
 
                     b.Navigation("Payments");
@@ -1648,8 +1605,6 @@ namespace School_Management.API.Migrations
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Student", b =>
                 {
-                    b.Navigation("EnrollCourses");
-
                     b.Navigation("ExamStudentAssignments");
 
                     b.Navigation("FeeDetails");

@@ -23,5 +23,6 @@ namespace School_Management.API.Models.Domain
 
         [ForeignKey("StudentId")]
         public Student Student { get; set; } = null!;
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }

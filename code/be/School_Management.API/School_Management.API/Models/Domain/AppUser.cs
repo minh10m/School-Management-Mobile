@@ -14,5 +14,6 @@ namespace School_Management.API.Models.Domain
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public Student? Student { get; set; }
         public Teacher? Teacher { get; set; }
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }
