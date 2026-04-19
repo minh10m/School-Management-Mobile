@@ -12,8 +12,8 @@ using School_Management.API.Data;
 namespace School_Management.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260413031308_Update_Course_Assignment_Table1")]
-    partial class Update_Course_Assignment_Table1
+    [Migration("20260419041512_ForceRenameToLessonAssignment")]
+    partial class ForceRenameToLessonAssignment
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -417,42 +417,29 @@ namespace School_Management.API.Migrations
                     b.ToTable("Course");
                 });
 
-            modelBuilder.Entity("School_Management.API.Models.Domain.LessonAssignment", b =>
+            modelBuilder.Entity("School_Management.API.Models.Domain.EnrollCourse", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("FileTitle")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("FileUrl")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
-
-                    b.Property<Guid>("LessonId")
+                    b.Property<Guid>("CourseId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("OrderIndex")
-                        .HasColumnType("integer");
+                    b.Property<DateTimeOffset>("EnrolledAt")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LessonId", "Title")
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("CourseId", "StudentId")
                         .IsUnique();
 
-                    b.ToTable("LessonAssignment", t =>
-                        {
-                            t.HasCheckConstraint("CK_OrderIndex_CourseAssignment", "\"OrderIndex\" > 0");
-                        });
+                    b.ToTable("EnrollCourse");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Event", b =>
@@ -613,6 +600,95 @@ namespace School_Management.API.Migrations
                     b.ToTable("ExamStudentAssignment");
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Fee", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid>("ClassYearId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("DueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SchoolYear")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassYearId", "SchoolYear", "Title")
+                        .IsUnique();
+
+                    b.ToTable("Fee", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Amount_Fee", "\"Amount\" > 0");
+
+                            t.HasCheckConstraint("CK_SchoolYear_Fee", "\"SchoolYear\" > 2000");
+                        });
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.FeeDetail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AmountDue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("AmountPaid")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid?>("FeeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("SchoolYear")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FeeId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("FeeDetail", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_AmountDue_Positive", "\"AmountDue\" >= 0");
+
+                            t.HasCheckConstraint("CK_AmountPaid_NotNegative", "\"AmountPaid\" >= 0");
+
+                            t.HasCheckConstraint("CK_Amount_FeeDetail", "\"AmountPaid\" <= \"AmountDue\"");
+                        });
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Lesson", b =>
                 {
                     b.Property<Guid>("Id")
@@ -637,6 +713,44 @@ namespace School_Management.API.Migrations
                     b.ToTable("Lesson", t =>
                         {
                             t.HasCheckConstraint("CK_OrderIndex_Lesson", "\"OrderIndex\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.LessonAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FileTitle")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonId", "Title")
+                        .IsUnique();
+
+                    b.ToTable("LessonAssignment", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_OrderIndex_CourseAssignment", "\"OrderIndex\" > 0");
                         });
                 });
 
@@ -677,6 +791,79 @@ namespace School_Management.API.Migrations
                             t.HasCheckConstraint("CK_Duration_LessonVideo", "\"Duration\" > 0");
 
                             t.HasCheckConstraint("CK_OrderIndex_LessonVideo", "\"OrderIndex\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ActualAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid?>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<Guid?>("FeeDetailId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("OrderCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("FeeDetailId");
+
+                    b.HasIndex("OrderCode")
+                        .IsUnique();
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique()
+                        .HasFilter("\"TransactionId\" IS NOT NULL");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Payment", t =>
+                        {
+                            t.HasCheckConstraint("CK_Amount_Payment", "\"Amount\" >= 0 AND \"ActualAmount\" >= 0");
                         });
                 });
 
@@ -844,6 +1031,23 @@ namespace School_Management.API.Migrations
                         {
                             t.HasCheckConstraint("CK_Time_Detail", "\"FinishTime\" > \"StartTime\"");
                         });
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.SchoolYearInfo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SchoolYear")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Term")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SchoolYearInfo");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Student", b =>
@@ -1091,15 +1295,23 @@ namespace School_Management.API.Migrations
                     b.Navigation("TeacherSubject");
                 });
 
-            modelBuilder.Entity("School_Management.API.Models.Domain.LessonAssignment", b =>
+            modelBuilder.Entity("School_Management.API.Models.Domain.EnrollCourse", b =>
                 {
-                    b.HasOne("School_Management.API.Models.Domain.Lesson", "Lesson")
-                        .WithMany("CourseAssignments")
-                        .HasForeignKey("LessonId")
+                    b.HasOne("School_Management.API.Models.Domain.Course", "Course")
+                        .WithMany("EnrollCourses")
+                        .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Lesson");
+                    b.HasOne("School_Management.API.Models.Domain.Student", "Student")
+                        .WithMany("EnrollCourses")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.ExamScheduleDetail", b =>
@@ -1146,6 +1358,34 @@ namespace School_Management.API.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Fee", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.ClassYear", "ClassYear")
+                        .WithMany("Fees")
+                        .HasForeignKey("ClassYearId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClassYear");
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.FeeDetail", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.Fee", "Fee")
+                        .WithMany("FeeDetails")
+                        .HasForeignKey("FeeId");
+
+                    b.HasOne("School_Management.API.Models.Domain.Student", "Student")
+                        .WithMany("FeeDetails")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Fee");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Lesson", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.Course", "Course")
@@ -1157,6 +1397,17 @@ namespace School_Management.API.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.LessonAssignment", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.Lesson", "Lesson")
+                        .WithMany("LessonAssignments")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.LessonVideo", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.Lesson", "Lesson")
@@ -1166,6 +1417,29 @@ namespace School_Management.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Lesson");
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.Payment", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.Course", "Course")
+                        .WithMany("Payments")
+                        .HasForeignKey("CourseId");
+
+                    b.HasOne("School_Management.API.Models.Domain.FeeDetail", "FeeDetail")
+                        .WithMany("Payments")
+                        .HasForeignKey("FeeDetailId");
+
+                    b.HasOne("School_Management.API.Models.Domain.AppUser", "User")
+                        .WithMany("Payments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("FeeDetail");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.RefreshToken", b =>
@@ -1309,6 +1583,8 @@ namespace School_Management.API.Migrations
 
             modelBuilder.Entity("School_Management.API.Models.Domain.AppUser", b =>
                 {
+                    b.Navigation("Payments");
+
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("Student");
@@ -1325,6 +1601,8 @@ namespace School_Management.API.Migrations
                 {
                     b.Navigation("Assignments");
 
+                    b.Navigation("Fees");
+
                     b.Navigation("Schedules");
 
                     b.Navigation("StudentClassYears");
@@ -1332,7 +1610,11 @@ namespace School_Management.API.Migrations
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Course", b =>
                 {
+                    b.Navigation("EnrollCourses");
+
                     b.Navigation("Lessons");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.ExamSchedule", b =>
@@ -1345,9 +1627,19 @@ namespace School_Management.API.Migrations
                     b.Navigation("ExamStudentAssignments");
                 });
 
+            modelBuilder.Entity("School_Management.API.Models.Domain.Fee", b =>
+                {
+                    b.Navigation("FeeDetails");
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.FeeDetail", b =>
+                {
+                    b.Navigation("Payments");
+                });
+
             modelBuilder.Entity("School_Management.API.Models.Domain.Lesson", b =>
                 {
-                    b.Navigation("CourseAssignments");
+                    b.Navigation("LessonAssignments");
 
                     b.Navigation("LessonVideos");
                 });
@@ -1359,7 +1651,11 @@ namespace School_Management.API.Migrations
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Student", b =>
                 {
+                    b.Navigation("EnrollCourses");
+
                     b.Navigation("ExamStudentAssignments");
+
+                    b.Navigation("FeeDetails");
 
                     b.Navigation("Results");
 

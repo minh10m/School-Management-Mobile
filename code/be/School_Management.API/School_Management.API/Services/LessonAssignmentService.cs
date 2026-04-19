@@ -5,17 +5,17 @@ using School_Management.API.Repositories;
 
 namespace School_Management.API.Services
 {
-    public class CourseAssignmentService : ICourseAssignmentService
+    public class LessonAssignmentService : ILessonAssignmentService
     {
-        private readonly ICourseAssignmentRepository courseAssignmentRepository;
+        private readonly ILessonAssignmentRepository lessonAssignmentRepository;
 
-        public CourseAssignmentService(ICourseAssignmentRepository courseAssignmentRepository)
+        public LessonAssignmentService(ILessonAssignmentRepository lessonAssignmentRepository)
         {
-            this.courseAssignmentRepository = courseAssignmentRepository;
+            this.lessonAssignmentRepository = lessonAssignmentRepository;
         }
-        public async Task<CourseAssignmentResponse> CreateCourseAssignment(CourseAssignmentRequest request)
+        public async Task<LessonAssignmentResponse> CreateLessonAssignment(LessonAssignmentRequest request)
         {
-            var (result, message) = await courseAssignmentRepository.CreateCourseAssignment(request);
+            var (result, message) = await lessonAssignmentRepository.CreateLessonAssignment(request);
             return message switch
             {
                 "NOT_FOUND_LESSON" => throw new NotFoundException("Không tìm thấy bài học này"),
@@ -25,9 +25,9 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<PagedResponse<CourseAssignmentResponse>> GetAllCourseAssigment(CourseAssignmentFilterRequest request)
+        public async Task<PagedResponse<LessonAssignmentResponse>> GetAllLessonAssignment(LessonAssignmentFilterRequest request)
         {
-            var (result, message) = await courseAssignmentRepository.GetAllCourseAssigment(request);
+            var (result, message) = await lessonAssignmentRepository.GetAllLessonAssignment(request);
             return message switch
             {
                 "NOT_FOUND_LESSON" => throw new NotFoundException("Không tìm thấy bài học này"),
@@ -36,9 +36,9 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<CourseAssignmentResponse> GetCourseAssignmentById(Guid courseAssignmentId)
+        public async Task<LessonAssignmentResponse> GetLessonAssignmentById(Guid lessonAssignmentId)
         {
-            var (result, message) = await courseAssignmentRepository.GetCourseAssignmentById(courseAssignmentId);
+            var (result, message) = await lessonAssignmentRepository.GetLessonAssignmentById(lessonAssignmentId);
             return message switch
             {
                 "NOT_FOUND_COURSE_ASSIGNMENT" => throw new NotFoundException("Không tìm thấy bài tập của bài học này"),
@@ -47,9 +47,9 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<CourseAssignmentResponse> UpdateCourseAssignment(UpdateCourseAssignmentRequest request, Guid courseAssignmentId)
+        public async Task<LessonAssignmentResponse> UpdateLessonAssignment(UpdateLessonAssignmentRequest request, Guid lessonAssignmentId)
         {
-            var (result, message) = await courseAssignmentRepository.UpdateCourseAssignment(request, courseAssignmentId);
+            var (result, message) = await lessonAssignmentRepository.UpdateLessonAssignment(request, lessonAssignmentId);
             return message switch
             {
                 "NOT_FOUND_COURSE_ASSIGNMENT" => throw new NotFoundException("Không tìm thấy bài tập của bài học này"),

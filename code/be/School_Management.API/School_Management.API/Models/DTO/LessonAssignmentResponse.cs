@@ -1,19 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace School_Management.API.Models.Domain
+﻿namespace School_Management.API.Models.DTO
 {
-    public class CourseAssignment
+    public class LessonAssignmentResponse
     {
-        [Key]
         public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string FileTitle { get; set; } = string.Empty;
         public string FileUrl { get; set; } = string.Empty;
         public Guid LessonId { get; set; }
+        public string LessonName { get; set; } = string.Empty;
         public int OrderIndex { get; set; }
-        //Navigation properties
-        [ForeignKey("LessonId")]
-        public Lesson Lesson { get; set; } = null!;
     }
 }

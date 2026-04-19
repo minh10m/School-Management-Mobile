@@ -12,12 +12,12 @@ namespace School_Management.API.Migrations
         {
             migrationBuilder.RenameColumn(
                 name: "fileUrl",
-                table: "CourseAssignment",
+                table: "LessonAssignment",
                 newName: "FileUrl");
 
             migrationBuilder.RenameColumn(
                 name: "Body",
-                table: "CourseAssignment",
+                table: "LessonAssignment",
                 newName: "FileTitle");
         }
 
@@ -26,12 +26,12 @@ namespace School_Management.API.Migrations
         {
             migrationBuilder.RenameColumn(
                 name: "FileUrl",
-                table: "CourseAssignment",
+                table: "LessonAssignment",
                 newName: "fileUrl");
 
             migrationBuilder.RenameColumn(
                 name: "FileTitle",
-                table: "CourseAssignment",
+                table: "LessonAssignment",
                 newName: "Body");
         }
     }
