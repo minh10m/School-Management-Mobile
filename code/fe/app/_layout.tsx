@@ -15,6 +15,7 @@ import {
   Poppins_700Bold,
 } from '@expo-google-fonts/poppins';
 import { useAuthStore } from '../store/authStore';
+import { useConfigStore } from '../store/configStore';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -44,10 +45,14 @@ export default function RootLayout() {
   });
 
   const { loadAuthFromStorage } = useAuthStore();
+  const { loadConfig } = useConfigStore();
 
   useEffect(() => {
     if (loaded) {
-      loadAuthFromStorage().finally(() => {
+      Promise.all([
+        loadAuthFromStorage(),
+        loadConfig()
+      ]).finally(() => {
         SplashScreen.hideAsync();
       });
     }
