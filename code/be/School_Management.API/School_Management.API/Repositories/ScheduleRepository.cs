@@ -223,6 +223,7 @@ namespace School_Management.API.Repositories
                                                       FinishTime = g.FinishTime,
                                                       StartTime = g.StartTime,
                                                       SubjectName = g.TeacherSubject.Subject.SubjectName,
+                                                      SubjectId = g.TeacherSubject.SubjectId,
                                                       ClassName = g.Schedule.ClassYear.ClassName
                                                   })
                                                   .OrderBy(x => x.DayOfWeek)
