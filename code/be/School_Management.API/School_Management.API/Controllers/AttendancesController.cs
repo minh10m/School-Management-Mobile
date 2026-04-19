@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
@@ -65,6 +65,23 @@ namespace School_Management.API.Controllers
             });
 
             var result = await attendanceService.GetStudentAttendance(request, Guid.Parse(userId));
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [ValidateModel]
+        [Route("weekly")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> GetWeeklyAttendance([FromQuery] WeeklyAttendanceRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+
+            var result = await attendanceService.GetWeeklyAttendance(request, Guid.Parse(userId));
             return Ok(result);
         }
     }

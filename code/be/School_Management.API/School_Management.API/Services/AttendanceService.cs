@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
@@ -117,6 +117,14 @@ namespace School_Management.API.Services
 
             var result = await attendanceRepository.GetStudentAttendance(request, studentId);
             return result;
+        }
+
+        public async Task<List<WeeklyAttendanceResponse>> GetWeeklyAttendance(WeeklyAttendanceRequest request, Guid userId)
+        {
+            var isHomeroom = await CheckHomeRoomTeacher(request.ClassYearId, userId);
+            if (!isHomeroom) throw new ForbiddenException("Bạn không phải giáo viên chủ nhiệm của lớp học");
+
+            return await attendanceRepository.GetWeeklyAttendance(request);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.DTO;
 
@@ -62,6 +62,43 @@ namespace School_Management.API.Repositories
                 TotalAbsent = absent,
                 StudentAttendances = details 
             };
+        }
+
+        public async Task<List<WeeklyAttendanceResponse>> GetWeeklyAttendance(WeeklyAttendanceRequest request)
+        {
+            var endDate = request.StartDate.AddDays(7);
+            var students = await context.StudentClassYear
+                                        .AsNoTracking()
+                                        .Where(x => x.ClassYearId == request.ClassYearId)
+                                        .Select(g => new WeeklyAttendanceResponse
+                                        {
+                                            StudentId = g.StudentId,
+                                            StudentName = g.Student != null && g.Student.User != null ? g.Student.User.FullName : "N/A",
+                                            Details = g.Attendances
+                                                              .Where(x => x.Date >= request.StartDate && x.Date < endDate)
+                                                              .Select(a => new StudentAttendanceInfo
+                                                              {
+                                                                  Date = a.Date,
+                                                                  Status = a.Status,
+                                                                  Note = a.Note
+                                                              })
+                                                              .OrderBy(a => a.Date)
+                                                              .ToList()
+                                        })
+                                        .OrderBy(x => x.StudentName)
+                                        .ToListAsync();
+
+            foreach (var student in students)
+            {
+                if (student.Details != null)
+                {
+                    student.TotalPresent = student.Details.Count(x => x.Status == "Có mặt" || x.Status == "Đi trễ");
+                    student.TotalAbsent = student.Details.Count(x => x.Status == "Vắng mặt");
+                    student.TotalLate = student.Details.Count(x => x.Status == "Đi trễ");
+                }
+            }
+
+            return students;
         }
     }
 }

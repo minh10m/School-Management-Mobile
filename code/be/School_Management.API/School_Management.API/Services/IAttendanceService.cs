@@ -1,4 +1,4 @@
-﻿using School_Management.API.Models.DTO;
+using School_Management.API.Models.DTO;
 
 namespace School_Management.API.Services
 {
@@ -9,5 +9,6 @@ namespace School_Management.API.Services
 
         public Task<List<ClassAttendanceResponse>> GetClassAttendance(ClassAttendanceRequest request, Guid userId);
         public Task<StudentAttendanceResponse> GetStudentAttendance(StudentAttedanceRequest request, Guid userId);
+        public Task<List<WeeklyAttendanceResponse>> GetWeeklyAttendance(WeeklyAttendanceRequest request, Guid userId);
     }
 }
