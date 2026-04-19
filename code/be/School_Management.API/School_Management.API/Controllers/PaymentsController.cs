@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
@@ -40,6 +40,37 @@ namespace School_Management.API.Controllers
                 message = "Hãy thanh toán đơn hàng này",
                 data = result
             }); 
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllPayments()
+        {
+            var result = await paymentService.GetAllPayments();
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
+
+        [HttpGet("my")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetMyPayments()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+
+            var result = await paymentService.GetMyPayments(Guid.Parse(userId));
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
         }
 
         [HttpPost]
