@@ -3,22 +3,24 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect, useCallback } from 'react';
-import { feeDetailService } from '../../../services/fee.service';
-import { FeeDetailResponse } from '../../../types/fee';
-import { getErrorMessage } from '../../../utils/error';
+import { feeDetailService } from "../../../services/fee.service";
+import { useConfigStore } from "../../../store/configStore";
+import { FeeDetailResponse } from "../../../types/fee";
+import { getErrorMessage } from "../../../utils/error";
 
 export default function StudentFeesScreen() {
   const [fees, setFees] = useState<FeeDetailResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { schoolYear } = useConfigStore();
   const insets = useSafeAreaInsets();
 
   const loadFees = useCallback(async () => {
     try {
       setLoading(true);
       const response = await feeDetailService.getMyFees({
-        schoolYear: 2026, // Matching the standard year used in other modules
-        pageSize: 50
+        schoolYear: schoolYear,
+        pageSize: 50,
       });
       setFees(response.items);
     } catch (err) {

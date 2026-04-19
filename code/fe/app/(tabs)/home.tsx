@@ -14,6 +14,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import SideMenu from "@/components/SideMenu";
 import { assignmentService } from "../../services/assignment.service";
 import { eventService } from "../../services/event.service";
+import { feeDetailService } from "../../services/fee.service";
+import { useConfigStore } from "../../store/configStore";
 import { useAuthStore } from "../../store/authStore";
 import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
 
@@ -21,26 +23,42 @@ export default function HomeScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);
   const { userInfo } = useAuthStore();
   const firstName = userInfo?.fullName?.split(" ").at(-1) ?? "Học sinh";
+  const { schoolYear, term } = useConfigStore();
 
   const [events, setEvents] = useState<any[]>([]);
   const [eventLoading, setEventLoading] = useState(false);
   const [assignments, setAssignments] = useState<any[]>([]);
   const [assignmentLoading, setAssignmentLoading] = useState(false);
+  const [unpaidFeesCount, setUnpaidFeesCount] = useState(0);
 
   useEffect(() => {
     fetchEvents();
     fetchAssignments();
-  }, []);
+    fetchUnpaidFees();
+  }, [schoolYear]);
 
   const fetchEvents = async () => {
     try {
       setEventLoading(true);
-      const res = await eventService.getEvents({ SchoolYear: 2026, Term: 1 });
+      const res = await eventService.getEvents({ SchoolYear: schoolYear, Term: term });
       setEvents(res.items || []);
     } catch (err) {
       console.error("Error fetching events:", err);
     } finally {
       setEventLoading(false);
+    }
+  };
+
+  const fetchUnpaidFees = async () => {
+    try {
+      const res = await feeDetailService.getMyFees({
+        schoolYear: schoolYear,
+        pageSize: 100,
+      });
+      const unpaid = res.items.filter((f) => f.status !== "paid").length;
+      setUnpaidFeesCount(unpaid);
+    } catch (err) {
+      console.error("Error fetching fees for dashboard:", err);
     }
   };
 
@@ -93,10 +111,37 @@ export default function HomeScreen() {
   const lastTitlePart = eventTitleParts.slice(1).join(" ");
 
   const STUDENT_STATS = [
-    { label: "Điểm TB", value: "8.5", icon: "stats-chart", color: "#136ADA", bg: "bg-blue-50" },
-    { label: "Chuyên cần", value: "98%", icon: "calendar-clear", color: "#10B981", bg: "bg-emerald-50" },
-    { label: "Bài tập nộp", value: (Array.isArray(assignments) ? assignments : []).filter(a => a.status === 'Submitted').length.toString().padStart(2, '0'), icon: "document-text", color: "#A855F7", bg: "bg-purple-50" },
-    { label: "Sự kiện", value: (events?.length || 0).toString().padStart(2, '0'), icon: "megaphone", color: "#F97316", bg: "bg-orange-50" },
+    {
+      label: "Điểm TB",
+      value: "8.5",
+      icon: "stats-chart",
+      color: "#136ADA",
+      bg: "bg-blue-50",
+    },
+    {
+      label: "Phí chưa đóng",
+      value: unpaidFeesCount.toString().padStart(2, "0"),
+      icon: "cash",
+      color: unpaidFeesCount > 0 ? "#EF4444" : "#10B981",
+      bg: unpaidFeesCount > 0 ? "bg-red-50" : "bg-emerald-50",
+    },
+    {
+      label: "Bài tập",
+      value: (Array.isArray(assignments) ? assignments : [])
+        .filter((a) => a.status === "Submitted")
+        .length.toString()
+        .padStart(2, "0"),
+      icon: "document-text",
+      color: "#A855F7",
+      bg: "bg-purple-50",
+    },
+    {
+      label: "Sự kiện",
+      value: (events?.length || 0).toString().padStart(2, "0"),
+      icon: "megaphone",
+      color: "#F97316",
+      bg: "bg-orange-50",
+    },
   ];
 
   const academicsData = [
@@ -148,6 +193,13 @@ export default function HomeScreen() {
       icon: "file-tray-full-outline",
       color: "bg-indigo-100",
       iconColor: "#4F46E5",
+    },
+    {
+      id: "9",
+      title: "Giao dịch",
+      icon: "receipt-outline",
+      color: "bg-cyan-100",
+      iconColor: "#0891B2",
     },
   ];
 
@@ -224,6 +276,8 @@ export default function HomeScreen() {
                     router.push("/(tabs)/attendance" as any);
                   } else if (item.title === "Khóa học") {
                     router.push("/student/courses" as any);
+                  } else if (item.title === "Giao dịch") {
+                    router.push("/student/payment-history" as any);
                   }
                 }}
               >

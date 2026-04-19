@@ -12,11 +12,11 @@ import {
 } from "../types/fee";
 import apiClient from "./apiClient";
 
-// ─── FEE SERVICE ──────────────────────────────────────────────────────────────
+// ─── FEE SERVICE (ADMIN) ───────────────────────────────────────────────────────
 
 export const feeService = {
   /**
-   * Admin lấy danh sách phí trong năm học
+   * Admin lấy danh sách phí tổng quát
    * GET /api/fees
    */
   getFees: async (params: FeeFilterRequest): Promise<PagedResponse<FeeResponse>> => {
@@ -25,16 +25,7 @@ export const feeService = {
   },
 
   /**
-   * Admin lấy thông tin chi tiết của một loại phí theo ID
-   * GET /api/fees/{id}
-   */
-  getFeeById: async (feeId: string): Promise<FeeResponse> => {
-    const response = await apiClient.get<ApiResponse<FeeResponse>>(`/fees/${feeId}`);
-    return response.data.data;
-  },
-
-  /**
-   * Admin xem danh sách học sinh và trạng thái đóng phí của một loại phí
+   * Admin xem danh sách chi tiết các khoản phí (trạng thái đóng tiền của từng HS)
    * GET /api/fees/details
    */
   getAllFeeDetails: async (params: FeeDetailFilterRequest): Promise<PagedResponse<FeeDetailResponse>> => {
@@ -43,7 +34,7 @@ export const feeService = {
   },
 
   /**
-   * Admin tạo phí cho một lớp
+   * Admin tạo một khoản phí mới (theo lớp/toàn trường)
    * POST /api/fees
    */
   createFee: async (payload: CreateFeeRequest): Promise<FeeResponse> => {
@@ -52,7 +43,7 @@ export const feeService = {
   },
 
   /**
-   * Admin sửa thông tin phí
+   * Admin sửa thông tin phí tổng quát
    * PATCH /api/fees/{id}
    */
   updateFee: async (feeId: string, payload: UpdateFeeRequest): Promise<FeeResponse> => {
@@ -61,11 +52,11 @@ export const feeService = {
   },
 };
 
-// ─── FEE DETAIL SERVICE ────────────────────────────────────────────────────────
+// ─── FEE DETAIL SERVICE (STUDENT & ADMIN) ──────────────────────────────────────
 
 export const feeDetailService = {
   /**
-   * Học sinh xem danh sách các loại phí của mình
+   * Sinh viên xem danh sách các khoản phí của cá nhân mình
    * GET /api/fee-details/my
    */
   getMyFees: async (params: MyFeeDetailFilterRequest): Promise<PagedResponse<FeeDetailResponse>> => {
@@ -74,7 +65,7 @@ export const feeDetailService = {
   },
 
   /**
-   * Xem chi tiết một phí theo id
+   * Lấy thông tin chi tiết của một khoản phí cụ thể theo ID
    * GET /api/fee-details/{id}
    */
   getFeeDetailById: async (feeDetailId: string): Promise<FeeDetailResponse> => {
@@ -83,7 +74,7 @@ export const feeDetailService = {
   },
 
   /**
-   * Admin tạo phí riêng lẻ cho một học sinh
+   * Admin tạo phí riêng lẻ cho một học sinh cụ thể
    * POST /api/fee-details
    */
   createFeeDetail: async (payload: FeeDetailRequest): Promise<FeeDetailResponse> => {
@@ -92,7 +83,7 @@ export const feeDetailService = {
   },
 
   /**
-   * Admin miễn giảm phí cho học sinh (thay đổi amountDue)
+   * Admin cập nhật thông tin phí chi tiết (miễn giảm, điều chỉnh số tiền)
    * PATCH /api/fee-details/{id}
    */
   updateFeeDetail: async (

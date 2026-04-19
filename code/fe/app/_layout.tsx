@@ -44,19 +44,22 @@ export default function RootLayout() {
     'Poppins-Bold': Poppins_700Bold,
   });
 
-  const { loadAuthFromStorage } = useAuthStore();
+  const { loadAuthFromStorage, accessToken } = useAuthStore();
   const { loadConfig } = useConfigStore();
 
   useEffect(() => {
     if (loaded) {
-      Promise.all([
-        loadAuthFromStorage(),
-        loadConfig()
-      ]).finally(() => {
+      loadAuthFromStorage().finally(() => {
         SplashScreen.hideAsync();
       });
     }
   }, [loaded]);
+
+  useEffect(() => {
+    if (accessToken) {
+      loadConfig();
+    }
+  }, [accessToken]);
 
   if (!loaded) {
     return null;

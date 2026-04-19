@@ -146,6 +146,13 @@ export default function AdminDashboard() {
       route: "/admin/events",
     },
     {
+      label: "Giao dịch",
+      icon: "card-outline",
+      color: "bg-cyan-100",
+      iconColor: "#0891B2",
+      route: "/admin/payments",
+    },
+    {
       label: "Khóa học",
       icon: "journal-outline",
       color: "bg-rose-100",
