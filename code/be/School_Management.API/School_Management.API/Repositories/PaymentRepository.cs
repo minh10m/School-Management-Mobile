@@ -1,4 +1,4 @@
-﻿using CloudinaryDotNet;
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
@@ -18,6 +18,23 @@ namespace School_Management.API.Repositories
             this.context = context;
             _hubContext = hubContext;
         }
+        public async Task<IEnumerable<School_Management.API.Models.Domain.Payment>> GetMyPayments(Guid userId)
+        {
+            return await context.Payment
+                .Include(p => p.User)
+                .Where(p => p.UserId == userId)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<School_Management.API.Models.Domain.Payment>> GetAllPayments()
+        {
+            return await context.Payment
+                .Include(p => p.User)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task<(PaymentResponse? data, string message)> PayTheBill(PaymentRequest request, Guid userId)
         {
             if (request.FeeDetailId.HasValue && request.CourseId.HasValue) return (null, "BOTH_HAVE_VALUE");
