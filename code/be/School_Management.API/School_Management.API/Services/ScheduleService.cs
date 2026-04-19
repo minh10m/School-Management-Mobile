@@ -200,6 +200,7 @@ namespace School_Management.API.Services
             return await scheduleRepository.GetAllScheduleForAdmin(request);   
         }
 
+        public async Task<List<ScheduleDetailResponse>> GetScheduleDetailByScheduleId(Guid scheduleId)
         {
             var result = await scheduleRepository.GetScheduleDetailByScheduleId(scheduleId);
             if (result == null) throw new NotFoundException("Lịch học tổng quát không tồn tại");
