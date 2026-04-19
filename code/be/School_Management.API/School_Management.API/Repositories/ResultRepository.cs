@@ -138,7 +138,17 @@ namespace School_Management.API.Repositories
                 .Select(x => new { x.HomeRoomId, x.SchoolYear })
                 .FirstOrDefaultAsync(); if (classYearInfo == null) return (null, "NOT_FOUND_CLASS");
 
-            if (classYearInfo.HomeRoomId != teacherId) return (null, "NOT_HOMEROOM_TEACHER");
+            var isHomeroomTeacher = classYearInfo.HomeRoomId == teacherId;
+            if (!isHomeroomTeacher)
+            {
+                var isTeachingThisClass = await context.ScheduleDetail.AsNoTracking()
+                    .AnyAsync(x => x.Schedule.ClassYearId == classYearId
+                                && x.Schedule.IsActive == true
+                                && x.Schedule.SchoolYear == classYearInfo.SchoolYear
+                                && x.Schedule.Term == request.Term
+                                && x.TeacherSubject.TeacherId == teacherId);
+                if (!isTeachingThisClass) return (null, "NOT_A_TEACHER_OF_THIS_CLASS");
+            }
 
             var studentIds = await context.StudentClassYear.AsNoTracking().Where(x => x.ClassYearId == classYearId)
                                                            .Select(g => g.StudentId)

@@ -48,7 +48,7 @@ namespace School_Management.API.Services
                 "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không là giáo viên"),
                 "NOT_FOUND_CLASS" => throw new NotFoundException("Không tìm thấy thông tin lớp học"),
                 "EMPTY_LIST" => throw new NotFoundException("Lớp chưa có học sinh"),
-                "NOT_HOMEROOM_TEACHER" => throw new ForbiddenException("Bạn không phải là giáo viên chủ nhiệm của lớp này"),
+                "NOT_A_TEACHER_OF_THIS_CLASS" => throw new ForbiddenException("Bạn không được phân công dạy lớp này"),
                 "SUCCESS" => result!,
                 _ => throw new Exception("Lỗi không xác định")
             };
