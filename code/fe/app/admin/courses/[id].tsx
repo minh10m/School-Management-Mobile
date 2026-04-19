@@ -193,7 +193,12 @@ export default function AdminCourseDetailScreen() {
            ) : (
              <View className="gap-3">
                {lessons.map((lesson, index) => (
-                 <View key={lesson.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex-row items-center gap-4">
+                 <TouchableOpacity 
+                    key={lesson.id} 
+                    onPress={() => router.push(`/admin/lessons/${lesson.id}` as any)}
+                    activeOpacity={0.7}
+                    className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex-row items-center gap-4"
+                 >
                     <View className="w-10 h-10 rounded-xl bg-blue-50 items-center justify-center">
                        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA]">{index + 1}</Text>
                     </View>
@@ -201,12 +206,10 @@ export default function AdminCourseDetailScreen() {
                        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-sm" numberOfLines={1}>
                          {lesson.lessonName}
                        </Text>
-                       <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px]">
-                         BÀI HỌC
-                       </Text>
+
                     </View>
                     <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
-                 </View>
+                 </TouchableOpacity>
                ))}
              </View>
            )}
