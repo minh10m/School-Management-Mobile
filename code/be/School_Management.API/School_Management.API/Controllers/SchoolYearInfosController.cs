@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
@@ -48,7 +48,7 @@ namespace School_Management.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> GetSchoolYearInfo()
         {
             var result = await schoolYearInfoService.GetSchoolYearInfo();
