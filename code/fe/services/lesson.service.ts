@@ -2,6 +2,7 @@ import {
   CreateLessonAssignmentPayload,
   CreateLessonPayload,
   CreateLessonVideoPayload,
+  LessonAssignmentFilterRequest,
   LessonAssignmentResponse,
   LessonFilterRequest,
   LessonResponse,
@@ -111,9 +112,9 @@ export const lessonAssignmentService = {
    * Lấy danh sách bài tập theo lessonId
    * GET /lesson-assignments
    */
-  getLessonAssignments: async (lessonId: string): Promise<LessonAssignmentResponse[]> => {
-    const response = await apiClient.get<ApiResponse<LessonAssignmentResponse[]>>("/lesson-assignments", {
-      params: { lessonId },
+  getLessonAssignments: async (params: LessonAssignmentFilterRequest): Promise<PagedResponse<LessonAssignmentResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<LessonAssignmentResponse>>>("/lesson-assignments", {
+      params,
     });
     return response.data.data;
   },

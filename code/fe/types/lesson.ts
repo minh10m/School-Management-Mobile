@@ -65,24 +65,34 @@ export interface UpdateLessonVideoPayload {
 
 // ─── LessonAssignment ─────────────────────────────────────────────────────────
 
+export interface LessonAssignmentFilterRequest {
+  lessonId: string;
+  pageNumber?: number;
+  pageSize?: number;
+}
+
 export interface LessonAssignmentResponse {
   id: string;
   title: string;
-  body: string;
-  fileUrl: string | null;
+  fileUrl: string;
+  fileTitle: string;
   lessonId: string;
+  lessonName: string;
+  orderIndex: number;
 }
 
 export interface CreateLessonAssignmentPayload {
   title: string;
-  body: string;
   fileUrl?: string;
+  fileTitle?: string;
   lessonId: string;
+  orderIndex: number;
 }
 
 export interface UpdateLessonAssignmentPayload {
-  title?: string;
-  body?: string;
+  title: string;
   fileUrl?: string;
+  fileTitle?: string;
+  orderIndex: number;
 }
 
