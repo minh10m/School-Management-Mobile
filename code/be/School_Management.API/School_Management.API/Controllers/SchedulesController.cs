@@ -118,8 +118,7 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetActiveScheduleByClassYearId([FromRoute] Guid classYearId, [FromQuery] int term, [FromQuery] int schoolYear)
         {
             var result = await scheduleService.GetActiveScheduleByClassYearId(classYearId, term, schoolYear);
-            if (result == null) return NotFound(new { Message = "Không tìm thấy lịch học cho lớp này." });
-            return Ok(result);
+            return Ok(result ?? new List<ScheduleDetailResponse>());
         }
     }
 }

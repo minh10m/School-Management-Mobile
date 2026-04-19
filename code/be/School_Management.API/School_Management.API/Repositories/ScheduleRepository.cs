@@ -327,7 +327,7 @@ namespace School_Management.API.Repositories
                                           .Where(x => x.ClassYearId == classYearId && x.Term == term && x.SchoolYear == schoolYear && x.IsActive == true)
                                           .Select(x => x.Id)
                                           .FirstOrDefaultAsync();
-            if (scheduleId == Guid.Empty) return null;
+            if (scheduleId == Guid.Empty) return new List<ScheduleDetailResponse>();
             return await GetScheduleDetailByScheduleId(scheduleId);
         }
     }
