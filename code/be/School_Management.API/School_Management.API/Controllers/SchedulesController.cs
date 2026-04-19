@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -110,6 +110,15 @@ namespace School_Management.API.Controllers
         public async Task<IActionResult> GetScheduleDetailByScheduleId([FromRoute] Guid scheduleId)
         {
             var result = await scheduleService.GetScheduleDetailByScheduleId(scheduleId);
+            return Ok(result);
+        }
+        [HttpGet]
+        [Route("class/{classYearId}/active")]
+        [Authorize]
+        public async Task<IActionResult> GetActiveScheduleByClassYearId([FromRoute] Guid classYearId, [FromQuery] int term, [FromQuery] int schoolYear)
+        {
+            var result = await scheduleService.GetActiveScheduleByClassYearId(classYearId, term, schoolYear);
+            if (result == null) return NotFound(new { Message = "Không tìm thấy lịch học cho lớp này." });
             return Ok(result);
         }
     }

@@ -319,6 +319,15 @@ namespace School_Management.API.Repositories
             }
 
             return scheduleDetailList;
+ 
+        public async Task<List<ScheduleDetailResponse>> GetActiveScheduleByClassYearId(Guid classYearId, int term, int schoolYear)
+        {
+            var scheduleId = await context.Schedule
+                                          .Where(x => x.ClassYearId == classYearId && x.Term == term && x.SchoolYear == schoolYear && x.IsActive == true)
+                                          .Select(x => x.Id)
+                                          .FirstOrDefaultAsync();
+            if (scheduleId == Guid.Empty) return null;
+            return await GetScheduleDetailByScheduleId(scheduleId);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using School_Management.API.Models.DTO;
+using School_Management.API.Models.DTO;
 
 namespace School_Management.API.Services
 {
@@ -13,6 +13,7 @@ namespace School_Management.API.Services
         public Task<bool> ValidateData(PostUpdateScheduleDetailRequest request, Guid scheduleId, Guid? currentDetailId = null);
         public Task<PagedResponse<ScheduleResponse>> GetAllScheduleForAdmin(ScheduleFilterRequest request);
         public Task<List<ScheduleDetailResponse>> GetScheduleDetailByScheduleId(Guid scheduleId);
+        public Task<List<ScheduleDetailResponse>> GetActiveScheduleByClassYearId(Guid classYearId, int term, int schoolYear);
 
     }
 }
