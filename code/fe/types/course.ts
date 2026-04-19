@@ -1,18 +1,20 @@
+import { BaseRequestSecond } from "./common";
+
 export type CourseStatus = 'pending' | 'approved' | 'rejected';
 
 // ─── Response Types ────────────────────────────────────────────────────────────
 
 export interface CourseResponse {
-  courseId: string;
+  id: string;
   courseName: string;
   price: number;
   teacherSubjectId: string;
-  status: CourseStatus;
+  teacherName: string;
+  subjectName: string;
+  status: string;
   createdAt: string;
   publishedAt: string | null;
   description: string;
-  teacherName: string;
-  subjectName: string;
 }
 
 /** Dành cho học sinh xem khóa học đã đăng ký */
@@ -23,8 +25,20 @@ export interface EnrolledCourseResponse extends CourseResponse {
 
 // ─── Query Params ──────────────────────────────────────────────────────────────
 
-export interface GetCoursesParams {
-  status?: CourseStatus; // 'pending' cho admin | 'approved' cho student/teacher
+export interface CourseFilterRequestAdmin extends BaseRequestSecond {
+  status?: string;
+  courseName?: string;
+  subjectId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+export interface CourseFilterRequestTeacherAndStudent extends BaseRequestSecond {
+  courseName?: string;
+}
+
+export interface MyCourseFilterRequest extends BaseRequestSecond {
+  courseName?: string;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────
@@ -32,18 +46,18 @@ export interface GetCoursesParams {
 export interface CreateCoursePayload {
   courseName: string;
   price: number;
-  teacherSubjectId: string;
+  subjectId: string;
   description: string;
-  // status không được truyền vào - mặc định 'pending'
 }
 
 export interface UpdateCoursePayload {
-  courseName?: string;
-  price?: number;
-  teacherSubjectId?: string;
-  description?: string;
+  courseName: string;
+  price: number;
+  subjectId: string;
+  description: string;
 }
 
 export interface UpdateCourseStatusPayload {
-  status: CourseStatus;
+  status: string;
 }
+

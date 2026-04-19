@@ -1,18 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { scheduleService } from "../../services/schedule.service";
 import { ScheduleDetailItem } from "../../types/schedule";
 
 // dayOfWeek: 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 7=Sun
-const DAY_LABELS = ["Th 2", "Th 3", "Th 4", "Th 5", "Th 6", "Th 7", "CN"];
-const DAY_FULL = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
+const DAY_LABELS = ["Th 2", "Th 3", "Th 4", "Th 5", "Th 6"];
+const DAY_FULL = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu"];
 
 const SUBJECT_COLORS = [
-  "bg-purple-100", "bg-cyan-100", "bg-blue-100",
-  "bg-red-100", "bg-green-100", "bg-yellow-100", "bg-pink-100",
+  "bg-purple-100",
+  "bg-cyan-100",
+  "bg-blue-100",
+  "bg-red-100",
+  "bg-green-100",
+  "bg-yellow-100",
+  "bg-pink-100",
 ];
 
 function subjectColor(subject: string) {
@@ -42,7 +53,10 @@ export default function TimetableTab() {
   const loadSchedule = async () => {
     try {
       setLoading(true);
-      const data = await scheduleService.getMyClassSchedule({ Term: term, SchoolYear: schoolYear });
+      const data = await scheduleService.getMyClassSchedule({
+        Term: term,
+        SchoolYear: schoolYear,
+      });
       setSchedule(data);
     } catch (e) {
       console.error("Schedule load error:", e);
@@ -63,7 +77,10 @@ export default function TimetableTab() {
         <TouchableOpacity onPress={() => router.back()} className="p-2">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
+        <Text
+          className="text-black text-lg"
+          style={{ fontFamily: "Poppins-Bold" }}
+        >
           Lịch học
         </Text>
         <View className="w-10" />
@@ -71,7 +88,6 @@ export default function TimetableTab() {
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-6 pt-4">
-
           {/* Term / Year selector */}
           <TouchableOpacity
             className="bg-white border border-gray-200 rounded-2xl p-4 mb-4 flex-row justify-between items-center shadow-sm"
@@ -79,25 +95,42 @@ export default function TimetableTab() {
           >
             <View className="flex-row items-center gap-2">
               <Ionicons name="school-outline" size={18} color="#136ADA" />
-              <Text className="text-black text-sm" style={{ fontFamily: "Poppins-SemiBold" }}>
+              <Text
+                className="text-black text-sm"
+                style={{ fontFamily: "Poppins-SemiBold" }}
+              >
                 Học kỳ {term} · Năm học {schoolYear}
               </Text>
             </View>
-            <Ionicons name={showTermPicker ? "chevron-up" : "chevron-down"} size={18} color="black" />
+            <Ionicons
+              name={showTermPicker ? "chevron-up" : "chevron-down"}
+              size={18}
+              color="black"
+            />
           </TouchableOpacity>
 
           {showTermPicker && (
             <View className="bg-white border border-gray-100 rounded-2xl p-3 mb-4 shadow-sm gap-4">
               <View>
-                <Text className="text-gray-400 text-xs mb-2" style={{ fontFamily: "Poppins-Medium" }}>Học kỳ</Text>
+                <Text
+                  className="text-gray-400 text-xs mb-2"
+                  style={{ fontFamily: "Poppins-Medium" }}
+                >
+                  Học kỳ
+                </Text>
                 <View className="flex-row gap-2">
                   {TERMS.map((t) => (
                     <TouchableOpacity
                       key={t}
-                      onPress={() => { setTerm(t); }}
+                      onPress={() => {
+                        setTerm(t);
+                      }}
                       className={`px-4 py-2 rounded-xl ${term === t ? "bg-blue-600" : "bg-gray-100"}`}
                     >
-                      <Text className={`text-sm ${term === t ? "text-white" : "text-gray-600"}`} style={{ fontFamily: "Poppins-Medium" }}>
+                      <Text
+                        className={`text-sm ${term === t ? "text-white" : "text-gray-600"}`}
+                        style={{ fontFamily: "Poppins-Medium" }}
+                      >
                         Học kỳ {t}
                       </Text>
                     </TouchableOpacity>
@@ -105,15 +138,25 @@ export default function TimetableTab() {
                 </View>
               </View>
               <View>
-                <Text className="text-gray-400 text-xs mb-2" style={{ fontFamily: "Poppins-Medium" }}>Năm học</Text>
+                <Text
+                  className="text-gray-400 text-xs mb-2"
+                  style={{ fontFamily: "Poppins-Medium" }}
+                >
+                  Năm học
+                </Text>
                 <View className="flex-row gap-2">
                   {SCHOOL_YEARS.map((y) => (
                     <TouchableOpacity
                       key={y}
-                      onPress={() => { setSchoolYear(y); }}
+                      onPress={() => {
+                        setSchoolYear(y);
+                      }}
                       className={`px-4 py-2 rounded-xl ${schoolYear === y ? "bg-blue-600" : "bg-gray-100"}`}
                     >
-                      <Text className={`text-sm ${schoolYear === y ? "text-white" : "text-gray-600"}`} style={{ fontFamily: "Poppins-Medium" }}>
+                      <Text
+                        className={`text-sm ${schoolYear === y ? "text-white" : "text-gray-600"}`}
+                        style={{ fontFamily: "Poppins-Medium" }}
+                      >
                         {y}
                       </Text>
                     </TouchableOpacity>
@@ -142,7 +185,9 @@ export default function TimetableTab() {
                     {label}
                   </Text>
                   {hasClass && (
-                    <View className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-white" : "bg-blue-500"}`} />
+                    <View
+                      className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-white" : "bg-blue-500"}`}
+                    />
                   )}
                 </TouchableOpacity>
               );
@@ -150,7 +195,10 @@ export default function TimetableTab() {
           </View>
 
           {/* Selected day label */}
-          <Text className="text-black text-sm mb-4" style={{ fontFamily: "Poppins-SemiBold" }}>
+          <Text
+            className="text-black text-sm mb-4"
+            style={{ fontFamily: "Poppins-SemiBold" }}
+          >
             {DAY_FULL[selectedDay - 1]}
           </Text>
 
@@ -162,7 +210,10 @@ export default function TimetableTab() {
           ) : dayItems.length === 0 ? (
             <View className="items-center py-10">
               <Ionicons name="calendar-outline" size={48} color="#D1D5DB" />
-              <Text className="text-gray-400 mt-3 text-sm" style={{ fontFamily: "Poppins-Regular" }}>
+              <Text
+                className="text-gray-400 mt-3 text-sm"
+                style={{ fontFamily: "Poppins-Regular" }}
+              >
                 Không có tiết học vào ngày này
               </Text>
             </View>
@@ -172,10 +223,16 @@ export default function TimetableTab() {
                 <View key={item.scheduleDetailId} className="flex-row">
                   {/* Time */}
                   <View className="w-20 items-end pr-3 pt-1">
-                    <Text className="text-black text-xs" style={{ fontFamily: "Poppins-SemiBold" }}>
+                    <Text
+                      className="text-black text-xs"
+                      style={{ fontFamily: "Poppins-SemiBold" }}
+                    >
                       {item.timeRange.split(" - ")[0]}
                     </Text>
-                    <Text className="text-gray-400 text-[10px]" style={{ fontFamily: "Poppins-Regular" }}>
+                    <Text
+                      className="text-gray-400 text-[10px]"
+                      style={{ fontFamily: "Poppins-Regular" }}
+                    >
                       {item.timeRange.split(" - ")[1]}
                     </Text>
                   </View>
@@ -187,15 +244,23 @@ export default function TimetableTab() {
                   </View>
 
                   {/* Card */}
-                  <View className={`flex-1 ${subjectColor(item.subjectName)} rounded-2xl p-4 flex-row items-center`}>
+                  <View
+                    className={`flex-1 ${subjectColor(item.subjectName)} rounded-2xl p-4 flex-row items-center`}
+                  >
                     <View className="w-10 h-10 bg-white/60 rounded-full items-center justify-center mr-3">
                       <Ionicons name="book-outline" size={18} color="#136ADA" />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-black text-sm" style={{ fontFamily: "Poppins-Bold" }}>
+                      <Text
+                        className="text-black text-sm"
+                        style={{ fontFamily: "Poppins-Bold" }}
+                      >
                         {item.subjectName}
                       </Text>
-                      <Text className="text-gray-500 text-xs" style={{ fontFamily: "Poppins-Regular" }}>
+                      <Text
+                        className="text-gray-500 text-xs"
+                        style={{ fontFamily: "Poppins-Regular" }}
+                      >
                         {item.teacherName}
                       </Text>
                     </View>

@@ -355,25 +355,19 @@ export default function StudentAssignmentDetailScreen() {
 
               {submission.score !== null && (
                 <View className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
-                  <View className="flex-row justify-between items-center mb-2">
+                  <View className="flex-row justify-between items-center">
                     <Text
                       className="text-black text-sm"
                       style={{ fontFamily: "Poppins-Bold" }}
                     >
                       Điểm của giáo viên
                     </Text>
-                    <View className="bg-bright-blue px-3 py-1 rounded-full">
-                      <Text className="text-white text-xs font-bold">
+                    <View className="bg-bright-blue px-4 py-1.5 rounded-full">
+                      <Text className="text-white text-sm font-bold">
                         {submission.score} / 10
                       </Text>
                     </View>
                   </View>
-                  <Text
-                    className="text-gray-600 text-xs leading-5"
-                    style={{ fontFamily: "Poppins-Regular italic" }}
-                  >
-                    "{submission.feedback || "Chưa có nhận xét nào."}"
-                  </Text>
                 </View>
               )}
             </View>

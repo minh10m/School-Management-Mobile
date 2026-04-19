@@ -1,4 +1,4 @@
-﻿namespace School_Management.API.Models.DTO
+namespace School_Management.API.Models.DTO
 {
     public class ClassYearResponse
     {
@@ -8,5 +8,6 @@
         public int SchoolYear { get; set; }
         public Guid HomeRoomId { get; set; }
         public string? HomeRoomName { get; set; }
+        public int StudentCount { get; set; }
     }
 }

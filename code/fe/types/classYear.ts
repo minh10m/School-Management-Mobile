@@ -6,7 +6,8 @@ export interface ClassYearResponse {
   grade: number;
   schoolYear: number;
   homeRoomTeacher: string;  // teacher fullName
-  homeRoomId?: string;
+  homeRoomId: string;
+  homeRoomName: string | null;
   studentCount: number;
 }
 

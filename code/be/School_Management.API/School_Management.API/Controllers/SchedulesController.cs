@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -111,6 +111,14 @@ namespace School_Management.API.Controllers
         {
             var result = await scheduleService.GetScheduleDetailByScheduleId(scheduleId);
             return Ok(result);
+        }
+        [HttpGet]
+        [Route("class/{classYearId}/active")]
+        [Authorize]
+        public async Task<IActionResult> GetActiveScheduleByClassYearId([FromRoute] Guid classYearId, [FromQuery] int term, [FromQuery] int schoolYear)
+        {
+            var result = await scheduleService.GetActiveScheduleByClassYearId(classYearId, term, schoolYear);
+            return Ok(result ?? new List<ScheduleDetailResponse>());
         }
     }
 }

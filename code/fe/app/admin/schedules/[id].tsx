@@ -8,10 +8,14 @@ import {
   Alert,
   Modal,
   FlatList,
+  Pressable,
+  Platform,
 } from "react-native";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect } from "react";
 import { scheduleService } from "../../../services/schedule.service";
 import { subjectService } from "../../../services/subject.service";
@@ -24,6 +28,7 @@ import { getErrorMessage } from "../../../utils/error";
 const DAYS = ["T2", "T3", "T4", "T5", "T6", "T7"];
 
 export default function AdminScheduleDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [details, setDetails] = useState<ScheduleDetailItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +43,36 @@ export default function AdminScheduleDetailScreen() {
   const [selectedTeacherSubjectId, setSelectedTeacherSubjectId] = useState("");
   const [startTime, setStartTime] = useState("08:00");
   const [finishTime, setFinishTime] = useState("08:45");
+
+  // New Picker States
+  const [showPicker, setShowPicker] = useState<'start' | 'finish' | null>(null);
+  const [tempDate, setTempDate] = useState(new Date());
+
+  const timeToDate = (timeStr: string) => {
+    const [h, m] = timeStr.split(":").map(Number);
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d;
+  };
+
+  const dateToTime = (date: Date) => {
+    const h = date.getHours().toString().padStart(2, "0");
+    const m = date.getMinutes().toString().padStart(2, "0");
+    return `${h}:${m}`;
+  };
+
+  const onPickerChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (selectedDate) {
+      setTempDate(selectedDate);
+    }
+  };
+
+  const handleConfirmPicker = () => {
+    const timeStr = dateToTime(tempDate);
+    if (showPicker === 'start') setStartTime(timeStr);
+    else if (showPicker === 'finish') setFinishTime(timeStr);
+    setShowPicker(null);
+  };
 
   const fetchDetails = async () => {
     if (!id) return;
@@ -123,22 +158,14 @@ export default function AdminScheduleDetailScreen() {
   const filteredDetails = details.filter((d) => d.dayOfWeek === selectedDay);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text
-          style={{ fontFamily: "Poppins-Bold" }}
-          className="text-black text-lg flex-1"
-        >
-          Quản lý Tiết học
-        </Text>
+    <AdminPageWrapper
+      title="Quản lý Tiết học"
+      rightComponent={
         <TouchableOpacity onPress={() => setAssignModal(true)}>
           <Ionicons name="add-circle" size={26} color="#136ADA" />
         </TouchableOpacity>
-      </View>
+      }
+    >
 
       {/* Day Selector */}
       <View className="bg-white border-b border-gray-100 py-3">
@@ -353,34 +380,38 @@ export default function AdminScheduleDetailScreen() {
                 </Text>
                 <View className="flex-row gap-5">
                   <View className="flex-1">
-                    <View className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 flex-row items-center gap-3">
-                      <Ionicons name="time-outline" size={18} color="#9CA3AF" />
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setTempDate(timeToDate(startTime));
+                        setShowPicker('start');
+                      }}
+                      className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 flex-row items-center gap-3"
+                    >
+                      <Ionicons name="time-outline" size={18} color="#1D4ED8" />
                       <View className="flex-1">
                         <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-[10px] text-gray-400 -mb-1">Bắt đầu</Text>
-                        <TextInput
-                          placeholder="08:00"
-                          value={startTime}
-                          onChangeText={setStartTime}
-                          className="text-black text-base"
-                          style={{ fontFamily: "Poppins-Bold" }}
-                        />
+                        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-base">
+                          {startTime}
+                        </Text>
                       </View>
-                    </View>
+                    </TouchableOpacity>
                   </View>
                   <View className="flex-1">
-                    <View className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 flex-row items-center gap-3">
-                      <Ionicons name="hourglass-outline" size={18} color="#9CA3AF" />
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setTempDate(timeToDate(finishTime));
+                        setShowPicker('finish');
+                      }}
+                      className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100 flex-row items-center gap-3"
+                    >
+                      <Ionicons name="hourglass-outline" size={18} color="#7C3AED" />
                       <View className="flex-1">
                         <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-[10px] text-gray-400 -mb-1">Kết thúc</Text>
-                        <TextInput
-                          placeholder="08:45"
-                          value={finishTime}
-                          onChangeText={setFinishTime}
-                          className="text-black text-base"
-                          style={{ fontFamily: "Poppins-Bold" }}
-                        />
+                        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-base">
+                          {finishTime}
+                        </Text>
                       </View>
-                    </View>
+                    </TouchableOpacity>
                   </View>
                 </View>
               </View>
@@ -400,7 +431,46 @@ export default function AdminScheduleDetailScreen() {
             </View>
           </ScrollView>
         </SafeAreaView>
+
+        {/* Time Picker Modal Wrapper */}
+        <Modal
+          visible={showPicker !== null}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowPicker(null)}
+        >
+          <Pressable 
+            className="flex-1 bg-black/40 justify-end"
+            onPress={() => setShowPicker(null)}
+          >
+            <View className="bg-white rounded-t-[40px] px-8 pb-10 shadow-2xl">
+              <View className="flex-row justify-between items-center py-6 border-b border-gray-50 mb-4">
+                <TouchableOpacity onPress={() => setShowPicker(null)}>
+                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-base">Hủy</Text>
+                </TouchableOpacity>
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-lg">
+                  Chọn giờ
+                </Text>
+                <TouchableOpacity onPress={handleConfirmPicker}>
+                  <Text style={{ fontFamily: "Poppins-Bold" }} className="text-blue-600 text-base">Xong</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View className="items-center py-4">
+                <DateTimePicker
+                  value={tempDate}
+                  mode="time"
+                  is24Hour={true}
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={onPickerChange}
+                  style={{ width: '100%', height: 200 }}
+                  textColor="black"
+                />
+              </View>
+            </View>
+          </Pressable>
+        </Modal>
       </Modal>
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

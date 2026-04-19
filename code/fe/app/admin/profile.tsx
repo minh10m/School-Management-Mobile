@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, router } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -17,6 +18,7 @@ import { useAuthStore } from "../../store/authStore";
 import { UserResponse } from "../../types/user";
 
 export default function AdminProfileScreen() {
+  const router = useRouter();
   const { userInfo } = useAuthStore();
   const [profile, setProfile] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -84,18 +86,9 @@ export default function AdminProfileScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="p-2">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text
-          className="text-black text-lg"
-          style={{ fontFamily: "Poppins-Bold" }}
-        >
-          Hồ sơ Quản trị viên
-        </Text>
+    <AdminPageWrapper
+      title="Hồ sơ Quản trị viên"
+      rightComponent={
         <TouchableOpacity onPress={openEdit}>
           <Text
             style={{ fontFamily: "Poppins-SemiBold" }}
@@ -104,7 +97,8 @@ export default function AdminProfileScreen() {
             Sửa
           </Text>
         </TouchableOpacity>
-      </View>
+      }
+    >
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
@@ -259,7 +253,7 @@ export default function AdminProfileScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }
 

@@ -11,7 +11,8 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import * as DocumentPicker from "expo-document-picker";
 import { examScheduleService } from "../../../services/examSchedule.service";
 import {
@@ -136,21 +137,9 @@ const ExamScheduleDetail = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Synchronized Header */}
-      <View className="px-6 py-4 flex-row items-center border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <View className="flex-1">
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-xl text-black"
-          >
-            {title || "Chi tiết Lịch thi"}
-          </Text>
-        </View>
-      </View>
+    <AdminPageWrapper
+      title={title || "Chi tiết Lịch thi"}
+    >
 
       {/* Primary Actions */}
       <View className="px-6 py-4 flex-row gap-x-4 bg-white">
@@ -213,7 +202,7 @@ const ExamScheduleDetail = () => {
           }
         />
       )}
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 };
 

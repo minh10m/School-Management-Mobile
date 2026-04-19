@@ -15,6 +15,7 @@ import SideMenu from "@/components/SideMenu";
 import { assignmentService } from "../../services/assignment.service";
 import { eventService } from "../../services/event.service";
 import { useAuthStore } from "../../store/authStore";
+import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
 
 export default function HomeScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);
@@ -91,94 +92,118 @@ export default function HomeScreen() {
   const firstTitlePart = eventTitleParts[0];
   const lastTitlePart = eventTitleParts.slice(1).join(" ");
 
+  const STUDENT_STATS = [
+    { label: "Điểm TB", value: "8.5", icon: "stats-chart", color: "#136ADA", bg: "bg-blue-50" },
+    { label: "Chuyên cần", value: "98%", icon: "calendar-clear", color: "#10B981", bg: "bg-emerald-50" },
+    { label: "Bài tập nộp", value: (Array.isArray(assignments) ? assignments : []).filter(a => a.status === 'Submitted').length.toString().padStart(2, '0'), icon: "document-text", color: "#A855F7", bg: "bg-purple-50" },
+    { label: "Sự kiện", value: (events?.length || 0).toString().padStart(2, '0'), icon: "megaphone", color: "#F97316", bg: "bg-orange-50" },
+  ];
+
   const academicsData = [
     {
       id: "2",
       title: "Lịch thi",
-      icon: "calendar",
+      icon: "calendar-outline",
       color: "bg-orange-100",
       iconColor: "#F97316",
     },
     {
       id: "3",
       title: "Học phí",
-      icon: "cash",
+      icon: "cash-outline",
       color: "bg-purple-100",
       iconColor: "#A855F7",
     },
     {
       id: "4",
       title: "Bài tập",
-      icon: "document-text",
+      icon: "document-text-outline",
       color: "bg-teal-100",
       iconColor: "#14B8A6",
     },
     {
       id: "5",
       title: "Kết quả",
-      icon: "pie-chart",
+      icon: "pie-chart-outline",
       color: "bg-yellow-100",
       iconColor: "#EAB308",
     },
     {
       id: "6",
       title: "Lịch học",
-      icon: "time",
-      color: "bg-blue-50",
+      icon: "time-outline",
+      color: "bg-blue-100",
       iconColor: "#3B82F6",
     },
     {
       id: "7",
       title: "Điểm danh",
-      icon: "calendar",
-      color: "bg-red-50",
-      iconColor: "#EF4444",
+      icon: "checkbox-outline",
+      color: "bg-emerald-100",
+      iconColor: "#10B981",
+    },
+    {
+      id: "8",
+      title: "Khóa học",
+      icon: "file-tray-full-outline",
+      color: "bg-indigo-100",
+      iconColor: "#4F46E5",
     },
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <AdminPageWrapper
+      showLogo={true}
+      leftComponent={
+        <TouchableOpacity onPress={() => setMenuVisible(true)}>
+          <Ionicons name="menu-outline" size={28} color="black" />
+        </TouchableOpacity>
+      }
+      rightComponent={
+        <TouchableOpacity
+          onPress={() => router.push("/student/notifications" as any)}
+        >
+          <Ionicons name="notifications-outline" size={28} color="black" />
+        </TouchableOpacity>
+      }
+    >
       <StatusBar hidden />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="flex-row justify-between items-center px-6 pt-4 mb-6">
-          <TouchableOpacity onPress={() => setMenuVisible(true)}>
-            <Ionicons name="menu-outline" size={28} color="black" />
-          </TouchableOpacity>
-          <View className="flex-row items-center gap-2">
-            <Ionicons name="book" size={24} color="#136ADA" />
-            <Text
-              className="text-bright-blue text-xl"
-              style={{ fontFamily: "Poppins-Bold" }}
-            >
-              EDU Manage
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => router.push("/student/notifications" as any)}
-          >
-            <Ionicons name="notifications-outline" size={28} color="black" />
-          </TouchableOpacity>
-        </View>
 
         {/* Greeting */}
-        <View className="px-6 mb-8">
+        <View className="px-6 mt-6 mb-2">
           <Text
             className="text-black text-xl"
             style={{ fontFamily: "Poppins-SemiBold" }}
           >
             Chào mừng bạn, {firstName} 👋
           </Text>
+          <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">
+            Bạn có {assignments.length} bài tập cần hoàn thành.
+          </Text>
+        </View>
+
+        {/* Stats Grid */}
+        <View className="px-6 mt-6 mb-5">
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Tổng quan học tập</Text>
+          <View className="flex-row flex-wrap gap-3">
+            {STUDENT_STATS.map((s) => (
+              <View key={s.label} className={`${s.bg} flex-1 min-w-[44%] rounded-[28px] p-5`}>
+                <View className="flex-row items-center justify-between mb-2">
+                  <View className="w-8 h-8 rounded-full bg-white/60 items-center justify-center">
+                    <Ionicons name={s.icon as any} size={18} color={s.color} />
+                  </View>
+                  <Text style={{ fontFamily: 'Poppins-Bold', color: s.color }} className="text-2xl">{s.value}</Text>
+                </View>
+                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600/80 text-[10px]">{s.label}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
         {/* Academics Grid */}
-        <View className="px-6 mb-8">
-          <Text
-            className="text-black text-base mb-4"
-            style={{ fontFamily: "Poppins-Medium" }}
-          >
-            Học tập
-          </Text>
+        <View className="px-6 mb-8 mt-2">
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Tiện ích học tập</Text>
           <View className="flex-row flex-wrap justify-between gap-y-4">
             {academicsData.map((item) => (
               <TouchableOpacity
@@ -197,6 +222,8 @@ export default function HomeScreen() {
                     router.push("/(tabs)/timetable" as any);
                   } else if (item.title === "Điểm danh") {
                     router.push("/(tabs)/attendance" as any);
+                  } else if (item.title === "Khóa học") {
+                    router.push("/student/courses" as any);
                   }
                 }}
               >
@@ -219,14 +246,9 @@ export default function HomeScreen() {
         </View>
 
         {/* Assignments */}
-        <View className="mb-8">
+        <View className="mb-8 mt-2">
           <View className="flex-row justify-between items-center px-6 mb-4">
-            <Text
-              className="text-black text-base"
-              style={{ fontFamily: "Poppins-Medium" }}
-            >
-              Bài tập
-            </Text>
+            <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-0 uppercase tracking-widest">Bài tập gần đây</Text>
             <TouchableOpacity
               onPress={() => router.push("/student/assignments" as any)}
             >
@@ -336,13 +358,8 @@ export default function HomeScreen() {
         </View>
 
         {/* Event Updates */}
-        <View className="px-6 pb-20">
-          <Text
-            className="text-black text-lg mb-4"
-            style={{ fontFamily: "Poppins-Bold" }}
-          >
-            Cập nhật sự kiện
-          </Text>
+        <View className="px-6 pb-20 mt-2">
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Sự kiện & Tin tức</Text>
 
           <View className="bg-white border border-gray-100 rounded-[40px] p-6 shadow-sm overflow-hidden min-h-[190px] relative">
             {/* Background decoration */}
@@ -413,6 +430,6 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
       <SideMenu visible={isMenuVisible} onClose={() => setMenuVisible(false)} />
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

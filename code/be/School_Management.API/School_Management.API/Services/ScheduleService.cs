@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
@@ -205,6 +205,11 @@ namespace School_Management.API.Services
             var result = await scheduleRepository.GetScheduleDetailByScheduleId(scheduleId);
             if (result == null) throw new NotFoundException("Lịch học tổng quát không tồn tại");
             return result;
+        }
+ 
+        public async Task<List<ScheduleDetailResponse>> GetActiveScheduleByClassYearId(Guid classYearId, int term, int schoolYear)
+        {
+            return await scheduleRepository.GetActiveScheduleByClassYearId(classYearId, term, schoolYear);
         }
     }
 }

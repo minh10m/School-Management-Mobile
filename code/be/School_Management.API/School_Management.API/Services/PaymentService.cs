@@ -1,4 +1,4 @@
-﻿using School_Management.API.Exceptions;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
 
@@ -12,6 +12,38 @@ namespace School_Management.API.Services
         {
             this.paymentRepository = paymentRepository;
         }
+        public async Task<IEnumerable<PaymentHistoryResponse>> GetMyPayments(Guid userId)
+        {
+            var payments = await paymentRepository.GetMyPayments(userId);
+            return payments.Select(p => new PaymentHistoryResponse
+            {
+                PaymentId = p.Id,
+                OrderCode = p.OrderCode,
+                Amount = p.Amount,
+                Type = p.Type,
+                Status = p.Status,
+                Description = p.Description,
+                CreatedAt = p.CreatedAt,
+                UserName = p.User.FullName
+            });
+        }
+
+        public async Task<IEnumerable<PaymentHistoryResponse>> GetAllPayments()
+        {
+            var payments = await paymentRepository.GetAllPayments();
+            return payments.Select(p => new PaymentHistoryResponse
+            {
+                PaymentId = p.Id,
+                OrderCode = p.OrderCode,
+                Amount = p.Amount,
+                Type = p.Type,
+                Status = p.Status,
+                Description = p.Description,
+                CreatedAt = p.CreatedAt,
+                UserName = p.User.FullName
+            });
+        }
+
         public async Task<PaymentResponse> PayTheBill(PaymentRequest request, Guid userId)
         {
             var (result, message) = await paymentRepository.PayTheBill(request, userId);

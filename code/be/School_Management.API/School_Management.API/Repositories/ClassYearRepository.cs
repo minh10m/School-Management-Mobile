@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -103,7 +103,8 @@ namespace School_Management.API.Repositories
                                                Grade = x.Grade,
                                                HomeRoomId = (Guid)x.HomeRoomId,
                                                SchoolYear = x.SchoolYear,
-                                               HomeRoomName = x.Teacher.User.FullName
+                                               HomeRoomName = x.Teacher.User.FullName,
+                                               StudentCount = x.StudentClassYears.Count()
 
                                            }).ToListAsync();
 
@@ -162,7 +163,8 @@ namespace School_Management.API.Repositories
                 ClassYearId = x.Id,
                 Grade = x.Grade,
                 HomeRoomId = (Guid)x.HomeRoomId!,
-                HomeRoomName = null
+                HomeRoomName = null,
+                StudentCount = x.StudentClassYears.Count()
             })
              .ToListAsync();
 
@@ -191,7 +193,8 @@ namespace School_Management.API.Repositories
                 ClassYearId = classYear.Id,
                 Grade = classYear.Grade,
                 HomeRoomId = (Guid)classYear.HomeRoomId,
-                HomeRoomName = classYear.Teacher.User.FullName
+                HomeRoomName = classYear.Teacher.User.FullName,
+                StudentCount = await context.StudentClassYear.CountAsync(scy => scy.ClassYearId == classYearId)
             }, "SUCCESS");
         }
 
@@ -233,7 +236,8 @@ namespace School_Management.API.Repositories
                 Grade = classYear.Grade,
                 HomeRoomId = (Guid)classYear.HomeRoomId,
                 SchoolYear = classYear.SchoolYear,
-                HomeRoomName = teacherInfo.teacherName
+                HomeRoomName = teacherInfo.teacherName,
+                StudentCount = await context.StudentClassYear.CountAsync(scy => scy.ClassYearId == classYearId)
 
             }, "SUCCESS");
         }
@@ -283,7 +287,8 @@ namespace School_Management.API.Repositories
                     ClassYearId = x.Id,
                     Grade = x.Grade,
                     HomeRoomId = (Guid)x.HomeRoomId!,
-                    HomeRoomName = null
+                    HomeRoomName = null,
+                    StudentCount = x.StudentClassYears.Count()
                 })
              .ToListAsync();
 
@@ -314,7 +319,8 @@ namespace School_Management.API.Repositories
                                                            ClassYearId = g.Id,
                                                            Grade = g.Grade,
                                                            HomeRoomId = (Guid)g.HomeRoomId!,
-                                                           HomeRoomName = null
+                                                           HomeRoomName = null,
+                                                           StudentCount = g.StudentClassYears.Count()
 
                                                        }).FirstOrDefaultAsync();
             if (homeRoomClass == null) return (null, "NOT_HAVE_HOMEROOM");
@@ -339,7 +345,8 @@ namespace School_Management.API.Repositories
                                                      ClassYearId = g.Id,
                                                      Grade = g.Grade,
                                                      HomeRoomId = (Guid)g.HomeRoomId,
-                                                     HomeRoomName = g.Teacher.User.FullName
+                                                     HomeRoomName = g.Teacher.User.FullName,
+                                                     StudentCount = g.StudentClassYears.Count()
                                                  }).FirstOrDefaultAsync();
             if (myClass == null) return (null, "NOT_FOUND_CLASS");
             return (myClass, "SUCCESS");

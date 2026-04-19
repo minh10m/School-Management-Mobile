@@ -56,7 +56,7 @@ export default function SettingsScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Settings</Text>
+          <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Cài đặt</Text>
         </View>
         <View className="w-10" />
       </View>
@@ -66,51 +66,51 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text className="text-gray-500 text-sm mb-2 mt-4" style={{ fontFamily: 'Poppins-Medium' }}>
-          General
+          Chung
         </Text>
         <View className="bg-white">
           <SettingItem
             icon="notifications-outline"
-            label="Notifications"
+            label="Thông báo"
             type="switch"
             value={notificationsEnabled}
             onPress={() => setNotificationsEnabled(!notificationsEnabled)}
           />
           <SettingItem
             icon="globe-outline"
-            label="Language"
+            label="Ngôn ngữ"
             onPress={() => {}}
           />
         </View>
 
         <Text className="text-gray-500 text-sm mb-2 mt-8" style={{ fontFamily: 'Poppins-Medium' }}>
-          Security
+          Bảo mật
         </Text>
         <View className="bg-white">
           <SettingItem
             icon="lock-closed-outline"
-            label="Change Password"
+            label="Đổi mật khẩu"
             onPress={() => router.push("/change-password" as any)}
           />
         </View>
 
         <Text className="text-gray-500 text-sm mb-2 mt-8" style={{ fontFamily: 'Poppins-Medium' }}>
-          Support
+          Hỗ trợ
         </Text>
         <View className="bg-white">
           <SettingItem
             icon="help-circle-outline"
-            label="Help & Support"
+            label="Trợ giúp & Hỗ trợ"
             onPress={() => {}}
           />
           <SettingItem
             icon="document-text-outline"
-            label="Privacy Policy"
+            label="Chính sách bảo mật"
             onPress={() => {}}
           />
           <SettingItem
             icon="information-circle-outline"
-            label="Terms of Service"
+            label="Điều khoản dịch vụ"
             onPress={() => {}}
           />
         </View>

@@ -1,7 +1,8 @@
 import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from 'react';
 import { classYearService } from '../../../services/classYear.service';
 import { teacherService } from '../../../services/teacher.service';
@@ -12,6 +13,7 @@ import { SCHOOL_YEAR } from '../../../constants/config';
 const GRADES = [10, 11, 12];
 
 export default function AdminClassYearsScreen() {
+  const router = useRouter();
   const [classes, setClasses] = useState<ClassYearResponse[]>([]);
   const [teachers, setTeachers] = useState<TeacherListItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -85,167 +87,162 @@ export default function AdminClassYearsScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Premium Header */}
-      <View className="px-6 py-4 flex-row items-center border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black flex-1">Quản lý Lớp học</Text>
+    <AdminPageWrapper
+      title="Quản lý Lớp học"
+      rightComponent={
         <View className="flex-row items-center gap-2">
            <TouchableOpacity 
              onPress={() => router.push('/admin/class-years/promote')}
-             className="px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100"
+             className="bg-indigo-50 px-3 py-2 rounded-xl border border-indigo-100"
            >
-             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-indigo-600 text-[10px] tracking-tighter">LÊN LỚP</Text>
+             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-indigo-600 text-[10px]">Lên lớp</Text>
            </TouchableOpacity>
            <TouchableOpacity 
              onPress={() => router.push("/admin/class-years/create" as any)}
-             className="px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100"
+             className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
            >
-             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-[10px] tracking-tighter">THÊM MỚI</Text>
+             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xs">Thêm mới</Text>
            </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Modern Search & Options Bar */}
-      <View className="px-6 py-4 flex-row items-center gap-4 bg-white border-b border-gray-50">
-        <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100">
-          <Ionicons name="search-outline" size={20} color="#9ca3af" />
-          <TextInput
-            placeholder="Tìm kiếm tên lớp..."
-            className="flex-1 ml-2 text-black text-sm"
-            style={{ fontFamily: "Poppins-Regular" }}
-            value={tempSearch}
-            onChangeText={setTempSearch}
-            onSubmitEditing={applyFilters}
-          />
-        </View>
-        <TouchableOpacity
-          onPress={openFilter}
-          className="bg-[#136ADA] w-12 h-12 rounded-2xl items-center justify-center shadow-md shadow-blue-200"
-        >
-          <Ionicons name="options-outline" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+      }
+      searchProps={{
+        value: tempSearch,
+        onChangeText: setTempSearch,
+        placeholder: "Tìm kiếm tên lớp...",
+        onFilterPress: openFilter,
+      }}
+    >
+      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Advanced Filter Bottom Sheet */}
       <Modal visible={isFilterVisible} animationType="slide" transparent={true} onRequestClose={() => setIsFilterVisible(false)}>
         <View className="flex-1 justify-end bg-black/40">
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Lọc Lớp học</Text>
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Bộ lọc</Text>
               <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
 
-            {/* Filter: School Year */}
-            <View className="mb-8">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Năm học</Text>
-              <View className="bg-gray-50 border border-gray-100 rounded-3xl px-6 py-4 flex-row items-center">
-                <TextInput
-                  value={tempYear}
-                  onChangeText={setTempYear}
-                  placeholder={SCHOOL_YEAR}
-                  keyboardType="numeric"
-                  className="flex-1 text-black text-base"
-                  style={{ fontFamily: "Poppins-SemiBold" }}
-                />
+            <ScrollView showsVerticalScrollIndicator={false} className="mb-10">
+              {/* Filter: School Year */}
+              <View className="mb-8">
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">NĂM HỌC</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {["2024", "2025", "2026"].map(y => (
+                    <TouchableOpacity
+                      key={y}
+                      onPress={() => setTempYear(y)}
+                      className={`px-4 py-2 rounded-xl border ${tempYear === y ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
+                    >
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: tempYear === y ? "#1D4ED8" : "#9CA3AF" }}>
+                        {y}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
 
-            {/* Filter: Grade */}
-            <View className="mb-12">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm mb-4 ml-1">Khối lớp</Text>
-              <View className="flex-row items-center gap-3">
-                <TouchableOpacity
-                  onPress={() => setTempGrade(undefined)}
-                  className={`flex-1 py-3.5 rounded-2xl items-center ${tempGrade === undefined ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
-                >
-                  <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempGrade === undefined ? "#1D4ED8" : "#9CA3AF" }}>Tất cả khối</Text>
-                </TouchableOpacity>
-                {GRADES.map((g) => (
+              {/* Filter: Grade */}
+              <View className="mb-12">
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">KHỐI LỚP</Text>
+                <View className="flex-row items-center gap-2">
                   <TouchableOpacity
-                    key={g}
-                    onPress={() => setTempGrade(g)}
-                    className={`flex-1 py-3.5 rounded-2xl items-center ${tempGrade === g ? "bg-[#DBEAFE]" : "bg-gray-50"}`}
+                    onPress={() => setTempGrade(undefined)}
+                    className={`px-4 py-2 rounded-xl border ${tempGrade === undefined ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
                   >
-                    <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13, color: tempGrade === g ? "#1D4ED8" : "#9CA3AF" }}>{g}</Text>
+                    <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: tempGrade === undefined ? "#1D4ED8" : "#9CA3AF" }}>TẤT CẢ</Text>
                   </TouchableOpacity>
-                ))}
+                  {GRADES.map((g) => (
+                    <TouchableOpacity
+                      key={g}
+                      onPress={() => setTempGrade(g)}
+                      className={`px-4 py-2 rounded-xl border ${tempGrade === g ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-100"}`}
+                    >
+                      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 11, color: tempGrade === g ? "#1D4ED8" : "#9CA3AF" }}>KHỐI {g}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
+            </ScrollView>
 
             {/* Modal Actions */}
             <View className="flex-row gap-4">
               <TouchableOpacity
                 onPress={resetFilters}
-                className="flex-1 bg-gray-50 h-16 rounded-[24px] items-center justify-center"
+                className="flex-1 bg-gray-50 h-16 rounded-[22px] items-center justify-center"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-gray-400">Đặt lại</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 15 }} className="text-gray-400">Thiết lập lại</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={applyFilters}
-                className="flex-2 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
+                className="flex-1 bg-[#136ADA] h-16 rounded-[22px] items-center justify-center shadow-lg shadow-blue-200"
               >
-                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white">Áp dụng</Text>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 15 }} className="text-white">Áp dụng</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Class List */}
+      {/* Class Year List */}
       {loading && !refreshing ? (
-        <View className="flex-1 items-center justify-center">
+        <View className="flex-1 items-center justify-center bg-white">
           <ActivityIndicator size="large" color="#136ADA" />
         </View>
       ) : (
         <FlatList
           data={filteredClasses}
-          keyExtractor={(item, index) => item.classYearId || index.toString()}
+          keyExtractor={(item) => item.classYearId}
+          className="flex-1 bg-white"
           contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 20, gap: 16 }}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
           showsVerticalScrollIndicator={false}
-          refreshControl={ <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#136ADA" /> }
           renderItem={({ item }) => (
             <TouchableOpacity
               activeOpacity={0.8}
-              className="bg-white rounded-[32px] p-5 shadow-sm border border-gray-100"
+              className="bg-white rounded-[32px] p-5 border border-gray-100 shadow-sm"
               onPress={() => router.push(`/admin/class-years/${item.classYearId}` as any)}
             >
               <View className="flex-row items-center justify-between mb-4">
-                <View className="bg-blue-50 px-4 py-1.5 rounded-2xl border border-blue-100">
-                  <Text style={{ fontFamily: "Poppins-Bold", fontSize: 14, color: "#136ADA" }}>{item.className}</Text>
+                <View className="flex-1">
+                  <Text style={{ fontFamily: "Poppins-Bold", fontSize: 18 }} className="text-black mb-1">Lớp {item.className}</Text>
+                  <View className="flex-row items-center gap-2">
+                    <View className="bg-blue-50 px-3 py-1 rounded-xl border border-blue-100">
+                      <Text style={{ fontFamily: "Poppins-Bold", color: "#136ADA", fontSize: 10 }}>KHỐI {item.grade}</Text>
+                    </View>
+                    <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px]">{item.schoolYear}</Text>
+                  </View>
                 </View>
-                <View className="bg-gray-50 px-3 py-1 rounded-xl">
-                  <Text style={{ fontFamily: "Poppins-Medium", fontSize: 10 }} className="text-gray-400">AY {item.schoolYear}</Text>
+                <View className="w-12 h-12 rounded-2xl bg-indigo-50 items-center justify-center border border-indigo-100">
+                  <Ionicons name="business-outline" size={24} color="#6366F1" />
                 </View>
               </View>
 
-              <View className="flex-row items-center gap-3 bg-gray-50/50 p-3 rounded-2xl border border-gray-100/50">
-                <View className="w-10 h-10 rounded-full bg-indigo-100 items-center justify-center border border-indigo-200">
-                  <Ionicons name="person" size={18} color="#6366F1" />
-                </View>
-                <View className="flex-1">
-                  <Text style={{ fontFamily: "Poppins-Medium", fontSize: 10 }} className="text-gray-400 uppercase tracking-tighter">Giáo viên Chủ nhiệm</Text>
-                  <Text style={{ fontFamily: "Poppins-Bold", fontSize: 13 }} className="text-indigo-900" numberOfLines={1}>
-                    {item.homeRoomTeacher || (item.homeRoomId ? teachers.find((t) => t.teacherId === item.homeRoomId)?.fullName : null) || "Chưa phân công"}
+              <View className="flex-row items-center justify-between pt-3 border-t border-gray-50/50">
+                <View className="flex-row items-center gap-2">
+                  <Ionicons name="person-outline" size={14} color="#9CA3AF" />
+                  <Text style={{ fontFamily: "Poppins-Medium", fontSize: 11 }} className="text-gray-400">
+                    GVCN: {item.homeRoomTeacher || (item.homeRoomId ? teachers.find(t => t.teacherId === item.homeRoomId)?.fullName : null) || "Chưa phân công"}
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
+                <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
               </View>
             </TouchableOpacity>
           )}
           ListEmptyComponent={
-            <View className="items-center py-20 bg-gray-50/50 rounded-[40px] border border-dashed border-gray-200 mx-6">
+            <View className="items-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200 mx-6">
               <Ionicons name="business-outline" size={64} color="#D1D5DB" />
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center px-10">Không tìm thấy lớp học nào.{"\n"}Hãy thử điều chỉnh bộ lọc.</Text>
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center px-10">
+                Không tìm thấy lớp học nào.{"\n"}Hãy thử điều chỉnh bộ lọc.
+              </Text>
             </View>
           }
-          ListFooterComponent={<View className="h-20" />}
+          ListFooterComponent={<View className="h-20 bg-white" />}
         />
       )}
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

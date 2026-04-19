@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace School_Management.API.Models.DTO
 {
@@ -9,7 +9,7 @@ namespace School_Management.API.Models.DTO
 
         [Required(ErrorMessage = "Tên thời khóa biểu là bắt buộc")]
         [MaxLength(200, ErrorMessage = "Tên thời khóa biểu không được vượt quá 200 ký tự")]
-        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 ]+$", ErrorMessage = "Tên không được chứa kí tự đặc biệt hoặc chỉ có khoảng trắng")]
+        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 _\-\(\)\/\.]+$", ErrorMessage = "Tên không được chứa kí tự đặc biệt lạ hoặc chỉ có khoảng trắng")]
         public string? Name { get; set; }
 
         [Required(ErrorMessage = "Năm học là bắt buộc")]

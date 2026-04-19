@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
@@ -60,9 +60,15 @@ namespace School_Management.API.Controllers
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> GetAllAssignment([FromQuery] AssignmentFilterRequest request)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
             if (request.PageNumber <= 0) request.PageNumber = 1;
             if (request.PageSize <= 0) request.PageSize = 10;
-            var result = await assignmentService.GetAllAssignment(request);
+            var result = await assignmentService.GetAllAssignment(request, Guid.Parse(userId));
             return Ok(result);
         }
 

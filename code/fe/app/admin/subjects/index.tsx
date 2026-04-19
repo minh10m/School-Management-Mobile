@@ -9,12 +9,14 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter, Stack } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { subjectService } from "../../../services/subject.service";
 import { SubjectResponse } from "../../../types/subject";
 
 export default function AdminSubjectsScreen() {
+  const router = useRouter();
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -49,94 +51,49 @@ export default function AdminSubjectsScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Header aligned with synchronised UI */}
-      <View className="px-6 py-4 flex-row items-center border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <View className="flex-1">
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-xl text-black"
-          >
-            Quản lý Môn học
-          </Text>
-        </View>
+    <AdminPageWrapper
+      title="Quản lý Môn học"
+      rightComponent={
         <TouchableOpacity
           onPress={() => router.push("/admin/subjects/create" as any)}
           className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
         >
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-[#136ADA] text-xs"
-          >
-            Thêm mới
-          </Text>
+          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xs">Thêm mới</Text>
         </TouchableOpacity>
-      </View>
+      }
+      searchProps={{
+        value: search,
+        onChangeText: setSearch,
+        placeholder: "Tìm kiếm môn học...",
+      }}
+    >
+      <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Synchronized Search Bar Section */}
-      <View className="px-6 py-4 flex-row items-center gap-4 bg-white border-b border-gray-50">
-        <View className="flex-1 bg-gray-50 flex-row items-center px-4 py-2.5 rounded-2xl border border-gray-100">
-          <Ionicons name="search-outline" size={20} color="#9ca3af" />
-          <TextInput
-            placeholder="Tìm kiếm môn học..."
-            className="flex-1 ml-2 text-black text-sm"
-            style={{ fontFamily: "Poppins-Regular" }}
-            value={search}
-            onChangeText={setSearch}
-          />
-        </View>
-      </View>
-
-      {/* List */}
+      {/* Standardized Subject List */}
       {loading && !refreshing ? (
-        <View className="flex-1 items-center justify-center">
+        <View className="flex-1 items-center justify-center bg-white">
           <ActivityIndicator size="large" color="#136ADA" />
         </View>
       ) : (
         <FlatList
           data={filteredSubjects}
           keyExtractor={(item, index) => item.subjectId || index.toString()}
-          contentContainerStyle={{
-            paddingHorizontal: 24,
-            paddingVertical: 16,
-            gap: 12,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#136ADA"
-            />
-          }
+          className="bg-white"
+          contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 20, gap: 16 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#136ADA" />}
           renderItem={({ item }) => (
             <TouchableOpacity
-              activeOpacity={0.7}
-              className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm flex-row items-center justify-between"
-              onPress={() =>
-                router.push(`/admin/subjects/${item.subjectId}` as any)
-              }
+              activeOpacity={0.8}
+              className="bg-white rounded-[32px] p-5 shadow-sm border border-gray-100 flex-row items-center justify-between"
+              onPress={() => router.push(`/admin/subjects/${item.subjectId}` as any)}
             >
               <View className="flex-1">
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-black text-base"
-                >
-                  {item.subjectName}
-                </Text>
-                <View className="flex-row items-center gap-2 mt-1.5">
-                  <View className="bg-gray-50 flex-row items-center px-2 py-0.5 rounded-lg border border-gray-100">
-                    <Ionicons name="time-outline" size={12} color="#9CA3AF" />
-                    <Text
-                      style={{
-                        fontFamily: "Poppins-Medium",
-                        fontSize: 10,
-                        color: "#9CA3AF",
-                      }}
-                      className="ml-1"
-                    >
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-black mb-1">{item.subjectName}</Text>
+                <View className="flex-row items-center gap-2 mt-1.5 text-wrap">
+                  <View className="bg-blue-50 px-3 py-1 rounded-xl border border-blue-100 flex-row items-center">
+                    <Ionicons name="time-outline" size={12} color="#136ADA" />
+                    <Text style={{ fontFamily: "Poppins-Bold", fontSize: 10, color: "#136ADA" }} className="ml-1">
                       {item.maxPeriod} tiết/tuần
                     </Text>
                   </View>
@@ -148,18 +105,16 @@ export default function AdminSubjectsScreen() {
             </TouchableOpacity>
           )}
           ListEmptyComponent={
-            <View className="items-center py-20">
-              <Ionicons name="book-outline" size={64} color="#E5E7EB" />
-              <Text
-                style={{ fontFamily: "Poppins-Medium" }}
-                className="text-gray-400 mt-4 text-center"
-              >
+            <View className="items-center py-20 bg-white rounded-[40px] border border-dashed border-gray-200 mx-6">
+              <Ionicons name="book-outline" size={64} color="#D1D5DB" />
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center px-10">
                 Không tìm thấy môn học nào.{"\n"}Hãy thử từ khóa khác.
               </Text>
             </View>
           }
+          ListFooterComponent={<View className="h-20 bg-white" />}
         />
       )}
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

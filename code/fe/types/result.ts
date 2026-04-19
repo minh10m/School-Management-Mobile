@@ -48,25 +48,25 @@ export interface GetStudentResultsParams {
 }
 
 export interface GetClassResultsParams {
-  term: number;
+  Term: number;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────
 
 export interface CreateResultRequest {
-  type: string;
-  value: number;
-  studentId: string;
-  subjectId: string;
-  term: number;
-  weight: number;
-  schoolYear: number;
+  Type: string;
+  Value: number;
+  StudentId: string;
+  SubjectId: string;
+  Term: number;
+  Weight: number;
+  SchoolYear: number;
 }
 
 export interface UpdateResultPayload {
-  type: string;
-  value: number;
-  term: number;
-  weight: number;
-  schoolYear: number;
+  Type: string;
+  Value: number;
+  Term: number;
+  Weight: number;
+  SchoolYear: number;
 }

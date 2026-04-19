@@ -1,6 +1,6 @@
 /**
  * Global configuration settings for the application.
- * SCHOOL_YEAR represents the starting year of the academic year (e.g., 2026 -> 2026 - 2027).
+ * @deprecated Use useConfigStore from @/store/configStore for dynamic school year settings.
  */
 export const SCHOOL_YEAR = '2026';
 export const TERM = 1;

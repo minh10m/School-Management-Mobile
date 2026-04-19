@@ -35,8 +35,9 @@ export const assignmentService = {
 
   getMyAssignments: async (params?: GetAssignmentsParams): Promise<StudentAssignmentResponse[]> => {
     const response = await apiClient.get<any>("/assignments/my", { params });
-    // Returns response.data directly because component handles both { items: [] } or raw array formats
-    return response.data;
+    // Handle both { items: [] } and raw array formats from the backend
+    const data = response.data;
+    return Array.isArray(data) ? data : data?.items || [];
   },
 
   // ─── TEACHER: CREATE ──────────────────────────────────────────────────────────

@@ -2,62 +2,58 @@ import {
   CreateLessonAssignmentPayload,
   CreateLessonPayload,
   CreateLessonVideoPayload,
+  LessonAssignmentFilterRequest,
   LessonAssignmentResponse,
+  LessonFilterRequest,
   LessonResponse,
+  LessonVideoFilterRequest,
   LessonVideoResponse,
   UpdateLessonAssignmentPayload,
   UpdateLessonPayload,
   UpdateLessonVideoPayload,
 } from "../types/lesson";
+import { ApiResponse, PagedResponse } from "../types/common";
 import apiClient from "./apiClient";
 
 // ─── LESSONS ──────────────────────────────────────────────────────────────────
 
 export const lessonService = {
   /**
-   * Lấy danh sách lesson theo courseId
-   * GET /lessons?courseId=
-   * AuthN(login)
-   * 404: course không tồn tại
+   * Lấy danh sách lesson theo courseId (có phân trang)
+   * GET /lessons
    */
-  getLessons: async (courseId: string): Promise<LessonResponse[]> => {
-    const response = await apiClient.get<LessonResponse[]>("/lessons", {
-      params: { courseId },
+  getLessons: async (params: LessonFilterRequest): Promise<PagedResponse<LessonResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<LessonResponse>>>("/lessons", {
+      params,
     });
-    return response.data;
+    return response.data.data;
   },
 
   /**
    * Xem chi tiết lesson theo id
    * GET /lessons/{id}
-   * AuthN(login)
-   * 404: lesson không tồn tại
    */
   getLessonById: async (lessonId: string): Promise<LessonResponse> => {
-    const response = await apiClient.get<LessonResponse>(`/lessons/${lessonId}`);
-    return response.data;
+    const response = await apiClient.get<ApiResponse<LessonResponse>>(`/lessons/${lessonId}`);
+    return response.data.data;
   },
 
   /**
    * Giáo viên tạo lesson
    * POST /lessons
-   * AuthN(login) + AuthZ(Teacher)
-   * 409: orderIndex hoặc lessonName đã tồn tại trong course
    */
   createLesson: async (payload: CreateLessonPayload): Promise<LessonResponse> => {
-    const response = await apiClient.post<LessonResponse>("/lessons", payload);
-    return response.data;
+    const response = await apiClient.post<ApiResponse<LessonResponse>>("/lessons", payload);
+    return response.data.data;
   },
 
   /**
    * Giáo viên sửa lesson
    * PATCH /lessons/{id}
-   * AuthN(login) + AuthZ(Teacher)
-   * 409: orderIndex / lessonName bị trùng
    */
   updateLesson: async (lessonId: string, payload: UpdateLessonPayload): Promise<LessonResponse> => {
-    const response = await apiClient.patch<LessonResponse>(`/lessons/${lessonId}`, payload);
-    return response.data;
+    const response = await apiClient.patch<ApiResponse<LessonResponse>>(`/lessons/${lessonId}`, payload);
+    return response.data.data;
   },
 };
 
@@ -65,56 +61,47 @@ export const lessonService = {
 
 export const lessonVideoService = {
   /**
-   * Lấy danh sách video theo lessonId
-   * GET /lesson-videos?lessonId=
-   * AuthN(login)
-   * 404: lesson không tồn tại
+   * Lấy danh sách video theo lessonId (có phân trang)
+   * GET /lesson-videos
    */
-  getLessonVideos: async (lessonId: number): Promise<LessonVideoResponse[]> => {
-    const response = await apiClient.get<LessonVideoResponse[]>("/lesson-videos", {
-      params: { lessonId },
+  getLessonVideos: async (params: LessonVideoFilterRequest): Promise<PagedResponse<LessonVideoResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<LessonVideoResponse>>>("/lesson-videos", {
+      params,
     });
-    return response.data;
+    return response.data.data;
   },
 
   /**
    * Xem chi tiết video theo id
    * GET /lesson-videos/{id}
-   * AuthN(login)
-   * 404: video không tồn tại
-   * Note: Học sinh chưa mua khóa chỉ xem được video có isPreview = true
    */
-  getLessonVideoById: async (videoId: number): Promise<LessonVideoResponse> => {
-    const response = await apiClient.get<LessonVideoResponse>(`/lesson-videos/${videoId}`);
-    return response.data;
+  getLessonVideoById: async (videoId: string): Promise<LessonVideoResponse> => {
+    const response = await apiClient.get<ApiResponse<LessonVideoResponse>>(`/lesson-videos/${videoId}`);
+    return response.data.data;
   },
 
   /**
    * Giáo viên tạo video
    * POST /lesson-videos
-   * AuthN(login) + AuthZ(Teacher)
-   * 409: tên video bị trùng trong lesson
    */
   createLessonVideo: async (payload: CreateLessonVideoPayload): Promise<LessonVideoResponse> => {
-    const response = await apiClient.post<LessonVideoResponse>("/lesson-videos", payload);
-    return response.data;
+    const response = await apiClient.post<ApiResponse<LessonVideoResponse>>("/lesson-videos", payload);
+    return response.data.data;
   },
 
   /**
    * Giáo viên sửa video
    * PATCH /lesson-videos/{id}
-   * AuthN(login) + AuthZ(Teacher)
-   * 409: tên video bị trùng trong lesson
    */
   updateLessonVideo: async (
-    videoId: number,
+    videoId: string,
     payload: UpdateLessonVideoPayload
   ): Promise<LessonVideoResponse> => {
-    const response = await apiClient.patch<LessonVideoResponse>(
+    const response = await apiClient.patch<ApiResponse<LessonVideoResponse>>(
       `/lesson-videos/${videoId}`,
       payload
     );
-    return response.data;
+    return response.data.data;
   },
 };
 
@@ -123,60 +110,53 @@ export const lessonVideoService = {
 export const lessonAssignmentService = {
   /**
    * Lấy danh sách bài tập theo lessonId
-   * GET /lesson-assignments?lessonId=
-   * AuthN(login)
-   * 404: lesson không tồn tại
+   * GET /lesson-assignments
    */
-  getLessonAssignments: async (lessonId: number): Promise<LessonAssignmentResponse[]> => {
-    const response = await apiClient.get<LessonAssignmentResponse[]>("/lesson-assignments", {
-      params: { lessonId },
+  getLessonAssignments: async (params: LessonAssignmentFilterRequest): Promise<PagedResponse<LessonAssignmentResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<LessonAssignmentResponse>>>("/lesson-assignments", {
+      params,
     });
-    return response.data;
+    return response.data.data;
   },
 
   /**
    * Xem chi tiết bài tập lesson theo id
    * GET /lesson-assignments/{id}
-   * AuthN(login)
-   * 404: bài tập không tồn tại
    */
-  getLessonAssignmentById: async (assignmentId: number): Promise<LessonAssignmentResponse> => {
-    const response = await apiClient.get<LessonAssignmentResponse>(
+  getLessonAssignmentById: async (assignmentId: string): Promise<LessonAssignmentResponse> => {
+    const response = await apiClient.get<ApiResponse<LessonAssignmentResponse>>(
       `/lesson-assignments/${assignmentId}`
     );
-    return response.data;
+    return response.data.data;
   },
 
   /**
    * Giáo viên tạo bài tập cho lesson
    * POST /lesson-assignments
-   * AuthN(login) + AuthZ(Teacher)
-   * 409: tên bài tập đã tồn tại trong lesson
    */
   createLessonAssignment: async (
     payload: CreateLessonAssignmentPayload
   ): Promise<LessonAssignmentResponse> => {
-    const response = await apiClient.post<LessonAssignmentResponse>(
+    const response = await apiClient.post<ApiResponse<LessonAssignmentResponse>>(
       "/lesson-assignments",
       payload
     );
-    return response.data;
+    return response.data.data;
   },
 
   /**
    * Giáo viên sửa bài tập lesson
    * PATCH /lesson-assignments/{id}
-   * AuthN(login) + AuthZ(Teacher)
-   * 409: tên bài tập đã tồn tại trong lesson
    */
   updateLessonAssignment: async (
-    assignmentId: number,
+    assignmentId: string,
     payload: UpdateLessonAssignmentPayload
   ): Promise<LessonAssignmentResponse> => {
-    const response = await apiClient.patch<LessonAssignmentResponse>(
+    const response = await apiClient.patch<ApiResponse<LessonAssignmentResponse>>(
       `/lesson-assignments/${assignmentId}`,
       payload
     );
-    return response.data;
+    return response.data.data;
   },
 };
+

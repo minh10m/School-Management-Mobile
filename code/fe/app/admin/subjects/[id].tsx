@@ -1,7 +1,8 @@
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Modal, FlatList, RefreshControl, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { AdminPageWrapper } from '../../../components/ui/AdminPageWrapper';
 import { useState, useEffect, useCallback } from 'react';
 import { subjectService } from '../../../services/subject.service';
 import { teacherService } from '../../../services/teacher.service';
@@ -10,6 +11,7 @@ import { TeacherListItem } from '../../../types/teacher';
 import { getErrorMessage } from '../../../utils/error';
 
 export default function AdminSubjectDetailScreen() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   
   const [subject, setSubject] = useState<SubjectResponse | null>(null);
@@ -141,20 +143,17 @@ export default function AdminSubjectDetailScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Premium Header */}
-      <View className="px-6 py-4 flex-row items-center border-b border-gray-50">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black flex-1">Chi tiết Môn học</Text>
+    <AdminPageWrapper
+      title="Chi tiết Môn học"
+      rightComponent={
         <TouchableOpacity 
           onPress={() => setIsEditing(true)}
           className="bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100"
         >
           <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xs text-[#136ADA]">Chỉnh sửa</Text>
         </TouchableOpacity>
-      </View>
+      }
+    >
 
       <ScrollView 
         className="flex-1" 
@@ -339,6 +338,6 @@ export default function AdminSubjectDetailScreen() {
             </View>
          </View>
       </Modal>
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

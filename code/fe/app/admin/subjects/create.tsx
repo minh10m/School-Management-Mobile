@@ -9,12 +9,14 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
+import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState } from "react";
 import { subjectService } from "../../../services/subject.service";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminCreateSubjectScreen() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     subjectName: "",
@@ -44,22 +46,16 @@ export default function AdminCreateSubjectScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Header */}
-      <View className="flex-row items-center px-6 py-4 border-b border-gray-50">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="w-10 h-10 items-center justify-center -ml-2"
-        >
-          <Ionicons name="arrow-back" size={24} color="black" />
+    <AdminPageWrapper
+      title="Thêm Môn học"
+      leftComponent={
+        <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
+          <Text style={{ fontFamily: "Poppins-Regular", color: '#6B7280', fontSize: 16 }}>
+            Hủy
+          </Text>
         </TouchableOpacity>
-        <Text
-          style={{ fontFamily: "Poppins-Bold" }}
-          className="text-black text-xl ml-2"
-        >
-          Thêm Môn học
-        </Text>
-      </View>
+      }
+    >
 
       <ScrollView
         className="flex-1"
@@ -147,6 +143,6 @@ export default function AdminCreateSubjectScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </AdminPageWrapper>
   );
 }

@@ -31,8 +31,11 @@ export interface TeacherScheduleDetailItem {
 export interface ScheduleSummary {
   scheduleId: string;
   className: string;
+  classYearId: string;
   name: string;
   term: string;
+  schoolYear: string;
+  isActive: boolean;
 }
 
 export interface ScheduleSummaryListResponse {
