@@ -30,7 +30,7 @@ namespace School_Management.API.Controllers
                 message = "Tạo thông tin năm học và kì học thành công",
                 data = result
             });
-        }
+        }  
 
         [HttpPatch]
         [ValidateModel]
