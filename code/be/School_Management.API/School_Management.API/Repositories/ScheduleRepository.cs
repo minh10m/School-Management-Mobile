@@ -319,6 +319,7 @@ namespace School_Management.API.Repositories
             }
 
             return scheduleDetailList;
+        }
  
         public async Task<List<ScheduleDetailResponse>> GetActiveScheduleByClassYearId(Guid classYearId, int term, int schoolYear)
         {
