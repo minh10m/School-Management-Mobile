@@ -417,7 +417,7 @@ namespace School_Management.API.Migrations
                     b.ToTable("Course");
                 });
 
-            modelBuilder.Entity("School_Management.API.Models.Domain.CourseAssignment", b =>
+            modelBuilder.Entity("School_Management.API.Models.Domain.LessonAssignment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -449,7 +449,7 @@ namespace School_Management.API.Migrations
                     b.HasIndex("LessonId", "Title")
                         .IsUnique();
 
-                    b.ToTable("CourseAssignment", t =>
+                    b.ToTable("LessonAssignment", t =>
                         {
                             t.HasCheckConstraint("CK_OrderIndex_CourseAssignment", "\"OrderIndex\" > 0");
                         });
@@ -1295,7 +1295,7 @@ namespace School_Management.API.Migrations
                     b.Navigation("TeacherSubject");
                 });
 
-            modelBuilder.Entity("School_Management.API.Models.Domain.CourseAssignment", b =>
+            modelBuilder.Entity("School_Management.API.Models.Domain.LessonAssignment", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.Lesson", "Lesson")
                         .WithMany("CourseAssignments")

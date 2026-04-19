@@ -414,44 +414,6 @@ namespace School_Management.API.Migrations
                     b.ToTable("Course");
                 });
 
-            modelBuilder.Entity("School_Management.API.Models.Domain.CourseAssignment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("FileTitle")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<string>("FileUrl")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
-
-                    b.Property<Guid>("LessonId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("OrderIndex")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LessonId", "Title")
-                        .IsUnique();
-
-                    b.ToTable("CourseAssignment", t =>
-                        {
-                            t.HasCheckConstraint("CK_OrderIndex_CourseAssignment", "\"OrderIndex\" > 0");
-                        });
-                });
-
             modelBuilder.Entity("School_Management.API.Models.Domain.EnrollCourse", b =>
                 {
                     b.Property<Guid>("Id")
@@ -748,6 +710,44 @@ namespace School_Management.API.Migrations
                     b.ToTable("Lesson", t =>
                         {
                             t.HasCheckConstraint("CK_OrderIndex_Lesson", "\"OrderIndex\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.LessonAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FileTitle")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid>("LessonId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonId", "Title")
+                        .IsUnique();
+
+                    b.ToTable("LessonAssignment", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_OrderIndex_CourseAssignment", "\"OrderIndex\" > 0");
                         });
                 });
 
@@ -1292,17 +1292,6 @@ namespace School_Management.API.Migrations
                     b.Navigation("TeacherSubject");
                 });
 
-            modelBuilder.Entity("School_Management.API.Models.Domain.CourseAssignment", b =>
-                {
-                    b.HasOne("School_Management.API.Models.Domain.Lesson", "Lesson")
-                        .WithMany("CourseAssignments")
-                        .HasForeignKey("LessonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Lesson");
-                });
-
             modelBuilder.Entity("School_Management.API.Models.Domain.EnrollCourse", b =>
                 {
                     b.HasOne("School_Management.API.Models.Domain.Course", "Course")
@@ -1403,6 +1392,17 @@ namespace School_Management.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.LessonAssignment", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.Lesson", "Lesson")
+                        .WithMany("LessonAssignments")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.LessonVideo", b =>
@@ -1636,7 +1636,7 @@ namespace School_Management.API.Migrations
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Lesson", b =>
                 {
-                    b.Navigation("CourseAssignments");
+                    b.Navigation("LessonAssignments");
 
                     b.Navigation("LessonVideos");
                 });

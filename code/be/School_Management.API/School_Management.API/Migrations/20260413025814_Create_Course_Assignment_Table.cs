@@ -12,7 +12,7 @@ namespace School_Management.API.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "CourseAssignment",
+                name: "LessonAssignment",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -36,7 +36,7 @@ namespace School_Management.API.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_CourseAssignment_LessonId_Title",
-                table: "CourseAssignment",
+                table: "LessonAssignment",
                 columns: new[] { "LessonId", "Title" },
                 unique: true);
         }
@@ -45,7 +45,7 @@ namespace School_Management.API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CourseAssignment");
+                name: "LessonAssignment");
         }
     }
 }

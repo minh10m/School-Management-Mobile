@@ -4,9 +4,9 @@ using School_Management.API.Models.Domain;
 
 namespace School_Management.API.EntityConfigurations
 {
-    public class CourseAssignmentConfiguration : IEntityTypeConfiguration<CourseAssignment>
+    public class LessonAssignmentConfiguration : IEntityTypeConfiguration<LessonAssignment>
     {
-        public void Configure(EntityTypeBuilder<CourseAssignment> builder)
+        public void Configure(EntityTypeBuilder<LessonAssignment> builder)
         {
             builder.Property(x => x.Id).IsRequired();
             builder.Property(x => x.Title).IsRequired().HasMaxLength(100);

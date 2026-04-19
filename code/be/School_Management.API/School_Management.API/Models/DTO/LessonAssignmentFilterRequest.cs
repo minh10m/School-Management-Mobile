@@ -2,7 +2,7 @@
 
 namespace School_Management.API.Models.DTO
 {
-    public class CourseAssignmentFilterRequest : BaseRequestSecond
+    public class LessonAssignmentFilterRequest : BaseRequestSecond
     {
         [Required(ErrorMessage = "Thông tin bài học là bắt buộc")]
         public Guid? LessonId { get; set; }

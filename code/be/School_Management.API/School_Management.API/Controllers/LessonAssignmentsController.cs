@@ -7,23 +7,23 @@ using School_Management.API.Services;
 
 namespace School_Management.API.Controllers
 {
-    [Route("api/course-assignments")]
+    [Route("api/lesson-assignments")]
     [ApiController]
-    public class CourseAssignmentsController : ControllerBase
+    public class LessonAssignmentsController : ControllerBase
     {
-        private readonly ICourseAssignmentService courseAssignmentService;
+        private readonly ILessonAssignmentService lessonAssignmentService;
 
-        public CourseAssignmentsController(ICourseAssignmentService courseAssignmentService)
+        public LessonAssignmentsController(ILessonAssignmentService lessonAssignmentService)
         {
-            this.courseAssignmentService = courseAssignmentService;
+            this.lessonAssignmentService = lessonAssignmentService;
         }
 
         [HttpPost]
         [ValidateModel]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> CreateCourseAssignment([FromBody] CourseAssignmentRequest request)
+        public async Task<IActionResult> CreateLessonAssignment([FromBody] LessonAssignmentRequest request)
         {
-            var result = await courseAssignmentService.CreateCourseAssignment(request);
+            var result = await lessonAssignmentService.CreateLessonAssignment(request);
             return StatusCode(201, new
             {
                 success = true,
@@ -34,11 +34,11 @@ namespace School_Management.API.Controllers
 
         [HttpPatch]
         [ValidateModel]
-        [Route("{courseAssignmentId}")]
+        [Route("{lessonAssignmentId}")]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> UpdateCourseAssignment([FromBody] UpdateCourseAssignmentRequest request, [FromRoute] Guid courseAssignmentId)
+        public async Task<IActionResult> UpdateLessonAssignment([FromBody] UpdateLessonAssignmentRequest request, [FromRoute] Guid lessonAssignmentId)
         {
-            var result = await courseAssignmentService.UpdateCourseAssignment(request, courseAssignmentId);
+            var result = await lessonAssignmentService.UpdateLessonAssignment(request, lessonAssignmentId);
             return Ok(new
             {
                 success = true, 
@@ -50,9 +50,9 @@ namespace School_Management.API.Controllers
         [HttpGet]
         [ValidateModel]
         [Authorize]
-        public async Task<IActionResult> GetAllCourseAssignment([FromQuery] CourseAssignmentFilterRequest request)
+        public async Task<IActionResult> GetAllLessonAssignment([FromQuery] LessonAssignmentFilterRequest request)
         {
-            var result = await courseAssignmentService.GetAllCourseAssigment(request);
+            var result = await lessonAssignmentService.GetAllLessonAssignment(request);
             return Ok(new
             {
                 success = true,
@@ -61,11 +61,11 @@ namespace School_Management.API.Controllers
         }
 
         [HttpGet]
-        [Route("{courseAssignmentId}")]
+        [Route("{lessonAssignmentId}")]
         [Authorize]
-        public async Task<IActionResult> GetCourseAssignmentById([FromRoute] Guid courseAssignmentId)
+        public async Task<IActionResult> GetLessonAssignmentById([FromRoute] Guid lessonAssignmentId)
         {
-            var result = await courseAssignmentService.GetCourseAssignmentById(courseAssignmentId);
+            var result = await lessonAssignmentService.GetLessonAssignmentById(lessonAssignmentId);
             return Ok(new
             {
                 success = true,
