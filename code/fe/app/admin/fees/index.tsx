@@ -53,9 +53,9 @@ export default function AdminFeesScreen() {
       rightComponent={
         <TouchableOpacity
           onPress={() => {}}
-          className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
+          className="bg-blue-600 px-5 py-2.5 rounded-2xl shadow-sm shadow-blue-100"
         >
-          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xs">Thêm mới</Text>
+          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-xs uppercase tracking-widest">Tạo mới</Text>
         </TouchableOpacity>
       }
       searchProps={{
