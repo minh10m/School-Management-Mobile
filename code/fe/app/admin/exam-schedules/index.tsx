@@ -149,9 +149,9 @@ const ExamScheduleIndex = () => {
       rightComponent={
         <TouchableOpacity
           onPress={() => router.push("/admin/exam-schedules/create")}
-          className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
+          className="w-10 h-10 rounded-2xl bg-[#136ADA] items-center justify-center shadow-lg shadow-blue-200"
         >
-          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xs">Thêm mới</Text>
+          <Ionicons name="add" size={24} color="white" />
         </TouchableOpacity>
       }
       searchProps={{

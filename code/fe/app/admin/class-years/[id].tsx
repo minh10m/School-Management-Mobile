@@ -18,6 +18,7 @@ import { studentService } from "../../../services/student.service";
 import { ClassYearResponse } from "../../../types/classYear";
 import { TeacherListItem } from "../../../types/teacher";
 import { StudentListItem } from "../../../types/student";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminClassDetailScreen() {
@@ -297,18 +298,6 @@ export default function AdminClassDetailScreen() {
                 })}
               </View>
             </View>
-
-            <TouchableOpacity
-              className="bg-[#136ADA] rounded-[28px] py-5 items-center mt-4 shadow-xl shadow-blue-200"
-              onPress={handleUpdate}
-            >
-              <Text
-                style={{ fontFamily: "Poppins-Bold" }}
-                className="text-white text-base"
-              >
-                Cập nhật Lớp học
-              </Text>
-            </TouchableOpacity>
           </View>
         ) : (
           <View className="px-6 py-10">
@@ -457,6 +446,12 @@ export default function AdminClassDetailScreen() {
         )}
         <View className="h-20" />
       </ScrollView>
+      {editing && (
+        <FormActionButton
+          title="Cập nhật Lớp học"
+          onPress={handleUpdate}
+        />
+      )}
     </AdminPageWrapper>
   );
 }

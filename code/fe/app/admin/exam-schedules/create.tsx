@@ -14,6 +14,7 @@ import { useRouter, Stack } from "expo-router";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { StatusBar } from "expo-status-bar";
 import { examScheduleService } from "../../../services/examSchedule.service";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function CreateExamScheduleScreen() {
@@ -154,42 +155,13 @@ export default function CreateExamScheduleScreen() {
             />
           </View>
 
-          {/* Submit Button */}
-          <TouchableOpacity
-            onPress={handleCreate}
-            disabled={loading}
-            className={`rounded-2xl py-4 items-center flex-row justify-center ${
-              loading ? "bg-blue-300" : "bg-blue-600"
-            }`}
-            style={{
-              shadowColor: "#2563EB",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 5,
-            }}
-          >
-            {loading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <>
-                <Ionicons
-                  name="calendar-outline"
-                  size={20}
-                  color="white"
-                  className="mr-2"
-                />
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-white text-base ml-2"
-                >
-                  Tạo Lịch thi
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
+          </View>
       </ScrollView>
+      <FormActionButton
+        title="Tạo Lịch thi"
+        onPress={handleCreate}
+        loading={loading}
+      />
     </AdminPageWrapper>
   );
 }

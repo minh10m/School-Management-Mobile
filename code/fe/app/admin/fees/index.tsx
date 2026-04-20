@@ -72,14 +72,9 @@ export default function AdminFeesScreen() {
       rightComponent={
         <TouchableOpacity
           onPress={() => router.push("/admin/fees/create" as any)}
-          className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
+          className="w-10 h-10 rounded-2xl bg-[#136ADA] items-center justify-center shadow-lg shadow-blue-200"
         >
-          <Text
-            style={{ fontFamily: "Poppins-Bold", color: "#136ADA" }}
-            className="text-xs"
-          >
-            Thêm mới
-          </Text>
+          <Ionicons name="add" size={24} color="white" />
         </TouchableOpacity>
       }
       searchProps={{
@@ -235,7 +230,7 @@ export default function AdminFeesScreen() {
                 style={{ fontFamily: "Poppins-Medium" }}
                 className="text-gray-400 mt-2 text-center px-10 leading-5"
               >
-                Chưa có dữ liệu học phí cho năm học này.{"\n"}Nhấn "Thêm mới" để
+                Chưa có dữ liệu học phí cho năm học này.{"\n"}Nhấn biểu tượng (+) để
                 bắt đầu.
               </Text>
             </View>

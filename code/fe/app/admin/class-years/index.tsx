@@ -93,15 +93,15 @@ export default function AdminClassYearsScreen() {
         <View className="flex-row items-center gap-2">
            <TouchableOpacity 
              onPress={() => router.push('/admin/class-years/promote')}
-             className="bg-indigo-50 px-3 py-2 rounded-xl border border-indigo-100"
+             className="bg-indigo-500 w-10 h-10 rounded-2xl items-center justify-center shadow-lg shadow-indigo-100"
            >
-             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-indigo-600 text-[10px]">Lên lớp</Text>
+             <Ionicons name="trending-up" size={20} color="white" />
            </TouchableOpacity>
            <TouchableOpacity 
              onPress={() => router.push("/admin/class-years/create" as any)}
-             className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
+             className="bg-[#136ADA] w-10 h-10 rounded-2xl items-center justify-center shadow-lg shadow-blue-200"
            >
-             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xs">Thêm mới</Text>
+             <Ionicons name="add" size={24} color="white" />
            </TouchableOpacity>
         </View>
       }

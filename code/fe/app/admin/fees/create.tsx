@@ -9,6 +9,7 @@ import { feeService } from "../../../services/fee.service";
 import { SCHOOL_YEAR, TERM } from "../../../constants/config";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Platform, Modal } from "react-native";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 
 export default function AdminCreateFeeScreen() {
   const router = useRouter();
@@ -231,24 +232,11 @@ export default function AdminCreateFeeScreen() {
         </View>
 
       </ScrollView>
-
-      {/* Footer Button */}
-      <View className="px-6 py-4 bg-white border-t border-gray-100">
-        <TouchableOpacity
-          onPress={handleCreate}
-          disabled={loading}
-          className={`h-14 rounded-2xl items-center justify-center flex-row shadow-lg shadow-blue-200 ${loading ? 'bg-blue-400' : 'bg-blue-600'}`}
-        >
-          {loading ? (
-             <ActivityIndicator color="white" />
-          ) : (
-            <>
-               <Ionicons name="add-circle" size={24} color="white" className="mr-2" />
-               <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16 }} className="text-white ml-2">Tạo khoản phí</Text>
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
+      <FormActionButton
+        title="Tạo khoản phí"
+        onPress={handleCreate}
+        loading={loading}
+      />
     </AdminPageWrapper>
   );
 }

@@ -16,6 +16,7 @@ import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect } from "react";
 import { scheduleService } from "../../../services/schedule.service";
 import { classYearService } from "../../../services/classYear.service";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { ClassYearResponse } from "../../../types/classYear";
 import { getErrorMessage } from "../../../utils/error";
 
@@ -89,7 +90,7 @@ export default function AdminCreateScheduleScreen() {
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 10,
-          paddingBottom: 40,
+          paddingBottom: 120,
         }}
       >
         {/* Hero Section */}
@@ -237,28 +238,15 @@ export default function AdminCreateScheduleScreen() {
           </View>
         </View>
 
-        {/* Action Button */}
-        <TouchableOpacity
-          onPress={handleSubmit}
-          disabled={loading}
-          className={`h-16 rounded-[24px] flex-row items-center justify-center shadow-lg shadow-blue-200 ${
-            loading ? "bg-blue-300" : "bg-blue-700"
-          }`}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <>
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-lg mr-2">Khởi tạo ngay</Text>
-              <Ionicons name="arrow-forward" size={20} color="white" />
-            </>
-          )}
-        </TouchableOpacity>
-
         <Text style={{ fontFamily: "Poppins-Regular" }} className="text-center text-gray-400 text-[10px] mt-6 px-10">
           Lưu ý: Bạn có thể chỉnh sửa chi tiết các tiết học của Thời khóa biểu này sau khi đã khởi tạo thành công.
         </Text>
       </ScrollView>
+      <FormActionButton
+        title="Khởi tạo thời khóa biểu"
+        onPress={handleSubmit}
+        loading={loading}
+      />
     </AdminPageWrapper>
   );
 }

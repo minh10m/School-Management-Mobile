@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import { teacherService } from "../../../services/teacher.service";
 import { subjectService } from "../../../services/subject.service";
 import { teacherSubjectService } from "../../../services/teacherSubject.service";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { TeacherResponse, TeacherSubject } from "../../../types/teacher";
 import { SubjectResponse } from "../../../types/subject";
 import { getErrorMessage } from "../../../utils/error";
@@ -278,23 +279,6 @@ export default function AdminTeacherDetailScreen() {
               onChangeText={(t: string) => setForm({ ...form, birthday: t })}
               placeholder="1980-05-15"
             />
-
-            <TouchableOpacity
-              className="bg-bright-blue rounded-3xl py-4 items-center mt-4 shadow-md shadow-blue-200"
-              onPress={handleUpdate}
-              disabled={saving}
-            >
-              {saving ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-white text-base"
-                >
-                  Lưu thay đổi
-                </Text>
-              )}
-            </TouchableOpacity>
           </View>
         ) : (
           <View className="mt-4">
@@ -470,6 +454,13 @@ export default function AdminTeacherDetailScreen() {
           </View>
         </View>
       </Modal>
+      {isEditing && (
+        <FormActionButton
+          title="Lưu thay đổi"
+          onPress={handleUpdate}
+          loading={saving}
+        />
+      )}
     </AdminPageWrapper>
   );
 }
