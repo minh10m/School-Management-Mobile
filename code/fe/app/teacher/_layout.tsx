@@ -42,13 +42,17 @@ export default function TeacherLayout() {
       <Stack.Screen name="my-homeroom-class/index" />
 
       <Stack.Screen name="schedules/index" />
-      <Stack.Screen name="assignments/index" />
+      <Stack.Screen name="my-class/assignments" />
       <Stack.Screen name="results/index" />
-      <Stack.Screen name="homeroom-results" />
-      <Stack.Screen name="batch-entry" />
+      <Stack.Screen name="my-homeroom-class/results" />
+      <Stack.Screen name="my-class/batch-entry" />
       <Stack.Screen name="manage-result" />
       <Stack.Screen name="courses/index" />
       <Stack.Screen name="lessons/index" />
+      <Stack.Screen name="submissions/index" />
+      <Stack.Screen name="submissions/[id]" />
+      <Stack.Screen name="attendance/index" />
+      <Stack.Screen name="attendance/[classYearId]" />
     </Stack>
   );
 }

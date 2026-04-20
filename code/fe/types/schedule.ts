@@ -18,6 +18,7 @@ export interface ScheduleDetailItem {
 export interface TeacherScheduleDetailItem {
   scheduleDetailId: string;
   className: string;
+  subjectId: string;
   subjectName: string;
   dayOfWeek: number;
   startTime: string;
