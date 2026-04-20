@@ -124,13 +124,6 @@ export default function AdminCreateEventScreen() {
   return (
     <AdminPageWrapper
       title={isEdit ? 'Chỉnh sửa Sự kiện' : 'Thêm Sự kiện mới'}
-      leftComponent={
-        <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
-          <Text style={{ fontFamily: "Poppins-Regular", color: '#6B7280', fontSize: 16 }}>
-            Hủy
-          </Text>
-        </TouchableOpacity>
-      }
     >
 
       <ScrollView className="flex-1 px-6 pt-5" showsVerticalScrollIndicator={false}>

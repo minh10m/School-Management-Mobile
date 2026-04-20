@@ -3,12 +3,13 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Pressable,
   TextInput,
   ActivityIndicator,
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams, Stack } from "expo-router";
+import { useRouter, useGlobalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { classYearService } from "../../../services/classYear.service";
@@ -21,7 +22,7 @@ import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminClassDetailScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useGlobalSearchParams<{ id: string }>();
   const [classData, setClassData] = useState<ClassYearResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [teachers, setTeachers] = useState<TeacherListItem[]>([]);
@@ -113,6 +114,13 @@ export default function AdminClassDetailScreen() {
   return (
     <AdminPageWrapper
       title={`Lớp ${classData?.className}`}
+      onBack={() => {
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace("/admin/class-years" as any);
+        }
+      }}
       rightComponent={
         <TouchableOpacity
           onPress={() => setEditing(!editing)}
@@ -127,73 +135,67 @@ export default function AdminClassDetailScreen() {
         </TouchableOpacity>
       }
     >
-      <Stack.Screen options={{ headerShown: false }} />
       <ScrollView
         className="flex-1 bg-white"
         showsVerticalScrollIndicator={false}
       >
         {/* Main Identity Header */}
-        <View className="px-6 py-8 items-center bg-gray-50/30">
-          <View className="w-24 h-24 rounded-[36px] bg-white items-center justify-center shadow-sm border border-gray-100 mb-4">
-            <View className="w-20 h-20 rounded-[32px] bg-indigo-500 items-center justify-center shadow-inner">
-              <Ionicons name="business" size={40} color="white" />
+        <View className="px-6 py-12 items-center bg-white">
+          <View className="relative">
+            <View className="w-28 h-28 rounded-[40px] bg-indigo-500 items-center justify-center shadow-2xl shadow-indigo-200">
+              <Ionicons name="business" size={48} color="white" />
+            </View>
+            <View className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-2xl items-center justify-center shadow-lg border border-gray-50">
+               <Ionicons name="school" size={20} color="#6366F1" />
             </View>
           </View>
+          
           <Text
             style={{ fontFamily: "Poppins-Bold" }}
-            className="text-gray-900 text-3xl mb-1"
+            className="text-gray-900 text-4xl mt-6 mb-2 tracking-tight"
           >
             {classData?.className}
           </Text>
-          <View className="flex-row items-center gap-2">
-            <View className="bg-indigo-50 px-4 py-1.5 rounded-2xl border border-indigo-100">
+          
+          <View className="flex-row items-center gap-3">
+            <View className="bg-indigo-50 px-5 py-2 rounded-2xl border border-indigo-100">
               <Text
                 style={{ fontFamily: "Poppins-Bold" }}
-                className="text-indigo-600 text-[10px] uppercase"
+                className="text-indigo-600 text-[11px] uppercase tracking-wider"
               >
                 Khối {classData?.grade}
               </Text>
             </View>
-            <View className="bg-emerald-50 px-4 py-1.5 rounded-2xl border border-emerald-100">
+            <View className="bg-emerald-50 px-5 py-2 rounded-2xl border border-emerald-100">
               <Text
                 style={{ fontFamily: "Poppins-Bold" }}
-                className="text-emerald-600 text-[10px] uppercase"
+                className="text-emerald-600 text-[11px] uppercase tracking-wider"
               >
-                {classData?.schoolYear}
+                Niên khóa {classData?.schoolYear}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Vital Stats Chips */}
-        <View className="flex-row px-8 -mt-6 gap-4">
-          <View className="flex-1 bg-white p-5 rounded-[32px] shadow-sm border border-gray-100 items-center">
-            <Text
-              style={{ fontFamily: "Poppins-Bold" }}
-              className="text-gray-900 text-xl"
-            >
-              {studentsInClass.length}
-            </Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium" }}
-              className="text-gray-400 text-[9px] uppercase tracking-widest"
-            >
-              Học sinh
-            </Text>
-          </View>
-          <View className="flex-1 bg-white p-5 rounded-[32px] shadow-sm border border-gray-100 items-center">
-            <Text
-              style={{ fontFamily: "Poppins-Bold" }}
-              className="text-emerald-500 text-xl"
-            >
-              100%
-            </Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium" }}
-              className="text-gray-400 text-[9px] uppercase tracking-widest"
-            >
-              Chuyên cần
-            </Text>
+        {/* Vital Stats Chips - Redesigned as a premium bar */}
+        <View className="px-8 -mt-6">
+          <View className="bg-white p-6 rounded-[40px] shadow-xl shadow-gray-100 border border-gray-50 flex-row items-center justify-between">
+            <View className="flex-row items-center gap-4">
+               <View className="w-12 h-12 bg-blue-50 rounded-2xl items-center justify-center border border-blue-100">
+                  <Ionicons name="people" size={24} color="#136ADA" />
+               </View>
+               <View>
+                 <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-900 text-xl leading-tight">
+                   {studentsInClass.length}
+                 </Text>
+                 <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px] uppercase tracking-wider">
+                   Học sinh trong lớp
+                 </Text>
+               </View>
+            </View>
+            <View className="bg-blue-50/50 p-2 rounded-full">
+               <Ionicons name="stats-chart" size={16} color="#136ADA" />
+            </View>
           </View>
         </View>
 
@@ -223,56 +225,76 @@ export default function AdminClassDetailScreen() {
                 Chọn Giáo viên Chủ nhiệm
               </Text>
               <View className="gap-3">
-                {teachers.map((t) => (
-                  <TouchableOpacity
-                    key={t.teacherId}
-                    onPress={() =>
-                      setForm(prev => ({ ...prev, homeRoomId: t.teacherId }))
-                    }
-                    className={`flex-row items-center p-4 rounded-[22px] border ${form.homeRoomId === t.teacherId ? "bg-indigo-600 border-indigo-700 shadow-md shadow-indigo-100" : "bg-gray-50 border-gray-100"}`}
-                  >
-                    <View
-                      className={`w-10 h-10 rounded-xl items-center justify-center mr-4 ${form.homeRoomId === t.teacherId ? "bg-indigo-500" : "bg-white"}`}
+                {teachers.map((teacher) => {
+                  const isSelected = form.homeRoomId === teacher.teacherId;
+                  return (
+                    <Pressable
+                      key={teacher.teacherId}
+                      onPress={() =>
+                        setForm(prev => ({ ...prev, homeRoomId: teacher.teacherId }))
+                      }
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        padding: 16,
+                        borderRadius: 20,
+                        borderWidth: 1,
+                        backgroundColor: isSelected ? '#2563EB' : 'white',
+                        borderColor: isSelected ? '#2563EB' : '#F1F5F9',
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: isSelected ? 0.1 : 0.05,
+                        shadowRadius: 2,
+                        elevation: isSelected ? 3 : 1,
+                      }}
                     >
-                      <Ionicons
-                        name="person"
-                        size={20}
-                        color={
-                          form.homeRoomId === t.teacherId ? "white" : "#6366F1"
-                        }
-                      />
-                    </View>
-                    <View className="flex-1">
-                      <Text
+                      <View
                         style={{
-                          fontFamily: "Poppins-Bold",
-                          fontSize: 13,
-                          color:
-                            form.homeRoomId === t.teacherId ? "white" : "#1F2937",
+                          width: 44, 
+                          height: 44, 
+                          borderRadius: 14, 
+                          backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : '#F0F7FF',
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          marginRight: 14
                         }}
                       >
-                        {t.fullName}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: "Poppins-Medium",
-                          fontSize: 9,
-                          color:
-                            form.homeRoomId === t.teacherId ? "rgba(255,255,255,0.7)" : "#9CA3AF",
-                        }}
-                      >
-                         {t.subjectNames && t.subjectNames.length > 0 ? t.subjectNames.join(" • ") : "Giáo viên"}
-                      </Text>
-                    </View>
-                    {form.homeRoomId === t.teacherId && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={24}
-                        color="white"
-                      />
-                    )}
-                  </TouchableOpacity>
-                ))}
+                        <Ionicons
+                          name="person"
+                          size={20}
+                          color={isSelected ? "white" : "#2563EB"}
+                        />
+                      </View>
+                      <View className="flex-1">
+                        <Text
+                          style={{
+                            fontFamily: "Poppins-Bold",
+                            fontSize: 14,
+                            color: isSelected ? "white" : "#111827",
+                          }}
+                        >
+                          {teacher.fullName}
+                        </Text>
+                        <Text
+                          style={{
+                            fontFamily: "Poppins-Medium",
+                            fontSize: 10,
+                            color: isSelected ? "rgba(255,255,255,0.7)" : "#6B7280",
+                          }}
+                        >
+                           {teacher.subjectNames && teacher.subjectNames.length > 0 ? teacher.subjectNames.join(" • ") : "Giáo viên"}
+                        </Text>
+                      </View>
+                      {isSelected && (
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={24}
+                          color="white"
+                        />
+                      )}
+                    </Pressable>
+                  );
+                })}
               </View>
             </View>
 
@@ -291,81 +313,93 @@ export default function AdminClassDetailScreen() {
         ) : (
           <View className="px-6 py-10">
             {/* Advisor Spotlight Card */}
-            <View className="mb-10">
-              <Text
-                style={{ fontFamily: "Poppins-Bold" }}
-                className="text-gray-400 text-[10px] uppercase tracking-[2px] mb-4 ml-2"
-              >
-                QUẢN LÝ CHỦ NHIỆM
-              </Text>
+            <View className="mb-12">
+              <View className="flex-row items-center justify-between mb-4 px-2">
+                <Text
+                  style={{ fontFamily: "Poppins-Bold" }}
+                  className="text-gray-400 text-[10px] uppercase tracking-[3px]"
+                >
+                  QUẢN LÝ CHỦ NHIỆM
+                </Text>
+                <View className="w-8 h-px bg-gray-100" />
+              </View>
+              
               <TouchableOpacity
                 onPress={() =>
                   classData?.homeRoomId &&
                   router.push(`/admin/teachers/${classData.homeRoomId}` as any)
                 }
-                className="bg-white rounded-[36px] px-6 py-7 border border-gray-100 shadow-sm flex-row items-center gap-5"
+                className="bg-white rounded-[40px] px-7 py-8 border border-gray-100 shadow-xl shadow-gray-200 flex-row items-center gap-6"
               >
-                <View className="w-16 h-16 rounded-[24px] bg-purple-50 items-center justify-center border border-purple-100">
-                  <Ionicons name="medal" size={32} color="#A855F7" />
+                <View className="w-18 h-18 rounded-[28px] bg-purple-50 items-center justify-center border border-purple-100 shadow-sm">
+                  <Ionicons name="medal" size={36} color="#A855F7" />
                 </View>
                 <View className="flex-1">
                   <Text
                     style={{ fontFamily: "Poppins-Bold" }}
-                    className="text-gray-900 text-xl leading-tight"
+                    className="text-gray-900 text-2xl leading-tight"
                   >
                     {classData?.homeRoomTeacher ||
                       (classData?.homeRoomId
-                        ? teachers.find(
-                            (t) => t.teacherId === classData.homeRoomId,
-                          )?.fullName
-                        : null) ||
+                         ? teachers.find(
+                             (t) => t.teacherId === classData.homeRoomId,
+                           )?.fullName
+                         : null) ||
                       "Chưa phân công"}
                   </Text>
-                  <Text
-                    style={{ fontFamily: "Poppins-Medium" }}
-                    className="text-gray-400 text-xs mt-0.5"
-                  >
-                    Giáo viên Chủ nhiệm
-                  </Text>
+                  <View className="flex-row items-center gap-2 mt-1">
+                     <View className="w-2 h-2 rounded-full bg-emerald-500" />
+                     <Text
+                        style={{ fontFamily: "Poppins-Medium" }}
+                        className="text-gray-400 text-xs"
+                      >
+                        Giáo viên Chủ nhiệm
+                      </Text>
+                  </View>
                 </View>
-                <View className="bg-gray-50 p-2 rounded-full">
-                  <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
+                <View className="bg-gray-50/50 p-3 rounded-full">
+                  <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
                 </View>
               </TouchableOpacity>
             </View>
 
             {/* Students Roster Section */}
-            <View className="mb-6 flex-row items-center justify-between px-2">
+            <View className="mb-8 flex-row items-end justify-between px-2">
               <View>
                 <Text
                   style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-gray-900 text-2xl"
+                  className="text-gray-900 text-3xl tracking-tight"
                 >
-                  Danh sách Học sinh
+                  Học sinh
                 </Text>
                 <Text
                   style={{ fontFamily: "Poppins-Medium" }}
-                  className="text-gray-400 text-[10px] uppercase tracking-widest mt-1"
+                  className="text-indigo-400 text-[10px] uppercase tracking-widest mt-1"
                 >
-                  Tổng cộng {studentsInClass.length} thành viên
+                  Danh sách chính thức
                 </Text>
+              </View>
+              <View className="bg-indigo-50 px-4 py-1.5 rounded-full">
+                 <Text style={{ fontFamily: "Poppins-Bold" }} className="text-indigo-600 text-[10px]">
+                   {studentsInClass.length} THÀNH VIÊN
+                 </Text>
               </View>
             </View>
 
             {studentsInClass.length > 0 ? (
-              <View className="gap-4">
+              <View className="gap-5">
                 {studentsInClass.map((s, idx) => (
                   <TouchableOpacity
                     key={s.studentId}
                     onPress={() =>
                       router.push(`/admin/students/${s.studentId}` as any)
                     }
-                    className="flex-row items-center p-5 bg-white border border-gray-100 rounded-[32px] shadow-sm"
+                    className="flex-row items-center p-6 bg-white border border-gray-100 rounded-[36px] shadow-sm active:opacity-70"
                   >
-                    <View className="w-12 h-12 rounded-[18px] bg-blue-50 items-center justify-center mr-4 border border-blue-100">
+                    <View className="w-14 h-14 rounded-[22px] bg-blue-50 items-center justify-center mr-5 border border-blue-100/50">
                       <Text
                         style={{ fontFamily: "Poppins-Bold" }}
-                        className="text-[#136ADA] text-xl"
+                        className="text-[#136ADA] text-2xl"
                       >
                         {s.fullName.charAt(0)}
                       </Text>
@@ -373,30 +407,34 @@ export default function AdminClassDetailScreen() {
                     <View className="flex-1">
                       <Text
                         style={{ fontFamily: "Poppins-Bold" }}
-                        className="text-gray-900 text-base leading-tight"
+                        className="text-gray-900 text-lg leading-tight"
                       >
                         {s.fullName}
                       </Text>
-                      <View className="flex-row items-center mt-1">
-                        <Ionicons
-                          name="finger-print-outline"
-                          size={12}
-                          color="#9CA3AF"
-                        />
-                        <Text
-                          style={{ fontFamily: "Poppins-Medium" }}
-                          className="text-gray-400 text-[10px] ml-1 uppercase"
-                        >
-                          {s.studentId.split("-")[0]}
-                        </Text>
+                      <View className="flex-row items-center mt-1.5 gap-2">
+                        <View className="flex-row items-center">
+                           <Ionicons
+                             name="finger-print-outline"
+                             size={12}
+                             color="#94A3B8"
+                           />
+                           <Text
+                             style={{ fontFamily: "Poppins-Medium" }}
+                             className="text-gray-400 text-[10px] ml-1 uppercase"
+                           >
+                             {s.studentId.split("-")[0]}
+                           </Text>
+                        </View>
+                        <View className="w-1 h-1 rounded-full bg-gray-200" />
+                        <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-[10px]">Active</Text>
                       </View>
                     </View>
-                    <View className="bg-emerald-50 px-3 py-1 rounded-full">
+                    <View className="bg-emerald-50 px-4 py-1.5 rounded-2xl border border-emerald-100/50">
                       <Text
                         style={{ fontFamily: "Poppins-Bold" }}
-                        className="text-emerald-500 text-[9px]"
+                        className="text-emerald-600 text-[9px] uppercase tracking-wider"
                       >
-                        ĐANG HỌC
+                        Đang học
                       </Text>
                     </View>
                   </TouchableOpacity>

@@ -112,7 +112,6 @@ export default function AdminClassYearsScreen() {
         onFilterPress: openFilter,
       }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Advanced Filter Bottom Sheet */}
       <Modal visible={isFilterVisible} animationType="slide" transparent={true} onRequestClose={() => setIsFilterVisible(false)}>
@@ -120,7 +119,10 @@ export default function AdminClassYearsScreen() {
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
               <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Bộ lọc</Text>
-              <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
+              <TouchableOpacity
+                onPress={() => setIsFilterVisible(false)}
+                className="bg-white p-2 rounded-full border border-gray-100"
+              >
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
             </View>

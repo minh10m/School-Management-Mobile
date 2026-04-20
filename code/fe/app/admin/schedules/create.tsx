@@ -82,13 +82,6 @@ export default function AdminCreateScheduleScreen() {
   return (
     <AdminPageWrapper
       title="Khởi tạo TKB"
-      leftComponent={
-        <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
-          <Text style={{ fontFamily: "Poppins-Regular", color: '#6B7280', fontSize: 16 }}>
-            Hủy
-          </Text>
-        </TouchableOpacity>
-      }
     >
       <ScrollView
         className="flex-1 bg-gray-50/30"

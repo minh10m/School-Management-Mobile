@@ -221,19 +221,6 @@ export default function AdminCreateUserScreen() {
   return (
     <AdminPageWrapper
       title="Tạo tài khoản mới"
-      leftComponent={
-        <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
-          <Text
-            style={{
-              fontFamily: "Poppins-Regular",
-              color: "#6B7280",
-              fontSize: 16,
-            }}
-          >
-            Hủy
-          </Text>
-        </TouchableOpacity>
-      }
       rightComponent={
         <TouchableOpacity
           onPress={handleSubmit}

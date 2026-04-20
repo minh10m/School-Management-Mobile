@@ -48,13 +48,6 @@ export default function AdminCreateSubjectScreen() {
   return (
     <AdminPageWrapper
       title="Thêm Môn học"
-      leftComponent={
-        <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
-          <Text style={{ fontFamily: "Poppins-Regular", color: '#6B7280', fontSize: 16 }}>
-            Hủy
-          </Text>
-        </TouchableOpacity>
-      }
     >
 
       <ScrollView
