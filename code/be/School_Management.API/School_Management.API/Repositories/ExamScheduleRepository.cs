@@ -516,7 +516,7 @@ namespace School_Management.API.Repositories
 
         public async Task<(ExamScheduleDetailResponse? data, string? message)> UpdateExamScheduleDetail(UpdateExamScheduleDetail request, Guid examScheduleDetailId)
         {
-            var examScheduleDetail = await context.ExamScheduleDetail.AsNoTracking().Include(x => x.Subject)
+            var examScheduleDetail = await context.ExamScheduleDetail.Include(x => x.Subject)
                                                                                     .Include(x => x.Teacher).ThenInclude(x => x.User)
                                                                                     .FirstOrDefaultAsync(x => x.Id == examScheduleDetailId);
             if (examScheduleDetail == null) return (null, "NOT_FOUND_EXAM_SCHEDULE_DETAIL");

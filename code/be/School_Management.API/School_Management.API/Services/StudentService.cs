@@ -31,9 +31,14 @@ namespace School_Management.API.Services
             var currentClassRelation = await studentRepository.GetClassRelationByStudentId(studentId);
             if (currentClassRelation == null)
                 throw new NotFoundException("Học sinh này không có lớp để thay đổi");
+
             if(currentClassRelation.ClassYearId != requestClassYearId)
             {
+                var schoolYear = await context.ClassYear.AsNoTracking().Where(x => x.Id == requestClassYearId).Select(x => x.SchoolYear).FirstOrDefaultAsync();
+                var isExisted = await context.StudentClassYear.AnyAsync(x => x.StudentId == studentId && x.SchoolYear == schoolYear);
+                if (isExisted) throw new ConflictException("Học sinh đã tồn tại lớp trong năm học này rồi, vui lòng chọn lớp năm học khác");
                 currentClassRelation.ClassYearId = (Guid)requestClassYearId;
+                currentClassRelation.SchoolYear = schoolYear;
             }
 
             await context.SaveChangesAsync();

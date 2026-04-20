@@ -385,6 +385,9 @@ namespace School_Management.API.Repositories
                         .Select(sc => sc.StudentId)
                         .ToListAsync();
 
+                    var isExisted = await context.StudentClassYear.AnyAsync(x => studentIds.Contains(x.StudentId) && x.SchoolYear == request.CurrentSystemYear);
+                    if (isExisted) return (false, "CONFLICT_SCHOOLYEAR");
+
                     if (studentIds.Any())
                     {
                         var existingStudentIds = await context.StudentClassYear
@@ -398,7 +401,8 @@ namespace School_Management.API.Repositories
                             {
                                 StudentClassYearId = Guid.NewGuid(),
                                 StudentId = sId,
-                                ClassYearId = pair.ToClassYearId
+                                ClassYearId = pair.ToClassYearId,
+                                SchoolYear = request.CurrentSystemYear
                             }).ToList();
 
                         if (newClassAssignments.Any())
