@@ -50,6 +50,17 @@ namespace School_Management.API.Services
 
         }
 
+        public async Task<PagedResponse<CourseResponse>> GetMyCourseForStudent(MyCourseFilterRequest request, Guid userId)
+        {
+            var (result, message) = await courseRepository.GetMyCourseForStudent(request, userId);
+            return message switch
+            {
+                "NOT_FOUND_STUDENT" => throw new NotFoundException("Bạn không phải là học sinh"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<PagedResponse<CourseResponse>> GetMyCourseForTeacher(MyCourseFilterRequest request, Guid userId)
         {
             var (result, message) = await courseRepository.GetMyCourseForTeacher(request, userId);

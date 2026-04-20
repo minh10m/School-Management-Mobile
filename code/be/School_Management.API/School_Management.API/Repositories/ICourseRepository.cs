@@ -12,7 +12,7 @@ namespace School_Management.API.Repositories
         public Task<(CourseResponse? data, string? message)> ReviseCourseForAdmin(Guid courseId, UpdateStatusCourseRequest request);
         public Task<PagedResponse<CourseResponse>> GetAllCourseForAdmin(CourseFilterRequestAdmin request);
         public Task<PagedResponse<CourseResponse>> GetAllCourseForTeacherAndStudent(CourseFilterRequestTeacherAndStudent request);
-
+        public Task<(PagedResponse<CourseResponse>? data, string message)> GetMyCourseForStudent(MyCourseFilterRequest request, Guid userId);
 
     }
 }

@@ -142,5 +142,26 @@ namespace School_Management.API.Controllers
             });
         }
 
+        [HttpGet]
+        [ValidateModel]
+        [Route("registered")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetMyCourseForStudent([FromQuery] MyCourseFilterRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await courseService.GetMyCourseForStudent(request, Guid.Parse(userId));
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
+        }
     }
 }
