@@ -6,323 +6,497 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState, useCallback, useEffect } from "react";
-import { authService } from "../../services/auth.service";
 import { useAuthStore } from "../../store/authStore";
-import { classYearService } from "../../services/classYear.service";
-import { assignmentService } from "../../services/assignment.service";
-import { courseService } from "../../services/course.service";
+import { useConfigStore } from "../../store/configStore";
 import SideMenu from "../../components/SideMenu";
-
-const QUICK_ACTIONS = [
-  {
-    label: "My Classes",
-    icon: "school-outline",
-    color: "bg-blue-100",
-    iconColor: "#136ADA",
-    route: "/teacher/classes",
-  },
-  {
-    label: "Attendance",
-    icon: "checkmark-circle-outline",
-    color: "bg-green-100",
-    iconColor: "#22C55E",
-    route: "/teacher/attendance",
-  },
-  {
-    label: "Schedule",
-    icon: "calendar-outline",
-    color: "bg-purple-100",
-    iconColor: "#A855F7",
-    route: "/teacher/schedules",
-  },
-  {
-    label: "Assignments",
-    icon: "document-text-outline",
-    color: "bg-yellow-100",
-    iconColor: "#EAB308",
-    route: "/teacher/assignments",
-  },
-  {
-    label: "Submissions",
-    icon: "list-circle-outline",
-    color: "bg-pink-100",
-    iconColor: "#F43F5E",
-    route: "/teacher/submissions",
-  },
-  {
-    label: "Grades",
-    icon: "ribbon-outline",
-    color: "bg-teal-100",
-    iconColor: "#14B8A6",
-    route: "/teacher/results",
-  },
-  {
-    label: "Courses",
-    icon: "play-circle-outline",
-    color: "bg-orange-100",
-    iconColor: "#F97316",
-    route: "/teacher/courses",
-  },
-  {
-    label: "Lessons",
-    icon: "folder-open-outline",
-    color: "bg-gray-100",
-    iconColor: "#6B7280",
-    route: "/teacher/lessons",
-  },
-  {
-    label: "Students",
-    icon: "people-outline",
-    color: "bg-indigo-100",
-    iconColor: "#6366F1",
-    route: "/teacher/students",
-  },
-  {
-    label: "Teachers",
-    icon: "id-card-outline",
-    color: "bg-red-100",
-    iconColor: "#EF4444",
-    route: "/teacher/community/teachers",
-  },
-];
-
+import { classYearService } from "../../services/classYear.service";
+import { attendanceService } from "../../services/attendance.service";
+import { scheduleService } from "../../services/schedule.service";
+import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
 export default function TeacherDashboard() {
   const { userInfo } = useAuthStore();
-  const teacherName = userInfo?.fullName?.split(" ").at(-1) ?? "Teacher";
+  const { schoolYear, term } = useConfigStore();
+  const teacherName = userInfo?.fullName?.split(" ").at(-1) ?? "Giáo viên";
 
-  const [stats, setStats] = useState({
-    classes: "0",
-    students: "0",
-    assignments: "0",
-    courses: "0",
-  });
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [isMenuVisible, setMenuVisible] = useState(false);
+  const [homeroomClass, setHomeroomClass] = useState<any>(null);
+  const [loadingHomeroom, setLoadingHomeroom] = useState(true);
+  const [teachingClasses, setTeachingClasses] = useState<any[]>([]);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [attendanceStats, setAttendanceStats] = useState({
+    present: 0,
+    absent: 0,
+    late: 0,
+    rate: 0,
+    total: 0,
+  });
+  const [loadingAttendance, setLoadingAttendance] = useState(false);
 
-  const fetchStats = useCallback(async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
-      setLoading(true);
-      const [homeroom, teaching, assignments, courses] = await Promise.all([
-        classYearService.getHomeroomClass().catch(() => null),
-        classYearService.getTeachingClasses().catch(() => []),
-        assignmentService.getAssignments({}).catch(() => []), // Adjust if needed
-        courseService.getMyCourses().catch(() => []),
+      setLoadingHomeroom(true);
+      setLoadingStats(true);
+      const [hrRes, tcRes, schRes] = await Promise.all([
+        classYearService.getHomeroomClass(schoolYear),
+        classYearService.getTeachingClasses({ schoolYear: schoolYear.toString() }),
+        scheduleService
+          .getMyTeachingSchedule({
+            Term: term,
+            SchoolYear: schoolYear,
+          })
+          .catch(() => []),
       ]);
 
-      const totalClasses = (homeroom ? 1 : 0) + teaching.length;
-      
-      // For students, we might need a more direct way, but let's assume we sum them
-      // If teaching summary doesn't have count, we might just show homeroom count or 0 for now
-      // or fetch homeroom details.
-      const studentCount = homeroom?.studentCount || 0;
-
-      setStats({
-        classes: totalClasses.toString(),
-        students: studentCount.toString(), // or sum if available
-        assignments: assignments.length.toString(),
-        courses: courses.length.toString(),
+      // Map subjects from schedule to teaching classes
+      const mappedTeaching = tcRes.map((cls: any) => {
+        const match = schRes.find((s: any) => s.className === cls.className);
+        return {
+          ...cls,
+          subjectId: match?.subjectId || cls.subjectId || "",
+          subjectName:
+            match?.subjectName || cls.subjectName || "Chưa gán môn",
+        };
       });
-    } catch (error) {
-      console.error("Error fetching teacher stats:", error);
+
+      setHomeroomClass(hrRes);
+      setTeachingClasses(mappedTeaching);
+    } catch (err) {
+      console.error("Error fetching teacher dashboard data:", err);
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setLoadingHomeroom(false);
+      setLoadingStats(false);
+    }
+  }, [schoolYear, term]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  const fetchAttendanceStats = useCallback(async (classYearId: string) => {
+    try {
+      setLoadingAttendance(true);
+      const now = new Date();
+      const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      
+      const data = await attendanceService.getClassAttendance({
+        classYearId,
+        date: localToday,
+      });
+
+      const present = data.filter(
+        (i) => i.status === "present" || i.status === "Có mặt",
+      ).length;
+      const absent = data.filter(
+        (i) => i.status === "absent" || i.status === "Vắng mặt",
+      ).length;
+      const late = data.filter(
+        (i) => i.status === "late" || i.status === "Đi trễ",
+      ).length;
+      const total = data.length;
+      const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+
+      setAttendanceStats({ present, absent, late, rate, total });
+    } catch (err) {
+      console.error("Error fetching attendance stats:", err);
+    } finally {
+      setLoadingAttendance(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+    if (homeroomClass?.classYearId) {
+      fetchAttendanceStats(homeroomClass.classYearId);
+    }
+  }, [homeroomClass, fetchAttendanceStats]);
 
-  const STAT_CARDS = [
+  const TEACHER_STATS = [
     {
-      label: "Classes",
-      value: stats.classes,
-      icon: "school",
+      label: "Lớp chủ nhiệm",
+      value: homeroomClass ? 1 : 0,
+      icon: "star",
       color: "#136ADA",
       bg: "bg-blue-50",
     },
     {
-      label: "Students",
-      value: stats.students,
+      label: "Lớp giảng dạy",
+      value: teachingClasses.length,
+      icon: "book",
+      color: "#22C55E",
+      bg: "bg-green-50",
+    },
+    {
+      label: "Học sinh CN",
+      value: homeroomClass?.students?.length || 0,
       icon: "people",
       color: "#A855F7",
       bg: "bg-purple-50",
     },
     {
-      label: "Assignments",
-      value: stats.assignments,
-      icon: "document-text",
-      color: "#14B8A6",
-      bg: "bg-teal-50",
-    },
-    {
-      label: "Courses",
-      value: stats.courses,
-      icon: "play-circle",
+      label: "Tiết dạy hôm nay",
+      value: "04",
+      icon: "time",
       color: "#F97316",
       bg: "bg-orange-50",
     },
   ];
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchStats();
-  }, [fetchStats]);
-
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <StatusBar hidden />
-
-      {/* Header */}
-      <View className="flex-row justify-between items-center px-6 pt-4 mb-6">
+    <AdminPageWrapper
+      showLogo={true}
+      leftComponent={
         <TouchableOpacity onPress={() => setMenuVisible(true)}>
           <Ionicons name="menu-outline" size={28} color="black" />
         </TouchableOpacity>
-        <View className="flex-row items-center gap-2">
-          <Ionicons name="book" size={24} color="#136ADA" />
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-bright-blue text-xl"
-          >
-            Teacher Portal
-          </Text>
-        </View>
-        <TouchableOpacity onPress={() => router.push("/teacher/edit-profile")}>
-          <Ionicons name="person-circle-outline" size={28} color="black" />
+      }
+      rightComponent={
+        <TouchableOpacity
+          onPress={() => router.push("/teacher/notifications" as any)}
+        >
+          <Ionicons name="notifications-outline" size={28} color="black" />
         </TouchableOpacity>
-      </View>
+      }
+    >
+      <StatusBar hidden />
 
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Welcome Greeting */}
         <View className="px-6 mt-6 mb-2">
           <Text
             style={{ fontFamily: "Poppins-SemiBold" }}
             className="text-black text-xl"
           >
-            Hi, Welcome, {teacherName} 👋
+            Chào mừng bạn, {teacherName} 👋
           </Text>
           <Text
             style={{ fontFamily: "Poppins-Regular" }}
             className="text-gray-400 text-xs"
           >
-            Teacher Dashboard for School Year 2025-2026
+            Hôm nay bạn có 4 tiết dạy.
           </Text>
         </View>
 
-        {/* Stats Grid */}
-        <View className="px-6 mt-6 mb-5">
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-gray-500 text-xs mb-3 uppercase tracking-widest"
-          >
-            Overview
-          </Text>
-          <View className="flex-row flex-wrap gap-3">
-            {STAT_CARDS.map((s) => (
-              <View
-                key={s.label}
-                className={`${s.bg} flex-1 min-w-[44%] rounded-3xl p-5`}
-              >
-                <View className="flex-row items-center justify-between mb-2">
-                  <View className="w-8 h-8 rounded-full bg-white/60 items-center justify-center">
-                    <Ionicons name={s.icon as any} size={18} color={s.color} />
-                  </View>
-                  {loading && !refreshing ? (
-                    <ActivityIndicator size="small" color={s.color} />
-                  ) : (
-                    <Text
-                      style={{ fontFamily: "Poppins-Bold", color: s.color }}
-                      className="text-2xl"
-                    >
-                      {s.value}
-                    </Text>
-                  )}
-                </View>
-                <Text
-                  style={{ fontFamily: "Poppins-Medium" }}
-                  className="text-gray-600/80 text-xs"
-                >
-                  {s.label}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Quick Actions */}
-        <View className="px-6 mb-5">
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-gray-500 text-xs mb-3 uppercase tracking-widest"
-          >
-            Management
-          </Text>
-          <View className="flex-row flex-wrap justify-between gap-y-3">
-            {QUICK_ACTIONS.map((action) => (
-              <TouchableOpacity
-                key={action.label}
-                className={`${action.color} w-[31%] py-6 rounded-2xl items-center justify-center gap-2`}
-                onPress={() => router.push(action.route as any)}
-              >
-                <View className="w-10 h-10 bg-white/50 rounded-full items-center justify-center">
-                  <Ionicons
-                    name={action.icon as any}
-                    size={20}
-                    color={action.iconColor}
-                  />
-                </View>
-                <Text
-                  style={{ fontFamily: "Poppins-Medium" }}
-                  className="text-black text-xs text-center"
-                >
-                  {action.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Bottom Banner/Note */}
-        <View className="mx-6 mb-10 p-5 bg-teal-500 rounded-3xl overflow-hidden shadow-lg shadow-teal-200">
-          <View className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10" />
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-white text-base"
-          >
-            Quick Action
-          </Text>
-          <Text
-            style={{ fontFamily: "Poppins-Regular" }}
-            className="text-white/80 text-xs mt-1"
-          >
-            Review missing assignment submissions across all your active
-            courses.
-          </Text>
-          <TouchableOpacity className="bg-white/20 self-start px-4 py-1.5 rounded-full mt-4">
+        {/* Homeroom Management Section (Featured) */}
+        {homeroomClass && (
+          <View className="px-6 mb-8 mt-4">
             <Text
               style={{ fontFamily: "Poppins-SemiBold" }}
-              className="text-white text-[10px]"
+              className="text-gray-500 text-xs mb-3 uppercase tracking-widest"
             >
-              Review Now
+              Quản lý Chủ nhiệm
             </Text>
-          </TouchableOpacity>
+            <View className="bg-white border border-gray-100 rounded-[40px] p-6 shadow-sm overflow-hidden min-h-[220px] relative">
+              {/* Background decoration */}
+              <View
+                className="absolute right-[-20] top-10 w-40 h-40 bg-blue-500/5 rounded-full"
+                style={{ transform: [{ scale: 1.2 }] }}
+              />
+
+              <View className="z-10 flex-1 justify-between">
+                <View>
+                  <Text
+                    className="text-[#136ADA] text-sm mb-1"
+                    style={{ fontFamily: "Poppins-Bold" }}
+                  >
+                    Năm học {schoolYear}
+                  </Text>
+
+                  <Text
+                    className="text-[#136ADA] leading-tight"
+                    style={{
+                      fontFamily: "Poppins-Bold",
+                      fontSize: 38,
+                      maxWidth: "80%",
+                    }}
+                  >
+                    Lớp {homeroomClass.className}
+                  </Text>
+                  <Text
+                    style={{ fontFamily: "Poppins-Medium" }}
+                    className="text-gray-400 text-xs mt-1"
+                  >
+                    Bạn đang là Giáo viên chủ nhiệm
+                  </Text>
+                </View>
+
+                <View className="flex-row items-center gap-2 mt-6">
+                  <TouchableOpacity
+                    onPress={() => router.push("/teacher/my-homeroom-class")}
+                    className="bg-[#136ADA] px-6 py-3 rounded-2xl shadow-md shadow-blue-200"
+                  >
+                    <Text
+                      style={{ fontFamily: "Poppins-Bold" }}
+                      className="text-white text-xs"
+                    >
+                      Vào lớp học
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Decorative icon */}
+              <View className="absolute right-4 bottom-4 opacity-10">
+                <Ionicons name="star" size={100} color="#136ADA" />
+              </View>
+            </View>
+          </View>
+        )}
+
+
+        {/* Teaching Classes Horizontal Section */}
+        <View className="mb-8 mt-2">
+          <View className="flex-row justify-between items-center px-6 mb-4">
+            <Text
+              style={{ fontFamily: "Poppins-SemiBold" }}
+              className="text-gray-500 text-xs mb-0 uppercase tracking-widest"
+            >
+              Lớp học giảng dạy
+            </Text>
+            <TouchableOpacity onPress={() => router.push("/teacher/my-class")}>
+              <Text
+                className="text-[#136ADA] text-sm"
+                style={{ fontFamily: "Poppins-Medium" }}
+              >
+                Tất cả
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            data={teachingClasses}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 24, gap: 16 }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: `/teacher/my-class/${item.classYearId}`,
+                    params: {
+                      subjectId: item.subjectId,
+                      subjectName: item.subjectName,
+                    },
+                  } as any)
+                }
+                className="bg-[#136ADA] w-64 p-6 rounded-[32px] shadow-lg shadow-blue-100"
+              >
+                <View className="flex-row justify-between items-start mb-6">
+                  <View className="flex-row items-center gap-3">
+                    <View className="bg-white/20 p-2 rounded-xl">
+                      <Ionicons name="school-outline" size={22} color="white" />
+                    </View>
+                    <View>
+                      <Text
+                        className="text-white text-lg"
+                        style={{ fontFamily: "Poppins-Bold" }}
+                      >
+                        {item.className}
+                      </Text>
+                      <Text
+                        className="text-white/80 text-[10px]"
+                        style={{ fontFamily: "Poppins-Medium" }}
+                      >
+                        {item.subjectName} • Khối {item.grade}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                <View className="flex-row items-center justify-between mt-2">
+                  <View className="flex-row items-center gap-1">
+                    <Ionicons name="people-outline" size={14} color="white" />
+                    <Text
+                      className="text-white text-xs"
+                      style={{ fontFamily: "Poppins-Bold" }}
+                    >
+                      {item.studentCount || "40"}
+                    </Text>
+                    <Text
+                      className="text-white/70 text-[10px]"
+                      style={{ fontFamily: "Poppins-Regular" }}
+                    >
+                      Học sinh
+                    </Text>
+                  </View>
+                  <View className="bg-white/20 px-3 py-1.5 rounded-xl">
+                    <Ionicons name="arrow-forward" size={16} color="white" />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item.classYearId.toString()}
+            ListEmptyComponent={() => (
+              <View className="w-64 bg-gray-50 border border-gray-100 p-5 rounded-[32px] items-center justify-center">
+                <Ionicons name="school-outline" size={32} color="#CCC" />
+                <Text
+                  className="text-gray-400 mt-2 text-xs"
+                  style={{ fontFamily: "Poppins-Medium" }}
+                >
+                  Chưa có lớp giảng dạy
+                </Text>
+              </View>
+            )}
+          />
+        </View>
+
+        {/* Teaching Activities Section (Service Grid) */}
+        <View className="px-6 mb-8 mt-2">
+          <Text
+            style={{ fontFamily: "Poppins-SemiBold" }}
+            className="text-gray-500 text-xs mb-3 uppercase tracking-widest"
+          >
+            Tiện ích Nghiệp vụ
+          </Text>
+          <View className="flex-row flex-wrap justify-between gap-y-4">
+            <TeachingCard
+              icon="calendar"
+              label="Lịch dạy"
+              route="/teacher/schedules"
+              color="bg-teal-100"
+              iconColor="#14B8A6"
+            />
+            <TeachingCard
+              icon="library"
+              label="Khóa học"
+              route="/teacher/courses"
+              color="bg-orange-100"
+              iconColor="#F97316"
+            />
+            <TeachingCard
+              icon="time"
+              label="Lịch thi"
+              route="/teacher/exam-schedules"
+              color="bg-rose-100"
+              iconColor="#F43F5E"
+            />
+            <TeachingCard
+              icon="people"
+              label="Đồng nghiệp"
+              route="/teacher/community/teachers"
+              color="bg-indigo-100"
+              iconColor="#6366F1"
+            />
+          </View>
+        </View>
+
+        {/* Bottom Banner Redesigned */}
+        <View className="px-6 pb-12 mt-2">
+          <View className="bg-white border border-gray-100 rounded-[40px] p-6 shadow-sm overflow-hidden min-h-[160px] relative">
+            <View
+              className="absolute right-[-10] top-5 w-32 h-32 bg-teal-500/5 rounded-full"
+              style={{ transform: [{ scale: 1.5 }] }}
+            />
+
+            <View className="z-10 flex-1 justify-between">
+              <View>
+                <Text
+                  className="text-[#14B8A6] text-sm mb-1"
+                  style={{ fontFamily: "Poppins-Bold" }}
+                >
+                  Thông báo mới
+                </Text>
+                <Text
+                  className="text-gray-800 leading-snug"
+                  style={{ fontFamily: "Poppins-SemiBold", fontSize: 18 }}
+                  numberOfLines={2}
+                >
+                  Kiểm tra các bài nộp còn thiếu từ học sinh trong tuần này.
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => router.push("/teacher/notifications" as any)}
+                className="bg-teal-50 self-start px-5 py-2 rounded-xl mt-4"
+              >
+                <Text
+                  style={{ fontFamily: "Poppins-Bold" }}
+                  className="text-[#14B8A6] text-[10px] uppercase tracking-widest"
+                >
+                  Kiểm tra ngay
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View className="absolute right-4 bottom-4 opacity-10">
+              <Ionicons name="notifications" size={60} color="#14B8A6" />
+            </View>
+          </View>
         </View>
       </ScrollView>
       <SideMenu visible={isMenuVisible} onClose={() => setMenuVisible(false)} />
-    </SafeAreaView>
+    </AdminPageWrapper>
+  );
+}
+// --- Helper Components ---
+
+function HomeroomAction({
+  icon,
+  label,
+  route,
+  disabled,
+  loading,
+}: {
+  icon: string;
+  label: string;
+  route: string;
+  disabled?: boolean;
+  loading?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      onPress={() => !disabled && !loading && router.push(route as any)}
+      className={`items-center gap-1.5 ${disabled ? "opacity-30" : ""}`}
+    >
+      <View className="w-10 h-10 bg-white/20 rounded-2xl items-center justify-center">
+        {loading ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <Ionicons name={icon as any} size={16} color="white" />
+        )}
+      </View>
+      <Text
+        style={{ fontFamily: "Poppins-SemiBold" }}
+        className="text-white text-[9px]"
+      >
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
+function TeachingCard({
+  icon,
+  label,
+  route,
+  color,
+  iconColor,
+}: {
+  icon: string;
+  label: string;
+  route: string;
+  color: string;
+  iconColor: string;
+}) {
+  return (
+    <TouchableOpacity
+      onPress={() => router.push(route as any)}
+      className={`${color} w-[31%] py-6 rounded-2xl items-center justify-center gap-2`}
+    >
+      <View className="w-10 h-10 bg-white/50 rounded-full items-center justify-center">
+        <Ionicons name={icon as any} size={20} color={iconColor} />
+      </View>
+      <Text
+        style={{ fontFamily: "Poppins-Medium" }}
+        className="text-black text-xs text-center"
+      >
+        {label}
+      </Text>
+    </TouchableOpacity>
   );
 }

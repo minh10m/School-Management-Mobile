@@ -1,25 +1,33 @@
-import { Stack, router } from 'expo-router';
-import { useAuthStore } from '../../store/authStore';
-import { useEffect } from 'react';
+import { Stack, router } from "expo-router";
+import { View, ActivityIndicator } from "react-native";
+import { useAuthStore } from "../../store/authStore";
+import { useEffect } from "react";
 
 export default function TeacherLayout() {
-  const { userInfo } = useAuthStore();
+  const userInfo = useAuthStore((state) => (state as any).userInfo);
+  const isLoading = useAuthStore((state) => (state as any).isLoading);
 
   useEffect(() => {
-    if (!userInfo) {
-       router.replace('/login');
-       return;
+    if (!isLoading && !userInfo) {
+      router.replace("/login");
     }
-    if (userInfo.role?.toLowerCase() !== 'teacher') {
-       if (userInfo.role?.toLowerCase() === 'admin') {
-          router.replace('/admin');
-       } else {
-          router.replace('/home');
-       }
-    }
-  }, [userInfo]);
+  }, [userInfo, isLoading]);
 
-  if (!userInfo || userInfo.role?.toLowerCase() !== 'teacher') return null;
+  if (isLoading || !userInfo) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "white" }}>
+        <ActivityIndicator size="large" color="#136ADA" />
+      </View>
+    );
+  }
+
+  if (userInfo.role?.toLowerCase() !== "teacher") {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "white" }}>
+        <ActivityIndicator size="large" color="#FF3B30" />
+      </View>
+    );
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -29,12 +37,16 @@ export default function TeacherLayout() {
       <Stack.Screen name="students/[id]" />
       <Stack.Screen name="community/teachers/index" />
       <Stack.Screen name="community/teachers/[id]" />
-      <Stack.Screen name="classes/index" />
-      <Stack.Screen name="attendance/index" />
+      <Stack.Screen name="my-class/index" />
+      <Stack.Screen name="my-class/[id]" />
+      <Stack.Screen name="my-homeroom-class/index" />
+
       <Stack.Screen name="schedules/index" />
       <Stack.Screen name="assignments/index" />
-      <Stack.Screen name="submissions/index" />
       <Stack.Screen name="results/index" />
+      <Stack.Screen name="homeroom-results" />
+      <Stack.Screen name="batch-entry" />
+      <Stack.Screen name="manage-result" />
       <Stack.Screen name="courses/index" />
       <Stack.Screen name="lessons/index" />
     </Stack>

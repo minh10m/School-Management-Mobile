@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { teacherService } from "../../services/teacher.service";
 import { useAuthStore } from "../../store/authStore";
 import { TeacherResponse } from "../../types/teacher";
+import { getErrorMessage } from "../../utils/error";
 
 export default function TeacherProfileScreen() {
   const { clearAuth } = useAuthStore();
@@ -43,7 +44,7 @@ export default function TeacherProfileScreen() {
       setProfile(data);
     } catch (error) {
       console.error("Error loading teacher profile:", error);
-      Alert.alert("Error", "Cannot load personal information.");
+      Alert.alert("Lỗi", "Không thể tải thông tin cá nhân.");
       router.back();
     } finally {
       setLoading(false);
@@ -64,7 +65,7 @@ export default function TeacherProfileScreen() {
 
   const handleSave = async () => {
     if (!editForm.fullName || !editForm.email) {
-      Alert.alert("Error", "Please provide full name and email.");
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ Họ tên và Email.");
       return;
     }
     
@@ -79,10 +80,9 @@ export default function TeacherProfileScreen() {
       });
       setProfile(updated);
       setEditVisible(false);
-      Alert.alert("Success", "Profile updated successfully!");
+      Alert.alert("Thành công", "Cập nhật hồ sơ thành công!");
     } catch (error: any) {
-      const msg = error?.response?.data?.message || "Update failed.";
-      Alert.alert("Error", msg);
+      Alert.alert("Lỗi", getErrorMessage(error));
     } finally {
       setSaving(false);
     }
@@ -99,7 +99,7 @@ export default function TeacherProfileScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
-          Teacher Profile
+          Hồ sơ Giáo viên
         </Text>
         <TouchableOpacity className="p-2" onPress={openEdit}>
           <Ionicons name="pencil-outline" size={22} color="#136ADA" />
@@ -120,11 +120,11 @@ export default function TeacherProfileScreen() {
               </Text>
             </View>
             <Text className="text-black text-xl mb-1" style={{ fontFamily: "Poppins-Bold" }}>
-              {profile?.fullName || "Teacher"}
+              {profile?.fullName || "Giáo viên"}
             </Text>
             <View className="bg-indigo-100 px-4 py-1 rounded-full mt-2">
               <Text className="text-indigo-700 text-[10px] uppercase" style={{ fontFamily: "Poppins-Bold" }}>
-                TEACHER {profile?.subjectNames?.length ? `• ${profile.subjectNames.join(', ')}` : ''}
+                GIÁO VIÊN {profile?.subjectNames?.length ? `• ${profile.subjectNames.join(', ')}` : ''}
               </Text>
             </View>
           </View>
@@ -132,10 +132,10 @@ export default function TeacherProfileScreen() {
           {/* Details Section */}
           <View className="p-6 gap-6">
             <InfoField label="Email" value={profile?.email ?? "—"} icon="mail-outline" />
-            <InfoField label="Phone" value={profile?.phoneNumber ?? "—"} icon="call-outline" />
-            <InfoField label="Address" value={profile?.address ?? "—"} icon="location-outline" />
+            <InfoField label="Số điện thoại" value={profile?.phoneNumber ?? "—"} icon="call-outline" />
+            <InfoField label="Địa chỉ" value={profile?.address ?? "—"} icon="location-outline" />
             <InfoField 
-              label="Birthday" 
+              label="Ngày sinh" 
               value={profile?.birthday ? new Date(profile.birthday).toLocaleDateString("en-GB") : "—"} 
               icon="calendar-outline" 
             />
@@ -151,18 +151,18 @@ export default function TeacherProfileScreen() {
           <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
             <TouchableOpacity onPress={() => setEditVisible(false)}>
               <Text className="text-gray-500 text-base" style={{ fontFamily: "Poppins-Regular" }}>
-                Cancel
+                Hủy
               </Text>
             </TouchableOpacity>
             <Text className="text-black text-base" style={{ fontFamily: "Poppins-Bold" }}>
-              Edit Teacher Info
+              Chỉnh sửa thông tin
             </Text>
             <TouchableOpacity onPress={handleSave} disabled={saving}>
               {saving ? (
                 <ActivityIndicator size="small" color="#136ADA" />
               ) : (
                 <Text className="text-blue-600 text-base" style={{ fontFamily: "Poppins-SemiBold" }}>
-                  Save
+                  Lưu
                 </Text>
               )}
             </TouchableOpacity>
@@ -173,16 +173,16 @@ export default function TeacherProfileScreen() {
             <View className="bg-blue-50 rounded-xl px-4 py-3 mb-5 flex-row gap-2">
               <Ionicons name="information-circle-outline" size={18} color="#136ADA" />
               <Text style={{ fontFamily: "Poppins-Regular" }} className="text-bright-blue text-xs flex-1">
-                You can only change your name, email, phone, address, and birthday. Subjects are managed by the Admin.
+                Bạn chỉ có thể thay đổi Họ tên, Email, SĐT, Địa chỉ và Ngày sinh. Các môn học do Admin quản lý.
               </Text>
             </View>
 
             <View className="gap-5">
-              <EditInput label="Full Name" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
+              <EditInput label="Họ và tên" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
               <EditInput label="Email" value={editForm.email} onChangeText={(v: string) => setEditForm({ ...editForm, email: v })} keyboardType="email-address" />
-              <EditInput label="Phone Number" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
-              <EditInput label="Address" value={editForm.address} onChangeText={(v: string) => setEditForm({ ...editForm, address: v })} />
-              <EditInput label="Birthday (YYYY-MM-DD)" value={editForm.birthday} onChangeText={(v: string) => setEditForm({ ...editForm, birthday: v })} placeholder="1990-01-01" />
+              <EditInput label="Số điện thoại" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
+              <EditInput label="Địa chỉ" value={editForm.address} onChangeText={(v: string) => setEditForm({ ...editForm, address: v })} />
+              <EditInput label="Ngày sinh (Năm-Tháng-Ngày)" value={editForm.birthday} onChangeText={(v: string) => setEditForm({ ...editForm, birthday: v })} placeholder="1990-01-01" />
             </View>
           </ScrollView>
         </SafeAreaView>
