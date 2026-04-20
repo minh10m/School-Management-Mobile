@@ -6,7 +6,7 @@ export default {
     "slug": "edumanage",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/edu_logo_clean.png",
     "scheme": "schoolmanagementapp",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -32,7 +32,7 @@ export default {
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/edu_logo_clean.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
