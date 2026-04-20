@@ -1,28 +1,79 @@
-import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, FlatList } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState, useEffect } from 'react';
-import { studentService } from '../../../services/student.service';
-import { StudentListItem } from '../../../types/student';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  FlatList,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState, useEffect } from "react";
+import { studentService } from "../../../services/student.service";
+import { classYearService } from "../../../services/classYear.service";
+import { StudentListItem } from "../../../types/student";
+import { SCHOOL_YEAR } from "../../../constants/config";
 
 export default function TeacherStudentListScreen() {
+  const params = useLocalSearchParams();
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<StudentListItem[]>([]);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [grade, setGrade] = useState<string | undefined>();
-  const [classId, setClassId] = useState<string | undefined>();
+  const [classId, setClassId] = useState<string | undefined>(
+    params.classId as string,
+  );
+  const [homeroom, setHomeroom] = useState<{
+    className: string;
+    grade: number;
+    classYearId: string;
+  } | null>(null);
 
   useEffect(() => {
-    fetchStudents();
-  }, [grade, classId]);
+    const fetchHomeroom = async () => {
+      try {
+        const hr = await classYearService.getHomeroomClass(
+          Number(SCHOOL_YEAR.split("-")[0]),
+        );
+        if (hr) {
+          setHomeroom({
+            className: hr.className || "",
+            grade: hr.grade,
+            classYearId: hr.classYearId,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching homeroom:", error);
+      }
+    };
+    fetchHomeroom();
+  }, []);
+
+  useEffect(() => {
+    if (params.classId !== classId) {
+      setClassId(params.classId as string);
+    }
+  }, [params.classId]);
+
+  useEffect(() => {
+    // Only fetch students if we have a specific class context or homeroom context
+    if (classId || homeroom) {
+      fetchStudents();
+    } else {
+      // If we finished initial loading and still no homeroom/classId,
+      // we might want to stop loading state to show "no students"
+      setLoading(false);
+    }
+  }, [grade, classId, homeroom]);
 
   const fetchStudents = async () => {
     setLoading(true);
     try {
       const response = await studentService.getStudents({
-        grade: grade, // grade is already string in GetStudentsParams
-        classId,
+        grade: grade,
+        ClassYearId: classId || homeroom?.classYearId,
         search: search || undefined,
       });
       setStudents(response.items);
@@ -39,14 +90,25 @@ export default function TeacherStudentListScreen() {
       className="bg-white p-4 rounded-2xl mb-3 flex-row items-center border border-gray-100 shadow-sm"
     >
       <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center mr-4">
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-bright-blue text-lg">
+        <Text
+          style={{ fontFamily: "Poppins-Bold" }}
+          className="text-bright-blue text-lg"
+        >
           {item.fullName.charAt(0)}
         </Text>
       </View>
       <View className="flex-1">
-        <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-base">{item.fullName}</Text>
-        <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-500 text-xs">
-          Grade {item.grade} • {item.className}
+        <Text
+          style={{ fontFamily: "Poppins-SemiBold" }}
+          className="text-black text-base"
+        >
+          {item.fullName}
+        </Text>
+        <Text
+          style={{ fontFamily: "Poppins-Regular" }}
+          className="text-gray-500 text-xs"
+        >
+          Khối {item.grade} • {item.className}
         </Text>
       </View>
       <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
@@ -61,16 +123,21 @@ export default function TeacherStudentListScreen() {
           <TouchableOpacity onPress={() => router.back()} className="mr-4">
             <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl flex-1">Students</Text>
+          <Text
+            style={{ fontFamily: "Poppins-Bold" }}
+            className="text-black text-xl flex-1"
+          >
+            Danh sách học sinh lớp {homeroom?.className}
+          </Text>
         </View>
 
         {/* Search Bar */}
         <View className="flex-row items-center bg-gray-100 rounded-xl px-3 py-2">
           <Ionicons name="search" size={20} color="#9CA3AF" />
           <TextInput
-            placeholder="Search students..."
+            placeholder="Tìm kiếm học sinh..."
             className="flex-1 ml-2 text-sm"
-            style={{ fontFamily: 'Poppins-Regular' }}
+            style={{ fontFamily: "Poppins-Regular" }}
             value={search}
             onChangeText={setSearch}
             onSubmitEditing={fetchStudents}
@@ -91,7 +158,12 @@ export default function TeacherStudentListScreen() {
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View className="items-center justify-center pt-10">
-                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">No students found</Text>
+                <Text
+                  style={{ fontFamily: "Poppins-Medium" }}
+                  className="text-gray-400"
+                >
+                  Không tìm thấy học sinh
+                </Text>
               </View>
             }
           />

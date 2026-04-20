@@ -25,7 +25,6 @@ export default function GradeSubmissionScreen() {
   const [student, setStudent] = useState<StudentResponse | null>(null);
   
   const [score, setScore] = useState("");
-  const [feedback, setFeedback] = useState("");
   
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -38,7 +37,6 @@ export default function GradeSubmissionScreen() {
       setSubmission(subData);
       
       if (subData.score !== null) setScore(subData.score.toString());
-      if (subData.feedback) setFeedback(subData.feedback);
 
       // Fetch student details if studentId exists
       if (subData.studentId) {
@@ -48,7 +46,7 @@ export default function GradeSubmissionScreen() {
 
     } catch (error) {
       console.error("Error fetching submission details:", error);
-      Alert.alert("Error", "Could not load submission details.");
+      Alert.alert("Lỗi", "Không thể tải chi tiết bài nộp.");
     } finally {
       setLoading(false);
     }
@@ -59,14 +57,14 @@ export default function GradeSubmissionScreen() {
   }, [fetchDetails]);
 
   const handleGrade = async () => {
-    if (!score.trim() || !feedback.trim()) {
-      Alert.alert("Error", "Please provide a score and feedback.");
+    if (!score.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập điểm.");
       return;
     }
 
     const numericScore = parseFloat(score);
-    if (isNaN(numericScore) || numericScore < 0 || numericScore > 100) {
-      Alert.alert("Error", "Please enter a valid score (between 0 and 100).");
+    if (isNaN(numericScore) || numericScore < 0 || numericScore > 10) {
+      Alert.alert("Lỗi", "Vui lòng nhập điểm hợp lệ (từ 0 đến 10).");
       return;
     }
 
@@ -74,15 +72,14 @@ export default function GradeSubmissionScreen() {
       setSubmitting(true);
       await submissionService.gradeSubmission(id as string, {
         score: numericScore,
-        feedback: feedback.trim(),
       });
       
-      Alert.alert("Success", "Submission graded successfully", [
-        { text: "OK", onPress: () => fetchDetails() } // Refresh to show graded status
+      Alert.alert("Thành công", "Đã chấm điểm thành công", [
+        { text: "Đồng ý", onPress: () => fetchDetails() } // Refresh to show graded status
       ]);
     } catch (error: any) {
       console.error("Error grading submission:", error);
-      Alert.alert("Error", error.response?.data?.message || "Failed to grade submission");
+      Alert.alert("Lỗi", error.response?.data?.message || "Lỗi khi chấm điểm bài nộp");
     } finally {
       setSubmitting(false);
     }
@@ -96,6 +93,13 @@ export default function GradeSubmissionScreen() {
     }
   };
 
+  const statusMap: any = {
+    'graded': 'Đã chấm',
+    'late': 'Nộp trễ',
+    'pending': 'Chờ chấm',
+    'submitted': 'Đã nộp'
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar hidden />
@@ -107,7 +111,7 @@ export default function GradeSubmissionScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-lg">
-          Grade Submission
+          Chấm điểm bài nộp
         </Text>
         <View className="w-10" />
       </View>
@@ -127,12 +131,12 @@ export default function GradeSubmissionScreen() {
                   {submission.fileTitle}
                 </Text>
                 <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-sm">
-                  Student: {student ? student.fullName : submission.studentId}
+                  Học sinh: {student ? student.fullName : submission.studentId}
                 </Text>
               </View>
               <View className={`px-3 py-1 rounded-full ${getStatusColor(submission.status).split(' ')[0]}`}>
                 <Text style={{ fontFamily: "Poppins-SemiBold" }} className={`text-xs uppercase ${getStatusColor(submission.status).split(' ')[1]}`}>
-                  {submission.status}
+                  {statusMap[submission.status] || submission.status}
                 </Text>
               </View>
             </View>
@@ -140,7 +144,7 @@ export default function GradeSubmissionScreen() {
             <View className="flex-row items-center mb-4">
               <Ionicons name="time-outline" size={16} color="#6B7280" />
               <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-500 text-xs ml-1">
-                Submitted on: {new Date(submission.timeSubmit).toLocaleString()}
+                Nộp lúc: {new Date(submission.timeSubmit).toLocaleString('vi-VN')}
               </Text>
             </View>
 
@@ -151,55 +155,43 @@ export default function GradeSubmissionScreen() {
               >
                 <View className="flex-row items-center">
                   <Ionicons name="document-attach" size={20} color="#4F46E5" />
-                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-indigo-600 ml-2">View Attachment</Text>
+                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-indigo-600 ml-2">Xem file đính kèm</Text>
                 </View>
                 <Ionicons name="open-outline" size={18} color="#4F46E5" />
               </TouchableOpacity>
             ) : (
               <View className="bg-gray-50 border border-gray-100 p-3 rounded-xl flex-row items-center">
                  <Ionicons name="document-text-outline" size={20} color="#9CA3AF" />
-                 <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 ml-2">No attachment provided</Text>
+                 <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 ml-2">Không có tài liệu đính kèm</Text>
               </View>
             )}
           </View>
 
           {/* Grading Form */}
           <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-xl mb-4 ml-1">
-            Teacher Evaluation
+            Chấm điểm
           </Text>
 
           <View className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
             {/* Score Input */}
-            <View className="mb-4">
+            <View className="mb-6">
               <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">
-                Score (0 - 100) <Text className="text-red-500">*</Text>
+                Điểm số (0 - 10) <Text className="text-red-500">*</Text>
               </Text>
               <TextInput
                 value={score}
                 onChangeText={setScore}
-                placeholder="e.g., 85"
+                placeholder="10"
                 keyboardType="numeric"
+                maxLength={4}
                 placeholderTextColor="#9ca3af"
-                className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-black text-sm"
-                style={{ fontFamily: "Poppins-Bold", fontSize: 16 }}
-              />
-            </View>
-
-            {/* Feedback Input */}
-            <View className="mb-6">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">
-                Feedback <Text className="text-red-500">*</Text>
-              </Text>
-              <TextInput
-                value={feedback}
-                onChangeText={setFeedback}
-                placeholder="Provide constructive feedback..."
-                placeholderTextColor="#9ca3af"
-                multiline
-                numberOfLines={5}
-                textAlignVertical="top"
-                className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-black text-sm min-h-[140px]"
-                style={{ fontFamily: "Poppins-Regular" }}
+                className="bg-gray-50 border border-gray-200 rounded-2xl px-4 text-black"
+                style={{ 
+                  fontFamily: "Poppins-Bold", 
+                  fontSize: 20, 
+                  height: 64,
+                  textAlign: 'center'
+                }}
               />
             </View>
 
@@ -218,7 +210,7 @@ export default function GradeSubmissionScreen() {
                 <>
                   <Ionicons name="checkmark-done-circle-outline" size={20} color="white" className="mr-2" />
                   <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-base ml-2">
-                    {submission.status === 'graded' ? 'Update Grade' : 'Submit Grade'}
+                    {submission.status === 'graded' ? 'Cập nhật điểm' : 'Lưu kết quả'}
                   </Text>
                 </>
               )}
@@ -228,7 +220,7 @@ export default function GradeSubmissionScreen() {
         </ScrollView>
       ) : (
          <View className="flex-1 justify-center items-center">
-            <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500">Submission not found.</Text>
+            <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500">Không tìm thấy bài nộp.</Text>
          </View>
       )}
 
