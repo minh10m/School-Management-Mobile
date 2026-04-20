@@ -5,6 +5,7 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -150,74 +151,47 @@ export default function MyTeachingClasses() {
         }
       >
         <View className="px-6 pt-6">
-          {/* Stats Section */}
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-gray-500 text-[10px] mb-3 uppercase tracking-widest ml-1"
-          >
-            Tổng quan
-          </Text>
-          <View className="flex-row mb-8 gap-3">
-            <StatCard
-              label="Tổng số lớp"
-              value={stats.totalClasses}
-              icon="school-outline"
-              bg="bg-blue-50"
-              color="#136ADA"
-            />
-            <StatCard
-              label="Khối học"
-              value={stats.grades}
-              icon="layers-outline"
-              bg="bg-emerald-50"
-              color="#22C55E"
-            />
-            <StatCard
-              label="Tiết/tuần"
-              value={stats.periods}
-              icon="time-outline"
-              bg="bg-purple-50"
-              color="#A855F7"
-            />
-          </View>
-
-          {/* Filter Chips */}
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-gray-500 text-[10px] mb-3 uppercase tracking-widest ml-1"
-          >
-            Bộ lọc khối
-          </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             nestedScrollEnabled={true}
-            className="mb-8"
-            contentContainerStyle={{ paddingRight: 20 }}
+            className="mb-6 pt-2"
+            contentContainerStyle={{ paddingRight: 24 }}
           >
-            {GRADE_OPTIONS.map((opt) => (
-              <TouchableOpacity
-                key={opt.label}
-                onPress={() => setSelectedGrade(opt.value)}
-                activeOpacity={0.7}
-                hitSlop={{ top: 10, bottom: 10, left: 5, right: 5 }}
-                className={`px-6 py-2.5 rounded-2xl mr-3 border ${
-                  selectedGrade === opt.value
-                    ? "bg-[#136ADA] border-[#136ADA] shadow-md shadow-blue-200"
-                    : "bg-white border-gray-100"
-                }`}
-              >
-                <Text
-                  style={{
-                    fontFamily: "Poppins-Bold",
-                    fontSize: 11,
-                  }}
-                  className={`${selectedGrade === opt.value ? "text-white" : "text-gray-400"}`}
+            {GRADE_OPTIONS.map((opt) => {
+              const isActive = selectedGrade === opt.value;
+              return (
+                <Pressable
+                  key={opt.label}
+                  onPress={() => setSelectedGrade(opt.value)}
+                  className="mr-3"
                 >
-                  {opt.label.toUpperCase()}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <View 
+                    className={`px-6 py-3 rounded-2xl border ${isActive ? 'border-[#136ADA]' : 'border-gray-100'}`}
+                    style={{
+                      backgroundColor: isActive ? "#136ADA" : "#F8FAFC",
+                      shadowColor: isActive ? "#136ADA" : "#000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: isActive ? 0.2 : 0.05,
+                      shadowRadius: 4,
+                      elevation: isActive ? 3 : 1,
+                      minWidth: 80,
+                      alignItems: 'center'
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Poppins-Bold",
+                        fontSize: 12,
+                        color: isActive ? "white" : "#94A3B8"
+                      }}
+                    >
+                      {opt.label.toUpperCase()}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
           </ScrollView>
         </View>
 

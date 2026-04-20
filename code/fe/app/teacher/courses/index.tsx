@@ -100,13 +100,29 @@ export default function TeacherCourses() {
                 </View>
               </View>
               <View
-                className={`${item.status === "approved" ? "bg-green-50" : "bg-orange-50"} px-3 py-1.5 rounded-xl`}
+                className={`px-3 py-1.5 rounded-xl ${
+                  item.status?.toLowerCase() === "approved"
+                    ? "bg-green-50"
+                    : item.status?.toLowerCase() === "rejected"
+                    ? "bg-red-50"
+                    : "bg-orange-50"
+                }`}
               >
                 <Text
                   style={{ fontFamily: "Poppins-Bold" }}
-                  className={`${item.status === "approved" ? "text-green-600" : "text-orange-600"} text-[8px] uppercase tracking-wider`}
+                  className={`text-[8px] uppercase tracking-wider ${
+                    item.status?.toLowerCase() === "approved"
+                      ? "text-green-600"
+                      : item.status?.toLowerCase() === "rejected"
+                      ? "text-red-600"
+                      : "text-orange-600"
+                  }`}
                 >
-                  {item.status === "approved" ? "Sẵn sàng" : "Chờ duyệt"}
+                  {item.status?.toLowerCase() === "approved"
+                    ? "Sẵn sàng"
+                    : item.status?.toLowerCase() === "rejected"
+                    ? "Bị từ chối"
+                    : "Chờ duyệt"}
                 </Text>
               </View>
             </View>
