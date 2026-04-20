@@ -98,5 +98,29 @@ namespace School_Management.API.Controllers
                 return Ok(new { success = false, message = "Internal error but request received" });
             }
         }
+
+        [HttpGet("verify/{orderCode}")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> VerifyPayment(string orderCode)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { success = false, message = "Lỗi xác thực" });
+
+            try
+            {
+                var isSuccess = await paymentService.CheckAndUpdatePaymentStatus(orderCode);
+
+                if (isSuccess)
+                {
+                    return Ok(new { success = true, message = "Thanh toán đã được xác nhận" });
+                }
+
+                return Ok(new { success = false, message = "Chưa tìm thấy giao dịch khớp" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

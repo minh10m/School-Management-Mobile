@@ -1,16 +1,25 @@
 using School_Management.API.Exceptions;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
+using System.Net.Http.Json;
+using System.Linq;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 
 namespace School_Management.API.Services
 {
     public class PaymentService : IPaymentService
     {
         private readonly IPaymentRepository paymentRepository;
+        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IConfiguration configuration;
 
-        public PaymentService(IPaymentRepository paymentRepository)
+        public PaymentService(IPaymentRepository paymentRepository, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             this.paymentRepository = paymentRepository;
+            this.httpClientFactory = httpClientFactory;
+            this.configuration = configuration;
         }
         public async Task<IEnumerable<PaymentHistoryResponse>> GetMyPayments(Guid userId)
         {
@@ -72,6 +81,53 @@ namespace School_Management.API.Services
                 "ORDER_CODE_NOT_FOUND" or "PAYMENT_NOT_FOUND" or "DUPLICATE_TRANSACTION" => false,
                 _ => false
             };
+        }
+
+        public async Task<bool> CheckAndUpdatePaymentStatus(string orderCode)
+        {
+            var apiKey = configuration["Sepay:ApiKey"];
+            var apiUrl = "https://my.sepay.vn/userapi/transactions/list?limit=20";
+
+            using var client = httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+            try
+            {
+                var response = await client.GetAsync(apiUrl);
+                if (!response.IsSuccessStatusCode) return false;
+
+                var data = await response.Content.ReadFromJsonAsync<SepayTransactionListResponse>();
+                if (data == null || data.Status != 200 || data.Transactions == null) return false;
+
+                // Tìm giao dịch khớp với mã đơn hàng
+                var match = data.Transactions.FirstOrDefault(tx => 
+                    !string.IsNullOrEmpty(tx.TransactionContent) && 
+                    tx.TransactionContent.Contains(orderCode, StringComparison.OrdinalIgnoreCase));
+
+                if (match != null)
+                {
+                    // Chuyển đổi giao dịch SePay thành WebhookRequest để tái sử dụng logic xử lý
+                    var webhookRequest = new SepayWebhookRequest
+                    {
+                        Id = match.Id,
+                        Gateway = match.BankBrandName,
+                        Amount = match.AmountIn,
+                        TransferAmount = match.AmountIn,
+                        Content = match.TransactionContent,
+                        TransferType = "IN",
+                        TransactionDate = match.TransactionDate,
+                        ReferenceCode = match.ReferenceNumber
+                    };
+
+                    return await ProcessWebhook(webhookRequest);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Sepay Check Error] {ex.Message}");
+            }
+
+            return false;
         }
     }
 }
