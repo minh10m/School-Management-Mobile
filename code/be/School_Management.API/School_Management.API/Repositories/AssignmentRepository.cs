@@ -52,15 +52,13 @@ namespace School_Management.API.Repositories
             if(request.File != null && request.File.Length > 0)
             {
                 using var stream = request.File.OpenReadStream();
-                var uploadParams = new ImageUploadParams
+                var uploadParams = new RawUploadParams
                 {
                     File = new FileDescription(request.File.FileName, stream),
                     Folder = "assignments",
                     PublicId = Guid.NewGuid().ToString(),
                     Type = "upload",
                     AccessMode = "public"
-                    
-
                 };
                 var uploadResult = await cloudinary.UploadAsync(uploadParams);
                 if (uploadResult.Error != null) return (null, "UPLOAD_FILE_FAILED");

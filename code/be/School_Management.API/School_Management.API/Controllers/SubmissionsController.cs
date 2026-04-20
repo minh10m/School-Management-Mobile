@@ -22,7 +22,8 @@ namespace School_Management.API.Controllers
         [HttpPost]
         [ValidateModel]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> CreateSubmission([FromBody] SubmissionRequest request)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateSubmission([FromForm] SubmissionRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized(new

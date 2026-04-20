@@ -21,6 +21,7 @@ namespace School_Management.API.Services
                 "FORBIDDEN_TEACHER_SUBJECT" => throw new ForbiddenException("Bạn không phải giáo viên dạy môn học này"),
                 "CONFLICT_TITLE" => throw new ConflictException("Tên tiêu đề bài tập đã tồn tại ở môn học này"),
                 "SUCCESS" => result!,
+                "UPLOAD_FILE_FAILED" => throw new BadRequestException("Upload file thất bại"),
                 _ => throw new Exception("Lỗi không xác định")
             };
         }

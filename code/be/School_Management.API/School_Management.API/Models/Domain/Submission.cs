@@ -13,6 +13,7 @@ namespace School_Management.API.Models.Domain
         public Guid AssignmentId { get; set; }
         public string FileTitle { get; set; } = string.Empty;
         public string FileUrl { get; set; } = string.Empty;
+        public string PublicId { get; set; } = string.Empty;
         public Guid StudentId { get; set; }
         public float? Score { get; set; }
 
