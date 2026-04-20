@@ -106,7 +106,7 @@ export default function StudentAssignmentListScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50/50">
+    <View className="flex-1 bg-gray-50/50">
       <Stack.Screen
         options={{
           headerShown: true,
@@ -128,7 +128,7 @@ export default function StudentAssignmentListScreen() {
       <StatusBar style="dark" />
 
       <ScrollView
-        className="flex-1 px-6 pt-4"
+        className="flex-1 px-6 pt-2"
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -274,6 +274,6 @@ export default function StudentAssignmentListScreen() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

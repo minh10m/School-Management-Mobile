@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
@@ -116,6 +116,7 @@ namespace School_Management.API.Repositories
                                           Average = g.Sum(x => x.Weight) > 0 ? (float)Math.Round(g.Sum(x => x.Value * x.Weight) / g.Sum(x => x.Weight), 2) : 0,
                                           DetailResults = g.Select(x => new DetailResult
                                           {
+                                              ResultId = x.Id,
                                               Type = x.Type,
                                               Value = x.Value,
                                               Weight = x.Weight
@@ -211,6 +212,7 @@ namespace School_Management.API.Repositories
                                        Average = g.Sum(x => x.Weight) > 0 ? (float)Math.Round(g.Sum(x => x.Value * x.Weight) / g.Sum(x => x.Weight), 2) : 0,
                                        DetailResults = g.Select(y => new DetailResult
                                        {
+                                           ResultId = y.Id,
                                            Type = y.Type,
                                            Value = y.Value,
                                            Weight = y.Weight
