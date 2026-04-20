@@ -14,6 +14,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import SideMenu from "@/components/SideMenu";
 import { assignmentService } from "../../services/assignment.service";
 import { eventService } from "../../services/event.service";
+import { classYearService } from "../../services/classYear.service";
+import { SCHOOL_YEAR } from "../../constants/config";
 import { useAuthStore } from "../../store/authStore";
 import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
 
@@ -47,7 +49,18 @@ export default function HomeScreen() {
   const fetchAssignments = async () => {
     try {
       setAssignmentLoading(true);
-      const res = await assignmentService.getMyAssignments();
+      
+      let params: any = {};
+      try {
+        const myClass = await classYearService.getMyClass(parseInt(SCHOOL_YEAR, 10));
+        if (myClass?.classYearId) {
+          params.ClassYearId = myClass.classYearId;
+        }
+      } catch (err) {
+        // Fallback
+      }
+
+      const res = await assignmentService.getMyAssignments(params);
       setAssignments(res || []);
     } catch (err) {
       console.error("Error fetching assignments:", err);
@@ -179,27 +192,10 @@ export default function HomeScreen() {
             Chào mừng bạn, {firstName} 👋
           </Text>
           <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">
-            Bạn có {assignments.length} bài tập cần hoàn thành.
+            Bạn có {assignments.filter(a => a.status !== 'Submitted' && a.status !== 'Graded').length} bài tập cần hoàn thành.
           </Text>
         </View>
 
-        {/* Stats Grid */}
-        <View className="px-6 mt-6 mb-5">
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Tổng quan học tập</Text>
-          <View className="flex-row flex-wrap gap-3">
-            {STUDENT_STATS.map((s) => (
-              <View key={s.label} className={`${s.bg} flex-1 min-w-[44%] rounded-[28px] p-5`}>
-                <View className="flex-row items-center justify-between mb-2">
-                  <View className="w-8 h-8 rounded-full bg-white/60 items-center justify-center">
-                    <Ionicons name={s.icon as any} size={18} color={s.color} />
-                  </View>
-                  <Text style={{ fontFamily: 'Poppins-Bold', color: s.color }} className="text-2xl">{s.value}</Text>
-                </View>
-                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-600/80 text-[10px]">{s.label}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
 
         {/* Academics Grid */}
         <View className="px-6 mb-8 mt-2">
@@ -262,7 +258,11 @@ export default function HomeScreen() {
           </View>
 
           <FlatList
-            data={assignments}
+            data={assignments
+              .filter(a => a.status !== 'Submitted' && a.status !== 'Graded')
+              .sort((a, b) => new Date(a.finishTime).getTime() - new Date(b.finishTime).getTime())
+              .slice(0, 2)
+            }
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 24, gap: 16 }}
@@ -296,23 +296,7 @@ export default function HomeScreen() {
                     </View>
                   </View>
 
-                  <View className="w-12 h-12 rounded-full border-[3px] border-white/20 items-center justify-center relative">
-                    {/* Semi-transparent track */}
-                    <View
-                      className="absolute inset-0 rounded-full border-[3px] border-white opacity-40"
-                      style={{
-                        borderLeftColor: "transparent",
-                        borderBottomColor: "transparent",
-                        transform: [{ rotate: "45deg" }],
-                      }}
-                    />
-                    <Text
-                      className="text-white text-[10px]"
-                      style={{ fontFamily: "Poppins-Bold" }}
-                    >
-                      50%
-                    </Text>
-                  </View>
+                  <View className="w-12 h-12 rounded-full items-center justify-center relative" />
                 </View>
 
                 <Text
