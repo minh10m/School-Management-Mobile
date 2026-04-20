@@ -56,7 +56,7 @@ export default function TeacherListScreen() {
         <View className="flex-1">
           <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-base">{item.fullName}</Text>
           <View style={{ backgroundColor: col.bg }} className="px-2 py-0.5 rounded-full self-start">
-            <Text style={{ fontFamily: 'Poppins-Medium', color: col.text, fontSize: 10 }}>{item.subjectNames?.join(', ') || 'No Subject'}</Text>
+            <Text style={{ fontFamily: 'Poppins-Medium', color: col.text, fontSize: 10 }}>{item.subjectNames?.join(', ') || 'Chưa có môn học'}</Text>
           </View>
         </View>
         <Ionicons name="chevron-forward" size={20} color="#D1D5DB" />
@@ -71,13 +71,13 @@ export default function TeacherListScreen() {
           <TouchableOpacity onPress={() => router.back()} className="mr-4">
             <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl flex-1">Other Teachers</Text>
+          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-xl flex-1">Danh sách đồng nghiệp</Text>
         </View>
 
         <View className="flex-row items-center bg-gray-100 rounded-xl px-3 py-2">
           <Ionicons name="search" size={20} color="#9CA3AF" />
           <TextInput
-            placeholder="Search teachers..."
+            placeholder="Tìm kiếm giáo viên..."
             className="flex-1 ml-2 text-sm"
             style={{ fontFamily: 'Poppins-Regular' }}
             value={search}
@@ -100,7 +100,7 @@ export default function TeacherListScreen() {
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View className="items-center justify-center pt-10">
-                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">No teachers found</Text>
+                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400">Không tìm thấy giáo viên</Text>
               </View>
             }
           />
