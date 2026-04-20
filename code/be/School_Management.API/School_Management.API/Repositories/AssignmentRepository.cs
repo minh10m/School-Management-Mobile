@@ -1,3 +1,5 @@
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
@@ -8,14 +10,17 @@ namespace School_Management.API.Repositories
     public class AssignmentRepository : IAssignmentRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly Cloudinary cloudinary;
 
-        public AssignmentRepository(ApplicationDbContext context)
+        public AssignmentRepository(ApplicationDbContext context, Cloudinary cloudinary)
         {
             this.context = context;
+            this.cloudinary = cloudinary;
         }
 
         public async Task<(AssignmentResponse? data, string? message)> CreateAssignment(PostOrUpdateAssignmentRequest request, Guid userId)
         {
+
             var teacher = await context.Teacher
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.UserId == userId);
@@ -40,6 +45,31 @@ namespace School_Management.API.Repositories
                                                        startTimeVN.Hour, startTimeVN.Minute, 0, startTimeVN.Offset);
             var officialFinishTime = new DateTimeOffset(finishTimeVN.Year, finishTimeVN.Month, finishTimeVN.Day,
                                                         finishTimeVN.Hour, finishTimeVN.Minute, 0, finishTimeVN.Offset);
+            string fileUrl = "Không có dữ liệu";
+            string? fileTitle = request.FileTitle?.Trim() ?? null;
+            string? publicId = null;
+
+            if(request.File != null && request.File.Length > 0)
+            {
+                using var stream = request.File.OpenReadStream();
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(request.File.FileName, stream),
+                    Folder = "assignments",
+                    PublicId = Guid.NewGuid().ToString(),
+                    Type = "upload",
+                    AccessMode = "public"
+                    
+
+                };
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                if (uploadResult.Error != null) return (null, "UPLOAD_FILE_FAILED");
+
+                fileUrl = uploadResult.SecureUrl.ToString();
+                if (string.IsNullOrEmpty(fileTitle)) fileTitle = request.File.FileName;
+                publicId = uploadResult.PublicId;
+
+            }
 
             var assignment = new Assignment
             {
@@ -48,9 +78,10 @@ namespace School_Management.API.Repositories
                 FinishTime = officialFinishTime.ToUniversalTime(),
                 TeacherSubjectId = teacherSubject.TeacherSubjectId,
                 Title = request.Title.Trim(),
+                PublicId = publicId,
                 ClassYearId = request.ClassYearId,
-                FileTitle = request.FileTitle?.Trim() ?? "Không có dữ liệu",
-                FileUrl = request.FileUrl?.Trim() ?? "Không có dữ liệu"
+                FileTitle = fileTitle ?? "Không có dữ liệu",
+                FileUrl = fileUrl ?? "Không có dữ liệu"
             };
 
             context.Assignment.Add(assignment);
@@ -216,10 +247,31 @@ namespace School_Management.API.Repositories
             var officialFinishTime = new DateTimeOffset(finishTimeVN.Year, finishTimeVN.Month, finishTimeVN.Day,
                                                         finishTimeVN.Hour, finishTimeVN.Minute, 0, finishTimeVN.Offset);
 
+            string? fileUrl = assignment.FileUrl;
+            string? fileTitle = assignment.FileTitle;
+
+            if (request.File != null && request.File.Length > 0)
+            {
+                using var stream = request.File.OpenReadStream();
+                var uploadParams = new RawUploadParams
+                {
+                    File = new FileDescription(request.File.FileName, stream),
+                    Folder = "assignments",
+                    PublicId = Guid.NewGuid().ToString() + "_" + Path.GetFileNameWithoutExtension(request.File.FileName)
+
+                };
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                if (uploadResult.Error != null) return (null, "UPLOAD_FILE_FAILED");
+
+                fileUrl = uploadResult.SecureUrl.ToString();
+                if (string.IsNullOrEmpty(fileTitle)) fileTitle = request.File.FileName;
+
+            }
+
             assignment.Title = request.Title;
             assignment.StartTime = officialStartTime.ToUniversalTime();
             assignment.FinishTime = officialFinishTime.ToUniversalTime();
-            assignment.FileUrl = request.FileUrl ?? assignment.FileUrl;
+            //assignment.FileUrl = request.FileUrl ?? assignment.FileUrl;
             assignment.FileTitle = request.FileTitle ?? assignment.FileTitle;
             assignment.TeacherSubjectId = teacherSubject.TeacherSubjectId;
             assignment.ClassYearId = request.ClassYearId;

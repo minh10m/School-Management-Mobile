@@ -9,6 +9,7 @@ namespace School_Management.API.Models.Domain
         public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? FileUrl { get; set; }
+        public string? PublicId { get; set; }
         public string? FileTitle { get; set; }
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset FinishTime { get; set; }

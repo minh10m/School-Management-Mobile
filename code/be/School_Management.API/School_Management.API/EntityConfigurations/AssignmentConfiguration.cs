@@ -15,6 +15,7 @@ namespace School_Management.API.EntityConfigurations
             builder.Property(x => x.ClassYearId).IsRequired();
             builder.Property(x => x.StartTime).IsRequired();
             builder.Property(x => x.FinishTime).IsRequired();
+            builder.Property(x => x.PublicId).HasMaxLength(300);
             builder.ToTable(x => x.HasCheckConstraint(
                 "CK_Time_Assignment", "\"StartTime\" < \"FinishTime\""));
         }
