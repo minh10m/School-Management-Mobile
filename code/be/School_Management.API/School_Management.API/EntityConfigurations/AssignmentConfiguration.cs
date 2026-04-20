@@ -8,7 +8,7 @@ namespace School_Management.API.EntityConfigurations
     {
         public void Configure(EntityTypeBuilder<Assignment> builder)
         {
-            builder.Property(x => x.Title).HasMaxLength(400).IsRequired();
+            builder.Property(x => x.Title).HasMaxLength(1000).IsRequired();
             builder.Property(x => x.FileTitle).HasMaxLength(250);
             builder.Property(x => x.FileUrl).HasMaxLength(2048);
             builder.Property(x => x.TeacherSubjectId).IsRequired();

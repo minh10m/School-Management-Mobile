@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -8,10 +10,12 @@ namespace School_Management.API.Repositories
     public class LessonAssignmentRepository : ILessonAssignmentRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly Cloudinary cloudinary;
 
-        public LessonAssignmentRepository(ApplicationDbContext context)
+        public LessonAssignmentRepository(ApplicationDbContext context, Cloudinary cloudinary)
         {
             this.context = context;
+            this.cloudinary = cloudinary;
         }
         public async Task<(LessonAssignmentResponse? data, string message)> CreateLessonAssignment(LessonAssignmentRequest request)
         {
@@ -35,13 +39,38 @@ namespace School_Management.API.Repositories
                 await context.LessonAssignment.Where(x => x.LessonId == request.LessonId && x.OrderIndex >= request.OrderIndex)
                                               .ExecuteUpdateAsync(g => g.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
 
+                string fileUrl = "Không có dữ liệu";
+                string? fileTitle = request.FileTitle?.Trim() ?? null;
+                string? publicId = null;
+
+                if (request.File != null && request.File.Length > 0)
+                {
+                    using var stream = request.File.OpenReadStream();
+                    var uploadParams = new RawUploadParams
+                    {
+                        File = new FileDescription(request.File.FileName, stream),
+                        Folder = "assignments",
+                        PublicId = Guid.NewGuid().ToString(),
+                        Type = "upload",
+                        AccessMode = "public"
+                    };
+                    var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                    if (uploadResult.Error != null) return (null, "UPLOAD_FILE_FAILED");
+
+                    fileUrl = uploadResult.SecureUrl.ToString();
+                    if (string.IsNullOrEmpty(fileTitle)) fileTitle = request.File.FileName;
+                    publicId = uploadResult.PublicId;
+
+                }
+
                 var lessonAssignment = new LessonAssignment
                 {
                     Id = Guid.NewGuid(),
-                    FileTitle = request.FileTitle ?? "Không có dữ liệu",
-                    FileUrl = request.FileUrl ?? "Không có dữ liệu", 
+                    FileTitle = fileTitle,
+                    FileUrl = fileUrl,
                     LessonId = request.LessonId,
                     OrderIndex = request.OrderIndex,
+                    PublicId = publicId,
                     Title = request.Title
                 };
 

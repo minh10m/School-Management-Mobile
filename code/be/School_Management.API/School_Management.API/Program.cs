@@ -144,19 +144,46 @@ builder.Services.AddIdentityCore<AppUser>()
     .AddDefaultTokenProviders();
 
 // Configure JWT authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
-    AddJwtBearer(options =>
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true, 
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/paymentHub")))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
+
+builder.Services.AddCors(options => {
+    options.AddPolicy("MobileSignalRPolicy", policy => {
+        policy.SetIsOriginAllowed(_ => true) // Chấp nhận mọi nguồn từ App Mobile
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // Bắt buộc cho SignalR
+    });
+});
+
 
 // Configure Identity options (password and lockout policy)
 builder.Services.Configure<IdentityOptions>(options =>
@@ -192,9 +219,12 @@ app.UseMiddleware<ExceptionHandlerMiddlewares>();
 
 app.UseHttpsRedirection();
 
+app.UseCors("MobileSignalRPolicy");
+
 app.UseAuthentication();
 
 app.UseAuthorization();
+
 
 app.MapHub<PaymentHub>("/paymentHub");
 

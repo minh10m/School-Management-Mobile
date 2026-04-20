@@ -11,6 +11,7 @@ namespace School_Management.API.Models.Domain
         public string Title { get; set; } = string.Empty;
         public string FileTitle { get; set; } = string.Empty;
         public string FileUrl { get; set; } = string.Empty;
+        public string? PublicId { get; set; } 
         public Guid LessonId { get; set; }
         public int OrderIndex { get; set; }
         //Navigation properties

@@ -21,7 +21,8 @@ namespace School_Management.API.Controllers
         [HttpPost]
         [ValidateModel]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> CreateLessonAssignment([FromBody] LessonAssignmentRequest request)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateLessonAssignment([FromForm] LessonAssignmentRequest request)
         {
             var result = await lessonAssignmentService.CreateLessonAssignment(request);
             return StatusCode(201, new

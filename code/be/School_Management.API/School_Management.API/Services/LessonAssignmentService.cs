@@ -21,6 +21,7 @@ namespace School_Management.API.Services
                 "NOT_FOUND_LESSON" => throw new NotFoundException("Không tìm thấy bài học này"),
                 "CONFLICT_TITLE" => throw new ConflictException("Tiêu đề bài học này đã tồn tại"),
                 "SUCCESS" => result!,
+                "UPLOAD_FILE_FAILED" => throw new BadRequestException("Upload file thất bại"),
                 _ => throw new Exception("Lỗi không xác định")
             };
         }

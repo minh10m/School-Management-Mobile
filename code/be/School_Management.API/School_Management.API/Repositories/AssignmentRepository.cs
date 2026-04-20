@@ -75,7 +75,7 @@ namespace School_Management.API.Repositories
                 StartTime = officialStartTime.ToUniversalTime(),
                 FinishTime = officialFinishTime.ToUniversalTime(),
                 TeacherSubjectId = teacherSubject.TeacherSubjectId,
-                Title = request.Title.Trim(),
+                Title = request.Title?.Trim(),
                 PublicId = publicId,
                 ClassYearId = request.ClassYearId,
                 FileTitle = fileTitle ?? "Không có dữ liệu",
