@@ -11,8 +11,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { TeacherScheduleDetailItem } from "../../../types/schedule";
+import { ScheduleDetailItem } from "../../../types/schedule";
 import { scheduleService } from "../../../services/schedule.service";
+import { classYearService } from "../../../services/classYear.service";
 import { SCHOOL_YEAR, TERM } from "../../../constants/config";
 
 const WEEK_DAYS = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6"];
@@ -26,10 +27,11 @@ const BG_COLORS = [
   "bg-orange-50",
 ];
 
-export default function TeacherSchedules() {
-  const [schedules, setSchedules] = useState<TeacherScheduleDetailItem[]>([]);
+export default function MyHomeroomClassSchedule() {
+  const [schedules, setSchedules] = useState<ScheduleDetailItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [homeroom, setHomeroom] = useState<any>(null);
   const [selectedDay, setSelectedDay] = useState(() => {
     const day = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
     if (day >= 1 && day <= 5) return WEEK_DAYS[day - 1];
@@ -38,38 +40,50 @@ export default function TeacherSchedules() {
   const [isDaySelectorOpen, setDaySelectorOpen] = useState(false);
 
   useEffect(() => {
-    fetchSchedules();
+    fetchInitialData();
   }, []);
 
-  const fetchSchedules = async () => {
+  const fetchInitialData = async () => {
     try {
       setLoading(true);
-      const data = await scheduleService.getMyTeachingSchedule({
-        Term: TERM,
-        SchoolYear: Number(SCHOOL_YEAR),
-      });
-      setSchedules(data || []);
+      const hr = await classYearService.getHomeroomClass(Number(SCHOOL_YEAR.split("-")[0]));
+      setHomeroom(hr);
+      if (hr) {
+        await fetchSchedules(hr.classYearId);
+      }
     } catch (error) {
-      console.error("Failed to fetch teacher schedules:", error);
-      setSchedules([]);
+      console.error("Failed to fetch homeroom:", error);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchSchedules();
+  const fetchSchedules = async (classYearId: string) => {
+    try {
+      const data = await scheduleService.getClassSchedule(classYearId, {
+        Term: TERM,
+        SchoolYear: Number(SCHOOL_YEAR.split("-")[0]),
+      });
+      setSchedules(data || []);
+    } catch (error) {
+      console.error("Failed to fetch class schedules:", error);
+      setSchedules([]);
+    }
   };
 
-  // Filter schedules for the selected day using dayOfWeek (1=Mon, 2=Tue, etc.)
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (homeroom) {
+      await fetchSchedules(homeroom.classYearId);
+    } else {
+      await fetchInitialData();
+    }
+    setRefreshing(false);
+  };
+
   const filteredSchedules = schedules
     .filter((item) => {
-      const dayIndex = WEEK_DAYS.indexOf(selectedDay); // Monday=0, Tuesday=1 ...
-      if (dayIndex === -1) return false;
-
-      // API uses 1 for Monday, 2 for Tuesday, ..., 7 for Sunday (as per types)
+      const dayIndex = WEEK_DAYS.indexOf(selectedDay);
       return item.dayOfWeek === dayIndex + 1;
     })
     .sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""));
@@ -84,12 +98,14 @@ export default function TeacherSchedules() {
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text
-          className="text-black text-lg"
-          style={{ fontFamily: "Poppins-Bold" }}
-        >
-          Thời khóa biểu giảng dạy
-        </Text>
+        <View className="flex-1">
+          <Text
+            className="text-black text-lg"
+            style={{ fontFamily: "Poppins-Bold" }}
+          >
+            Thời khóa biểu lớp {homeroom?.className}
+          </Text>
+        </View>
       </View>
 
       <ScrollView
@@ -160,7 +176,7 @@ export default function TeacherSchedules() {
             className="text-gray-500 text-xs flex-1 ml-4 uppercase tracking-widest"
             style={{ fontFamily: "Poppins-Bold" }}
           >
-            Tiết dạy
+            Môn học & GV
           </Text>
         </View>
 
@@ -168,7 +184,7 @@ export default function TeacherSchedules() {
         {loading && !refreshing ? (
           <ActivityIndicator size="large" color="#136ADA" className="mt-10" />
         ) : filteredSchedules.length === 0 ? (
-          <View className="py-20 lg:py-40 items-center justify-center">
+          <View className="py-20 items-center justify-center">
             <View className="w-20 h-20 bg-gray-50 rounded-full items-center justify-center mb-4">
               <Ionicons name="calendar-outline" size={32} color="#D1D5DB" />
             </View>
@@ -176,7 +192,7 @@ export default function TeacherSchedules() {
               style={{ fontFamily: "Poppins-Bold" }}
               className="text-gray-400 text-center"
             >
-              Hôm nay không có tiết dạy
+              Hôm nay không có tiết học
             </Text>
             <Text
               style={{ fontFamily: "Poppins-Medium" }}
@@ -196,21 +212,13 @@ export default function TeacherSchedules() {
                       className="text-black text-sm"
                       style={{ fontFamily: "Poppins-Bold" }}
                     >
-                      {item.timeRange
-                        ? item.timeRange.split(" - ")[0]
-                        : item.startTime
-                          ? item.startTime.slice(0, 5)
-                          : "--"}
+                      {item.startTime ? item.startTime.slice(0, 5) : "--"}
                     </Text>
                     <Text
                       className="text-gray-400 text-xs"
                       style={{ fontFamily: "Poppins-Regular" }}
                     >
-                      {item.timeRange
-                        ? item.timeRange.split(" - ")[1]
-                        : item.finishTime
-                          ? item.finishTime.slice(0, 5)
-                          : "--"}
+                      {item.finishTime ? item.finishTime.slice(0, 5) : "--"}
                     </Text>
                   </View>
                   <View className="items-center relative mr-4">
@@ -242,7 +250,7 @@ export default function TeacherSchedules() {
                             className="text-gray-500 text-xs uppercase mr-2"
                             style={{ fontFamily: "Poppins-Bold" }}
                           >
-                            Lớp {item.className}
+                            GV: {item.teacherName}
                           </Text>
                         </View>
                       </View>

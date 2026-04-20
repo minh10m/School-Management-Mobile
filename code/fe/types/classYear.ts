@@ -9,6 +9,8 @@ export interface ClassYearResponse {
   homeRoomId: string;
   homeRoomName: string | null;
   studentCount: number;
+  subjectId?: string;
+  subjectName?: string;
 }
 
 /** Dùng cho /teaching và /by-teacher (ít thông tin hơn) */
@@ -17,6 +19,8 @@ export interface ClassYearSummary {
   className: string;
   grade: number;
   schoolYear: number;
+  subjectId?: string;
+  subjectName?: string;
 }
 
 export interface ClassYearListResponse {

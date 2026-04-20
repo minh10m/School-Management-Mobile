@@ -2,9 +2,11 @@ import {
   ClassAttendanceItem,
   GetClassAttendanceParams,
   GetStudentAttendanceParams,
+  GetWeeklyAttendanceParams,
   StudentAttendanceResponse,
   SubmitAttendancePayload,
   SubmitAttendanceResponse,
+  WeeklyAttendanceResponse,
 } from "../types/attendance";
 import apiClient from "./apiClient";
 
@@ -56,6 +58,26 @@ export const attendanceService = {
     const response = await apiClient.get<ClassAttendanceItem[]>("/attendances/class", {
       params,
     });
+    return response.data;
+  },
+
+  // ─── TEACHER: GET WEEKLY ATTENDANCE STATISTICS ───────────────────────────────
+  /**
+   * Teacher views weekly attendance statistics for all students in their homeroom class.
+   * AuthN(login) + AuthZ(Teacher)
+   */
+  getWeeklyAttendance: async (
+    params: GetWeeklyAttendanceParams
+  ): Promise<WeeklyAttendanceResponse[]> => {
+    // Backend expects ClassYearId and StartDate with capital first letter
+    const backendParams = {
+      ClassYearId: params.classYearId,
+      StartDate: params.startDate,
+    };
+    const response = await apiClient.get<WeeklyAttendanceResponse[]>(
+      "/attendances/weekly",
+      { params: backendParams }
+    );
     return response.data;
   },
 

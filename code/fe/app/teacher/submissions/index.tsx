@@ -60,7 +60,7 @@ export default function TeacherSubmissions() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-lg">
-          Submissions
+          Danh sách bài nộp
         </Text>
         <View className="w-10" />
       </View>
@@ -69,7 +69,7 @@ export default function TeacherSubmissions() {
         <View className="flex-1 items-center justify-center p-6">
           <Ionicons name="information-circle-outline" size={64} color="#D1D5DB" />
           <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center">
-            Please select an assignment to view submissions.
+            Vui lòng chọn bài tập để xem danh sách bài nộp.
           </Text>
         </View>
       ) : (
@@ -98,13 +98,13 @@ export default function TeacherSubmissions() {
                       {item.studentName}
                     </Text>
                     <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px]">
-                      {new Date(item.timeSubmit).toLocaleString('en-GB')}
+                      {new Date(item.timeSubmit).toLocaleString('vi-VN')}
                     </Text>
                   </View>
                 </View>
                 <View className={`${item.score !== null ? 'bg-green-100' : 'bg-orange-100'} px-3 py-1 rounded-full`}>
                    <Text style={{ fontFamily: "Poppins-Bold" }} className={`${item.score !== null ? 'text-green-600' : 'text-orange-600'} text-[10px] uppercase`}>
-                      {item.score !== null ? `Score: ${item.score}` : "Pending"}
+                      {item.score !== null ? `Điểm: ${item.score}` : "Chờ chấm"}
                    </Text>
                 </View>
               </View>
@@ -113,13 +113,13 @@ export default function TeacherSubmissions() {
                 <View className="flex-row items-center gap-1.5">
                   <Ionicons name="attach-outline" size={14} color="#6B7280" />
                   <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs">
-                    File attached
+                    Có file đính kèm
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-1">
-                   <Text style={{ fontFamily: "Poppins-Bold" }} className="text-blue-500 text-xs">
-                      {item.score !== null ? "Review" : "Grade Now"}
-                   </Text>
+                    <Text style={{ fontFamily: "Poppins-Bold" }} className="text-blue-500 text-xs">
+                       {item.score !== null ? "Xem lại" : "Chấm ngay"}
+                    </Text>
                    <Ionicons name="chevron-forward" size={14} color="#3B82F6" />
                 </View>
               </View>
@@ -133,8 +133,8 @@ export default function TeacherSubmissions() {
             ) : (
               <View className="items-center py-20">
                 <Ionicons name="document-text-outline" size={64} color="#D1D5DB" />
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center">
-                  No submissions found for this assignment.
+                 <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center">
+                  Chưa có bài nộp nào cho bài tập này.
                 </Text>
               </View>
             )

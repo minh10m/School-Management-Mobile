@@ -1,58 +1,33 @@
-export type SubmissionStatus = 'submitted' | 'graded' | 'late';
-
-// ─── Response Types ────────────────────────────────────────────────────────────
-
-/** Chi tiết bài nộp (Dùng cho Create, GetById, Grade, GetMySubmission) */
 export interface SubmissionResponse {
   submissionId: string;
-  fileTitle: string;
-  timeSubmit: string;         // ISO datetime
-  status: SubmissionStatus;
-  assignmentId: string;
-  fileUrl: string | null;
-  studentId: string;
-  score: number | null;
-}
-
-/** Dành cho giáo viên xem danh sách bài nộp của một bài tập */
-export interface TeacherSubmissionListResponse {
-  submissionId: string;
-  fileTitle: string;
   timeSubmit: string;
-  status: SubmissionStatus;
+  status: string | null;
   assignmentId: string;
-  fileUrl: string | null;
+  fileTitle: string;
+  fileUrl: string;
+  studentId: string;
   studentName: string;
   score: number | null;
 }
 
-export interface TeacherSubmissionListResponseWrapper {
-  items: TeacherSubmissionListResponse[];
-  totalCount: number;
-  pageNumber: number;
-  pageSize: number;
-  totalPages: number;
+export interface SubmissionFilterParams {
+  Status?: string;
+  FileTitle?: string;
+  AssignmentId: string;
+  PageNumber?: number;
+  PageSize?: number;
 }
 
-// ─── Query Params ──────────────────────────────────────────────────────────────
-
-export interface GetSubmissionsParams {
-  assignmentId: string; // required
-}
-
-export interface GetMySubmissionParams {
-  assignmentId: string;
-  studentId: string;
-}
-
-// ─── Request Payloads ─────────────────────────────────────────────────────────
-
-export interface CreateSubmissionPayload {
-  assignmentId: string;
-  fileTitle: string;
-  fileUrl: string | null;
-}
-
-export interface GradeSubmissionPayload {
+export interface ScoreSubmissionRequest {
   score: number;
+}
+
+export interface SubmissionCreateRequest {
+  assignmentId: string;
+  fileUrl: string;
+  fileTitle: string;
+}
+
+export interface SubmissionStudentRequest {
+  assignmentId: string;
 }

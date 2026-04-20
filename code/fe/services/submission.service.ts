@@ -1,78 +1,51 @@
-import {
-  CreateSubmissionPayload,
-  GetMySubmissionParams,
-  GetSubmissionsParams,
-  GradeSubmissionPayload,
-  SubmissionResponse,
-  TeacherSubmissionListResponse,
-  TeacherSubmissionListResponseWrapper,
-} from "../types/submission";
+import { SubmissionFilterParams, SubmissionResponse, ScoreSubmissionRequest, SubmissionCreateRequest, SubmissionStudentRequest } from "../types/submission";
 import apiClient from "./apiClient";
 
 export const submissionService = {
-  // ─── STUDENT: SUBMIT ─────────────────────────────────────────────────────────
   /**
-   * Student submits an assignment. They can still submit past the deadline, but it will be marked as late.
-   * POST /submissions
-   * AuthN(login) + AuthZ(Student)
-   * 409: Already submitted or deadline significantly passed
+   * Teachers get all submissions for a specific assignment.
+   * GET /api/submissions?assignmentId=xxx
    */
-  submitAssignment: async (payload: CreateSubmissionPayload): Promise<SubmissionResponse> => {
-    const response = await apiClient.post<SubmissionResponse>("/submissions", payload);
+  getSubmissions: async (params: SubmissionFilterParams): Promise<SubmissionResponse[]> => {
+    const response = await apiClient.get<any>("/submissions", { params });
+    // Backend returns PagedResponse<SubmissionResponse> which has an items property
+    return response.data.items || [];
+  },
+
+  /**
+   * Get a single submission detail.
+   * GET /api/submissions/{id}
+   */
+  getSubmissionById: async (submissionId: string): Promise<SubmissionResponse> => {
+    const response = await apiClient.get<SubmissionResponse>(`/submissions/${submissionId}`);
     return response.data;
   },
 
-  // ─── TEACHER: LIST SUBMISSIONS ────────────────────────────────────────────────
   /**
-   * Teacher retrieves a list of submissions for a specific assignment.
-   * GET /submissions?assignmentId={id}
-   * AuthN(login) + AuthZ(Teacher)
+   * Teachers score a student submission.
+   * PATCH /api/submissions/{id}/score
    */
-  getSubmissionsByAssignment: async (
-    params: GetSubmissionsParams
-  ): Promise<TeacherSubmissionListResponse[]> => {
-    const response = await apiClient.get<TeacherSubmissionListResponseWrapper>("/submissions", { params });
-    return response.data.items;
-  },
-
-  // ─── TEACHER: GET ONE ────────────────────────────────────────────────────────
-  /**
-   * Teacher retrieves detailed information for a specific submission.
-   * GET /submissions/{id}
-   * AuthN(login) + AuthZ(Teacher)
-   */
-  getSubmissionById: async (id: string): Promise<SubmissionResponse> => {
-    const response = await apiClient.get<SubmissionResponse>(`/submissions/${id}`);
+  scoreSubmission: async (submissionId: string, score: number): Promise<any> => {
+    const payload: ScoreSubmissionRequest = { score };
+    const response = await apiClient.patch(`/submissions/${submissionId}/score`, payload);
     return response.data;
   },
 
-  // ─── TEACHER: GRADE ──────────────────────────────────────────────────────────
   /**
-   * Teacher grades and adds feedback to a submission.
-   * PATCH /submissions/{id}/score
-   * AuthN(login) + AuthZ(Teacher)
+   * Students submit their homework.
+   * POST /api/submissions
    */
-  gradeSubmission: async (
-    id: string,
-    payload: GradeSubmissionPayload
-  ): Promise<SubmissionResponse> => {
-    const response = await apiClient.patch<SubmissionResponse>(
-      `/submissions/${id}/score`,
-      payload
-    );
+  submitAssignment: async (payload: SubmissionCreateRequest): Promise<any> => {
+    const response = await apiClient.post("/submissions", payload);
     return response.data;
   },
 
-  // ─── STUDENT: GET MY SUBMISSION ───────────────────────────────────────────────
   /**
-   * Student retrieves their submission for a specific assignment.
-   * GET /submissions/mySubmission?assignmentId=&studentId=
-   * AuthN(login) + AuthZ(Student)
+   * Students get their own submission for a specific assignment.
+   * GET /api/submissions/mySubmission?assignmentId=xxx
    */
-  getMySubmission: async (params: GetMySubmissionParams): Promise<SubmissionResponse> => {
-    const response = await apiClient.get<SubmissionResponse>("/submissions/mySubmission", {
-      params,
-    });
-    return response.data;
-  },
+  getMySubmission: async (params: SubmissionStudentRequest): Promise<SubmissionResponse | null> => {
+    const response = await apiClient.get<{ success: boolean; data: SubmissionResponse }>("/submissions/mySubmission", { params });
+    return response.data.data;
+  }
 };

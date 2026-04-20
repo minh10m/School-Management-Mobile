@@ -143,4 +143,15 @@ export const scheduleService = {
     );
     return response.data;
   },
+ 
+  /**
+   * Lấy lịch học hoạt động của một lớp cụ thể
+   * GET /schedules/class/{classYearId}/active?term=...&schoolYear=...
+   */
+  getClassSchedule: async (classYearId: string, params: GetMyClassScheduleParams): Promise<ScheduleDetailItem[]> => {
+    const response = await apiClient.get<ScheduleDetailItem[]>(
+      `/schedules/class/${classYearId}/active`, { params }
+    );
+    return response.data;
+  },
 };
