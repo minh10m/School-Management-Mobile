@@ -184,7 +184,7 @@ namespace School_Management.API.Repositories
 
         private async Task SendPaymentNotify(string userId, bool isSuccess, string msg)
         {
-            await _hubContext.Clients.Group(userId).SendAsync("ReceivePaymentStatus", new
+            await _hubContext.Clients.User(userId).SendAsync("ReceivePaymentStatus", new
             {
                 status = isSuccess ? "Success" : "Error",
                 message = msg
