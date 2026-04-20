@@ -190,19 +190,6 @@ export default function AdminCoursesScreen() {
   return (
     <AdminPageWrapper
       title="Quản lý Khóa học"
-      rightComponent={
-        <TouchableOpacity
-          onPress={() => router.push("/admin/courses/create" as any)}
-          className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
-        >
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-[#136ADA] text-xs"
-          >
-            Thêm mới
-          </Text>
-        </TouchableOpacity>
-      }
       searchProps={{
         value: search,
         onChangeText: setSearch,
