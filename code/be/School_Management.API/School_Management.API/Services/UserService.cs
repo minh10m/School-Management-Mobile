@@ -336,13 +336,20 @@ namespace School_Management.API.Services
                     };
                     await context.Student.AddAsync(student);
 
-                    if(createUserRequest.ClassYearId != null)
+                    if (createUserRequest.ClassYearId != null)
+                    {
+                        var schoolYear = await context.ClassYear.AsNoTracking().Where(x => x.Id == createUserRequest.ClassYearId).Select(x => x.SchoolYear).FirstOrDefaultAsync();
+                        var isExisted = await context.StudentClassYear.AnyAsync(x => x.StudentId == student.Id && x.SchoolYear == schoolYear);
+                        if (isExisted) throw new ConflictException("Học sinh đã tồn tại lớp trong năm học này rồi");
                         await context.AddAsync(new StudentClassYear
                         {
                             StudentClassYearId = Guid.NewGuid(),
                             ClassYearId = (Guid)createUserRequest.ClassYearId,
-                            StudentId = student.Id
+                            StudentId = student.Id,
+                            SchoolYear = schoolYear
                         });
+                    }
+                    
                 }
 
                 await context.SaveChangesAsync();

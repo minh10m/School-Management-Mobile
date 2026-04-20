@@ -10,6 +10,7 @@ namespace School_Management.API.Models.Domain
         public Guid StudentClassYearId { get; set; }
         public Guid StudentId { get; set; }
         public Guid ClassYearId { get; set; }
+        public int SchoolYear { get; set; }
 
         //Navigation properties
         [ForeignKey("StudentId")]

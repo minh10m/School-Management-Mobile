@@ -105,6 +105,7 @@ namespace School_Management.API.Services
                 "INVALID_SCHOOL_YEAR_SEQUENCE" => throw new BadRequestException("Năm học của lớp chuyển đi phải là năm trước, lớp chuyển tới là năm hiện tại"),
                 "INVALID_GRADE_PROMOTION" => throw new BadRequestException("Hai lớp chỉ được cách nhau một khối lớp"),
                 "CANNOT_PROMOTE_GRADE_12" => throw new BadRequestException("Không thể chuyển lớp cho lớp 12, vì đã tốt nghiệp"),
+                "CONFLICT_SCHOOLYEAR" => throw new ConflictException("Tồn tại ít nhất một học sinh đã có lớp ở năm học này, vui lòng kiểm tra lại"),
                 "SUCCESS" => result,
                 _ => throw new Exception("Lỗi hệ thống")
             };
