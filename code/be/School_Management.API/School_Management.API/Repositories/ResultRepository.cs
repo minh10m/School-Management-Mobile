@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
@@ -96,7 +96,7 @@ namespace School_Management.API.Repositories
             }
         }
 
-        public async Task<(List<ResultForStudentResponse>? data, string? message)> GetMyResultForStudent(ResultOfStudentRequest request, Guid userId)
+        public async Task<(ResultForStudentResponse? data, string? message)> GetMyResultForStudent(ResultOfStudentRequest request, Guid userId)
         {
             var studentId = await context.Student.AsNoTracking()
                                                  .Where(x => x.UserId == userId)
@@ -108,12 +108,12 @@ namespace School_Management.API.Repositories
                                                         && x.Term == request.Term
                                                         && x.StudentId == studentId)
                                                .ToListAsync();
-            var result = myResultsList.GroupBy(x => new { x.SubjectId, x.Subject.SubjectName })
-                                      .Select(g => new ResultForStudentResponse
+            var subjectResults = myResultsList.GroupBy(x => new { x.SubjectId, x.Subject.SubjectName })
+                                      .Select(g => new SubjectResultR
                                       {
                                           SubjectId = g.Key.SubjectId,
                                           SubjectName = g.Key.SubjectName,
-                                          Average = g.Sum(x => x.Weight) > 0 ? (float)Math.Round(g.Sum(x => x.Value * x.Weight) / g.Sum(x => x.Weight), 2) : 0,
+                                          AverageSubject = g.Sum(x => x.Weight) > 0 ? (float)Math.Round(g.Sum(x => x.Value * x.Weight) / g.Sum(x => x.Weight), 2) : 0,
                                           DetailResults = g.Select(x => new DetailResult
                                           {
                                               ResultId = x.Id,
@@ -122,6 +122,21 @@ namespace School_Management.API.Repositories
                                               Weight = x.Weight
                                           }).ToList()
                                       }).ToList();
+
+            var result = new ResultForStudentResponse
+            {
+                SubjectResults = subjectResults,
+                Average = subjectResults.Any() ? (float)Math.Round(subjectResults.Average(x => x.AverageSubject), 2) : 0
+            };
+
+            result.Rating = result.Average switch
+            {
+                >= 9.0f => "Xuất sắc",
+                >= 8.0f => "Giỏi",
+                >= 6.5f => "Khá",
+                >= 5.0f => "Trung bình",
+               _ => "Yếu"
+            };
 
             return (result, "SUCCESS");
         }
@@ -137,7 +152,8 @@ namespace School_Management.API.Repositories
             var classYearInfo = await context.ClassYear.AsNoTracking()
                 .Where(x => x.Id == classYearId)
                 .Select(x => new { x.HomeRoomId, x.SchoolYear })
-                .FirstOrDefaultAsync(); if (classYearInfo == null) return (null, "NOT_FOUND_CLASS");
+                .FirstOrDefaultAsync();
+            if (classYearInfo == null) return (null, "NOT_FOUND_CLASS");
 
             var isHomeroomTeacher = classYearInfo.HomeRoomId == teacherId;
             if (!isHomeroomTeacher)
@@ -151,7 +167,8 @@ namespace School_Management.API.Repositories
                 if (!isTeachingThisClass) return (null, "NOT_A_TEACHER_OF_THIS_CLASS");
             }
 
-            var studentIds = await context.StudentClassYear.AsNoTracking().Where(x => x.ClassYearId == classYearId)
+            var studentIds = await context.StudentClassYear.AsNoTracking()
+                                                           .Where(x => x.ClassYearId == classYearId)
                                                            .Select(g => g.StudentId)
                                                            .ToListAsync();
 
@@ -160,26 +177,50 @@ namespace School_Management.API.Repositories
             var listResults = await context.Result.Include(x => x.Subject)
                                                   .Include(x => x.Student).ThenInclude(x => x.User)
                                                   .Where(x => studentIds.Contains(x.StudentId)
-                                                        && x.Term == request.Term && x.SchoolYear == classYearInfo.SchoolYear)
+                                                        && x.Term == request.Term
+                                                        && x.SchoolYear == classYearInfo.SchoolYear)
                                                   .ToListAsync();
 
             var overallResult = listResults.GroupBy(x => new { x.StudentId, x.Student.User.FullName })
-                                           .Select(g => new StudentResultForTeacherResponse
-                                           {
-                                               StudentId = g.Key.StudentId,
-                                               StudentName = g.Key.FullName,
-                                               SubjectResults = g.GroupBy(t => new { t.SubjectId, t.Subject.SubjectName })
-                                                                 .Select(h => new SubjectResult
-                                                                 {
-                                                                     SubjectId = h.Key.SubjectId,
-                                                                     SubjectName = h.Key.SubjectName,
-                                                                     Average = h.Sum(y => y.Weight) > 0 ? (float)Math.Round(h.Sum(y => y.Value * y.Weight) / h.Sum(y => y.Weight), 2) : 0
-                                                                 }).ToList()
-                                           }).ToList();
+                .Select(g =>
+                {
+                    var subjectResults = g.GroupBy(t => new { t.SubjectId, t.Subject.SubjectName })
+                                          .Select(h => new SubjectResult
+                                          {
+                                              SubjectId = h.Key.SubjectId,
+                                              SubjectName = h.Key.SubjectName,
+                                              AverageSubject = h.Sum(y => y.Weight) > 0
+                                                  ? (float)Math.Round(h.Sum(y => y.Value * y.Weight) / h.Sum(y => y.Weight), 2)
+                                                  : 0
+                                          }).ToList();
+
+                    float semesterAverage = subjectResults.Any()
+                        ? (float)Math.Round(subjectResults.Average(sr => sr.AverageSubject), 2)
+                        : 0;
+
+                    string rating = semesterAverage switch
+                    {
+                        >= 9.0f => "Xuất sắc",
+                        >= 8.0f => "Giỏi",
+                        >= 6.5f => "Khá",
+                        >= 5.0f => "Trung bình",
+                        _ => "Yếu"
+                    };
+
+                    return new StudentResultForTeacherResponse
+                    {
+                        StudentId = g.Key.StudentId,
+                        StudentName = g.Key.FullName,
+                        SubjectResults = subjectResults,
+                        Average = semesterAverage,
+                        Rating = rating
+                    };
+                }).ToList();
+
             return (overallResult, "SUCCESS");
         }
 
-        public async Task<(List<ResultForStudentResponse>? data, string? message)> GetResultOfOneStudentForTeacher(ResultOfAllStudentRequest request, Guid classYearId, Guid studentId, Guid userId)
+        public async Task<(ResultForStudentResponse? data, string? message)> GetResultOfOneStudentForTeacher(ResultOfAllStudentRequest request, Guid classYearId, Guid studentId, Guid userId)
         {
             var teacherId = await context.Teacher.AsNoTracking().Where(x => x.UserId == userId).Select(g => g.Id).FirstOrDefaultAsync();
             if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
@@ -204,12 +245,12 @@ namespace School_Management.API.Repositories
                                                           && subjectIdsOfTeacher.Contains(x.SubjectId) && x.StudentId == studentId)
                                                  .ToListAsync();
 
-            var result = listResult.GroupBy(t => new { t.SubjectId, t.Subject.SubjectName })
-                                   .Select(g => new ResultForStudentResponse
+            var subjectResults = listResult.GroupBy(t => new { t.SubjectId, t.Subject.SubjectName })
+                                   .Select(g => new SubjectResultR
                                    {
                                        SubjectId = g.Key.SubjectId,
                                        SubjectName = g.Key.SubjectName,
-                                       Average = g.Sum(x => x.Weight) > 0 ? (float)Math.Round(g.Sum(x => x.Value * x.Weight) / g.Sum(x => x.Weight), 2) : 0,
+                                       AverageSubject = g.Sum(x => x.Weight) > 0 ? (float)Math.Round(g.Sum(x => x.Value * x.Weight) / g.Sum(x => x.Weight), 2) : 0,
                                        DetailResults = g.Select(y => new DetailResult
                                        {
                                            ResultId = y.Id,
@@ -219,6 +260,15 @@ namespace School_Management.API.Repositories
                                        }).ToList()
 
                                    }).ToList();
+
+            var result = new ResultForStudentResponse
+            {
+                SubjectResults = subjectResults,
+                Average = null,
+                Rating = null
+            };
+
+            
 
             return (result, "SUCCESS");
         }

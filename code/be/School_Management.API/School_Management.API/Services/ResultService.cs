@@ -29,7 +29,7 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<List<ResultForStudentResponse>> GetMyResultForStudent(ResultOfStudentRequest request, Guid userId)
+        public async Task<ResultForStudentResponse> GetMyResultForStudent(ResultOfStudentRequest request, Guid userId)
         {
             var (result, message) = await resultRepository.GetMyResultForStudent(request, userId);
             return message switch
@@ -54,7 +54,7 @@ namespace School_Management.API.Services
             };
         }
 
-        public async Task<List<ResultForStudentResponse>> GetResultOfOneStudentForTeacher(ResultOfAllStudentRequest request, Guid classYearId, Guid studentId, Guid userId)
+        public async Task<ResultForStudentResponse> GetResultOfOneStudentForTeacher(ResultOfAllStudentRequest request, Guid classYearId, Guid studentId, Guid userId)
         {
             var (result, message) = await resultRepository.GetResultOfOneStudentForTeacher(request, classYearId, studentId, userId);
             return message switch
