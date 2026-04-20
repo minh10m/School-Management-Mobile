@@ -1,4 +1,4 @@
-﻿namespace School_Management.API.Models.DTO
+namespace School_Management.API.Models.DTO
 {
     public class ResultForStudentResponse
     {
@@ -10,6 +10,7 @@
 
     public class DetailResult
     {
+        public Guid ResultId { get; set; }
         public string Type { get; set; } = string.Empty;
         public float Value { get; set; }
         public int Weight { get; set; }
