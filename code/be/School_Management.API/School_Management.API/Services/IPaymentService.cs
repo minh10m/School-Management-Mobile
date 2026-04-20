@@ -8,5 +8,6 @@ namespace School_Management.API.Services
         public Task<bool> ProcessWebhook(SepayWebhookRequest request);
         public Task<IEnumerable<PaymentHistoryResponse>> GetMyPayments(Guid userId);
         public Task<IEnumerable<PaymentHistoryResponse>> GetAllPayments();
+        public Task<bool> CheckAndUpdatePaymentStatus(string orderCode);
     }
 }
