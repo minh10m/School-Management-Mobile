@@ -6,5 +6,6 @@ namespace School_Management.API.Models.DTO
         public string? ClassName { get; set; }
         public int Grade { get; set; } = 0;
         public Guid? ClassYearId { get; set; }
+        public int? SchoolYear { get; set; }
     }
 }
