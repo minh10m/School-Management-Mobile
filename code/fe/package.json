@@ -17,7 +17,6 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@react-native-community/datetimepicker": "8.4.4",
-    "@stripe/stripe-react-native": "^0.57.2",
     "axios": "^1.13.6",
     "expo": "~54.0.30",
     "expo-constants": "~18.0.12",

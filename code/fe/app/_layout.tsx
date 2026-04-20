@@ -48,21 +48,27 @@ export default function RootLayout() {
   const { loadConfig } = useConfigStore();
 
   useEffect(() => {
-    if (loaded) {
-      Promise.all([
-        loadAuthFromStorage(),
-        loadConfig()
-      ]).finally(() => {
-        SplashScreen.hideAsync();
-      });
-    }
+    const init = async () => {
+      if (loaded) {
+        try {
+          // 1. Load auth from storage first to ensure tokens are available for API calls
+          await loadAuthFromStorage();
+          // 2. Then load global config (this may call APIs that require the token)
+          await loadConfig();
+        } catch (error) {
+          console.error("Initialization error:", error);
+        } finally {
+          await SplashScreen.hideAsync();
+        }
+      }
+    };
+    init();
   }, [loaded]);
 
   if (!loaded) {
     return null;
   }
 
-  const stripeKey = Constants.expoConfig?.extra?.stripePublishableKey || Constants.manifest?.extra?.stripePublishableKey;
 
   const CustomDefaultTheme = {
     ...DefaultTheme,
