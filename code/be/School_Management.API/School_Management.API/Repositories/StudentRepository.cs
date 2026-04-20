@@ -27,7 +27,15 @@ namespace School_Management.API.Repositories
                 query = query.Where(s => s.StudentClassYears
                     .Any(scy => scy.ClassYearId == request.ClassYearId));
             }
-            // Filter by ClassName or Grade if provided (Legacy/General filtering)
+            // Filter by SchoolYear if provided (can be combined with ClassName/Grade)
+            else if (request.SchoolYear.HasValue && request.SchoolYear != 0)
+            {
+                query = query.Where(s => s.StudentClassYears
+                    .Any(scy => scy.ClassYear.SchoolYear == request.SchoolYear &&
+                               (string.IsNullOrWhiteSpace(request.ClassName) || scy.ClassYear.ClassName.ToLower().Contains(request.ClassName.ToLower())) &&
+                               (request.Grade == 0 || scy.ClassYear.Grade == request.Grade)));
+            }
+            // Filter by ClassName or Grade if provided (Legacy/General filtering - usually latest year)
             else if (!string.IsNullOrWhiteSpace(request.ClassName) || request.Grade != 0)
             {
                 query = query.Where(s => s.StudentClassYears
