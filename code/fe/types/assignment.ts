@@ -22,13 +22,13 @@ export interface AssignmentResponse {
   subjectName: string;
   classYearId: string;
   className: string;
-  body?: string; // Mô tả chi tiết (nếu có)
+  description?: string; // Mô tả chi tiết (nếu có)
 }
 
 export interface StudentAssignmentResponse {
   assignmentId: string;
   title: string;
-  body: string | null;
+  description: string | null;
   fileUrl: string | null;
   startTime: string;
   finishTime: string;
@@ -43,8 +43,8 @@ export interface StudentAssignmentResponse {
 // ─── Query Params ──────────────────────────────────────────────────────────────
 
 export interface GetAssignmentsParams {
-  classYearId?: string;
-  teacherSubjectId?: string;
+  ClassYearId?: string;
+  SubjectId?: string;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────
@@ -57,7 +57,7 @@ export interface CreateAssignmentPayload {
   finishTime: string; // ISO datetime
   subjectId: string;
   classYearId: string;
-  body?: string; // Mô tả chi tiết (nếu có)
+  description?: string; // Mô tả chi tiết (nếu có)
 }
 
 /**
@@ -70,5 +70,5 @@ export interface UpdateAssignmentPayload {
   startTime?: string;
   finishTime?: string;
   subjectId?: string;
-  body?: string;
+  description?: string;
 }

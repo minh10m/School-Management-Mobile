@@ -1,22 +1,42 @@
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Modal, Image, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { feeDetailService } from '../../../services/fee.service';
+import { paymentService } from '../../../services/payment.service';
+import { sepayService } from '../../../services/sepay.service';
 import { FeeDetailResponse } from '../../../types/fee';
+import { PaymentResponse } from '../../../types/payment';
 
 export default function PaymentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [detail, setDetail] = useState<FeeDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [paymentInfo, setPaymentInfo] = useState<PaymentResponse | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  
   const insets = useSafeAreaInsets();
+  const pollingTimer = useRef<any>(null);
 
   useEffect(() => {
     if (id) {
       loadDetail();
     }
   }, [id]);
+
+  useEffect(() => {
+    // Start polling when QR is shown and we have payment info
+    if (showQR && paymentInfo) {
+      startPolling();
+    } else {
+      stopPolling();
+    }
+
+    return () => stopPolling();
+  }, [showQR, paymentInfo]);
 
   const loadDetail = async () => {
     try {
@@ -28,6 +48,52 @@ export default function PaymentDetailScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!detail) return;
+
+    try {
+      setIsProcessing(true);
+      // 1. Tell backend we want to pay
+      const response = await paymentService.payTheBill({
+        feeDetailId: detail.id
+      });
+      
+      setPaymentInfo(response);
+      setShowQR(true);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Lỗi", "Không thể khởi tạo giao dịch. Vui lòng thử lại sau.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const startPolling = () => {
+    setIsVerifying(true);
+    pollingTimer.current = setInterval(async () => {
+      if (!paymentInfo) return;
+
+      const isPaid = await sepayService.checkPaymentStatus(
+        paymentInfo.amount,
+        paymentInfo.orderCode
+      );
+
+      if (isPaid) {
+        stopPolling();
+        setShowQR(false);
+        router.push('/student/payment/success' as any);
+      }
+    }, 5000); // Check every 5 seconds
+  };
+
+  const stopPolling = () => {
+    if (pollingTimer.current) {
+      clearInterval(pollingTimer.current);
+      pollingTimer.current = null;
+    }
+    setIsVerifying(false);
   };
 
   if (loading) {
@@ -110,13 +176,12 @@ export default function PaymentDetailScreen() {
           </View>
         </View>
 
-        {/* Payment Methods - Modern Placeholder */}
+        {/* Payment Methods */}
         <View className="mt-10 px-6">
           <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#1E293B] text-base mb-4">Phương thức thanh toán</Text>
-          <View className="flex-row gap-4">
-             <PaymentMethodIcon icon="cash-outline" label="Chuyển khoản" active />
-             <PaymentMethodIcon icon="card-outline" label="Thẻ nội địa" />
-             <PaymentMethodIcon icon="wallet-outline" label="Momo/Zalo" />
+          <View className="flex-row">
+             <PaymentMethodIcon icon="cash-outline" label="Chuyển khoản (VietQR)" active />
+             <View className="flex-[2]" />
           </View>
         </View>
       </ScrollView>
@@ -127,12 +192,84 @@ export default function PaymentDetailScreen() {
         style={{ paddingBottom: insets.bottom }}
       >
         <TouchableOpacity 
-          className="bg-blue-600 py-5 rounded-[24px] items-center shadow-xl shadow-blue-200"
-          onPress={() => router.push('/student/payment/success' as any)}
+          className={`bg-blue-600 py-5 rounded-[24px] items-center shadow-xl shadow-blue-200 ${isProcessing ? 'opacity-70' : ''}`}
+          onPress={handleConfirmPayment}
+          disabled={isProcessing}
         >
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">XÁC NHẬN THANH TOÁN</Text>
+          {isProcessing ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">XÁC NHẬN THANH TOÁN</Text>
+          )}
         </TouchableOpacity>
       </View>
+
+      {/* QR Code Modal */}
+      <Modal
+        visible={showQR}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowQR(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-white rounded-t-[40px] px-6 pt-8 pb-10">
+            <View className="w-12 h-1.5 bg-gray-200 rounded-full self-center mb-8" />
+            
+            <View className="flex-row justify-between items-center mb-6">
+              <View>
+                <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-xl text-[#1E293B]">Quét mã VietQR</Text>
+                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-xs">Mở app Ngân hàng để quét thanh toán</Text>
+              </View>
+              <TouchableOpacity 
+                onPress={() => setShowQR(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
+              >
+                <Ionicons name="close" size={20} color="#64748B" />
+              </TouchableOpacity>
+            </View>
+
+            {paymentInfo && (
+              <View className="items-center">
+                <View className="p-4 bg-white border-2 border-blue-600 rounded-[32px] shadow-2xl shadow-blue-200">
+                  <Image 
+                    source={{ uri: paymentInfo.qrCodeUrl }}
+                    style={{ width: 240, height: 240 }}
+                    resizeMode="contain"
+                  />
+                </View>
+
+                <View className="mt-8 w-full bg-blue-50 rounded-3xl p-5 border border-blue-100">
+                  <View className="flex-row justify-between items-center mb-3">
+                    <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-blue-400 text-xs uppercase tracking-widest">Ngân hàng</Text>
+                    <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#1E293B] text-sm">{paymentInfo.bankName}</Text>
+                  </View>
+                  <View className="flex-row justify-between items-center mb-3">
+                    <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-blue-400 text-xs uppercase tracking-widest">Số tài khoản</Text>
+                    <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#1E293B] text-sm">{paymentInfo.accountNumber}</Text>
+                  </View>
+                  <View className="flex-row justify-between items-center mb-3">
+                    <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-blue-400 text-xs uppercase tracking-widest">Nội dung</Text>
+                    <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-blue-600 text-sm">{paymentInfo.orderCode}</Text>
+                  </View>
+                  <View className="flex-row justify-between items-center pt-3 border-t border-blue-100">
+                    <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-blue-400 text-xs uppercase tracking-widest">Số tiền</Text>
+                    <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#1E293B] text-lg">{paymentInfo.amount.toLocaleString()} VNĐ</Text>
+                  </View>
+                </View>
+
+                <View className="mt-8 items-center flex-row">
+                  <ActivityIndicator size="small" color="#3B82F6" className="mr-3" />
+                  <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-blue-600 text-sm">Đang chờ bạn thanh toán...</Text>
+                </View>
+                
+                <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] text-center mt-3 px-10">
+                  Hệ thống sẽ tự động xác nhận sau khi nhận được tiền. Vui lòng không tắt màn hình này.
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

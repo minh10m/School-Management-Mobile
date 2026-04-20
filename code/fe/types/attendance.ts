@@ -45,6 +45,20 @@ export interface GetStudentAttendanceParams {
   year?: number;
 }
 
+export interface GetWeeklyAttendanceParams {
+  classYearId: string;
+  startDate: string; // "YYYY-MM-DD"
+}
+
+export interface WeeklyAttendanceResponse {
+  studentId: string;
+  studentName: string;
+  totalPresent: number;
+  totalLate: number;
+  totalAbsent: number;
+  details: StudentAttendanceRecord[];
+}
+
 // ─── Request Payloads ─────────────────────────────────────────────────────────
 
 export interface AttendanceEntry {

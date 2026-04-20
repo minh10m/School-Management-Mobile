@@ -14,6 +14,7 @@ export interface ResultItem {
 }
 
 export interface DetailResult {
+  resultId?: string;
   type: string;
   value: number;
   weight: number;
@@ -43,30 +44,31 @@ export interface SubjectResult {
 // ─── Query Params ──────────────────────────────────────────────────────────────
 
 export interface GetStudentResultsParams {
-  Term?: number;
-  SchoolYear?: number;
+  term?: number;
+  schoolYear?: number;
 }
 
 export interface GetClassResultsParams {
-  Term: number;
+  term: number;
+  subjectId?: string;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────
 
 export interface CreateResultRequest {
-  Type: string;
-  Value: number;
-  StudentId: string;
-  SubjectId: string;
-  Term: number;
-  Weight: number;
-  SchoolYear: number;
+  type: string;
+  value: number;
+  studentId: string;
+  subjectId: string;
+  term: number;
+  weight: number;
+  schoolYear: number;
 }
 
 export interface UpdateResultPayload {
-  Type: string;
-  Value: number;
-  Term: number;
-  Weight: number;
-  SchoolYear: number;
+  type: string;
+  value: number;
+  term: number;
+  weight: number;
+  schoolYear: number;
 }

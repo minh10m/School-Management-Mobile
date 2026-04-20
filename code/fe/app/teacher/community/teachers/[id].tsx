@@ -30,7 +30,7 @@ export default function OtherTeacherDetailScreen() {
       const data = await teacherService.getTeacherById(id);
       setProfile(data);
     } catch (error) {
-      Alert.alert('Error', 'Cannot load teacher information.');
+      Alert.alert('Lỗi', 'Không thể tải thông tin giáo viên.');
       router.back();
     } finally {
       setLoading(false);
@@ -66,7 +66,7 @@ export default function OtherTeacherDetailScreen() {
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Teacher Information</Text>
+        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-lg flex-1">Thông tin giáo viên</Text>
       </View>
 
       <ScrollView className="flex-1 pt-5 px-6" showsVerticalScrollIndicator={false}>
@@ -86,12 +86,12 @@ export default function OtherTeacherDetailScreen() {
         </View>
 
         <View className="bg-white rounded-3xl p-6 shadow-sm mb-10 border border-gray-100">
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-base mb-4">Contact Profile</Text>
+          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-base mb-4">Thông tin liên hệ</Text>
           
-          <InfoRow label="Phone Number" value={profile?.phoneNumber} icon="call-outline" />
-          <InfoRow label="Birthday" value={profile?.birthday ? profile.birthday.split('T')[0] : null} icon="calendar-outline" />
-          <InfoRow label="Address" value={profile?.address} icon="location-outline" />
-          <InfoRow label="Work Email" value={profile?.email} icon="mail-outline" />
+          <InfoRow label="Số điện thoại" value={profile?.phoneNumber} icon="call-outline" />
+          <InfoRow label="Ngày sinh" value={profile?.birthday ? profile.birthday.split('T')[0] : null} icon="calendar-outline" />
+          <InfoRow label="Địa chỉ" value={profile?.address} icon="location-outline" />
+          <InfoRow label="Email công việc" value={profile?.email} icon="mail-outline" />
           
         </View>
       </ScrollView>

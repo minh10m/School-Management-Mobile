@@ -3,10 +3,10 @@ import axios, {
    AxiosResponse,
    InternalAxiosRequestConfig,
 } from "axios";
+import Constants from "expo-constants";
 import { useAuthStore } from "../store/authStore";
 
-// Replace with your actual backend URL
-const API_URL = "https://student-management-api-bbfdh3f8agg0gehg.indonesiacentral-01.azurewebsites.net/api";
+const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -16,9 +16,7 @@ const apiClient = axios.create({
   timeout: 10000,
 });
 
-// Flag to prevent multiple refresh calls simultaneously
 let isRefreshing = false;
-// Queue for holding requests while token is refreshing
 let failedQueue: Array<{
   resolve: (value?: unknown) => void;
   reject: (reason?: any) => void;

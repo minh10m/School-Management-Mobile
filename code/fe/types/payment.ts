@@ -1,26 +1,27 @@
-export type PaymentType = 'course' | 'fee';
-export type PaymentStatus = 'pending' | 'success' | 'failed';
-
-// ─── Response Types ────────────────────────────────────────────────────────────
+export interface PaymentRequest {
+  feeDetailId?: string;
+  courseId?: string;
+}
 
 export interface PaymentResponse {
   paymentId: string;
-  userId: string;
-  amount: number;
   orderCode: string;
-  refId: string;          // courseId hoặc feeId
-  type: PaymentType;
-  status: PaymentStatus;
-  body: string;
+  amount: number;
   description: string;
-  createdAt: string;
+  accountName: string;
+  accountNumber: string;
+  bankName: string;
+  bin: string;
+  qrCodeUrl: string;
 }
 
-// ─── Request Payloads ─────────────────────────────────────────────────────────
-
-export interface CreatePaymentPayload {
-  refId: string;          // courseId hoặc feeId
-  type: PaymentType;
-  body: string;
+export interface PaymentHistoryResponse {
+  paymentId: string;
+  orderCode: string;
+  amount: number;
+  type: string;
+  status: string;
   description: string;
+  createdAt: string;
+  userName: string;
 }
