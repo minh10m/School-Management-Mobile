@@ -22,7 +22,8 @@ namespace School_Management.API.Controllers
         [HttpPost]
         [ValidateModel]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> CreateAssignment([FromBody] PostOrUpdateAssignmentRequest request)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateAssignment([FromForm] PostOrUpdateAssignmentRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized(new
@@ -31,7 +32,7 @@ namespace School_Management.API.Controllers
                 message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
             });
             var result = await assignmentService.CreateAssignment(request, Guid.Parse(userId));
-            return StatusCode(210, new
+            return StatusCode(201, new
             {
                 success = true,
                 message = "Tạo bài tập thành công",
@@ -43,7 +44,8 @@ namespace School_Management.API.Controllers
         [ValidateModel]
         [Route("{assignmentId}")]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> UpdateAssignment([FromBody] PostOrUpdateAssignmentRequest request, [FromRoute] Guid assignmentId)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateAssignment([FromForm] PostOrUpdateAssignmentRequest request, [FromRoute] Guid assignmentId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized(new

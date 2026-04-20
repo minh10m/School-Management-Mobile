@@ -12,6 +12,7 @@ using School_Management.API.Services;
 using School_Management.API.Repositories;
 using Microsoft.OpenApi.Models;
 using School_Management.API.ErrorMessageConfiguration;
+using CloudinaryDotNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +56,20 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+//Cloudinary
+var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
+
+var account = new Account(
+    cloudinaryConfig["CloudName"],
+    cloudinaryConfig["ApiKey"],
+    cloudinaryConfig["ApiSecret"]
+);
+
+Cloudinary cloudinary = new Cloudinary(account);
+
+builder.Services.AddSingleton(cloudinary);
+
 
 //SignIR
 builder.Services.AddSignalR();

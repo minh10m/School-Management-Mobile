@@ -225,7 +225,7 @@ namespace School_Management.API.Repositories
         {
             var teacher = await context.Teacher.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId);
             if (teacher == null) return (null, "NOT_FOUND_TEACHER");
-            var result = await context.Result.AsNoTracking().Include(x => x.Student).ThenInclude(x => x.User)
+            var result = await context.Result.Include(x => x.Student).ThenInclude(x => x.User)
                                              .Include(x => x.Subject).ThenInclude(x => x.TeacherSubjects)
                                              .FirstOrDefaultAsync(x => x.Id == resultId);
             if (result == null) return (null, "NOT_FOUND_RESULT");
