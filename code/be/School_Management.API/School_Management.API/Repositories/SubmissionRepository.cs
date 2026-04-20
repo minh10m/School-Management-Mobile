@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -8,10 +10,12 @@ namespace School_Management.API.Repositories
     public class SubmissionRepository : ISubmissionRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly Cloudinary cloudinary;
 
-        public SubmissionRepository(ApplicationDbContext context)
+        public SubmissionRepository(ApplicationDbContext context, Cloudinary cloudinary)
         {
             this.context = context;
+            this.cloudinary = cloudinary;
         }
         public async Task<(SubmissionResponse? data, string? message)> CreateSubmission(SubmissionRequest request, Guid userId)
         {
@@ -23,21 +27,43 @@ namespace School_Management.API.Repositories
             if (assignment == null) return (null, "NOT_FOUND_ASSIGNMENT");
             string status = string.Empty;
 
-            status = (timeSubmit <= assignment.FinishTime) ? "Đã nộp" : "Nộp trễ";
+            status = (timeSubmit <= assignment.FinishTime.ToUniversalTime().AddSeconds(10)) ? "Đã nộp" : "Nộp trễ";
 
             var existingSubmission = await context.Submission
                               .FirstOrDefaultAsync(s => s.AssignmentId == request.AssignmentId && s.StudentId == student.Id);
             if (existingSubmission != null) return (null, "TOO_FAST_REQUEST");
 
+            string fileUrl = "Không có dữ liệu";
+            string publicId = "";
+
+            if (request.File != null && request.File.Length > 0)
+            {
+                using var stream = request.File.OpenReadStream();
+                var uploadParams = new RawUploadParams
+                {
+                    File = new FileDescription(request.File.FileName, stream),
+                    Folder = "submissions",
+                    PublicId = Guid.NewGuid().ToString(),
+                    Type = "upload",
+                    AccessMode = "public"
+                };
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                if (uploadResult.Error != null) return (null, "UPLOAD_FILE_FAILED");
+
+                fileUrl = uploadResult.SecureUrl.ToString();
+                publicId = uploadResult.PublicId ?? "";
+            }
+
             var submission = new Submission
             {
                 Id = Guid.NewGuid(),
                 Score = null,
-                FileUrl = request.FileUrl,
+                FileUrl = fileUrl,
                 FileTitle = request.FileTitle,
                 AssignmentId = request.AssignmentId,
                 TimeSubmit = timeSubmit,
                 StudentId = student.Id,
+                PublicId = publicId,
                 Status = status
             };
 

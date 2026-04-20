@@ -14,6 +14,7 @@ namespace School_Management.API.EntityConfigurations
             builder.Property(x => x.FileUrl).HasMaxLength(2048);
             builder.Property(x => x.TimeSubmit).IsRequired();
             builder.Property(x => x.Status).HasMaxLength(30);
+            builder.Property(x => x.PublicId).IsRequired();
 
         }
     }
