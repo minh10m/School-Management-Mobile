@@ -80,7 +80,6 @@ export default function AdminCreateFeeScreen() {
 
   return (
     <AdminPageWrapper title="Tạo khoản phí mới" showLogo={false}>
-      <Stack.Screen options={{ headerShown: false }} />
       <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
         
         {/* Basic Info */}

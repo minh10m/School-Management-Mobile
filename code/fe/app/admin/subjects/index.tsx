@@ -67,7 +67,6 @@ export default function AdminSubjectsScreen() {
         placeholder: "Tìm kiếm môn học...",
       }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Standardized Subject List */}
       {loading && !refreshing ? (

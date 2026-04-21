@@ -83,7 +83,6 @@ export default function AdminFeesScreen() {
         placeholder: "Tìm kiếm khoản phí...",
       }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
       
       {/* Filter Tabs */}
       <View className="flex-row px-6 mb-2 mt-4 gap-2">

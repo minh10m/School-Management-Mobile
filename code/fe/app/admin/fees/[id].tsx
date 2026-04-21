@@ -79,7 +79,6 @@ export default function AdminFeeDetailScreen() {
          placeholder: "Tìm tên học sinh..."
        }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Summary card */}
       <View className="mx-6 mt-6 mb-4 bg-[#136ADA] rounded-[32px] p-6 shadow-xl shadow-blue-200">

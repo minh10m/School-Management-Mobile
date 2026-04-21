@@ -134,7 +134,6 @@ export default function AdminEventsScreen() {
         onFilterPress: openFilter,
       }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Filter Modal */}
       <Modal

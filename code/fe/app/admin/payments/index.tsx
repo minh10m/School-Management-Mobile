@@ -45,7 +45,6 @@ export default function AdminPaymentsScreen() {
         placeholder: "Tìm tên hoặc mã giao dịch...",
       }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
       
       {/* Filter Status Section */}
       <View className="bg-white border-b border-gray-50/50 pb-2">

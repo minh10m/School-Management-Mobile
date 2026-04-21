@@ -26,7 +26,7 @@ import { TeacherListItem } from "../../../types/teacher";
 import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { getErrorMessage } from "../../../utils/error";
 
-const DAYS = ["T2", "T3", "T4", "T5", "T6", "T7"];
+const DAYS = ["T2", "T3", "T4", "T5", "T6"];
 
 export default function AdminScheduleDetailScreen() {
   const router = useRouter();
