@@ -161,7 +161,6 @@ const ExamScheduleIndex = () => {
         onFilterPress: openFilter,
       }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Advanced Filter Modal */}
       <Modal

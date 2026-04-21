@@ -58,12 +58,12 @@ export default function AdminCourseDetailScreen() {
     fetchData();
   };
 
-  const handleUpdateStatus = async (newStatus: "approved" | "rejected") => {
+  const handleUpdateStatus = async (newStatus: "Approved" | "Rejected") => {
     if (!course) return;
     try {
       setProcessing(true);
       await courseService.updateCourseStatus(course.id, { status: newStatus });
-      Alert.alert("Thành công", `Đã ${newStatus === "approved" ? "duyệt" : "từ chối"} khóa học.`);
+      Alert.alert("Thành công", `Đã ${newStatus === "Approved" ? "duyệt" : "từ chối"} khóa học.`);
       router.back();
     } catch (err: any) {
       Alert.alert("Lỗi", err.response?.data?.message || "Không thể cập nhật trạng thái.");
@@ -72,15 +72,15 @@ export default function AdminCourseDetailScreen() {
     }
   };
 
-  const confirmAction = (action: "approved" | "rejected") => {
+  const confirmAction = (action: "Approved" | "Rejected") => {
     Alert.alert(
-      action === "approved" ? "Duyệt khóa học" : "Từ chối khóa học",
-      `Bạn có chắc chắn muốn ${action === "approved" ? "duyệt" : "từ chối"} khóa học này?`,
+      action === "Approved" ? "Duyệt khóa học" : "Từ chối khóa học",
+      `Bạn có chắc chắn muốn ${action === "Approved" ? "duyệt" : "từ chối"} khóa học này?`,
       [
         { text: "Hủy", style: "cancel" },
         {
-          text: action === "approved" ? "Duyệt" : "Từ chối",
-          style: action === "rejected" ? "destructive" : "default",
+          text: action === "Approved" ? "Duyệt" : "Từ chối",
+          style: action === "Rejected" ? "destructive" : "default",
           onPress: () => handleUpdateStatus(action),
         },
       ]
@@ -211,7 +211,7 @@ export default function AdminCourseDetailScreen() {
             disabled={processing}
             activeOpacity={0.8}
             className="flex-1 bg-red-50 h-16 rounded-[24px] items-center justify-center border border-red-100"
-            onPress={() => confirmAction("rejected")}
+            onPress={() => confirmAction("Rejected")}
           >
             {processing ? (
               <ActivityIndicator color="#EF4444" />
@@ -223,7 +223,7 @@ export default function AdminCourseDetailScreen() {
             disabled={processing}
             activeOpacity={0.8}
             className="flex-1 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
-            onPress={() => confirmAction("approved")}
+            onPress={() => confirmAction("Approved")}
           >
             {processing ? (
               <ActivityIndicator color="white" />

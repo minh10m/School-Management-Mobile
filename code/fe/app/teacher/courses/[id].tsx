@@ -13,7 +13,7 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { courseService } from "../../../services/course.service";
 import { teacherService } from "../../../services/teacher.service";
@@ -21,8 +21,10 @@ import { TeacherSubject } from "../../../types/teacher";
 import { getErrorMessage } from "../../../utils/error";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 
-export default function CreateCourseScreen() {
+export default function EditCourseScreen() {
   const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  
   const [courseName, setCourseName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -30,29 +32,38 @@ export default function CreateCourseScreen() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [fetchingSubjects, setFetchingSubjects] = useState(true);
+  const [fetchingData, setFetchingData] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    const fetchSubjects = async () => {
+    const fetchData = async () => {
+      if (!id) return;
       try {
+        setFetchingData(true);
+        // Fetch teacher info and subjects
         const me = await teacherService.getMe();
         const subjects = await teacherService.getTeacherSubjects(me.teacherId);
         setTeacherSubjects(subjects);
-        if (subjects.length > 0) {
-          setSelectedSubjectId(subjects[0].subjectId);
-        }
+
+        // Fetch course details
+        const course = await courseService.getCourseById(id);
+        setCourseName(course.courseName);
+        setDescription(course.description);
+        setPrice(course.price.toString());
+        setSelectedSubjectId(course.subjectId || null);
       } catch (error) {
-        console.error("Error fetching subjects:", error);
-        Alert.alert("Lỗi", "Không thể tải danh sách môn học. Vui lòng thử lại.");
+        console.error("Error fetching data:", error);
+        Alert.alert("Lỗi", "Không thể tải thông tin khóa học. Vui lòng thử lại.");
+        router.back();
       } finally {
-        setFetchingSubjects(false);
+        setFetchingData(false);
       }
     };
-    fetchSubjects();
-  }, []);
+    fetchData();
+  }, [id]);
 
-  const handleCreate = async () => {
+  const handleUpdate = async () => {
+    if (!id) return;
     if (!courseName.trim() || !description.trim() || !price || !selectedSubjectId) {
       Alert.alert("Thiếu thông tin", "Vui lòng hoàn thiện tất cả các trường thông tin bắt buộc.");
       return;
@@ -66,7 +77,7 @@ export default function CreateCourseScreen() {
 
     try {
       setLoading(true);
-      await courseService.createCourse({
+      await courseService.updateCourse(id, {
         courseName: courseName.trim(),
         description: description.trim(),
         price: numericPrice,
@@ -74,12 +85,12 @@ export default function CreateCourseScreen() {
       });
 
       Alert.alert(
-        "🎉 Chúc mừng!",
-        "Khóa học của bạn đã được tạo và đang chờ Quản trị viên phê duyệt.",
-        [{ text: "Tuyệt vời", onPress: () => router.back() }]
+        "Thành công",
+        "Khóa học của bạn đã được cập nhật.",
+        [{ text: "Đồng ý", onPress: () => router.back() }]
       );
     } catch (error: any) {
-      Alert.alert("Lỗi tạo khóa học", getErrorMessage(error));
+      Alert.alert("Lỗi cập nhật", getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -89,7 +100,7 @@ export default function CreateCourseScreen() {
 
   return (
     <AdminPageWrapper
-      title="Tạo khóa học mới"
+      title="Chỉnh sửa khóa học"
       onBack={() => router.back()}
     >
       <StatusBar hidden />
@@ -103,7 +114,7 @@ export default function CreateCourseScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ padding: 24, paddingBottom: 150 }}
         >
-          {fetchingSubjects ? (
+          {fetchingData ? (
             <View className="items-center py-20">
               <ActivityIndicator size="large" color="#136ADA" />
               <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4">
@@ -226,20 +237,20 @@ export default function CreateCourseScreen() {
                 </View>
               </View>
 
-              {/* NÚT TẠO */}
+              {/* NÚT CẬP NHẬT */}
               <TouchableOpacity
-                onPress={handleCreate}
+                onPress={handleUpdate}
                 disabled={loading}
                 activeOpacity={0.8}
                 className="mt-4"
               >
-                <View className={`h-16 rounded-[24px] flex-row items-center justify-center shadow-xl ${loading ? "bg-gray-300" : "bg-[#136ADA] shadow-blue-200"}`}>
+                <View className={`h-16 rounded-[24px] flex-row items-center justify-center shadow-xl ${loading ? "bg-gray-300" : "bg-indigo-600 shadow-indigo-200"}`}>
                   {loading ? (
                     <ActivityIndicator color="white" />
                   ) : (
                     <>
-                      <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-base mr-2">TẠO KHÓA HỌC NGAY</Text>
-                      <Ionicons name="rocket-outline" size={20} color="white" />
+                      <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-base mr-2">LƯU THAY ĐỔI</Text>
+                      <Ionicons name="save-outline" size={20} color="white" />
                     </>
                   )}
                 </View>

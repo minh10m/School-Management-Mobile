@@ -159,7 +159,6 @@ export default function LessonDetailScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar hidden />
-      <Stack.Screen options={{ headerShown: false }} />
       
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-100">

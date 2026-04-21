@@ -61,7 +61,6 @@ export default function ExamScheduleScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
       <View className="flex-row items-center px-6 py-4 border-b border-gray-100">

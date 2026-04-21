@@ -49,7 +49,6 @@ export default function AdminRolesScreen() {
 
   return (
     <AdminPageWrapper title="Quản lý Vai trò">
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Standardized Role List */}
       {loading && !refreshing ? (

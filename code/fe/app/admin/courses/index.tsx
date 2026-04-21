@@ -171,16 +171,16 @@ export default function AdminCoursesScreen() {
     }
   };
 
-  const confirmAction = (action: "approved" | "rejected") => {
+  const confirmAction = (action: "Approved" | "Rejected") => {
     if (!selected) return;
     Alert.alert(
-      action === "approved" ? "Duyệt khóa học" : "Từ chối khóa học",
-      `Bạn có chắc chắn muốn ${action === "approved" ? "duyệt" : "từ chối"} khóa học "${selected.courseName}"?`,
+      action === "Approved" ? "Duyệt khóa học" : "Từ chối khóa học",
+      `Bạn có chắc chắn muốn ${action === "Approved" ? "duyệt" : "từ chối"} khóa học "${selected.courseName}"?`,
       [
         { text: "Hủy", style: "cancel" },
         {
-          text: action === "approved" ? "Duyệt" : "Từ chối",
-          style: action === "rejected" ? "destructive" : "default",
+          text: action === "Approved" ? "Duyệt" : "Từ chối",
+          style: action === "Rejected" ? "destructive" : "default",
           onPress: () => handleUpdateStatus(selected.id, action),
         },
       ]
@@ -197,7 +197,6 @@ export default function AdminCoursesScreen() {
         onFilterPress: openFilter,
       }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Filter Modal */}
       <Modal

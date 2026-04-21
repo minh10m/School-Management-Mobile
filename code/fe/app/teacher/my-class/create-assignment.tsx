@@ -105,7 +105,6 @@ export default function CreateAssignmentPage() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
       <View className="px-6 py-4 flex-row items-center border-b border-gray-50">

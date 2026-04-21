@@ -130,7 +130,6 @@ export default function AdminUsersScreen() {
         onFilterPress: openFilter,
       }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
       {/* Advanced Filter Modal */}
       <Modal
         visible={isFilterVisible}

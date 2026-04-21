@@ -51,7 +51,6 @@ export default function StudentBrowseCourses() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar hidden />
-      <Stack.Screen options={{ headerShown: false }} />
       
       {/* Header */}
       <View className="px-6 py-4 bg-white border-b border-gray-100">
@@ -62,9 +61,7 @@ export default function StudentBrowseCourses() {
           <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-lg">
             Khám phá khóa học
           </Text>
-          <TouchableOpacity onPress={() => router.push("/student/courses/registered" as any)}>
-            <Ionicons name="bookmark-outline" size={24} color="#136ADA" />
-          </TouchableOpacity>
+          <View className="w-10" />
         </View>
 
         {/* Search Bar */}
