@@ -71,6 +71,15 @@ namespace School_Management.API.Repositories
                                     x.SchoolYear == item.SchoolYear &&
                                     x.Type.ToLower() == item.Type.ToLower());
                     if (isExisted) return (false, "CONFLICT_TYPE");
+                    int weight = 0;
+                    weight = item.Type switch
+                    {
+                        "Miệng" => 1,
+                        "15 phút" => 1,
+                        "Giữa kì" => 2, 
+                        "Cuối kì" => 3
+
+                    };
                     var result = new Result
                     {
                         Id = Guid.NewGuid(),
@@ -80,7 +89,7 @@ namespace School_Management.API.Repositories
                         Term = item.Term,
                         Type = item.Type,
                         Value = item.Value,
-                        Weight = item.Weight
+                        Weight = weight
                     };
                     listResult.Add(result);
                 }
@@ -306,13 +315,21 @@ namespace School_Management.API.Repositories
                                                             && x.Id != resultId && x.Type.ToLower() == request.Type.ToLower());
             if(isExisted) return (null, "DUPLICATED_TYPE");
 
-            
+            int weight = 0;
+            weight = request.Type switch
+            {
+                "Miệng" => 1,
+                "15 phút" => 1,
+                "Giữa kì" => 2,
+                "Cuối kì" => 3
+
+            };
 
             result.Type = request.Type;
             result.Term = request.Term;
             result.SchoolYear = request.SchoolYear;
             result.Value = request.Value;
-            result.Weight = request.Weight;
+            result.Weight = weight;
 
             await context.SaveChangesAsync();
             return (new ResultResponse
