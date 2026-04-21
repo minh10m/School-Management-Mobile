@@ -21,6 +21,7 @@ namespace School_Management.API.Services
                 "NOT_FOUND_ASSIGNMENT" => throw new NotFoundException("Không thể nộp bài cho bài tập này"),
                 "TOO_FAST_REQUEST" => throw new ConflictException("Bạn đã nộp bài rồi"),
                 "SUCCESS" => result!,
+                "BIGGER_THAN_MAXSIZE" => throw new BadRequestException("Dung lượng tối đa cho file chỉ được phép là 20MB"),
                 "UPLOAD_FILE_FAILED" => throw new BadRequestException("Upload file thất bại"),
                 _ => throw new Exception("Lỗi không xác định")
             };

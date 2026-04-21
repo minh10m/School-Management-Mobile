@@ -43,6 +43,9 @@ namespace School_Management.API.Repositories
                 string? fileTitle = request.FileTitle?.Trim() ?? null;
                 string? publicId = null;
 
+                var longMaxSize = 20 * 1024 * 1024;
+                if (request.File.Length > longMaxSize) return (null, "BIGGER_THAN_MAXSIZE");
+
                 if (request.File != null && request.File.Length > 0)
                 {
                     using var stream = request.File.OpenReadStream();
