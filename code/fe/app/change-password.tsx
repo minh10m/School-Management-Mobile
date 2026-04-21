@@ -24,12 +24,12 @@ export default function ChangePasswordScreen() {
 
   const handleChangePassword = async () => {
     if (!oldPassword || !newPassword || !confirmedPassword) {
-      alert("Please fill in all fields");
+      alert("Vui lòng điền đầy đủ thông tin");
       return;
     }
 
     if (newPassword !== confirmedPassword) {
-      alert("New password and confirmed password do not match");
+      alert("Mật khẩu mới và xác nhận mật khẩu không khớp");
       return;
     }
 
@@ -45,12 +45,12 @@ export default function ChangePasswordScreen() {
 
       await authService.changePassword(payload);
 
-      alert("Password changed successfully!");
+      alert("Đổi mật khẩu thành công!");
       router.back();
     } catch (error: any) {
       console.error(error);
       alert(
-        "Change password failed: " +
+        "Đổi mật khẩu thất bại: " +
           (error.response?.data?.message || error.message),
       );
     } finally {
@@ -64,7 +64,7 @@ export default function ChangePasswordScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 relative border-b border-gray-100">
+      <View className="flex-row items-center px-6 py-4 relative border-b border-gray-100">
         <TouchableOpacity
           className="absolute left-6 z-10 p-2"
           onPress={() => router.back()}
@@ -72,11 +72,10 @@ export default function ChangePasswordScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>
-            Change Password
+          <Text className="text-black text-[17px]" style={{ fontFamily: 'Poppins-Bold' }}>
+            Đổi mật khẩu
           </Text>
         </View>
-        <View className="w-10" />
       </View>
 
       <KeyboardAvoidingView
@@ -88,11 +87,11 @@ export default function ChangePasswordScreen() {
             {/* Old Password */}
             <View>
               <Text className="text-black text-sm mb-2 ml-1" style={{ fontFamily: 'Poppins-Medium' }}>
-                Old Password
+                Mật khẩu cũ
               </Text>
               <View className="relative justify-center">
                 <TextInput
-                  placeholder="Enter old password"
+                  placeholder="Nhập mật khẩu cũ"
                   placeholderTextColor="#9CA3AF"
                   secureTextEntry={!oldPasswordVisible}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 text-base pr-12" style={{ fontFamily: 'Poppins-Regular' }}
@@ -117,11 +116,11 @@ export default function ChangePasswordScreen() {
             {/* New Password */}
             <View>
               <Text className="text-black text-sm mb-2 ml-1 mt-4" style={{ fontFamily: 'Poppins-Medium' }}>
-                New Password
+                Mật khẩu mới
               </Text>
               <View className="relative justify-center">
                 <TextInput
-                  placeholder="Enter new password"
+                  placeholder="Nhập mật khẩu mới"
                   placeholderTextColor="#9CA3AF"
                   secureTextEntry={!newPasswordVisible}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 text-base pr-12" style={{ fontFamily: 'Poppins-Regular' }}
@@ -146,11 +145,11 @@ export default function ChangePasswordScreen() {
             {/* Confirm Password */}
             <View>
               <Text className="text-black text-sm mb-2 ml-1 mt-4" style={{ fontFamily: 'Poppins-Medium' }}>
-                Confirm Password
+                Xác nhận mật khẩu mới
               </Text>
               <View className="relative justify-center">
                 <TextInput
-                  placeholder="Confirm new password"
+                  placeholder="Xác nhận mật khẩu mới"
                   placeholderTextColor="#9CA3AF"
                   secureTextEntry={!confirmPasswordVisible}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 text-base pr-12" style={{ fontFamily: 'Poppins-Regular' }}
@@ -182,7 +181,7 @@ export default function ChangePasswordScreen() {
             disabled={loading}
           >
             <Text className="text-white text-lg" style={{ fontFamily: 'Poppins-SemiBold' }}>
-              {loading ? "Changing..." : "Change Password"}
+              {loading ? "Đang thay đổi..." : "Đổi mật khẩu"}
             </Text>
           </TouchableOpacity>
         </ScrollView>

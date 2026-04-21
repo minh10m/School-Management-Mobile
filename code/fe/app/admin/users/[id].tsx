@@ -47,7 +47,6 @@ export default function AdminUserDetailScreen() {
 
   useEffect(() => {
     fetchUser();
-    fetchRoles();
   }, [id]);
 
   const fetchUser = async () => {
@@ -61,16 +60,6 @@ export default function AdminUserDetailScreen() {
       Alert.alert("Lỗi", "Không thể tải thông tin người dùng");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchRoles = async () => {
-    try {
-      const res = await roleService.getRoles();
-      const rolesData = Array.isArray(res) ? res : (res as any).items || [];
-      setRoles(rolesData);
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -206,34 +195,6 @@ export default function AdminUserDetailScreen() {
     );
   };
 
-  const handleChangeRole = () => {
-    Alert.alert(
-      "Thay đổi vai trò",
-      "Chọn vai trò mới:",
-      roles
-        .map((r: any) => ({
-          text:
-            r.name === "Admin"
-              ? "Quản trị"
-              : r.name === "Teacher"
-                ? "Giáo viên"
-                : r.name === "Student"
-                  ? "Học sinh"
-                  : r.name,
-          onPress: async () => {
-            try {
-              await userService.updateRole(user.userId, { roleId: r.name });
-              Alert.alert("Thành công", "Đã cập nhật vai trò.");
-              fetchUser();
-            } catch (err: any) {
-              Alert.alert("Lỗi", getErrorMessage(err));
-            }
-          },
-        }))
-        .concat([{ text: "Hủy", style: "cancel" } as any]),
-    );
-  };
-
   const InfoRow = ({ icon, label, value }: any) => (
     <View className="flex-row items-center gap-3 py-3 border-b border-gray-50">
       <View className="w-8 h-8 rounded-full bg-gray-50 items-center justify-center">
@@ -260,13 +221,11 @@ export default function AdminUserDetailScreen() {
     <AdminPageWrapper
       title="Chi tiết người dùng"
       rightComponent={
-        <TouchableOpacity onPress={openEdit}>
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-bright-blue text-sm"
-          >
-            Chỉnh sửa
-          </Text>
+        <TouchableOpacity 
+          onPress={openEdit}
+          className="bg-blue-50 w-10 h-10 rounded-full items-center justify-center border border-blue-100"
+        >
+          <Ionicons name="create-outline" size={20} color="#136ADA" />
         </TouchableOpacity>
       }
     >
@@ -395,21 +354,7 @@ export default function AdminUserDetailScreen() {
             <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            className="bg-white border border-gray-100 rounded-2xl p-4 flex-row items-center gap-3 shadow-sm"
-            onPress={handleChangeRole}
-          >
-            <View className="w-9 h-9 rounded-full bg-purple-50 items-center justify-center">
-              <Ionicons name="shield-outline" size={18} color="#A855F7" />
-            </View>
-            <Text
-              style={{ fontFamily: "Poppins-Medium" }}
-              className="text-black text-sm flex-1"
-            >
-              Thay đổi vai trò
-            </Text>
-            <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
-          </TouchableOpacity>
+
         </View>
       </ScrollView>
 

@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
   ScrollView,
   ActivityIndicator,
   Alert,
@@ -10,7 +11,7 @@ import {
   Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { lessonService, lessonVideoService, lessonAssignmentService } from "../../../services/lesson.service";
 import { courseService } from "../../../services/course.service";
@@ -21,7 +22,6 @@ const { width } = Dimensions.get("window");
 const VIDEO_HEIGHT = (width * 9) / 16;
 
 export default function LessonViewScreen() {
-  const router = useRouter();
   const { courseId, previewId } = useLocalSearchParams<{ courseId: string; previewId?: string }>();
   
   const [lessons, setLessons] = useState<LessonResponse[]>([]);
@@ -60,7 +60,8 @@ export default function LessonViewScreen() {
         if (!enrolled && idx >= 3) {
           lessonToShow = lessonsData.items[0];
         }
-        await selectLesson(lessonToShow);
+        // Pass the fetched data directly to avoid stale state issues
+        await selectLesson(lessonToShow, lessonsData.items, enrolled);
       }
     } catch (error) {
       console.error("Error fetching initial lesson data:", error);
@@ -70,9 +71,12 @@ export default function LessonViewScreen() {
     }
   }, [courseId, previewId]);
 
-  const selectLesson = async (lesson: LessonResponse) => {
-    const idx = lessons.indexOf(lesson);
-    if (!isEnrolled && idx >= 3) {
+  const selectLesson = async (lesson: LessonResponse, allLessons?: LessonResponse[], enrolled?: boolean) => {
+    const lessonList = allLessons ?? lessons;
+    const enrolledStatus = enrolled ?? isEnrolled;
+    
+    const idx = lessonList.indexOf(lesson);
+    if (!enrolledStatus && idx >= 3) {
       Alert.alert(
         "Khóa học đã bị khóa",
         "Bạn chỉ có thể xem thử 3 bài học đầu tiên. Vui lòng đăng ký khóa học để mở khóa toàn bộ nội dung.",
@@ -87,16 +91,26 @@ export default function LessonViewScreen() {
     setCurrentLesson(lesson);
     setLoading(true);
     try {
-      const [videosData, assignmentsData] = await Promise.all([
-        lessonVideoService.getLessonVideos({ lessonId: lesson.id, pageSize: 10 }),
-        lessonAssignmentService.getLessonAssignments({ lessonId: lesson.id, pageSize: 10 })
-      ]);
-      setVideos(videosData.items);
-      setAssignments(assignmentsData.items);
-      if (videosData.items.length > 0) {
-        setActiveVideo(videosData.items[0]);
+      // Use existing lessonVideos if available (new API behavior), otherwise fallback to fetch
+      if (lesson.lessonVideos && lesson.lessonVideos.length > 0) {
+        setVideos(lesson.lessonVideos);
+        setActiveVideo(lesson.lessonVideos[0]);
+        
+        // Still fetch assignments separately (kept for simplicity)
+        const assignmentsData = await lessonAssignmentService.getLessonAssignments({ lessonId: lesson.id, pageSize: 10 });
+        setAssignments(assignmentsData.items);
       } else {
-        setActiveVideo(null);
+        const [videosData, assignmentsData] = await Promise.all([
+          lessonVideoService.getLessonVideos({ lessonId: lesson.id, pageSize: 10 }),
+          lessonAssignmentService.getLessonAssignments({ lessonId: lesson.id, pageSize: 10 })
+        ]);
+        setVideos(videosData.items);
+        setAssignments(assignmentsData.items);
+        if (videosData.items.length > 0) {
+          setActiveVideo(videosData.items[0]);
+        } else {
+          setActiveVideo(null);
+        }
       }
     } catch (error) {
       console.error("Error selecting lesson:", error);
@@ -108,6 +122,15 @@ export default function LessonViewScreen() {
   useEffect(() => {
     fetchInitialData();
   }, [fetchInitialData]);
+
+  const formatDuration = (seconds: number) => {
+    if (!seconds || seconds <= 0) return "";
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    if (m === 0) return `${s} giây`;
+    if (s === 0) return `${m} phút`;
+    return `${m} phút ${s} giây`;
+  };
 
   const getEmbedUrl = (url: string) => {
     if (url.includes("youtube.com") || url.includes("youtu.be")) {
@@ -121,7 +144,7 @@ export default function LessonViewScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white pt-10">
       {/* Header */}
       <View className="px-5 py-4 flex-row items-center border-b border-gray-50">
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
@@ -138,22 +161,34 @@ export default function LessonViewScreen() {
       </View>
 
       {/* Video Player Section */}
-      <View className="bg-black">
+      <View 
+        className="bg-black"
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.5,
+          shadowRadius: 15,
+          elevation: 10
+        }}
+      >
         {activeVideo ? (
           <VideoPlayer url={activeVideo.url} autoPlay={true} />
         ) : (
-          <View style={{ height: VIDEO_HEIGHT }} className="items-center justify-center">
+          <View style={{ height: VIDEO_HEIGHT }} className="items-center justify-center bg-[#0F172A]">
             {loading ? (
               <ActivityIndicator color="#3B82F6" />
             ) : (
-              <Text className="text-white text-xs">Hiện chưa có video bài giảng</Text>
+              <View className="items-center">
+                <Ionicons name="videocam-off-outline" size={40} color="#94A3B8" />
+                <Text className="text-gray-400 text-xs mt-3">Hiện chưa có video bài giảng</Text>
+              </View>
             )}
           </View>
         )}
       </View>
 
       {/* Tabs */}
-      <View className="flex-row border-b border-gray-50">
+      <View className="flex-row border-b border-gray-100 bg-white">
         <TouchableOpacity 
           onPress={() => setTab("content")}
           className={`flex-1 py-4 border-b-2 ${tab === "content" ? "border-blue-600" : "border-transparent"}`}
@@ -177,7 +212,7 @@ export default function LessonViewScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-
+ 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {tab === "content" ? (
           <View className="px-5 py-6">
@@ -186,62 +221,119 @@ export default function LessonViewScreen() {
               <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#1E293B] text-base">Danh sách bài giảng</Text>
               <Text className="text-gray-400 text-[10px]">{lessons.length} bài học</Text>
             </View>
-
+ 
             {/* List */}
             {lessons.map((lesson, idx) => {
               const isLocked = !isEnrolled && idx >= 3;
               const isActive = currentLesson?.id === lesson.id;
               
               return (
-                <TouchableOpacity
-                  key={lesson.id}
-                  onPress={() => selectLesson(lesson)}
-                  className={`flex-row items-center p-4 rounded-2xl mb-3 border ${
-                    isActive 
-                      ? "bg-blue-50 border-blue-100" 
-                      : isLocked ? "bg-gray-50 border-gray-100 opacity-60" : "bg-white border-gray-100"
-                  }`}
-                >
-                  <View className="relative mr-4">
-                    <View className={`w-10 h-10 rounded-full items-center justify-center ${
-                      isActive ? "bg-blue-600" : isLocked ? "bg-gray-200" : "bg-gray-100"
-                    }`}>
-                      {isLocked ? (
-                        <Ionicons name="lock-closed" size={14} color="#94A3B8" />
-                      ) : (
-                        <Text 
-                          className={`text-xs ${isActive ? "text-white" : "text-gray-500"}`}
-                          style={{ fontFamily: "Poppins-Bold" }}
-                        >
-                          {idx + 1}
-                        </Text>
+                <View key={lesson.id} className="mb-4">
+                  <TouchableOpacity
+                    onPress={() => selectLesson(lesson)}
+                    activeOpacity={0.7}
+                    className={`flex-row items-center p-4 rounded-3xl border ${
+                      isActive 
+                        ? "bg-blue-50 border-blue-200" 
+                        : isLocked ? "bg-gray-50 border-gray-100 opacity-60" : "bg-white border-gray-100"
+                    }`}
+                    style={(!isActive && !isLocked) ? {
+                      shadowColor: "#F1F5F9",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                      elevation: 2
+                    } : {}}
+                  >
+                    <View className="relative mr-4">
+                      <View 
+                        className={`w-12 h-12 rounded-2xl items-center justify-center ${
+                          isActive ? "bg-blue-600" : isLocked ? "bg-gray-200" : "bg-gray-100"
+                        }`}
+                        style={isActive ? {
+                          shadowColor: "#2563EB",
+                          shadowOffset: { width: 0, height: 4 },
+                          shadowOpacity: 0.3,
+                          shadowRadius: 8,
+                          elevation: 5
+                        } : {}}
+                      >
+                        {isLocked ? (
+                          <Ionicons name="lock-closed" size={16} color="#94A3B8" />
+                        ) : (
+                          <Text 
+                            className={`text-sm ${isActive ? "text-white" : "text-gray-500"}`}
+                            style={{ fontFamily: "Poppins-Bold" }}
+                          >
+                            {idx + 1}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                    <View className="flex-1">
+                      <Text 
+                        style={{ fontFamily: isActive ? "Poppins-Bold" : "Poppins-SemiBold" }}
+                        className={`text-[15px] ${isActive ? "text-[#1E293B]" : "text-gray-700"}`}
+                      >
+                        {lesson.lessonName}
+                      </Text>
+                      {isActive ? (
+                        <Text className="text-blue-600 text-[10px] mt-1 font-bold italic tracking-wider">Đang phát</Text>
+                      ) : isLocked && (
+                        <Text className="text-gray-400 text-[10px] mt-1 italic">Khóa</Text>
                       )}
                     </View>
-                    {isLocked && (
-                      <View className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 border border-gray-100">
-                        <Ionicons name="lock-closed" size={10} color="#F87171" />
-                      </View>
-                    )}
-                  </View>
-                  <View className="flex-1">
-                    <Text 
-                      style={{ fontFamily: isActive ? "Poppins-Bold" : "Poppins-Medium" }}
-                      className={`text-sm ${isActive ? "text-[#1E293B]" : "text-gray-600"}`}
-                    >
-                      {lesson.lessonName}
-                    </Text>
-                    {isActive ? (
-                      <Text className="text-blue-600 text-[10px] mt-1">Đang phát</Text>
-                    ) : isLocked && (
-                      <Text className="text-gray-400 text-[10px] mt-1 italic">Vui lòng đăng ký để mở khóa</Text>
-                    )}
-                  </View>
-                  <Ionicons 
-                    name={isActive ? "pause-circle" : isLocked ? "lock-closed" : "play-circle"} 
-                    size={24} 
-                    color={isActive ? "#2563EB" : isLocked ? "#94A3B8" : "#CBD5E1"} 
-                  />
-                </TouchableOpacity>
+                    <Ionicons 
+                      name={isActive ? "chevron-up" : "chevron-down"} 
+                      size={20} 
+                      color={isActive ? "#2563EB" : "#CBD5E1"} 
+                    />
+                  </TouchableOpacity>
+
+                  {/* Expandable Video List for Active Lesson */}
+                  {isActive && lesson.lessonVideos && lesson.lessonVideos.length > 0 && (
+                    <View className="mt-2 ml-4 pl-4 border-l-2 border-blue-100">
+                      {lesson.lessonVideos.map((video, vIdx) => {
+                        const isVideoActive = activeVideo?.id === video.id;
+                        return (
+                          <TouchableOpacity
+                            key={video.id}
+                            onPress={() => setActiveVideo(video)}
+                            className="flex-row items-center py-3 px-2 mb-2 rounded-xl"
+                            style={{ backgroundColor: isVideoActive ? '#F1F5F9' : 'transparent' }}
+                          >
+                            <View className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${
+                              isVideoActive ? "bg-blue-600" : "bg-blue-50"
+                            }`}>
+                              <Ionicons 
+                                name={isVideoActive ? "play" : "play-outline"} 
+                                size={14} 
+                                color={isVideoActive ? "white" : "#3B82F6"} 
+                              />
+                            </View>
+                            <View className="flex-1">
+                              <Text 
+                                style={{ fontFamily: isVideoActive ? "Poppins-Bold" : "Poppins-Medium" }}
+                                className={`text-[13px] ${isVideoActive ? "text-blue-600" : "text-gray-600"}`}
+                                numberOfLines={1}
+                              >
+                                {video.name || `Phần ${vIdx + 1}`}
+                              </Text>
+                              {video.duration > 0 && (
+                                <Text className="text-gray-400 text-[9px] mt-0.5">{formatDuration(video.duration)}</Text>
+                              )}
+                            </View>
+                            {isVideoActive && (
+                               <View className="bg-blue-100 px-2 py-0.5 rounded-md">
+                                  <Text className="text-blue-600 text-[8px] font-bold">PLAYING</Text>
+                               </View>
+                            )}
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  )}
+                </View>
               );
             })}
           </View>
@@ -288,6 +380,6 @@ export default function LessonViewScreen() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -149,9 +149,9 @@ export default function AdminSubjectDetailScreen() {
       rightComponent={
         <TouchableOpacity 
           onPress={() => setIsEditing(true)}
-          className="bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100"
+          className="bg-blue-50 w-10 h-10 rounded-full items-center justify-center border border-blue-100"
         >
-          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xs text-[#136ADA]">Chỉnh sửa</Text>
+          <Ionicons name="create-outline" size={18} color="#136ADA" />
         </TouchableOpacity>
       }
     >

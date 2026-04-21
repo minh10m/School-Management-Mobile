@@ -11,7 +11,10 @@ export interface PaymentStatus {
   message: string;
 }
 
-export const usePaymentHub = (onPaymentStatusReceived?: (status: PaymentStatus) => void) => {
+export const usePaymentHub = (
+  onPaymentStatusReceived?: (status: PaymentStatus) => void,
+  enabled: boolean = true
+) => {
   const connectionRef = useRef<signalR.HubConnection | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const { userInfo, accessToken } = useAuthStore();
@@ -23,7 +26,7 @@ export const usePaymentHub = (onPaymentStatusReceived?: (status: PaymentStatus) 
   }, [onPaymentStatusReceived]);
 
   useEffect(() => {
-    if (!accessToken || !userInfo?.id) return;
+    if (!accessToken || !userInfo?.id || !enabled) return;
 
     // Nếu đã có connection rồi thì không tạo mới
     if (connectionRef.current) return;
@@ -74,7 +77,7 @@ export const usePaymentHub = (onPaymentStatusReceived?: (status: PaymentStatus) 
         setIsConnected(false);
       }
     };
-  }, [accessToken, userInfo?.id]);
+  }, [accessToken, userInfo?.id, enabled]);
 
   return { isConnected };
 };
