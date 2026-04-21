@@ -15,14 +15,6 @@ using School_Management.API.ErrorMessageConfiguration;
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.SignalR;
 
-public class CustomUserIdProvider : IUserIdProvider
-{
-    public string GetUserId(HubConnectionContext connection)
-    {
-        return connection.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-    }
-}
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -241,3 +233,11 @@ app.MapHub<PaymentHub>("/paymentHub");
 app.MapControllers();
 
 app.Run();
+
+public class CustomUserIdProvider : IUserIdProvider
+{
+    public string GetUserId(HubConnectionContext connection)
+    {
+        return connection.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    }
+}
