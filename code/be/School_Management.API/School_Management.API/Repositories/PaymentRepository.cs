@@ -18,7 +18,7 @@ namespace School_Management.API.Repositories
             this.context = context;
             _hubContext = hubContext;
         }
-        public async Task<IEnumerable<School_Management.API.Models.Domain.Payment>> GetMyPayments(Guid userId)
+        public async Task<IEnumerable<Payment>> GetMyPayments(Guid userId)
         {
             return await context.Payment
                 .Include(p => p.User)
@@ -27,7 +27,7 @@ namespace School_Management.API.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<School_Management.API.Models.Domain.Payment>> GetAllPayments()
+        public async Task<IEnumerable<Payment>> GetAllPayments()
         {
             return await context.Payment
                 .Include(p => p.User)
@@ -102,7 +102,7 @@ namespace School_Management.API.Repositories
                 Bin = "970418",
                 OrderCode = payment.OrderCode,
                 PaymentId = payment.Id,
-                QrCodeUrl = $"https://qr.sepay.vn/img?bank=BIDV&acc=96247TUANUIT111&template=compact&amount={payment.Amount}&des={payment.OrderCode}"
+                QrCodeUrl = $"https://qr.sepay.vn/img?bank=MBBank&acc=VQRQAILYM9270&template=compact&amount={payment.Amount}&des={payment.OrderCode}"
             };
 
             return (result, "SUCCESS");
