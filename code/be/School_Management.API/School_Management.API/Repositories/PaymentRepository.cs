@@ -116,8 +116,10 @@ namespace School_Management.API.Repositories
                 var orderCode = request.Content?.Trim();
                 if (string.IsNullOrEmpty(orderCode)) return (false, "ORDER_CODE_NOT_FOUND");
 
-                var payment = await context.Payment
-                    .FirstOrDefaultAsync(x => x.OrderCode.ToLower() == orderCode.ToLower() && x.Status == "Chưa đóng");
+                var payment = (await context.Payment
+                    .Where(x => x.Status == "Chưa đóng")
+                    .ToListAsync())
+                    .FirstOrDefault(x => orderCode.Contains(x.OrderCode, StringComparison.OrdinalIgnoreCase));
 
                 if (payment == null) return (false, "PAYMENT_NOT_FOUND");
 

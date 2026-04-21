@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
@@ -13,6 +13,15 @@ using School_Management.API.Repositories;
 using Microsoft.OpenApi.Models;
 using School_Management.API.ErrorMessageConfiguration;
 using CloudinaryDotNet;
+using Microsoft.AspNetCore.SignalR;
+
+public class CustomUserIdProvider : IUserIdProvider
+{
+    public string GetUserId(HubConnectionContext connection)
+    {
+        return connection.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    }
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,6 +82,7 @@ builder.Services.AddSingleton(cloudinary);
 
 //SignIR
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 //Dependency Injection
 builder.Services.AddScoped<ITokenService, TokenService>();
