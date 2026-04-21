@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useGlobalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { classYearService } from "../../../services/classYear.service";
@@ -23,7 +23,7 @@ import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminClassDetailScreen() {
   const router = useRouter();
-  const { id } = useGlobalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [classData, setClassData] = useState<ClassYearResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [teachers, setTeachers] = useState<TeacherListItem[]>([]);
@@ -127,12 +127,11 @@ export default function AdminClassDetailScreen() {
           onPress={() => setEditing(!editing)}
           className={`px-4 py-2 rounded-xl ${editing ? "bg-gray-100" : "bg-blue-50 border border-blue-100"}`}
         >
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className={`text-xs ${editing ? "text-gray-500" : "text-[#136ADA]"}`}
-          >
-            {editing ? "Hủy" : "Chỉnh sửa"}
-          </Text>
+          <Ionicons 
+            name={editing ? "close-outline" : "create-outline"} 
+            size={20} 
+            color={editing ? "#6B7280" : "#136ADA"} 
+          />
         </TouchableOpacity>
       }
     >

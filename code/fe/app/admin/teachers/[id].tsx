@@ -217,13 +217,15 @@ export default function AdminTeacherDetailScreen() {
     <AdminPageWrapper
       title="Chi tiết Giáo viên"
       rightComponent={
-        <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-bright-blue text-sm"
-          >
-            {isEditing ? "Hủy" : "Chỉnh sửa"}
-          </Text>
+        <TouchableOpacity 
+          onPress={() => setIsEditing(!isEditing)}
+          className={`w-10 h-10 rounded-full items-center justify-center ${isEditing ? "bg-gray-100" : "bg-blue-50 border border-blue-100"}`}
+        >
+          <Ionicons 
+            name={isEditing ? "close-outline" : "create-outline"} 
+            size={20} 
+            color={isEditing ? "#6B7280" : "#136ADA"} 
+          />
         </TouchableOpacity>
       }
     >

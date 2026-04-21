@@ -69,54 +69,50 @@ export default function StudentRegisteredCourses() {
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-4"
+            key={item.id}
+            activeOpacity={0.9}
             onPress={() => {
-              // In the future, this could go to lessons/videos for this course
               router.push(`/student/courses/${item.id}` as any);
             }}
+            className="bg-white rounded-[32px] border border-gray-100 shadow-2xl shadow-indigo-100/50 mb-6 p-6 overflow-hidden"
           >
-            <View className="flex-row justify-between items-start mb-3">
-              <View className="flex-row items-center gap-3">
-                <View className="w-12 h-12 bg-indigo-50 rounded-2xl items-center justify-center">
-                  <Ionicons name="journal" size={24} color="#4F46E5" />
-                </View>
-                <View className="flex-1">
-                  <Text
-                    style={{ fontFamily: "Poppins-Bold" }}
-                    className="text-black text-base"
-                    numberOfLines={1}
-                  >
-                    {item.courseName}
-                  </Text>
-                  <Text
-                    style={{ fontFamily: "Poppins-Medium" }}
-                    className="text-gray-400 text-[10px] uppercase"
-                  >
-                    {item.subjectName} • GV: {item.teacherName}
+            {/* Background Decorative Circle */}
+            <View className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-50/50 rounded-full" />
+            
+            <View className="flex-row items-center gap-4 mb-5">
+              <View className="w-14 h-14 bg-indigo-600 rounded-2xl items-center justify-center shadow-lg shadow-indigo-200">
+                <Ionicons name="journal" size={26} color="white" />
+              </View>
+              <View className="flex-1">
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#1E293B] text-lg leading-tight" numberOfLines={2}>
+                  {item.courseName}
+                </Text>
+                <View className="flex-row items-center mt-1">
+                  <View className="bg-emerald-100 px-2.5 py-0.5 rounded-lg mr-2">
+                    <Text style={{ fontFamily: "Poppins-Bold" }} className="text-emerald-600 text-[9px] uppercase">
+                       {item.subjectName}
+                    </Text>
+                  </View>
+                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[11px]">
+                    GV: {item.teacherName}
                   </Text>
                 </View>
               </View>
             </View>
-
-            <View className="flex-row items-center justify-between mt-2 pt-4 border-t border-gray-50">
-              <View className="flex-row items-center gap-1.5">
-                <Ionicons name="calendar-outline" size={14} color="#6B7280" />
-                <Text
-                  style={{ fontFamily: "Poppins-Medium" }}
-                  className="text-gray-500 text-[11px]"
-                >
-                  Bắt đầu:{" "}
-                  {new Date(item.createdAt).toLocaleDateString("vi-VN")}
+ 
+            <View className="flex-row items-center justify-between pt-5 border-t border-gray-50">
+              <View className="flex-row items-center gap-2">
+                <View className="w-8 h-8 rounded-full bg-emerald-500" />
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-emerald-600 text-xs uppercase tracking-widest">
+                  Đang diễn ra
                 </Text>
               </View>
-              <View className="flex-row items-center gap-1">
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-indigo-600 text-xs text-right"
-                >
-                  Vào học
-                </Text>
-                <Ionicons name="chevron-forward" size={14} color="#4F46E5" />
+              
+              <View className="bg-indigo-600 h-12 px-6 rounded-2xl flex-row items-center justify-center shadow-lg shadow-indigo-200">
+                 <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-xs mr-2">
+                    VÀO HỌC
+                 </Text>
+                 <Ionicons name="play-circle" size={18} color="white" />
               </View>
             </View>
           </TouchableOpacity>

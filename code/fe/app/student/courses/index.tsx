@@ -80,42 +80,55 @@ export default function StudentBrowseCourses() {
       <FlatList
         data={courses}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: 24, paddingBottom: 150 }}
+        showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item }) => (
           <TouchableOpacity
-            className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-4"
+            key={item.id}
+            activeOpacity={0.9}
             onPress={() => {
                router.push(`/student/courses/${item.id}` as any);
             }}
+            className="bg-white rounded-[32px] border border-gray-100 shadow-2xl shadow-blue-100/50 mb-6 p-6 overflow-hidden"
           >
-            <View className="flex-row justify-between items-start mb-3">
-              <View className="flex-row items-center gap-3">
-                <View className="w-12 h-12 bg-blue-50 rounded-2xl items-center justify-center">
-                  <Ionicons name="library" size={24} color="#3B82F6" />
-                </View>
-                <View className="flex-1">
-                  <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-base" numberOfLines={1}>
-                    {item.courseName}
-                  </Text>
-                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px] uppercase">
-                    {item.subjectName} • GV: {item.teacherName}
+            {/* Background Decorative Gradient-like circle */}
+            <View className="absolute -top-10 -right-10 w-40 h-40 bg-blue-50/50 rounded-full" />
+            
+            <View className="flex-row items-center gap-4 mb-5">
+              <View className="w-14 h-14 bg-blue-600 rounded-2xl items-center justify-center shadow-lg shadow-blue-200">
+                <Ionicons name="book" size={26} color="white" />
+              </View>
+              <View className="flex-1">
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#1E293B] text-lg leading-tight" numberOfLines={2}>
+                  {item.courseName}
+                </Text>
+                <View className="flex-row items-center mt-1">
+                  <View className="bg-orange-100 px-2.5 py-0.5 rounded-lg mr-2">
+                    <Text style={{ fontFamily: "Poppins-Bold" }} className="text-orange-600 text-[9px] uppercase">
+                       {item.subjectName}
+                    </Text>
+                  </View>
+                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[11px]">
+                    GV: {item.teacherName}
                   </Text>
                 </View>
               </View>
             </View>
 
-            <View className="flex-row items-center justify-between mt-2 pt-4 border-t border-gray-50">
-              <View className="flex-row items-center gap-1.5">
-                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-blue-600 text-base">
-                  {item.price === 0 ? "Miễn phí" : `${item.price.toLocaleString()}đ`}
+            <View className="flex-row items-center justify-between pt-5 border-t border-gray-50">
+              <View>
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px] uppercase mb-0.5">Học phí</Text>
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#1E293B] text-xl">
+                  {item.price === 0 ? "Free" : `${item.price.toLocaleString()}đ`}
                 </Text>
               </View>
-              <View className="flex-row items-center gap-1 bg-blue-600 px-4 py-2 rounded-xl">
-                 <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-xs">
-                    Chi tiết
+              
+              <View className="bg-blue-600 h-12 px-6 rounded-2xl flex-row items-center justify-center shadow-lg shadow-blue-200">
+                 <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-xs mr-2">
+                    CHI TIẾT
                  </Text>
-                 <Ionicons name="chevron-forward" size={14} color="white" />
+                 <Ionicons name="chevron-forward" size={16} color="white" />
               </View>
             </View>
           </TouchableOpacity>

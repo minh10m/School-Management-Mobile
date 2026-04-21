@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -64,7 +64,7 @@ namespace School_Management.API.Repositories
         {
             var course = await context.Course.FirstOrDefaultAsync(x => x.Id == request.CourseId);
             if (course == null) return (null, "NOT_FOUND_COURSE");
-            var query = context.Lesson.AsNoTracking().Include(x => x.Course).AsQueryable();
+            var query = context.Lesson.AsNoTracking().Include(x => x.Course).Include(x => x.LessonVideos).AsQueryable();
             query = query.Where(x => x.CourseId == request.CourseId);
 
             query = query.OrderBy(x => x.OrderIndex);
@@ -78,7 +78,18 @@ namespace School_Management.API.Repositories
                                             CourseId = lesson.CourseId,
                                             CourseName = lesson.Course.CourseName,
                                             LessonName = lesson.LessonName,
-                                            OrderIndex = lesson.OrderIndex
+                                            OrderIndex = lesson.OrderIndex,
+                                            LessonVideos = lesson.LessonVideos.Select(v => new LessonVideoResponse
+                                            {
+                                                Id = v.Id,
+                                                LessonId = v.LessonId,
+                                                LessonName = lesson.LessonName,
+                                                Url = v.Url,
+                                                Name = v.Name,
+                                                Duration = v.Duration,
+                                                OrderIndex = v.OrderIndex,
+                                                IsPreview = v.IsPreview
+                                            }).ToList()
                                         }).ToListAsync();
 
             return (new PagedResponse<LessonResponse>
@@ -92,7 +103,7 @@ namespace School_Management.API.Repositories
 
         public async Task<(LessonResponse? data, string message)> GetLessonById(Guid lessonId)
         {
-            var lesson = await context.Lesson.Include(x => x.Course).FirstOrDefaultAsync(x => x.Id == lessonId);
+            var lesson = await context.Lesson.Include(x => x.Course).Include(x => x.LessonVideos).FirstOrDefaultAsync(x => x.Id == lessonId);
             if (lesson == null) return (null, "NOT_FOUND_LESSON");
 
             var result = new LessonResponse
@@ -101,7 +112,18 @@ namespace School_Management.API.Repositories
                 CourseId = lesson.CourseId,
                 CourseName = lesson.Course.CourseName,
                 LessonName = lesson.LessonName,
-                OrderIndex = lesson.OrderIndex
+                OrderIndex = lesson.OrderIndex,
+                LessonVideos = lesson.LessonVideos.Select(v => new LessonVideoResponse
+                {
+                    Id = v.Id,
+                    LessonId = v.LessonId,
+                    LessonName = lesson.LessonName,
+                    Url = v.Url,
+                    Name = v.Name,
+                    Duration = v.Duration,
+                    OrderIndex = v.OrderIndex,
+                    IsPreview = v.IsPreview
+                }).ToList()
             };
 
             return (result, "SUCCESS");
@@ -113,7 +135,7 @@ namespace School_Management.API.Repositories
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var lesson = await context.Lesson.Include(x => x.Course).FirstOrDefaultAsync(x => x.Id == lessonId);
+                var lesson = await context.Lesson.Include(x => x.Course).Include(x => x.LessonVideos).FirstOrDefaultAsync(x => x.Id == lessonId);
                 if (lesson == null) return (null, "NOT_FOUND_LESSON");
 
                 if (request.OrderIndex > lesson.OrderIndex)
@@ -139,7 +161,18 @@ namespace School_Management.API.Repositories
                     CourseId = lesson.CourseId,
                     CourseName = lesson.Course.CourseName,
                     LessonName= lesson.LessonName,
-                    OrderIndex = lesson.OrderIndex
+                    OrderIndex = lesson.OrderIndex,
+                    LessonVideos = lesson.LessonVideos.Select(v => new LessonVideoResponse
+                    {
+                        Id = v.Id,
+                        LessonId = v.LessonId,
+                        LessonName = lesson.LessonName,
+                        Url = v.Url,
+                        Name = v.Name,
+                        Duration = v.Duration,
+                        OrderIndex = v.OrderIndex,
+                        IsPreview = v.IsPreview
+                    }).ToList()
                 };
 
                 return (result, "SUCCESS");

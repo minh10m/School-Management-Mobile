@@ -48,7 +48,7 @@ namespace School_Management.API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> GetSchoolYearInfo()
         {
             var result = await schoolYearInfoService.GetSchoolYearInfo();

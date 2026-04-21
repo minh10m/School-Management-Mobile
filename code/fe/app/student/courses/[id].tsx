@@ -38,11 +38,17 @@ export default function StudentCourseDetail() {
     if (status.status === "Success") {
       setShowQR(false);
       setIsEnrolled(true);
-      Alert.alert("Thành công", "Đăng ký khóa học thành công!");
+      router.push({
+        pathname: "/payment/success",
+        params: { 
+          courseId: id,
+          courseName: course?.courseName || ""
+        }
+      });
     } else {
       Alert.alert("Thanh toán thất bại", status.message);
     }
-  });
+  }, showQR);
 
   const fetchCourseDetail = useCallback(async () => {
     if (!id || id === "lessons" || id === "create") return;
@@ -98,20 +104,20 @@ export default function StudentCourseDetail() {
   };
 
   return (
-    <View className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
 
       {/* Header */}
-      <View className="px-6 pt-12 pb-4 flex-row justify-between items-center bg-white border-b border-gray-50">
+      <View className="px-6 py-4 bg-white border-b border-gray-100 flex-row items-center justify-between">
         <TouchableOpacity
           onPress={() => router.back()}
-          className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center"
+          className="p-2"
         >
-          <Ionicons name="arrow-back" size={20} color="#1E293B" />
+          <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text
           style={{ fontFamily: "Poppins-Bold" }}
-          className="text-[#1E293B] text-lg"
+          className="text-black text-lg"
         >
           Chi tiết khóa học
         </Text>
@@ -455,6 +461,6 @@ export default function StudentCourseDetail() {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }

@@ -169,21 +169,22 @@ export default function AdminScheduleDetailScreen() {
     >
 
       {/* Day Selector */}
-      <View className="bg-white border-b border-gray-100 py-3">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="px-6 flex-row gap-4"
-        >
+      <View className="bg-white border-b border-gray-100 py-4 px-6">
+        <View className="flex-row justify-between items-center gap-2">
           {DAYS.map((day, idx) => (
             <TouchableOpacity
               key={day}
               onPress={() => setSelectedDay(idx + 1)}
-              className={`px-6 py-2 rounded-2xl border ${selectedDay === idx + 1 ? "bg-amber-500 border-amber-500" : "bg-gray-50 border-gray-100"}`}
+              className={`flex-1 py-3 rounded-2xl border items-center justify-center ${
+                selectedDay === idx + 1
+                  ? "bg-amber-500 border-amber-500 shadow-md shadow-amber-200"
+                  : "bg-gray-50 border-gray-100"
+              }`}
             >
               <Text
                 style={{
                   fontFamily: "Poppins-Bold",
+                  fontSize: 13,
                   color: selectedDay === idx + 1 ? "white" : "#6B7280",
                 }}
               >
@@ -191,7 +192,7 @@ export default function AdminScheduleDetailScreen() {
               </Text>
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </View>
       </View>
 
       <ScrollView
