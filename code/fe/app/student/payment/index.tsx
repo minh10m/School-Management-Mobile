@@ -40,7 +40,6 @@ export default function StudentFeesScreen() {
 
   return (
     <View className="flex-1 bg-[#F8FAFC]">
-      <Stack.Screen options={{ headerShown: false }} />
       
       {/* Premium Header */}
       <View 
@@ -95,13 +94,13 @@ export default function StudentFeesScreen() {
           <View>
             <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-xs uppercase tracking-wider">Tổng cần đóng</Text>
             <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#1E293B] text-xl">
-              {fees.reduce((acc, curr) => curr.status !== 'paid' ? acc + curr.amountDue : acc, 0).toLocaleString()} VNĐ
+              {fees.reduce((acc, curr) => curr.status !== 'Đã đóng' ? acc + curr.amountDue : acc, 0).toLocaleString()} VNĐ
             </Text>
           </View>
           <TouchableOpacity 
             className="bg-blue-600 px-6 py-3 rounded-2xl"
             onPress={() => {
-              const pendingFee = fees.find(f => f.status !== 'paid');
+              const pendingFee = fees.find(f => f.status !== 'Đã đóng');
               if (pendingFee) {
                 router.push({
                   pathname: '/student/payment/payment-detail',
@@ -135,7 +134,7 @@ function StepItem({ active, completed, icon, label }: any) {
 }
 
 function FeeCard({ data }: { data: FeeDetailResponse }) {
-  const isPaid = data.status === 'paid';
+  const isPaid = data.status === 'Đã đóng';
   
   return (
     <TouchableOpacity 

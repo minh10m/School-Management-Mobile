@@ -9,6 +9,7 @@ export interface CourseResponse {
   courseName: string;
   price: number;
   teacherSubjectId: string;
+  subjectId: string;
   teacherName: string;
   subjectName: string;
   status: string;
