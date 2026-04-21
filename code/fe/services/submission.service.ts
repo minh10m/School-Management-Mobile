@@ -34,9 +34,11 @@ export const submissionService = {
   /**
    * Students submit their homework.
    * POST /api/submissions
+   * Supports both JSON and FormData (for actual file uploads)
    */
-  submitAssignment: async (payload: SubmissionCreateRequest): Promise<any> => {
-    const response = await apiClient.post("/submissions", payload);
+  submitAssignment: async (payload: SubmissionCreateRequest | FormData): Promise<any> => {
+    const headers = payload instanceof FormData ? { "Content-Type": "multipart/form-data" } : {};
+    const response = await apiClient.post("/submissions", payload, { headers });
     return response.data;
   },
 
