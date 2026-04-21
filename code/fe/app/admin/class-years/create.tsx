@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { classYearService } from "../../../services/classYear.service";
 import { teacherService } from "../../../services/teacher.service";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { TeacherListItem } from "../../../types/teacher";
 import { SCHOOL_YEAR } from "../../../constants/config";
 import { getErrorMessage } from "../../../utils/error";
@@ -96,31 +97,7 @@ export default function AdminCreateClassScreen() {
     );
 
   return (
-    <AdminPageWrapper 
-      title="Tạo Lớp mới"
-      leftComponent={
-        <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
-          <Text style={{ fontFamily: "Poppins-Regular", color: '#6B7280', fontSize: 16 }}>
-            Hủy
-          </Text>
-        </TouchableOpacity>
-      }
-      rightComponent={
-        <TouchableOpacity 
-          onPress={handleSubmit} 
-          disabled={loading}
-          style={{ padding: 8 }}
-        >
-          {loading ? (
-             <ActivityIndicator size="small" color="#2563EB" />
-          ) : (
-            <Text style={{ fontFamily: "Poppins-Bold", color: '#2563EB', fontSize: 16 }}>
-              Lưu
-            </Text>
-          )}
-        </TouchableOpacity>
-      }
-    >
+    <AdminPageWrapper title="Tạo Lớp mới">
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"} 
         style={{ flex: 1 }}
@@ -299,6 +276,11 @@ export default function AdminCreateClassScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <FormActionButton
+        title="Lưu lớp học"
+        onPress={handleSubmit}
+        loading={loading}
+      />
     </AdminPageWrapper>
   );
 }

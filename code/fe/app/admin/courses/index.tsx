@@ -171,16 +171,16 @@ export default function AdminCoursesScreen() {
     }
   };
 
-  const confirmAction = (action: "approved" | "rejected") => {
+  const confirmAction = (action: "Approved" | "Rejected") => {
     if (!selected) return;
     Alert.alert(
-      action === "approved" ? "Duyệt khóa học" : "Từ chối khóa học",
-      `Bạn có chắc chắn muốn ${action === "approved" ? "duyệt" : "từ chối"} khóa học "${selected.courseName}"?`,
+      action === "Approved" ? "Duyệt khóa học" : "Từ chối khóa học",
+      `Bạn có chắc chắn muốn ${action === "Approved" ? "duyệt" : "từ chối"} khóa học "${selected.courseName}"?`,
       [
         { text: "Hủy", style: "cancel" },
         {
-          text: action === "approved" ? "Duyệt" : "Từ chối",
-          style: action === "rejected" ? "destructive" : "default",
+          text: action === "Approved" ? "Duyệt" : "Từ chối",
+          style: action === "Rejected" ? "destructive" : "default",
           onPress: () => handleUpdateStatus(selected.id, action),
         },
       ]
@@ -197,7 +197,6 @@ export default function AdminCoursesScreen() {
         onFilterPress: openFilter,
       }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Filter Modal */}
       <Modal
@@ -217,7 +216,7 @@ export default function AdminCoursesScreen() {
               </Text>
               <TouchableOpacity
                 onPress={() => setIsFilterVisible(false)}
-                className="bg-gray-100 p-2 rounded-full"
+                className="bg-white p-2 rounded-full border border-gray-100"
               >
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>

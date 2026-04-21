@@ -227,7 +227,6 @@ export default function TeacherExamScheduleScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar hidden />
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-50">

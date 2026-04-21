@@ -8,17 +8,18 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { resultService } from "../../services/result.service";
-import { StudentResultSubject, DetailResult } from "../../types/result";
+import { StudentResultSubject, StudentResultReport, DetailResult } from "../../types/result";
 import { useAuthStore } from "../../store/authStore";
 import { SCHOOL_YEAR } from "../../constants/config";
 
 export default function ResultsScreen() {
   const { userInfo } = useAuthStore();
   const [results, setResults] = useState<StudentResultSubject[]>([]);
+  const [overall, setOverall] = useState<{ average?: number; rating?: string } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [schoolYearLabel, setSchoolYearLabel] = useState(
+  const [schoolYearLabel] = useState(
     `${SCHOOL_YEAR} - ${parseInt(SCHOOL_YEAR, 10) + 1}`,
   );
   const [term, setTerm] = useState<number>(1);
@@ -37,13 +38,15 @@ export default function ResultsScreen() {
     try {
       setLoading(true);
       const data = await resultService.getStudentResults({
-        SchoolYear: parseInt(SCHOOL_YEAR, 10),
-        Term: term,
+        schoolYear: parseInt(SCHOOL_YEAR, 10),
+        term: term,
       });
-      setResults(data || []);
+      setResults(data.subjectResults || []);
+      setOverall({ average: data.average, rating: data.rating });
     } catch (error) {
       console.error("[AGENT] Error fetching student results:", error);
       setResults([]);
+      setOverall(null);
     } finally {
       setLoading(false);
     }
@@ -51,7 +54,6 @@ export default function ResultsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
@@ -143,6 +145,26 @@ export default function ResultsScreen() {
           </View>
         </View>
 
+        {/* Overall Summary Card */}
+        {!loading && overall && (
+          <View className="mx-6 mt-4 mb-2 bg-bright-blue rounded-3xl p-5 flex-row items-center justify-between shadow-lg shadow-blue-200">
+            <View>
+              <Text className="text-white/70 text-[10px] uppercase tracking-widest" style={{ fontFamily: 'Poppins-Bold' }}>Điểm trung bình HK</Text>
+              <Text className="text-white text-4xl mt-1" style={{ fontFamily: 'Poppins-Bold' }}>
+                {overall.average && overall.average > 0 ? overall.average.toFixed(1) : '---'}
+              </Text>
+            </View>
+            <View className="items-end">
+              <Text className="text-white/70 text-[10px] uppercase tracking-widest" style={{ fontFamily: 'Poppins-Bold' }}>Xếp loại</Text>
+              <View className="bg-white/20 px-4 py-1.5 rounded-full mt-1">
+                <Text className="text-white text-sm" style={{ fontFamily: 'Poppins-Bold' }}>
+                  {overall.average && overall.average > 0 ? (overall.rating || '---') : 'Chưa có'}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
         {loading ? (
           <View className="py-20">
             <ActivityIndicator size="large" color="#4A90E2" />
@@ -163,7 +185,7 @@ export default function ResultsScreen() {
             <View className="flex-row bg-[#F8F9FB] px-4 py-3 border-y border-gray-100">
               <View style={{ flex: 2 }}>
                 <Text
-                  className="text-gray-500 text-xs"
+                  className="text-gray-500 text-[10px]"
                   style={{ fontFamily: "Poppins-Bold" }}
                 >
                   Môn học
@@ -171,23 +193,31 @@ export default function ResultsScreen() {
               </View>
               <View className="flex-1 items-center">
                 <Text
-                  className="text-gray-500 text-xs"
+                  className="text-gray-500 text-[10px]"
                   style={{ fontFamily: "Poppins-Bold" }}
                 >
-                  QT
+                  Miệng
                 </Text>
               </View>
               <View className="flex-1 items-center">
                 <Text
-                  className="text-gray-500 text-xs"
+                  className="text-gray-500 text-[10px]"
                   style={{ fontFamily: "Poppins-Bold" }}
                 >
-                  GK
+                  15 phút
                 </Text>
               </View>
               <View className="flex-1 items-center">
                 <Text
-                  className="text-gray-500 text-xs"
+                  className="text-gray-500 text-[10px]"
+                  style={{ fontFamily: "Poppins-Bold" }}
+                >
+                   GK
+                </Text>
+              </View>
+              <View className="flex-1 items-center">
+                <Text
+                  className="text-gray-500 text-[10px]"
                   style={{ fontFamily: "Poppins-Bold" }}
                 >
                   CK
@@ -195,7 +225,7 @@ export default function ResultsScreen() {
               </View>
               <View className="flex-1 items-center">
                 <Text
-                  className="text-gray-500 text-xs"
+                  className="text-gray-500 text-[10px]"
                   style={{ fontFamily: "Poppins-Bold" }}
                 >
                   AVG
@@ -218,11 +248,10 @@ export default function ResultsScreen() {
           <View className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex-row items-center">
             <Ionicons name="information-circle" size={20} color="#4A90E2" />
             <Text
-              className="ml-3 text-blue-700 text-xs flex-1"
+              className="ml-3 text-blue-700 text-[10px] flex-1"
               style={{ fontFamily: "Poppins-Regular" }}
             >
-              QT: Điểm thường xuyên/15 phút. GK: Giữa kỳ. CK: Cuối kỳ. AVG:
-              Trung bình môn.
+              MIỆNG: Kiểm tra miệng. 15 PHÚT: Kiểm tra 15p. GK: Giữa kỳ. CK: Cuối kì. AVG: TB môn.
             </Text>
           </View>
         </View>
@@ -239,26 +268,42 @@ function ResultRow({
   isLast: boolean;
 }) {
   // Map scores
-  const qtScores: number[] = [];
+  let miengScore: string = "-";
+  let p15Score: string = "-";
   let gkScore: string = "-";
   let ckScore: string = "-";
 
   item.detailResults.forEach((res) => {
     const type = res.type.toLowerCase();
-    if (type.includes("cuối kì")) {
-      ckScore = res.value.toString();
-    } else if (type.includes("giữa kì")) {
+    if (type.includes("miệng")) {
+      miengScore = res.value.toString();
+    } else if (type.includes("15")) {
+      p15Score = res.value.toString();
+    } else if (type.includes("giữa")) {
       gkScore = res.value.toString();
-    } else {
-      qtScores.push(res.value);
+    } else if (type.includes("cuối")) {
+      ckScore = res.value.toString();
     }
   });
 
-  const qtDisplay = qtScores.length > 0 ? qtScores.join(", ") : "-";
+  const avgValue = useMemo(() => {
+    if (item.average !== undefined && item.average !== null) return item.average;
+    
+    let totalScore = 0;
+    let totalWeight = 0;
+    
+    item.detailResults.forEach(res => {
+        totalScore += res.value * res.weight;
+        totalWeight += res.weight;
+    });
+    
+    return totalWeight > 0 ? totalScore / totalWeight : 0;
+  }, [item.average, item.detailResults]);
+
   const avgColor =
-    item.average >= 8
+    avgValue >= 8
       ? "text-green-600"
-      : item.average >= 5
+      : avgValue >= 5
         ? "text-blue-600"
         : "text-red-600";
 
@@ -276,13 +321,23 @@ function ResultRow({
         </Text>
       </View>
 
-      {/* QT */}
-      <View className="flex-1 items-center px-1">
+      {/* Miệng */}
+      <View className="flex-1 items-center">
         <Text
-          className="text-gray-600 text-[11px] text-center"
-          style={{ fontFamily: "Poppins-Regular" }}
+          className="text-gray-800 text-sm"
+          style={{ fontFamily: "Poppins-Medium" }}
         >
-          {qtDisplay}
+          {miengScore}
+        </Text>
+      </View>
+
+      {/* 15 phút */}
+      <View className="flex-1 items-center">
+        <Text
+          className="text-gray-800 text-sm"
+          style={{ fontFamily: "Poppins-Medium" }}
+        >
+          {p15Score}
         </Text>
       </View>
 
@@ -290,7 +345,7 @@ function ResultRow({
       <View className="flex-1 items-center">
         <Text
           className="text-gray-800 text-sm"
-          style={{ fontFamily: "Poppins-Regular" }}
+          style={{ fontFamily: "Poppins-Medium" }}
         >
           {gkScore}
         </Text>
@@ -300,7 +355,7 @@ function ResultRow({
       <View className="flex-1 items-center">
         <Text
           className="text-gray-800 text-sm"
-          style={{ fontFamily: "Poppins-Regular" }}
+          style={{ fontFamily: "Poppins-Medium" }}
         >
           {ckScore}
         </Text>
@@ -313,7 +368,7 @@ function ResultRow({
             className={`text-sm ${avgColor}`}
             style={{ fontFamily: "Poppins-Bold" }}
           >
-            {item.average}
+            {avgValue ? avgValue.toFixed(1) : "---"}
           </Text>
         </View>
       </View>

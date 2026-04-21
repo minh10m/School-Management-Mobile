@@ -141,37 +141,6 @@ const ExamScheduleDetail = () => {
       title={title || "Chi tiết Lịch thi"}
     >
 
-      {/* Primary Actions */}
-      <View className="px-6 py-4 flex-row gap-x-4 bg-white">
-        <TouchableOpacity
-          activeOpacity={0.8}
-          className="flex-1 bg-[#10B981] h-12 rounded-2xl flex-row items-center justify-center shadow-sm"
-          onPress={handleImportExcel}
-        >
-          <Ionicons name="cloud-upload" size={20} color="white" />
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-white ml-2 text-sm"
-          >
-            Nhập dữ liệu
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.8}
-          className="flex-1 bg-[#136ADA] h-12 rounded-2xl flex-row items-center justify-center shadow-sm"
-          onPress={handleAssignStudents}
-        >
-          <Ionicons name="people" size={20} color="white" />
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-white ml-2 text-sm"
-          >
-            Gán
-          </Text>
-        </TouchableOpacity>
-      </View>
-
       <View className="px-6 mt-4 flex-row justify-between items-center">
         <Text className="text-gray-900 font-bold text-lg">Ca thi</Text>
         <View className="bg-gray-200 px-2 py-0.5 rounded-full">
@@ -202,6 +171,40 @@ const ExamScheduleDetail = () => {
           }
         />
       )}
+
+      {/* Standard Sticky Bottom Actions */}
+      <View 
+        className="px-6 py-4 bg-white border-t border-gray-100 flex-row gap-x-4"
+        style={{ paddingBottom: 30 }}
+      >
+        <TouchableOpacity
+          activeOpacity={0.8}
+          className="flex-1 bg-[#10B981] h-14 rounded-2xl flex-row items-center justify-center shadow-lg shadow-green-100"
+          onPress={handleImportExcel}
+        >
+          <Ionicons name="cloud-upload" size={22} color="white" />
+          <Text
+            style={{ fontFamily: "Poppins-Bold" }}
+            className="text-white ml-2 text-base"
+          >
+            Nhập dữ liệu
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          className="flex-1 bg-[#136ADA] h-14 rounded-2xl flex-row items-center justify-center shadow-lg shadow-blue-200"
+          onPress={handleAssignStudents}
+        >
+          <Ionicons name="people" size={22} color="white" />
+          <Text
+            style={{ fontFamily: "Poppins-Bold" }}
+            className="text-white ml-2 text-base"
+          >
+            Gán
+          </Text>
+        </TouchableOpacity>
+      </View>
     </AdminPageWrapper>
   );
 };

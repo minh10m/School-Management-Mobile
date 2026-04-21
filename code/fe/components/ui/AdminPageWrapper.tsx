@@ -45,7 +45,7 @@ export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({
       {/* Standardized Header */}
       <View className="px-6 py-4 flex-row items-center justify-between border-b border-gray-100 bg-white min-h-[64px]">
         {/* Left Section (Title & Back) */}
-        <View className="flex-[4] flex-row items-center">
+        <View className="flex-row items-center flex-1 mr-4">
           {leftComponent ? (
             <View>{leftComponent}</View>
           ) : (
@@ -82,7 +82,7 @@ export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({
         </View>
 
         {/* Right Section */}
-        <View className="flex-1 flex-row items-center justify-end">
+        <View className="flex-row items-center justify-end">
           {rightComponent}
         </View>
       </View>

@@ -28,6 +28,12 @@ export interface SubmissionCreateRequest {
   fileTitle: string;
 }
 
+export interface SubmissionCreatePayload {
+  AssignmentId: string;
+  File: any; // Used for multipart/form-data
+  FileTitle: string;
+}
+
 export interface SubmissionStudentRequest {
   assignmentId: string;
 }

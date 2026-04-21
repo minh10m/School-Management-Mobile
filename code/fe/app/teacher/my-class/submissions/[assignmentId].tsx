@@ -101,7 +101,6 @@ export default function AssignmentSubmissions() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar style="dark" />
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
       <View className="flex-row items-center px-6 py-4 border-b border-gray-50">

@@ -23,6 +23,7 @@ import { userService } from "../../../services/user.service";
 import { roleService } from "../../../services/role.service";
 import { classYearService } from "../../../services/classYear.service";
 import { subjectService } from "../../../services/subject.service";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { RoleResponse } from "../../../types/role";
 import { ClassYearResponse } from "../../../types/classYear";
 import { SubjectResponse } from "../../../types/subject";
@@ -219,43 +220,7 @@ export default function AdminCreateUserScreen() {
     );
 
   return (
-    <AdminPageWrapper
-      title="Tạo tài khoản mới"
-      leftComponent={
-        <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
-          <Text
-            style={{
-              fontFamily: "Poppins-Regular",
-              color: "#6B7280",
-              fontSize: 16,
-            }}
-          >
-            Hủy
-          </Text>
-        </TouchableOpacity>
-      }
-      rightComponent={
-        <TouchableOpacity
-          onPress={handleSubmit}
-          disabled={loading}
-          style={{ padding: 8 }}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color="#136ADA" />
-          ) : (
-            <Text
-              style={{
-                fontFamily: "Poppins-Bold",
-                color: "#3B82F6",
-                fontSize: 16,
-              }}
-            >
-              Tạo
-            </Text>
-          )}
-        </TouchableOpacity>
-      }
-    >
+    <AdminPageWrapper title="Tạo tài khoản mới">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -266,10 +231,9 @@ export default function AdminCreateUserScreen() {
           contentContainerStyle={{
             paddingHorizontal: 24,
             paddingTop: 32,
-            paddingBottom: 100,
+            paddingBottom: 40,
           }}
         >
-          {/* Section: Basic Credentials */}
           <Field
             label="Tên đăng nhập *"
             icon="at-outline"
@@ -288,7 +252,6 @@ export default function AdminCreateUserScreen() {
             onToggleSecure={() => setShowPassword(!showPassword)}
           />
 
-          {/* Section: Personal Info */}
           <View className="mb-4">
             <Text
               style={{ fontFamily: "Poppins-Bold" }}
@@ -334,7 +297,6 @@ export default function AdminCreateUserScreen() {
             />
           </View>
 
-          {/* Role Selection - Modern Chips */}
           <View style={{ marginBottom: 40 }}>
             <FormLabel>Vai trò hệ thống *</FormLabel>
             <View
@@ -389,7 +351,6 @@ export default function AdminCreateUserScreen() {
             </View>
           </View>
 
-          {/* Dynamic Sections */}
           {isStudent && (
             <View
               style={{
@@ -587,6 +548,11 @@ export default function AdminCreateUserScreen() {
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+      <FormActionButton
+        title="Tạo tài khoản"
+        onPress={handleSubmit}
+        loading={loading}
+      />
     </AdminPageWrapper>
   );
 }

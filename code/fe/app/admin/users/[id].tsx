@@ -15,6 +15,7 @@ import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useEffect, useState } from "react";
 import { userService } from "../../../services/user.service";
 import { roleService } from "../../../services/role.service";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { UserResponse } from "../../../types/user";
 import { RoleResponse } from "../../../types/role";
 import { getErrorMessage } from "../../../utils/error";
@@ -434,18 +435,7 @@ export default function AdminUserDetailScreen() {
             >
               Sửa thông tin người dùng
             </Text>
-            <TouchableOpacity onPress={handleSaveEdit} disabled={saving}>
-              {saving ? (
-                <ActivityIndicator size="small" color="#136ADA" />
-              ) : (
-                <Text
-                  className="text-blue-600 text-base"
-                  style={{ fontFamily: "Poppins-SemiBold" }}
-                >
-                  Lưu
-                </Text>
-              )}
-            </TouchableOpacity>
+            <View style={{ width: 40 }} />
           </View>
 
           <ScrollView
@@ -493,6 +483,11 @@ export default function AdminUserDetailScreen() {
               />
             </View>
           </ScrollView>
+          <FormActionButton
+            title="Lưu thay đổi"
+            onPress={handleSaveEdit}
+            loading={saving}
+          />
         </SafeAreaView>
       </Modal>
     </AdminPageWrapper>

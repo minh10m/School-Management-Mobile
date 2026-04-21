@@ -1,29 +1,33 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { Ionicons } from "@expo/vector-icons";
+import { Image } from 'expo-image';
 
 interface AppLogoProps {
-  size?: 'small' | 'medium' | 'large';
-  color?: string;
-  textColor?: string;
+  size?: 'small' | 'medium' | 'large' | 'xl';
 }
 
 export const AppLogo: React.FC<AppLogoProps> = ({ 
-  size = 'medium', 
-  color = '#136ADA', 
-  textColor = '#136ADA' 
+  size = 'medium' 
 }) => {
-  const iconSize = size === 'small' ? 20 : size === 'medium' ? 24 : 32;
-  const fontSize = size === 'small' ? 16 : size === 'medium' ? 20 : 28;
+  const dimensions = {
+    small: { icon: 28, font: 16 },
+    medium: { icon: 34, font: 20 },
+    large: { icon: 48, font: 28 },
+    xl: { icon: 60, font: 36 },
+  }[size];
 
   return (
     <View className="flex-row items-center gap-2">
-      <Ionicons name="book" size={iconSize} color={color} />
+      <Image
+        source={require("../../assets/images/edu_logo_clean.png")}
+        style={{ width: dimensions.icon, height: dimensions.icon }}
+        contentFit="contain"
+      />
       <Text
-        style={{ fontFamily: "Poppins-Bold", color: textColor }}
-        className={size === 'small' ? 'text-base' : size === 'medium' ? 'text-xl' : 'text-2xl'}
+        style={{ fontSize: dimensions.font, fontFamily: "Poppins-Bold", color: "#136ADA" }}
+        className="ml-1"
       >
-        EDU Manage
+        EduManage
       </Text>
     </View>
   );

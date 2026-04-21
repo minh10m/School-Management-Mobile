@@ -6,6 +6,7 @@ import { AdminPageWrapper } from '../../../components/ui/AdminPageWrapper';
 import { useState, useEffect } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { eventService } from '../../../services/event.service';
+import { FormActionButton } from '../../../components/ui/FormActionButton';
 import { getErrorMessage } from '../../../utils/error';
 
 export default function AdminCreateEventScreen() {
@@ -124,13 +125,6 @@ export default function AdminCreateEventScreen() {
   return (
     <AdminPageWrapper
       title={isEdit ? 'Chỉnh sửa Sự kiện' : 'Thêm Sự kiện mới'}
-      leftComponent={
-        <TouchableOpacity onPress={() => router.back()} style={{ padding: 8 }}>
-          <Text style={{ fontFamily: "Poppins-Regular", color: '#6B7280', fontSize: 16 }}>
-            Hủy
-          </Text>
-        </TouchableOpacity>
-      }
     >
 
       <ScrollView className="flex-1 px-6 pt-5" showsVerticalScrollIndicator={false}>
@@ -243,22 +237,12 @@ export default function AdminCreateEventScreen() {
           </View>
         </View>
 
-        {/* Submit */}
-        <TouchableOpacity
-          className={`${submitting ? 'bg-blue-300' : 'bg-[#136ADA]'} rounded-2xl py-4 items-center mt-6 mb-10 shadow-sm shadow-blue-100`}
-          onPress={handleSubmit}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <ActivityIndicator color="white" size="small" />
-          ) : (
-            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">
-              {isEdit ? 'Cập nhật Sự kiện' : 'Lưu Sự kiện'}
-            </Text>
-          )}
-        </TouchableOpacity>
       </ScrollView>
-
+      <FormActionButton
+        title={isEdit ? 'Cập nhật Sự kiện' : 'Lưu Sự kiện'}
+        onPress={handleSubmit}
+        loading={submitting}
+      />
       {/* Date/Time Picker Modal (iOS Style) */}
       {showPicker && Platform.OS === 'ios' && (
         <View className="absolute inset-0 bg-black/40 z-50 justify-end">

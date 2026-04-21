@@ -191,7 +191,6 @@ export default function TeacherResults() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <Stack.Screen options={{ headerShown: false }} />
       <StatusBar style="dark" />
 
       {/* Header Bar */}

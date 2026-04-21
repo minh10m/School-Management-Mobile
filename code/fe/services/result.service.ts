@@ -4,6 +4,7 @@ import {
   GetStudentResultsParams,
   ResultItem,
   StudentResultSubject,
+  StudentResultReport,
   StudentResultForTeacherResponse,
   UpdateResultPayload,
 } from "../types/result";
@@ -40,7 +41,7 @@ export const resultService = {
    */
   getStudentResults: async (
     params?: GetStudentResultsParams
-  ): Promise<StudentResultSubject[]> => {
+  ): Promise<StudentResultReport> => {
     const response = await apiClient.get<any>("/results/student", { params });
     return response.data.data;
   },
@@ -62,8 +63,15 @@ export const resultService = {
    * GET /results/class/{classYearId}/student/{studentId}?term=
    * AuthN(login) + AuthZ(Teacher)
    */
-  getOneStudentResultForTeacher: async (classYearId: string, studentId: string, params: GetClassResultsParams): Promise<StudentResultSubject[]> => {
-    const response = await apiClient.get<any>(`/results/class/${classYearId}/student/${studentId}`, { params });
+  getOneStudentResultForTeacher: async (
+    classYearId: string,
+    studentId: string,
+    params: GetClassResultsParams
+  ): Promise<StudentResultReport> => {
+    const response = await apiClient.get<any>(
+      `/results/class/${classYearId}/student/${studentId}`,
+      { params }
+    );
     return response.data.data;
   },
 };

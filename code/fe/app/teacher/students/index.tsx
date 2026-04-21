@@ -13,11 +13,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { studentService } from "../../../services/student.service";
 import { classYearService } from "../../../services/classYear.service";
+import { useConfigStore } from "../../../store/configStore";
 import { StudentListItem } from "../../../types/student";
-import { SCHOOL_YEAR } from "../../../constants/config";
 
 export default function TeacherStudentListScreen() {
   const params = useLocalSearchParams();
+  const { schoolYear: currentConfigYear } = useConfigStore();
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<StudentListItem[]>([]);
   const [search, setSearch] = useState("");
@@ -34,9 +35,7 @@ export default function TeacherStudentListScreen() {
   useEffect(() => {
     const fetchHomeroom = async () => {
       try {
-        const hr = await classYearService.getHomeroomClass(
-          Number(SCHOOL_YEAR.split("-")[0]),
-        );
+        const hr = await classYearService.getHomeroomClass(currentConfigYear);
         if (hr) {
           setHomeroom({
             className: hr.className || "",
@@ -49,7 +48,7 @@ export default function TeacherStudentListScreen() {
       }
     };
     fetchHomeroom();
-  }, []);
+  }, [currentConfigYear]);
 
   useEffect(() => {
     if (params.classId !== classId) {
@@ -62,11 +61,9 @@ export default function TeacherStudentListScreen() {
     if (classId || homeroom) {
       fetchStudents();
     } else {
-      // If we finished initial loading and still no homeroom/classId,
-      // we might want to stop loading state to show "no students"
       setLoading(false);
     }
-  }, [grade, classId, homeroom]);
+  }, [grade, classId, homeroom, currentConfigYear]);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -74,6 +71,7 @@ export default function TeacherStudentListScreen() {
       const response = await studentService.getStudents({
         grade: grade,
         ClassYearId: classId || homeroom?.classYearId,
+        schoolYear: currentConfigYear,
         search: search || undefined,
       });
       setStudents(response.items);

@@ -156,7 +156,6 @@ export default function ClassAssignments() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar hidden />
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
       <View className="flex-row items-center px-6 py-4 border-b border-gray-50">
@@ -178,7 +177,10 @@ export default function ClassAssignments() {
           </Text>
         </View>
         <TouchableOpacity
-          onPress={() => setModalVisible(true)}
+          onPress={() => router.push({
+            pathname: "/teacher/my-class/create-assignment",
+            params: { classId, subjectId, subjectName }
+          } as any)}
           className="bg-blue-600 w-10 h-10 rounded-2xl items-center justify-center shadow-md shadow-blue-200"
         >
           <Ionicons name="add" size={24} color="white" />
@@ -208,7 +210,10 @@ export default function ClassAssignments() {
               Chưa có bài tập nào được giao
             </Text>
             <TouchableOpacity
-              onPress={() => setModalVisible(true)}
+              onPress={() => router.push({
+                pathname: "/teacher/my-class/create-assignment",
+                params: { classId, subjectId, subjectName }
+              } as any)}
               className="mt-6 border border-blue-600 px-6 py-2 rounded-2xl"
             >
               <Text
@@ -229,231 +234,6 @@ export default function ClassAssignments() {
           ))
         )}
       </ScrollView>
-
-      {/* Create Assignment Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-[40px] p-8">
-            <View className="flex-row justify-between items-center mb-6">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl">
-                Giao bài tập mới
-              </Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#94A3B8" />
-              </TouchableOpacity>
-            </View>
-
-            <View className="mb-6">
-              <Text
-                style={{ fontFamily: "Poppins-SemiBold" }}
-                className="text-gray-400 text-[10px] uppercase mb-2 ml-1"
-              >
-                Tiêu đề
-              </Text>
-              <TextInput
-                value={newTitle}
-                onChangeText={setNewTitle}
-                placeholder="Ví dụ: Bài tập ôn tập chương 1"
-                className="bg-gray-50 p-4 rounded-2xl text-gray-800"
-                style={{ fontFamily: "Poppins-Medium" }}
-              />
-            </View>
-
-            <View className="mb-8">
-              <Text
-                style={{ fontFamily: "Poppins-SemiBold" }}
-                className="text-gray-400 text-[10px] uppercase mb-2 ml-1"
-              >
-                Mô tả / Yêu cầu
-              </Text>
-              <TextInput
-                value={newDesc}
-                onChangeText={setNewDesc}
-                placeholder="Nội dung chi tiết..."
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-                className="bg-gray-50 p-4 rounded-2xl text-gray-800 min-h-[100px]"
-                style={{ fontFamily: "Poppins-Medium" }}
-              />
-            </View>
-
-            <View className="mb-6">
-              <Text
-                style={{ fontFamily: "Poppins-SemiBold" }}
-                className="text-gray-400 text-[10px] uppercase mb-2 ml-1"
-              >
-                Tên tài liệu đính kèm
-              </Text>
-              <TextInput
-                value={newFileTitle}
-                onChangeText={setNewFileTitle}
-                placeholder="VD: Tài liệu hướng dẫn ôn tập.pdf"
-                className="bg-gray-50 p-4 rounded-2xl text-gray-800"
-                style={{ fontFamily: "Poppins-Medium" }}
-              />
-            </View>
-
-            <View className="mb-8">
-              <Text
-                style={{ fontFamily: "Poppins-SemiBold" }}
-                className="text-gray-400 text-[10px] uppercase mb-2 ml-1"
-              >
-                URL tài liệu (Link)
-              </Text>
-              <TextInput
-                value={newFileUrl}
-                onChangeText={setNewFileUrl}
-                placeholder="https://..."
-                autoCapitalize="none"
-                className="bg-gray-50 p-4 rounded-2xl text-gray-800"
-                style={{ fontFamily: "Poppins-Medium" }}
-              />
-            </View>
-
-            <View className="flex-row gap-4 mb-8">
-              <View className="flex-1">
-                <Text
-                  style={{ fontFamily: "Poppins-SemiBold" }}
-                  className="text-gray-400 text-[10px] uppercase mb-2 ml-1"
-                >
-                  Ngày áp dụng
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setPickerType("start");
-                    setTempDate(startDate);
-                    setShowDatePicker(true);
-                  }}
-                  className="bg-gray-50 p-4 rounded-2xl flex-row justify-between items-center"
-                >
-                  <Text
-                    style={{ fontFamily: "Poppins-Medium" }}
-                    className="text-gray-800 text-[10px]"
-                  >
-                    {startDate.toLocaleDateString("vi-VN")}
-                  </Text>
-                  <Ionicons name="calendar-outline" size={14} color="#94A3B8" />
-                </TouchableOpacity>
-              </View>
-
-              <View className="flex-1">
-                <Text
-                  style={{ fontFamily: "Poppins-SemiBold" }}
-                  className="text-gray-400 text-[10px] uppercase mb-2 ml-1"
-                >
-                  Ngày kết thúc
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setPickerType("finish");
-                    setTempDate(finishDate || new Date());
-                    setShowDatePicker(true);
-                  }}
-                  className="bg-gray-50 p-4 rounded-2xl flex-row justify-between items-center"
-                >
-                  <Text
-                    style={{ fontFamily: "Poppins-Medium" }}
-                    className={finishDate ? "text-gray-800 text-[10px]" : "text-gray-400 text-[10px]"}
-                  >
-                    {finishDate ? finishDate.toLocaleDateString("vi-VN") : "Chọn ngày"}
-                  </Text>
-                  <Ionicons name="calendar-outline" size={14} color="#94A3B8" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              onPress={handleCreateAssignment}
-              disabled={loading}
-              className="bg-blue-600 py-4 rounded-2xl items-center shadow-lg shadow-blue-200"
-            >
-              {loading ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-white text-base"
-                >
-                  Giao bài tập
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            {/* iOS Date Picker Modal */}
-            {Platform.OS === "ios" && (
-              <Modal
-                visible={showDatePicker}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setShowDatePicker(false)}
-              >
-                <TouchableOpacity 
-                  activeOpacity={1} 
-                  onPress={() => setShowDatePicker(false)}
-                  className="flex-1 bg-black/40 justify-end"
-                >
-                  <TouchableOpacity 
-                    activeOpacity={1} 
-                    className="bg-white rounded-t-[40px] p-6 pb-12"
-                  >
-                    <View className="flex-row justify-between items-center mb-6">
-                      <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                        <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500">Hủy</Text>
-                      </TouchableOpacity>
-                      <Text style={{ fontFamily: "Poppins-Bold" }} className="text-lg">Chọn ngày</Text>
-                      <TouchableOpacity onPress={() => {
-                        if (pickerType === "start") {
-                          setStartDate(tempDate);
-                        } else {
-                          setFinishDateToEndOfDay(tempDate);
-                        }
-                        setShowDatePicker(false);
-                      }}>
-                        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-blue-600">Xong</Text>
-                      </TouchableOpacity>
-                    </View>
-                    
-                    <DateTimePicker
-                      value={tempDate}
-                      mode="date"
-                      display="spinner"
-                      locale="vi-VN"
-                      onChange={(event, date) => {
-                        if (date) setTempDate(date);
-                      }}
-                    />
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              </Modal>
-            )}
-
-            {/* Android Date Picker */}
-            {Platform.OS === "android" && showDatePicker && (
-              <DateTimePicker
-                value={tempDate}
-                mode="date"
-                display="default"
-                onChange={(event, date) => {
-                  setShowDatePicker(false);
-                  if (event.type === "set" && date) {
-                    if (pickerType === "start") {
-                      setStartDate(date);
-                    } else {
-                      setFinishDateToEndOfDay(date);
-                    }
-                  }
-                }}
-              />
-            )}
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -464,12 +244,16 @@ function AssignmentRow({ item, onDelete }: any) {
   const isExpired = endDate < now;
 
   return (
-    <View className="bg-white border border-gray-100 rounded-3xl p-5 mb-4 shadow-sm">
-      <View className="flex-row justify-between items-start mb-3">
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => router.push(`/teacher/my-class/assignments/${item.assignmentId}`)}
+      className="bg-white border border-gray-100 rounded-[32px] p-6 mb-5 shadow-sm shadow-gray-100/50"
+    >
+      <View className="flex-row justify-between items-start mb-4">
         <View className="flex-1 mr-4">
           <Text
             style={{ fontFamily: "Poppins-Bold" }}
-            className="text-gray-800 text-base"
+            className="text-[#1E293B] text-base"
             numberOfLines={1}
           >
             {item.title}
@@ -477,14 +261,14 @@ function AssignmentRow({ item, onDelete }: any) {
           {item.description && (
             <Text
               style={{ fontFamily: "Poppins-Regular" }}
-              className="text-gray-400 text-xs mt-1"
+              className="text-gray-400 text-[11px] mt-1"
               numberOfLines={2}
             >
               {item.description}
             </Text>
           )}
           {item.fileUrl && (
-            <View className="flex-row items-center mt-3 bg-blue-50/50 self-start px-3 py-1.5 rounded-lg border border-blue-100/50">
+            <View className="flex-row items-center mt-3 bg-blue-50/50 self-start px-3 py-1.5 rounded-xl border border-blue-100/20">
               <Ionicons name="document-attach-outline" size={12} color="#1D4ED8" />
               <Text
                 style={{ fontFamily: "Poppins-Medium" }}
@@ -497,15 +281,19 @@ function AssignmentRow({ item, onDelete }: any) {
           )}
         </View>
         <TouchableOpacity
-          onPress={onDelete}
-          className="bg-rose-50 w-8 h-8 rounded-full items-center justify-center"
+          onPress={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="bg-rose-50 w-9 h-9 rounded-full items-center justify-center border border-rose-100/50"
         >
-          <Ionicons name="trash-outline" size={16} color="#E11D48" />
+          <Ionicons name="trash-outline" size={18} color="#E11D48" />
         </TouchableOpacity>
       </View>
 
-      <View className="flex-row items-center justify-between pt-4 border-t border-gray-50">
+      <View className="flex-row items-center justify-between pt-5 border-t border-gray-50">
         <View className="flex-row items-center">
+          <View className={`w-2 h-2 rounded-full mr-2 ${isExpired ? "bg-rose-500" : "bg-emerald-500"}`} />
           <Ionicons
             name="time-outline"
             size={14}
@@ -515,28 +303,11 @@ function AssignmentRow({ item, onDelete }: any) {
             style={{ fontFamily: "Poppins-Medium" }}
             className={`text-[10px] ml-1 ${isExpired ? "text-rose-500" : "text-gray-400"}`}
           >
-            Hết hạn: {endDate.toLocaleDateString("vi-VN")}
+            Hạn nộp: {endDate.toLocaleDateString("vi-VN")}
           </Text>
         </View>
-        <TouchableOpacity 
-          onPress={() => router.push({
-            pathname: "/teacher/my-class/submissions/[assignmentId]",
-            params: { 
-              assignmentId: item.assignmentId,
-              title: item.title
-            }
-          })}
-          className="bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100/50 flex-row items-center"
-        >
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-blue-600 text-[10px] mr-1"
-          >
-            {item.submissionCount || 0} nộp
-          </Text>
-          <Ionicons name="chevron-forward" size={10} color="#2563EB" />
-        </TouchableOpacity>
+        
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

@@ -83,8 +83,13 @@ export interface LessonAssignmentResponse {
 
 export interface CreateLessonAssignmentPayload {
   title: string;
-  fileUrl?: string;
+  fileUrl?: string; // Keeping for backward compatibility or direct URL entry
   fileTitle?: string;
+  file?: {
+    uri: string;
+    name: string;
+    type: string;
+  };
   lessonId: string;
   orderIndex: number;
 }

@@ -24,7 +24,7 @@ namespace School_Management.API.Repositories
             if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
             var teacherSubjectInfo = await context.TeacherSubject.AsNoTracking()
                                                                               .Where(x => x.TeacherId == teacherId && x.SubjectId == request.SubjectId)
-                                                                              .Select(g => new { g.TeacherSubjectId, g.Teacher.User.FullName, g.Subject.SubjectName })
+                                                                              .Select(g => new { g.TeacherSubjectId, g.SubjectId, g.Teacher.User.FullName, g.Subject.SubjectName })
                                                                               .FirstOrDefaultAsync();
             if (teacherSubjectInfo == null) return (null, "NOT_FOUND_TEACHERSUBJECTID");
 
@@ -59,6 +59,7 @@ namespace School_Management.API.Repositories
                 PublishedAt = course.PublishedAt,
                 SubjectName = teacherSubjectInfo.SubjectName,
                 TeacherSubjectId = course.TeacherSubjectId,
+                SubjectId = teacherSubjectInfo.SubjectId,
                 TeacherName = teacherSubjectInfo.FullName
             }, "SUCCESS");
         }
@@ -182,6 +183,7 @@ namespace School_Management.API.Repositories
                 PublishedAt = course.PublishedAt,
                 Status = course.Status,
                 TeacherSubjectId = course.TeacherSubjectId,
+                SubjectId = course.TeacherSubject.SubjectId,
                 TeacherName = course.TeacherSubject.Teacher.User.FullName,
                 SubjectName = course.TeacherSubject.Subject.SubjectName
             }, "SUCCESS");

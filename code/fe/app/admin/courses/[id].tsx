@@ -1,15 +1,18 @@
 import {
   View,
   Text,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
-  ActivityIndicator,
   Alert,
+  Modal,
+  ScrollView,
+  TextInput,
+  ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter, Stack } from "expo-router";
+import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { courseService } from "../../../services/course.service";
@@ -28,7 +31,7 @@ export default function AdminCourseDetailScreen() {
   const [processing, setProcessing] = useState(false);
 
   const fetchData = useCallback(async () => {
-    if (!id) return;
+    if (!id || id === "create") return;
     try {
       setLoading(true);
       const [courseData, lessonData] = await Promise.all([
@@ -55,12 +58,12 @@ export default function AdminCourseDetailScreen() {
     fetchData();
   };
 
-  const handleUpdateStatus = async (newStatus: "approved" | "rejected") => {
+  const handleUpdateStatus = async (newStatus: "Approved" | "Rejected") => {
     if (!course) return;
     try {
       setProcessing(true);
       await courseService.updateCourseStatus(course.id, { status: newStatus });
-      Alert.alert("Thành công", `Đã ${newStatus === "approved" ? "duyệt" : "từ chối"} khóa học.`);
+      Alert.alert("Thành công", `Đã ${newStatus === "Approved" ? "duyệt" : "từ chối"} khóa học.`);
       router.back();
     } catch (err: any) {
       Alert.alert("Lỗi", err.response?.data?.message || "Không thể cập nhật trạng thái.");
@@ -69,15 +72,15 @@ export default function AdminCourseDetailScreen() {
     }
   };
 
-  const confirmAction = (action: "approved" | "rejected") => {
+  const confirmAction = (action: "Approved" | "Rejected") => {
     Alert.alert(
-      action === "approved" ? "Duyệt khóa học" : "Từ chối khóa học",
-      `Bạn có chắc chắn muốn ${action === "approved" ? "duyệt" : "từ chối"} khóa học này?`,
+      action === "Approved" ? "Duyệt khóa học" : "Từ chối khóa học",
+      `Bạn có chắc chắn muốn ${action === "Approved" ? "duyệt" : "từ chối"} khóa học này?`,
       [
         { text: "Hủy", style: "cancel" },
         {
-          text: action === "approved" ? "Duyệt" : "Từ chối",
-          style: action === "rejected" ? "destructive" : "default",
+          text: action === "Approved" ? "Duyệt" : "Từ chối",
+          style: action === "Rejected" ? "destructive" : "default",
           onPress: () => handleUpdateStatus(action),
         },
       ]
@@ -98,7 +101,6 @@ export default function AdminCourseDetailScreen() {
     <AdminPageWrapper
       title="Chi tiết duyệt khóa học"
     >
-
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
@@ -184,33 +186,19 @@ export default function AdminCourseDetailScreen() {
 
         {/* Lessons Section */}
         <View className="px-6 mt-8 mb-10">
-           <Text style={{ fontFamily: "Poppins-Bold" }} className="text-lg text-black mb-4">Nội dung bài học</Text>
-           {lessons.length === 0 ? (
+           <View className="flex-row justify-between items-center mb-4">
+              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-lg text-black">Nội dung bài học</Text>
+              <TouchableOpacity 
+                onPress={() => router.push(`/admin/courses/lessons?courseId=${course.id}` as any)}
+                className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
+              >
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-[10px] uppercase">Xem trước bài học</Text>
+              </TouchableOpacity>
+           </View>
+           {lessons.length === 0 && (
              <View className="bg-gray-50 py-10 rounded-3xl items-center border border-dashed border-gray-300">
                 <Ionicons name="list-outline" size={32} color="#D1D5DB" />
                 <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-2">Chưa có bài học nào.</Text>
-             </View>
-           ) : (
-             <View className="gap-3">
-               {lessons.map((lesson, index) => (
-                 <TouchableOpacity 
-                    key={lesson.id} 
-                    onPress={() => router.push(`/admin/lessons/${lesson.id}` as any)}
-                    activeOpacity={0.7}
-                    className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex-row items-center gap-4"
-                 >
-                    <View className="w-10 h-10 rounded-xl bg-blue-50 items-center justify-center">
-                       <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA]">{index + 1}</Text>
-                    </View>
-                    <View className="flex-1">
-                       <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-sm" numberOfLines={1}>
-                         {lesson.lessonName}
-                       </Text>
-
-                    </View>
-                    <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
-                 </TouchableOpacity>
-               ))}
              </View>
            )}
         </View>
@@ -223,7 +211,7 @@ export default function AdminCourseDetailScreen() {
             disabled={processing}
             activeOpacity={0.8}
             className="flex-1 bg-red-50 h-16 rounded-[24px] items-center justify-center border border-red-100"
-            onPress={() => confirmAction("rejected")}
+            onPress={() => confirmAction("Rejected")}
           >
             {processing ? (
               <ActivityIndicator color="#EF4444" />
@@ -235,7 +223,7 @@ export default function AdminCourseDetailScreen() {
             disabled={processing}
             activeOpacity={0.8}
             className="flex-1 bg-[#136ADA] h-16 rounded-[24px] items-center justify-center shadow-lg shadow-blue-200"
-            onPress={() => confirmAction("approved")}
+            onPress={() => confirmAction("Approved")}
           >
             {processing ? (
               <ActivityIndicator color="white" />

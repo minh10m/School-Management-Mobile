@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { classYearService } from "../../../services/classYear.service";
 import { teacherService } from "../../../services/teacher.service";
 import { studentService } from "../../../services/student.service";
@@ -22,9 +22,12 @@ import { StudentListItem } from "../../../types/student";
 import { CreateResultRequest } from "../../../types/result";
 import { SCHOOL_YEAR } from "../../../constants/config";
 import { StatusBar } from "expo-status-bar";
+import { useConfigStore } from "../../../store/configStore";
+import { getErrorMessage } from "../../../utils/error";
 
 export default function BatchResultEntryScreen() {
   const params = useLocalSearchParams();
+  const { schoolYear: currentSchoolYear, term: currentTerm } = useConfigStore();
   const [loading, setLoading] = useState(true);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -38,14 +41,10 @@ export default function BatchResultEntryScreen() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
     (params.subjectId as string) || null,
   );
-  const [selectedTerm, setSelectedTerm] = useState(Number(params.term) || 1);
-  const [selectedType, setSelectedType] = useState("Thường xuyên");
-  const [termModalVisible, setTermModalVisible] = useState(false);
-  const inputRefs = useRef<Record<string, any>>({});
-  const sy = useMemo(() => Number(SCHOOL_YEAR.split("-")[0]), []);
+  const [selectedType, setSelectedType] = useState("Miệng");
   const scoreTypes = [
-    { label: "Thường xuyên", weight: 1 },
-    { label: "15p", weight: 1 },
+    { label: "Miệng", weight: 1 },
+    { label: "15 phút", weight: 1 },
     { label: "Giữa kì", weight: 2 },
     { label: "Cuối kì", weight: 3 },
   ];
@@ -115,10 +114,7 @@ export default function BatchResultEntryScreen() {
     setScores((p) => ({ ...p, [sid]: v.replace(/[^0-9.]/g, "") }));
   };
 
-  const focusNext = (idx: number) => {
-    if (idx < students.length - 1)
-      inputRefs.current[students[idx + 1].studentId]?.focus();
-  };
+
 
   const handleSave = async () => {
     if (!selectedClassId || !selectedSubjectId) return;
@@ -130,8 +126,8 @@ export default function BatchResultEntryScreen() {
         type: selectedType,
         value: Number(v),
         weight: scoreTypes.find((t) => t.label === selectedType)?.weight || 1,
-        term: selectedTerm,
-        schoolYear: sy,
+        term: currentTerm,
+        schoolYear: currentSchoolYear,
       }));
     if (entries.length === 0)
       return Alert.alert("Thông báo", "Chưa nhập điểm.");
@@ -145,7 +141,7 @@ export default function BatchResultEntryScreen() {
       });
       setScores(s);
     } catch (e) {
-      Alert.alert("Lỗi", "Lưu thất bại.");
+      Alert.alert("Lỗi", getErrorMessage(e));
     } finally {
       setSubmitting(false);
     }
@@ -154,7 +150,6 @@ export default function BatchResultEntryScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar hidden />
-      <Stack.Screen options={{ headerShown: false }} />
       <View
         style={{ paddingTop: 20, paddingBottom: 15 }}
         className="flex-row items-center justify-between px-8 bg-white"
@@ -206,13 +201,13 @@ export default function BatchResultEntryScreen() {
                   <View className="flex-1">
                     <Text
                       style={{ fontFamily: "Poppins-SemiBold" }}
-                      className="text-gray-400 text-[10px] uppercase tracking-widest mb-1 ml-1"
+                      className="text-gray-400 text-[11px] uppercase tracking-widest mb-1 ml-1"
                     >
                       Lớp học
                     </Text>
                     <Text
                       style={{ fontFamily: "Poppins-Bold" }}
-                      className="text-gray-900 text-base ml-1"
+                      className="text-gray-900 text-lg ml-1"
                     >
                       {activeClass?.className || "---"}
                     </Text>
@@ -221,13 +216,13 @@ export default function BatchResultEntryScreen() {
                   <View className="flex-1">
                     <Text
                       style={{ fontFamily: "Poppins-SemiBold" }}
-                      className="text-gray-400 text-[10px] uppercase tracking-widest mb-1 ml-1"
+                      className="text-gray-400 text-[11px] uppercase tracking-widest mb-1 ml-1"
                     >
                       Môn học
                     </Text>
                     <Text
                       style={{ fontFamily: "Poppins-Bold" }}
-                      className="text-indigo-600 text-base ml-1"
+                      className="text-indigo-600 text-lg ml-1"
                     >
                       {activeSubject?.subjectName || "---"}
                     </Text>
@@ -239,7 +234,7 @@ export default function BatchResultEntryScreen() {
                   <View>
                     <Text
                       style={{ fontFamily: "Poppins-SemiBold" }}
-                      className="text-gray-400 text-[10px] uppercase tracking-widest mb-3 ml-1"
+                      className="text-gray-400 text-[11px] uppercase tracking-widest mb-3 ml-1"
                     >
                       Loại điểm
                     </Text>
@@ -248,11 +243,11 @@ export default function BatchResultEntryScreen() {
                         <TouchableOpacity
                           key={t.label}
                           onPress={() => setSelectedType(t.label)}
-                          className={`flex-1 py-3.5 rounded-2xl border ${selectedType === t.label ? "bg-emerald-50 border-emerald-200" : "bg-gray-50 border-gray-50"}`}
+                          className={`flex-1 py-4 rounded-2xl border ${selectedType === t.label ? "bg-emerald-50 border-emerald-200" : "bg-gray-50 border-gray-50"}`}
                         >
                           <Text
                             style={{ fontFamily: "Poppins-Bold" }}
-                            className={`text-center text-[9px] ${selectedType === t.label ? "text-emerald-700" : "text-gray-400"}`}
+                            className={`text-center text-[11px] ${selectedType === t.label ? "text-emerald-700" : "text-gray-400"}`}
                           >
                             {t.label}
                           </Text>
@@ -261,36 +256,6 @@ export default function BatchResultEntryScreen() {
                     </View>
                   </View>
 
-                  <View>
-                    <Text
-                      style={{ fontFamily: "Poppins-SemiBold" }}
-                      className="text-gray-400 text-[10px] uppercase tracking-widest mb-3 ml-1"
-                    >
-                      Học kỳ
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => setTermModalVisible(true)}
-                      className="bg-gray-50 py-4 rounded-2xl px-6 items-center justify-between flex-row border border-gray-50"
-                    >
-                      <View className="flex-row items-center gap-3">
-                        <View className="w-6 h-6 bg-blue-100 rounded-full items-center justify-center">
-                          <Text
-                            style={{ fontFamily: "Poppins-Bold" }}
-                            className="text-[#136ADA] text-[10px]"
-                          >
-                            {selectedTerm}
-                          </Text>
-                        </View>
-                        <Text
-                          style={{ fontFamily: "Poppins-Bold" }}
-                          className="text-gray-900 text-sm"
-                        >
-                          Học kỳ {selectedTerm}
-                        </Text>
-                      </View>
-                      <Ionicons name="chevron-down" size={16} color="#136ADA" />
-                    </TouchableOpacity>
-                  </View>
                 </View>
               </View>
             ) : null}
@@ -339,16 +304,13 @@ export default function BatchResultEntryScreen() {
                           </Text>
                           <Text
                             style={{ fontFamily: "Poppins-Medium" }}
-                            className="text-gray-400 text-[10px]"
+                            className="text-gray-400 text-[11px]"
                           >
                             Số thứ tự: {i + 1}
                           </Text>
                         </View>
                         <View className="relative">
                           <TextInput
-                            ref={(el) => {
-                              inputRefs.current[st.studentId] = el;
-                            }}
                             value={sc}
                             onChangeText={(v) =>
                               handleScoreChange(st.studentId, v)
@@ -356,11 +318,6 @@ export default function BatchResultEntryScreen() {
                             placeholder="---"
                             placeholderTextColor="#CBD5E1"
                             keyboardType="numeric"
-                            returnKeyType={
-                              i === students.length - 1 ? "done" : "next"
-                            }
-                            onSubmitEditing={() => focusNext(i)}
-                            blurOnSubmit={i === students.length - 1}
                             className={`w-16 h-14 rounded-[22px] text-center text-xl shadow-sm ${inv ? "text-rose-600 bg-rose-50" : fill ? "text-blue-600 bg-blue-50/30" : "text-gray-400 bg-gray-50"}`}
                             style={{ fontFamily: "Poppins-Bold" }}
                           />
@@ -405,59 +362,7 @@ export default function BatchResultEntryScreen() {
           </TouchableOpacity>
         </View>
       )}
-      <Modal
-        animationType="fade"
-        transparent
-        visible={termModalVisible}
-        onRequestClose={() => setTermModalVisible(false)}
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => setTermModalVisible(false)}
-          className="flex-1 bg-black/20 justify-center items-center px-10"
-        >
-          <View className="bg-white w-full rounded-[32px] p-6 shadow-2xl overflow-hidden">
-            <Text
-              style={{ fontFamily: "Poppins-Bold" }}
-              className="text-gray-800 text-base mb-6 text-center"
-            >
-              Chọn học kỳ
-            </Text>
-            {[1, 2].map((t) => (
-              <TouchableOpacity
-                key={t}
-                onPress={() => {
-                  setSelectedTerm(t);
-                  setTermModalVisible(false);
-                }}
-                className={`flex-row items-center justify-between p-4 mb-3 rounded-2xl border ${selectedTerm === t ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-transparent"}`}
-              >
-                <View className="flex-row items-center">
-                  <View
-                    className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${selectedTerm === t ? "bg-blue-600" : "bg-gray-200"}`}
-                  >
-                    <Text
-                      style={{ fontFamily: "Poppins-Bold" }}
-                      className="text-white text-[10px]"
-                    >
-                      {t}
-                    </Text>
-                  </View>
-                  <Text
-                    style={{ fontFamily: "Poppins-Bold" }}
-                    className={`text-sm ${selectedTerm === t ? "text-blue-600" : "text-gray-500"}`}
-                  >
-                    Học kỳ {t}
-                  </Text>
-                </View>
-                {selectedTerm === t && (
-                  <Ionicons name="checkmark-circle" size={20} color="#136ADA" />
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </TouchableOpacity>
-      </Modal>
+
     </SafeAreaView>
   );
 }

@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import * as DocumentPicker from "expo-document-picker";
 import { lessonService, lessonVideoService, lessonAssignmentService } from "../../../services/lesson.service";
 import { LessonResponse, LessonVideoResponse, LessonAssignmentResponse } from "../../../types/lesson";
 import { getErrorMessage } from "../../../utils/error";
@@ -43,6 +44,26 @@ export default function LessonDetailScreen() {
   const [assignmentTitle, setAssignmentTitle] = useState("");
   const [assignmentFileUrl, setAssignmentFileUrl] = useState("");
   const [assignmentFileTitle, setAssignmentFileTitle] = useState("");
+  const [selectedFile, setSelectedFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
+
+  const handlePickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "*/*",
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled) {
+        setSelectedFile(result);
+        if (!assignmentTitle) {
+          // Auto-fill title with file name if empty
+          setAssignmentTitle(result.assets[0].name.split(".")[0]);
+        }
+      }
+    } catch (err) {
+      console.error("Error picking document:", err);
+    }
+  };
 
   const fetchLessonDetails = useCallback(async () => {
     if (!id) return;
@@ -105,12 +126,20 @@ export default function LessonDetailScreen() {
     }
     try {
       setSubmitting(true);
+      
+      const fileAsset = selectedFile && !selectedFile.canceled ? selectedFile.assets[0] : null;
+
       await lessonAssignmentService.createLessonAssignment({
         lessonId: id,
         title: assignmentTitle.trim(),
         fileUrl: assignmentFileUrl.trim() || undefined,
         fileTitle: assignmentFileTitle.trim() || undefined,
         orderIndex: assignments.length + 1,
+        file: fileAsset ? {
+          uri: fileAsset.uri,
+          name: fileAsset.name,
+          type: fileAsset.mimeType || "application/octet-stream",
+        } : undefined,
       });
       Alert.alert("Thành công", "Đã tạo bài tập thành công");
       setAssignmentModalVisible(false);
@@ -118,6 +147,7 @@ export default function LessonDetailScreen() {
       setAssignmentTitle("");
       setAssignmentFileUrl("");
       setAssignmentFileTitle("");
+      setSelectedFile(null);
       fetchLessonDetails();
     } catch (error: any) {
       Alert.alert("Error", getErrorMessage(error));
@@ -129,7 +159,6 @@ export default function LessonDetailScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar hidden />
-      <Stack.Screen options={{ headerShown: false }} />
       
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
@@ -422,12 +451,33 @@ export default function LessonDetailScreen() {
             </View>
 
             <View className="mb-4">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">Tên tài liệu (tùy chọn)</Text>
-              <TextInput value={assignmentFileTitle} onChangeText={setAssignmentFileTitle} placeholder="VD: File PDF hướng dẫn" className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-black" />
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">Tài liệu đính kèm (File)</Text>
+              <TouchableOpacity
+                onPress={handlePickDocument}
+                className="bg-emerald-50 border border-emerald-100 border-dashed rounded-2xl px-4 py-6 items-center justify-center"
+              >
+                <Ionicons name="cloud-upload-outline" size={32} color="#059669" />
+                <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-emerald-700 mt-2">
+                  {selectedFile && !selectedFile.canceled ? selectedFile.assets[0].name : "Chọn tài liệu từ máy..."}
+                </Text>
+                {selectedFile && !selectedFile.canceled && (
+                  <Text style={{ fontFamily: "Poppins-Regular" }} className="text-emerald-500 text-[10px] mt-1">
+                    {(selectedFile.assets[0].size! / 1024 / 1024).toFixed(2)} MB
+                  </Text>
+                )}
+              </TouchableOpacity>
+              {selectedFile && !selectedFile.canceled && (
+                <TouchableOpacity 
+                  onPress={() => setSelectedFile(null)}
+                  className="absolute top-0 right-0 p-2"
+                >
+                  <Ionicons name="close-circle" size={20} color="#EF4444" />
+                </TouchableOpacity>
+              )}
             </View>
 
-            <View className="mb-6">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">URL tài liệu (Tùy chọn)</Text>
+            <View className="mb-4">
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">Hoặc nhập URL tài liệu</Text>
               <TextInput value={assignmentFileUrl} onChangeText={setAssignmentFileUrl} placeholder="VD: https://docs..." className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-black" />
             </View>
 

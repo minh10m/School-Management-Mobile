@@ -8,6 +8,7 @@ import { subjectService } from '../../../services/subject.service';
 import { teacherService } from '../../../services/teacher.service';
 import { SubjectResponse, SubjectTeacherItem } from '../../../types/subject';
 import { TeacherListItem } from '../../../types/teacher';
+import { FormActionButton } from '../../../components/ui/FormActionButton';
 import { getErrorMessage } from '../../../utils/error';
 
 export default function AdminSubjectDetailScreen() {
@@ -272,17 +273,12 @@ export default function AdminSubjectDetailScreen() {
                         placeholder="VD: 5"
                      />
                   </View>
-
-                  <TouchableOpacity 
-                     className="bg-[#136ADA] rounded-3xl py-4 items-center mt-4 shadow-xl shadow-blue-200"
-                     onPress={handleUpdateSubject}
-                     disabled={saving}
-                  >
-                     {saving ? <ActivityIndicator color="white" /> : (
-                        <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-base">Cập nhật Môn học</Text>
-                     )}
-                  </TouchableOpacity>
                </View>
+               <FormActionButton
+                  title="Cập nhật Môn học"
+                  onPress={handleUpdateSubject}
+                  loading={saving}
+               />
             </View>
          </View>
       </Modal>

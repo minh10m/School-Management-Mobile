@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { AppLogo } from "../components/ui/AppLogo";
 import { Href, Link, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState, useEffect } from "react";
@@ -88,11 +89,16 @@ export default function LoginScreen() {
             keyboardShouldPersistTaps="handled"
           >
             <View className="flex-1 px-6 justify-center">
+              {/* Brand Logo */}
+              <View className="items-center mt-12 mb-4">
+                <AppLogo size="xl" />
+              </View>
+
               {/* Illustration */}
-              <View className="items-center mb-5 mt-10">
+              <View className="items-center mb-5 mt-4">
                 <Image
-                  source={require("../assets/images/login.png")}
-                  style={{ width: 250, height: 250 }}
+                  source={require("../assets/images/edu_login_vibe.png")}
+                  style={{ width: 280, height: 280 }}
                   contentFit="contain"
                 />
               </View>

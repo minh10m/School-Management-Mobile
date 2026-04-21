@@ -51,6 +51,7 @@ export default function AdminLayout() {
       <Stack.Screen name="fees/index" />
       <Stack.Screen name="fees/[id]" />
       <Stack.Screen name="courses/index" />
+      <Stack.Screen name="courses/lessons" />
       <Stack.Screen name="events/index" />
       <Stack.Screen name="events/create" />
       <Stack.Screen name="payments/index" />

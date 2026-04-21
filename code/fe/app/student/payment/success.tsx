@@ -27,7 +27,6 @@ export default function PaymentSuccessScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <Stack.Screen options={{ headerShown: false }} />
       
       {/* Header */}
       <View 

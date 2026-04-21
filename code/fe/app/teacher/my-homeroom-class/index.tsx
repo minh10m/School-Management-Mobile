@@ -118,7 +118,7 @@ export default function MyHomeroomClass() {
               <View style={styles.featuresGrid}>
                 <FeatureButton
                   label="Điểm danh"
-                  value="Xem & Ghi lại"
+                  value="Ghi lại"
                   icon="calendar"
                   onPress={() =>
                     router.push(`/teacher/attendance/${homeroom.classYearId}`)
