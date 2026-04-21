@@ -58,6 +58,9 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+//Clean Expired Payment Automatically
+builder.Services.AddHostedService<PaymentCleanUpService>();
+
 //Cloudinary
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 
