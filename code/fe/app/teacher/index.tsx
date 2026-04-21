@@ -45,7 +45,9 @@ export default function TeacherDashboard() {
       setLoadingStats(true);
       const [hrRes, tcRes, schRes] = await Promise.all([
         classYearService.getHomeroomClass(schoolYear),
-        classYearService.getTeachingClasses({ schoolYear: schoolYear.toString() }),
+        classYearService.getTeachingClasses({
+          schoolYear: schoolYear.toString(),
+        }),
         scheduleService
           .getMyTeachingSchedule({
             Term: term,
@@ -60,8 +62,7 @@ export default function TeacherDashboard() {
         return {
           ...cls,
           subjectId: match?.subjectId || cls.subjectId || "",
-          subjectName:
-            match?.subjectName || cls.subjectName || "Chưa gán môn",
+          subjectName: match?.subjectName || cls.subjectName || "Chưa gán môn",
         };
       });
 
@@ -84,7 +85,7 @@ export default function TeacherDashboard() {
       setLoadingAttendance(true);
       const now = new Date();
       const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-      
+
       const data = await attendanceService.getClassAttendance({
         classYearId,
         date: localToday,
@@ -248,7 +249,6 @@ export default function TeacherDashboard() {
           </View>
         )}
 
-
         {/* Teaching Classes Horizontal Section */}
         <View className="mb-8 mt-2">
           <View className="flex-row justify-between items-center px-6 mb-4">
@@ -374,6 +374,13 @@ export default function TeacherDashboard() {
               route="/teacher/exam-schedules"
               color="bg-rose-100"
               iconColor="#F43F5E"
+            />
+            <TeachingCard
+              icon="megaphone"
+              label="Sự kiện"
+              route="/teacher/events"
+              color="bg-amber-100"
+              iconColor="#D97706"
             />
             <TeachingCard
               icon="people"

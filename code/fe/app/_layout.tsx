@@ -54,10 +54,8 @@ export default function RootLayout() {
     const init = async () => {
       if (loaded) {
         try {
-          // 1. Load auth from storage first to ensure tokens are available for API calls
-          await loadAuthFromStorage();
-          // 2. Then load global config (this may call APIs that require the token)
-          await loadConfig();
+          // school-year-info is public, so load config immediately on app start.
+          await Promise.allSettled([loadConfig(), loadAuthFromStorage()]);
         } catch (error) {
           console.error("Initialization error:", error);
         } finally {
