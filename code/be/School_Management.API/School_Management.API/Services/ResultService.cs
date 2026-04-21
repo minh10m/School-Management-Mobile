@@ -76,7 +76,7 @@ namespace School_Management.API.Services
                 "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không là giáo viên"),
                 "FORBIDDEN_UPDATE_RESULT" => throw new ForbiddenException("Bạn không là giáo viên phụ trách môn này"),
                 "NOT_FOUND_CLASSYEAR" => throw new NotFoundException("Không tìm thấy lớp của các học sinh này"),
-                "DUPLICATED_TYPE" => throw new BadRequestException("Học sinh này đã có đầu điểm này trong học kỳ và năm học đã chọn"),
+                "DUPLICATED_TYPE" => throw new BadRequestException("Học sinh này đã có loại điểm này trong học kỳ và năm học đã chọn"),
                 "SUCCESS" => result!,
                 _ => throw new Exception("Lỗi không xác định")
             };
