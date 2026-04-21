@@ -8,6 +8,7 @@ export interface LessonResponse {
   courseId: string;
   courseName: string;
   orderIndex: number;
+  lessonVideos: LessonVideoResponse[];
 }
 
 export interface LessonFilterRequest {
