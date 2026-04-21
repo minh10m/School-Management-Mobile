@@ -24,8 +24,10 @@ export default function CreateCourseScreen() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [teacherSubjects, setTeacherSubjects] = useState<TeacherSubject[]>([]);
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
-  
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
+    null,
+  );
+
   const [loading, setLoading] = useState(false);
   const [fetchingSubjects, setFetchingSubjects] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -41,7 +43,10 @@ export default function CreateCourseScreen() {
         }
       } catch (error) {
         console.error("Error fetching subjects:", error);
-        Alert.alert("Lỗi", "Không thể tải danh sách môn học. Vui lòng thử lại.");
+        Alert.alert(
+          "Lỗi",
+          "Không thể tải danh sách môn học. Vui lòng thử lại.",
+        );
       } finally {
         setFetchingSubjects(false);
       }
@@ -51,7 +56,12 @@ export default function CreateCourseScreen() {
   }, []);
 
   const handleCreate = async () => {
-    if (!courseName.trim() || !description.trim() || !price || !selectedSubjectId) {
+    if (
+      !courseName.trim() ||
+      !description.trim() ||
+      !price ||
+      !selectedSubjectId
+    ) {
       Alert.alert("Lỗi", "Vui lòng điền đầy đủ các thông tin bắt buộc.");
       return;
     }
@@ -70,10 +80,12 @@ export default function CreateCourseScreen() {
         price: numericPrice,
         subjectId: selectedSubjectId,
       });
-      
-      Alert.alert("Thành công", "Tạo khóa học thành công (Đang chờ phê duyệt)", [
-        { text: "Đồng ý", onPress: () => router.back() }
-      ]);
+
+      Alert.alert(
+        "Thành công",
+        "Tạo khóa học thành công (Đang chờ phê duyệt)",
+        [{ text: "Đồng ý", onPress: () => router.back() }],
+      );
     } catch (error: any) {
       console.error("Error creating course:", error);
       Alert.alert("Error", getErrorMessage(error));
@@ -82,29 +94,40 @@ export default function CreateCourseScreen() {
     }
   };
 
-  const selectedSubject = teacherSubjects.find(s => s.subjectId === selectedSubjectId);
+  const selectedSubject = teacherSubjects.find(
+    (s) => s.subjectId === selectedSubjectId,
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar hidden />
       <Stack.Screen options={{ headerShown: false }} />
-      
+
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
         <TouchableOpacity onPress={() => router.back()} className="p-2">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-lg">
+        <Text
+          style={{ fontFamily: "Poppins-Bold" }}
+          className="text-black text-lg"
+        >
           Tạo khóa học mới
         </Text>
         <View className="w-10" />
       </View>
 
-      <ScrollView className="flex-1 px-6 py-4" contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView
+        className="flex-1 px-6 py-4"
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
         {fetchingSubjects ? (
           <View className="items-center py-20">
             <ActivityIndicator size="large" color="#136ADA" />
-            <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 mt-4 text-center">
+            <Text
+              style={{ fontFamily: "Poppins-Medium" }}
+              className="text-gray-400 mt-4 text-center"
+            >
               Đang tải danh sách môn học...
             </Text>
           </View>
@@ -112,7 +135,10 @@ export default function CreateCourseScreen() {
           <View className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
             {/* Input: Course Name */}
             <View className="mb-4">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">
+              <Text
+                style={{ fontFamily: "Poppins-Medium" }}
+                className="text-gray-700 text-sm mb-1.5 ml-1"
+              >
                 Tên khóa học <Text className="text-red-500">*</Text>
               </Text>
               <TextInput
@@ -127,15 +153,27 @@ export default function CreateCourseScreen() {
 
             {/* Input: Subject Selection */}
             <View className="mb-4">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">
+              <Text
+                style={{ fontFamily: "Poppins-Medium" }}
+                className="text-gray-700 text-sm mb-1.5 ml-1"
+              >
                 Môn học <Text className="text-red-500">*</Text>
               </Text>
               <TouchableOpacity
                 onPress={() => setModalVisible(true)}
                 className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 flex-row justify-between items-center"
               >
-                <Text style={{ fontFamily: "Poppins-Regular" }} className={selectedSubject ? "text-black text-sm" : "text-gray-400 text-sm"}>
-                  {selectedSubject ? selectedSubject.subjectName : "Chọn môn học..."}
+                <Text
+                  style={{ fontFamily: "Poppins-Regular" }}
+                  className={
+                    selectedSubject
+                      ? "text-black text-sm"
+                      : "text-gray-400 text-sm"
+                  }
+                >
+                  {selectedSubject
+                    ? selectedSubject.subjectName
+                    : "Chọn môn học..."}
                 </Text>
                 <Ionicons name="chevron-down" size={18} color="#6b7280" />
               </TouchableOpacity>
@@ -143,7 +181,10 @@ export default function CreateCourseScreen() {
 
             {/* Input: Price */}
             <View className="mb-4">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">
+              <Text
+                style={{ fontFamily: "Poppins-Medium" }}
+                className="text-gray-700 text-sm mb-1.5 ml-1"
+              >
                 Học phí (VNĐ) <Text className="text-red-500">*</Text>
               </Text>
               <TextInput
@@ -159,7 +200,10 @@ export default function CreateCourseScreen() {
 
             {/* Input: Description */}
             <View className="mb-6">
-              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">
+              <Text
+                style={{ fontFamily: "Poppins-Medium" }}
+                className="text-gray-700 text-sm mb-1.5 ml-1"
+              >
                 Mô tả <Text className="text-red-500">*</Text>
               </Text>
               <TextInput
@@ -182,14 +226,28 @@ export default function CreateCourseScreen() {
               className={`rounded-2xl py-4 items-center flex-row justify-center ${
                 loading ? "bg-blue-300" : "bg-blue-600"
               }`}
-              style={{ shadowColor: "#2563EB", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 }}
+              style={{
+                shadowColor: "#2563EB",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 5,
+              }}
             >
               {loading ? (
                 <ActivityIndicator color="white" />
               ) : (
                 <>
-                  <Ionicons name="checkmark-circle-outline" size={20} color="white" className="mr-2" />
-                  <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-base ml-2">
+                  <Ionicons
+                    name="checkmark-circle-outline"
+                    size={20}
+                    color="white"
+                    className="mr-2"
+                  />
+                  <Text
+                    style={{ fontFamily: "Poppins-Bold" }}
+                    className="text-white text-base ml-2"
+                  >
                     Tạo khóa học
                   </Text>
                 </>
@@ -204,11 +262,18 @@ export default function CreateCourseScreen() {
         <View className="flex-1 bg-black/50 justify-end">
           <View className="bg-white rounded-t-3xl p-6 min-h-[50%]">
             <View className="flex-row justify-between items-center mb-4">
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-black">
+              <Text
+                style={{ fontFamily: "Poppins-Bold" }}
+                className="text-xl text-black"
+              >
                 Chọn môn học
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close-circle-outline" size={28} color="#6b7280" />
+                <Ionicons
+                  name="close-circle-outline"
+                  size={28}
+                  color="#6b7280"
+                />
               </TouchableOpacity>
             </View>
             <FlatList
@@ -221,15 +286,32 @@ export default function CreateCourseScreen() {
                     setModalVisible(false);
                   }}
                   className={`py-4 border-b border-gray-100 flex-row justify-between items-center ${
-                    selectedSubjectId === item.subjectId ? "bg-blue-50/50 px-2 rounded-xl border-b-0" : ""
+                    selectedSubjectId === item.subjectId
+                      ? "bg-blue-50/50 px-2 rounded-xl border-b-0"
+                      : ""
                   }`}
                 >
-                  <Text style={{ fontFamily: selectedSubjectId === item.subjectId ? "Poppins-Bold" : "Poppins-Regular" }} 
-                        className={selectedSubjectId === item.subjectId ? "text-blue-600" : "text-black"}>
+                  <Text
+                    style={{
+                      fontFamily:
+                        selectedSubjectId === item.subjectId
+                          ? "Poppins-Bold"
+                          : "Poppins-Regular",
+                    }}
+                    className={
+                      selectedSubjectId === item.subjectId
+                        ? "text-blue-600"
+                        : "text-black"
+                    }
+                  >
                     {item.subjectName}
                   </Text>
                   {selectedSubjectId === item.subjectId && (
-                    <Ionicons name="checkmark-circle" size={20} color="#2563EB" />
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20}
+                      color="#2563EB"
+                    />
                   )}
                 </TouchableOpacity>
               )}

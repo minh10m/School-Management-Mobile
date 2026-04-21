@@ -23,6 +23,7 @@ import { teacherService } from "../../../services/teacher.service";
 import { ScheduleDetailItem } from "../../../types/schedule";
 import { SubjectResponse } from "../../../types/subject";
 import { TeacherListItem } from "../../../types/teacher";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { getErrorMessage } from "../../../utils/error";
 
 const DAYS = ["T2", "T3", "T4", "T5", "T6", "T7"];
@@ -415,21 +416,12 @@ export default function AdminScheduleDetailScreen() {
                   </View>
                 </View>
               </View>
-
-              {/* Submit Button */}
-              <TouchableOpacity
-                className="bg-bright-blue rounded-[24px] py-5 items-center mt-6 shadow-xl shadow-blue-200"
-                onPress={handleAddPeriod}
-              >
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-white text-lg"
-                >
-                  Xác nhận Thêm
-                </Text>
-              </TouchableOpacity>
             </View>
           </ScrollView>
+          <FormActionButton
+            title="Xác nhận Thêm"
+            onPress={handleAddPeriod}
+          />
         </SafeAreaView>
 
         {/* Time Picker Modal Wrapper */}

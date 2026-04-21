@@ -45,8 +45,8 @@ export const courseService = {
    * Học sinh lấy danh sách khóa học đã đăng ký
    * (Giả sử endpoint này vẫn giữ nguyên hoặc cần cập nhật sau)
    */
-  getRegisteredCourses: async (): Promise<EnrolledCourseResponse[]> => {
-    const response = await apiClient.get<ApiResponse<EnrolledCourseResponse[]>>("/courses/registered");
+  getRegisteredCourses: async (params?: MyCourseFilterRequest): Promise<PagedResponse<CourseResponse>> => {
+    const response = await apiClient.get<ApiResponse<PagedResponse<CourseResponse>>>("/courses/registered", { params });
     return response.data.data;
   },
 

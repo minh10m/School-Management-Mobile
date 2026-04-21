@@ -188,18 +188,21 @@ export default function WeeklyAttendanceStatistics() {
             value={totals.present} 
             color="#10B981" 
             bg="bg-emerald-50" 
+            icon="checkmark-circle"
           />
           <SummaryCard 
             label="Vắng" 
             value={totals.absent} 
             color="#EF4444" 
             bg="bg-rose-50" 
+            icon="close-circle"
           />
           <SummaryCard 
             label="Muộn" 
             value={totals.late} 
             color="#F59E0B" 
             bg="bg-amber-50" 
+            icon="time"
           />
         </View>
 
@@ -234,13 +237,16 @@ export default function WeeklyAttendanceStatistics() {
   );
 }
 
-function SummaryCard({ label, value, color, bg }: any) {
+function SummaryCard({ label, value, color, bg, icon }: any) {
   return (
-    <View className={`flex-1 ${bg} p-4 rounded-3xl border border-white/50 shadow-sm`}>
-      <Text style={{ fontFamily: "Poppins-Bold", color }} className="text-lg">
+    <View className={`flex-1 ${bg} p-4 rounded-[32px] border border-white/50 shadow-sm shadow-gray-100`}>
+      <View className="w-10 h-10 bg-white rounded-full items-center justify-center mb-4 shadow-sm shadow-black/5">
+        <Ionicons name={icon} size={20} color={color} />
+      </View>
+      <Text style={{ fontFamily: "Poppins-Bold", color }} className="text-xl mb-0.5">
         {value}
       </Text>
-      <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-[10px] uppercase">
+      <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-[9px] uppercase tracking-wider">
         {label}
       </Text>
     </View>
@@ -263,19 +269,19 @@ function StudentRow({ student }: { student: WeeklyAttendanceResponse }) {
   }, [student.details]);
 
   return (
-    <View className="bg-white border border-gray-50 rounded-3xl p-4 mb-4 shadow-sm flex-row items-center">
-      <View className="w-10 h-10 bg-blue-50 rounded-2xl items-center justify-center mr-3">
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xs">
+    <View className="bg-white border border-gray-50 rounded-[32px] p-5 mb-5 shadow-sm shadow-gray-100 flex-row items-center">
+      <View className="w-12 h-12 bg-blue-50 rounded-2xl items-center justify-center mr-4 border border-white shadow-sm">
+        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-sm">
           {student.studentName.split(" ").at(-1)?.charAt(0)}
         </Text>
       </View>
       
       <View className="flex-1">
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-sm mb-1" numberOfLines={1}>
+        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#1E293B] text-sm mb-2" numberOfLines={1}>
           {student.studentName}
         </Text>
         
-        <View className="flex-row gap-x-3 mt-1">
+        <View className="flex-row gap-x-4">
           {DAYS_OF_WEEK.map((day, idx) => {
             const dayStatus = student.details.find(d => {
               const dDate = d.date ? new Date(d.date) : null;
@@ -283,27 +289,30 @@ function StudentRow({ student }: { student: WeeklyAttendanceResponse }) {
               return jsDay === idx;
             });
 
-            let dotColor = "bg-gray-100";
+            let dotColor = "#F1F5F9"; // Default bg-gray-100
             if (dayStatus) {
-              if (dayStatus.status === "Có mặt") dotColor = "bg-emerald-500";
-              else if (dayStatus.status === "Vắng mặt") dotColor = "bg-rose-500";
-              else if (dayStatus.status === "Đi trễ") dotColor = "bg-amber-500";
+              if (dayStatus.status === "Có mặt") dotColor = "#10B981"; // bg-emerald-500
+              else if (dayStatus.status === "Vắng mặt") dotColor = "#EF4444"; // bg-rose-500
+              else if (dayStatus.status === "Đi trễ") dotColor = "#F59E0B"; // bg-amber-500
             }
 
             return (
               <View key={day} className="items-center">
-                <View className={`w-4 h-4 rounded-full ${dotColor} shadow-sm`} />
-                <Text className="text-[8px] text-gray-400 mt-1" style={{ fontFamily: "Poppins-Medium" }}>{day}</Text>
+                <View 
+                  className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                  style={{ backgroundColor: dotColor }}
+                />
+                <Text className="text-[9px] text-gray-400 mt-1" style={{ fontFamily: "Poppins-Medium" }}>{day}</Text>
               </View>
             );
           })}
         </View>
       </View>
 
-      <View className="flex-row gap-x-2 pl-4 border-l border-gray-50">
-        <CountBadge value={counts.p} color="text-emerald-600" label="P" />
-        <CountBadge value={counts.a} color="text-rose-600" label="A" />
-        <CountBadge value={counts.l} color="text-amber-600" label="L" />
+      <View className="flex-row gap-x-3 pl-4 border-l border-gray-100">
+        <CountBadge value={counts.p} color="text-emerald-500" label="P" />
+        <CountBadge value={counts.a} color="text-rose-500" label="A" />
+        <CountBadge value={counts.l} color="text-amber-500" label="L" />
       </View>
     </View>
   );
@@ -311,11 +320,11 @@ function StudentRow({ student }: { student: WeeklyAttendanceResponse }) {
 
 function CountBadge({ value, color, label }: any) {
   return (
-    <View className="items-center min-w-[20px]">
-      <Text style={{ fontFamily: "Poppins-Bold" }} className={`text-[10px] ${color}`}>
+    <View className="items-center min-w-[24px]">
+      <Text style={{ fontFamily: "Poppins-Bold" }} className={`text-[11px] ${color}`}>
         {value}
       </Text>
-      <Text className="text-[7px] text-gray-300 uppercase">{label}</Text>
+      <Text className="text-[8px] text-gray-300 uppercase tracking-tighter" style={{ fontFamily: 'Poppins-Medium' }}>{label}</Text>
     </View>
   );
 }

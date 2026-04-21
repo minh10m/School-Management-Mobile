@@ -14,6 +14,7 @@ import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect } from "react";
 import { studentService } from "../../../services/student.service";
 import { StudentResponse } from "../../../types/student";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminStudentDetailScreen() {
@@ -232,61 +233,28 @@ export default function AdminStudentDetailScreen() {
               onChangeText={(t: string) => setForm({ ...form, birthday: t })}
               placeholder="2005-10-10"
             />
-
-            <TouchableOpacity
-              className="bg-bright-blue rounded-3xl py-4 items-center mt-4 shadow-md shadow-blue-200"
-              onPress={handleUpdate}
-              disabled={saving}
-            >
-              {saving ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-white text-base"
-                >
-                  Lưu thay đổi
-                </Text>
-              )}
-            </TouchableOpacity>
           </View>
         ) : (
-          <View className="mt-4">
+          <View className="py-6">
+            <InfoRow label="Họ và tên" value={student.fullName} icon="person-outline" />
             <InfoRow label="Email" value={student.email} icon="mail-outline" />
-            <InfoRow
-              label="Số điện thoại"
-              value={student.phoneNumber}
-              icon="call-outline"
-            />
-            <InfoRow
-              label="Địa chỉ"
-              value={student.address}
-              icon="location-outline"
-            />
+            <InfoRow label="Số điện thoại" value={student.phoneNumber} icon="call-outline" />
+            <InfoRow label="Địa chỉ" value={student.address} icon="location-outline" />
             <InfoRow
               label="Ngày sinh"
-              value={
-                student.birthday
-                  ? new Date(student.birthday).toLocaleDateString("vi-VN")
-                  : "Chưa cập nhật"
-              }
+              value={student.birthday ? student.birthday.split("T")[0] : ""}
               icon="calendar-outline"
-            />
-            <InfoRow
-              label="Năm học"
-              value={
-                student.classYearSub?.[0]?.schoolYear?.toString() || "2025-2026"
-              }
-              icon="time-outline"
-            />
-            <InfoRow
-              label="Mã người dùng"
-              value={student.userId}
-              icon="finger-print-outline"
             />
           </View>
         )}
-      </ScrollView>
-    </AdminPageWrapper>
-  );
+        </ScrollView>
+        {isEditing && (
+          <FormActionButton
+            title="Lưu thay đổi"
+            onPress={handleUpdate}
+            loading={saving}
+          />
+        )}
+      </AdminPageWrapper>
+    );
 }

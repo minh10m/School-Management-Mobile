@@ -45,27 +45,26 @@ export const assignmentService = {
    * Teacher creates a new assignment for a class.
    * POST /assignments
    * AuthN(login) + AuthZ(Teacher)
-   * 403: Teacher not authorized to teach this subject
-   * 404: Subject or Class not found
+   * Supports both JSON and FormData (for file uploads)
    */
-  createAssignment: async (payload: CreateAssignmentPayload): Promise<AssignmentResponse> => {
-    const response = await apiClient.post<AssignmentResponse>("/assignments", payload);
+  createAssignment: async (payload: CreateAssignmentPayload | FormData): Promise<AssignmentResponse> => {
+    const headers = payload instanceof FormData ? { "Content-Type": "multipart/form-data" } : {};
+    const response = await apiClient.post<AssignmentResponse>("/assignments", payload, { headers });
     return response.data;
   },
 
   // ─── TEACHER: UPDATE ──────────────────────────────────────────────────────────
   /**
    * Teacher updates assignment information (only creator can edit).
-   * Modifying classYearId is NOT allowed as assignments are fixed to a class.
    * PATCH /assignments/{id}
-   * AuthN(login) + AuthZ(Teacher)
-   * 403: User is not the teacher who created this assignment
+   * Supports both JSON and FormData
    */
   updateAssignment: async (
     id: string,
-    payload: UpdateAssignmentPayload
+    payload: UpdateAssignmentPayload | FormData
   ): Promise<AssignmentResponse> => {
-    const response = await apiClient.patch<AssignmentResponse>(`/assignments/${id}`, payload);
+    const headers = payload instanceof FormData ? { "Content-Type": "multipart/form-data" } : {};
+    const response = await apiClient.patch<AssignmentResponse>(`/assignments/${id}`, payload, { headers });
     return response.data;
   },
 

@@ -126,7 +126,7 @@ export default function AdminTeachersScreen() {
               </Text>
               <TouchableOpacity
                 onPress={() => setIsFilterVisible(false)}
-                className="bg-gray-100 p-2 rounded-full"
+                className="bg-white p-2 rounded-full border border-gray-100"
               >
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>

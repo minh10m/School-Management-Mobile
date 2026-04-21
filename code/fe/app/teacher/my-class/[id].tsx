@@ -26,7 +26,7 @@ export default function TeachingClassDetail() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = useCallback(async () => {
-    if (!id) return;
+    if (!id || id === "create-assignment") return;
     try {
       setLoading(true);
       const [classRes, studentsRes] = await Promise.all([
@@ -93,35 +93,49 @@ export default function TeachingClassDetail() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Hub Action Buttons */}
         <View className="px-5 py-6 flex-row gap-x-3">
-          <FeatureCard 
-            label="Bài tập" 
-            icon="document-text" 
-            color="#136ADA" 
-            bg="bg-blue-50"
-            onPress={() => router.push({
-              pathname: "/teacher/my-class/assignments",
-              params: { classId: id, subjectId: subjectId, subjectName: subjectName }
-            })}
+          <FeatureCard
+            label="Bài tập"
+            icon="document"
+            color="#2563EB"
+            bg="bg-[#EFF6FF]"
+            onPress={() =>
+              router.push({
+                pathname: "/teacher/my-class/assignments",
+                params: {
+                  classId: id,
+                  subjectId: subjectId,
+                  subjectName: subjectName,
+                },
+              } as any)
+            }
           />
-          <FeatureCard 
-            label="Điểm số" 
-            icon="stats-chart" 
-            color="#10B981" 
-            bg="bg-emerald-50"
-            onPress={() => router.push({
-              pathname: "/teacher/my-class/grades",
-              params: { classId: id, subjectId: subjectId, subjectName: subjectName }
-            })}
+          <FeatureCard
+            label="Điểm số"
+            icon="bar-chart"
+            color="#059669"
+            bg="bg-[#ECFDF5]"
+            onPress={() =>
+              router.push({
+                pathname: "/teacher/my-class/grades",
+                params: {
+                  classId: id,
+                  subjectId: subjectId,
+                  subjectName: subjectName,
+                },
+              } as any)
+            }
           />
-          <FeatureCard 
-            label="Nhập nhanh" 
-            icon="flash" 
-            color="#A855F7" 
-            bg="bg-purple-50"
-            onPress={() => router.push({
-              pathname: "/teacher/my-class/batch-entry",
-              params: { classId: id, subjectId: subjectId }
-            })}
+          <FeatureCard
+            label="Nhập nhanh"
+            icon="flash"
+            color="#7C3AED"
+            bg="bg-[#F5F3FF]"
+            onPress={() =>
+              router.push({
+                pathname: "/teacher/my-class/batch-entry",
+                params: { classId: id, subjectId: subjectId },
+              } as any)
+            }
           />
         </View>
 
@@ -162,18 +176,23 @@ export default function TeachingClassDetail() {
 
 function FeatureCard({ label, icon, color, bg, onPress }: any) {
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      className={`flex-1 ${bg} p-5 rounded-3xl border border-white/50 shadow-sm`}
+      className={`flex-1 ${bg} p-5 rounded-[32px] border border-white items-start justify-between min-h-[140px] shadow-sm shadow-gray-200/50`}
     >
-      <View className="w-10 h-10 rounded-2xl bg-white/80 items-center justify-center mb-4">
-        <Ionicons name={icon as any} size={20} color={color} />
+      <View className="w-12 h-12 rounded-full bg-white items-center justify-center shadow-sm shadow-gray-100">
+        <Ionicons name={icon as any} size={22} color={color} />
       </View>
-      <Text style={{ fontFamily: 'Poppins-Bold', color }} className="text-sm">
-        {label}
-      </Text>
-      <Ionicons name="chevron-forward" size={12} color={color} style={{ position: 'absolute', right: 20, bottom: 24 }} />
+      <View className="w-full flex-row items-end justify-between mt-4">
+        <Text
+          style={{ fontFamily: "Poppins-Bold", color, fontSize: 15 }}
+          className="flex-1 leading-tight"
+        >
+          {label}
+        </Text>
+        <Ionicons name="chevron-forward" size={18} color={color} />
+      </View>
     </TouchableOpacity>
   );
 }

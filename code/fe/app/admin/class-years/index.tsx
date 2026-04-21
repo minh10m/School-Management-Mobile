@@ -93,15 +93,15 @@ export default function AdminClassYearsScreen() {
         <View className="flex-row items-center gap-2">
            <TouchableOpacity 
              onPress={() => router.push('/admin/class-years/promote')}
-             className="bg-indigo-50 px-3 py-2 rounded-xl border border-indigo-100"
+             className="bg-indigo-500 w-10 h-10 rounded-2xl items-center justify-center shadow-lg shadow-indigo-100"
            >
-             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-indigo-600 text-[10px]">Lên lớp</Text>
+             <Ionicons name="trending-up" size={20} color="white" />
            </TouchableOpacity>
            <TouchableOpacity 
              onPress={() => router.push("/admin/class-years/create" as any)}
-             className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100"
+             className="bg-[#136ADA] w-10 h-10 rounded-2xl items-center justify-center shadow-lg shadow-blue-200"
            >
-             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#136ADA] text-xs">Thêm mới</Text>
+             <Ionicons name="add" size={24} color="white" />
            </TouchableOpacity>
         </View>
       }
@@ -112,7 +112,6 @@ export default function AdminClassYearsScreen() {
         onFilterPress: openFilter,
       }}
     >
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Advanced Filter Bottom Sheet */}
       <Modal visible={isFilterVisible} animationType="slide" transparent={true} onRequestClose={() => setIsFilterVisible(false)}>
@@ -120,7 +119,10 @@ export default function AdminClassYearsScreen() {
           <View className="bg-white rounded-t-[40px] px-8 py-10 shadow-2xl">
             <View className="flex-row justify-between items-center mb-10">
               <Text style={{ fontFamily: "Poppins-Bold" }} className="text-3xl text-black">Bộ lọc</Text>
-              <TouchableOpacity onPress={() => setIsFilterVisible(false)} className="bg-gray-100 p-2 rounded-full">
+              <TouchableOpacity
+                onPress={() => setIsFilterVisible(false)}
+                className="bg-white p-2 rounded-full border border-gray-100"
+              >
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
             </View>

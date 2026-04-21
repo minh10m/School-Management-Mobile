@@ -137,6 +137,37 @@ export const lessonAssignmentService = {
   createLessonAssignment: async (
     payload: CreateLessonAssignmentPayload
   ): Promise<LessonAssignmentResponse> => {
+    // If a file is provided, use FormData
+    if (payload.file) {
+      const formData = new FormData();
+      formData.append("title", payload.title);
+      formData.append("lessonId", payload.lessonId);
+      formData.append("orderIndex", payload.orderIndex.toString());
+      
+      if (payload.fileTitle) {
+        formData.append("fileTitle", payload.fileTitle);
+      }
+
+      // In React Native, the file object for FormData needs uri, name, and type
+      formData.append("file", {
+        uri: payload.file.uri,
+        name: payload.file.name,
+        type: payload.file.type || "application/octet-stream",
+      } as any);
+
+      const response = await apiClient.post<ApiResponse<LessonAssignmentResponse>>(
+        "/lesson-assignments",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data.data;
+    }
+
+    // Fallback to JSON if no file is selected (for backward compatibility if allowed by backend)
     const response = await apiClient.post<ApiResponse<LessonAssignmentResponse>>(
       "/lesson-assignments",
       payload

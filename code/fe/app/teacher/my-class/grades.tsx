@@ -72,9 +72,7 @@ export default function ClassGrades() {
             {subjectName} • Năm học {schoolYear} • Học kỳ {currentTerm}
           </Text>
         </View>
-        <View className="bg-emerald-50 px-3 py-1 rounded-full">
-            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-emerald-600 text-[10px]">Đang mở</Text>
-        </View>
+        <View className="w-10" />
       </View>
 
       <View className="px-6 py-4 bg-gray-50/50 flex-row items-center gap-4">

@@ -162,6 +162,13 @@ export default function HomeScreen() {
       color: "bg-indigo-100",
       iconColor: "#4F46E5",
     },
+    {
+      id: "9",
+      title: "Khóa của tôi",
+      icon: "bookmark-outline",
+      color: "bg-purple-100",
+      iconColor: "#A855F7",
+    },
   ];
 
   return (
@@ -220,6 +227,8 @@ export default function HomeScreen() {
                     router.push("/(tabs)/attendance" as any);
                   } else if (item.title === "Khóa học") {
                     router.push("/student/courses" as any);
+                  } else if (item.title === "Khóa của tôi") {
+                    router.push("/student/courses/registered" as any);
                   }
                 }}
               >

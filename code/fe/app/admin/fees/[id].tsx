@@ -9,7 +9,7 @@ import { SCHOOL_YEAR } from "../../../constants/config";
 
 export default function AdminFeeDetailScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, feeData } = useLocalSearchParams<{ id: string, feeData?: string }>();
   
   const [fee, setFee] = useState<FeeResponse | null>(null);
   const [details, setDetails] = useState<FeeDetailResponse[]>([]);
@@ -17,23 +17,27 @@ export default function AdminFeeDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
 
+  useEffect(() => {
+    if (feeData) {
+      try {
+        setFee(JSON.parse(feeData as string));
+      } catch (e) {}
+    }
+  }, [feeData]);
+
   const fetchData = useCallback(async () => {
     if (!id) return;
     try {
       if (!refreshing) setLoading(true);
       
-      const [feeRes, detailRes] = await Promise.all([
-        feeService.getFeeById(id),
-        feeService.getAllFeeDetails({
-            feeId: id,
-            schoolYear: parseInt(SCHOOL_YEAR, 10),
-            pageNumber: 1,
-            pageSize: 100,
-            studentName: search || undefined
-        })
-      ]);
+      const detailRes = await feeService.getAllFeeDetails({
+          feeId: id,
+          schoolYear: parseInt(SCHOOL_YEAR, 10),
+          pageNumber: 1,
+          pageSize: 100,
+          studentName: search || undefined
+      });
 
-      setFee(feeRes);
       setDetails(detailRes.items);
     } catch (err) {
       console.error(err);
