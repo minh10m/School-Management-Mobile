@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { classYearService } from "../../../services/classYear.service";
 import { teacherService } from "../../../services/teacher.service";
 import { studentService } from "../../../services/student.service";
@@ -23,6 +23,7 @@ import { CreateResultRequest } from "../../../types/result";
 import { SCHOOL_YEAR } from "../../../constants/config";
 import { StatusBar } from "expo-status-bar";
 import { useConfigStore } from "../../../store/configStore";
+import { getErrorMessage } from "../../../utils/error";
 
 export default function BatchResultEntryScreen() {
   const params = useLocalSearchParams();
@@ -40,11 +41,10 @@ export default function BatchResultEntryScreen() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
     (params.subjectId as string) || null,
   );
-  const [selectedType, setSelectedType] = useState("Thường xuyên");
-  const inputRefs = useRef<Record<string, any>>({});
+  const [selectedType, setSelectedType] = useState("Miệng");
   const scoreTypes = [
-    { label: "Thường xuyên", weight: 1 },
-    { label: "15p", weight: 1 },
+    { label: "Miệng", weight: 1 },
+    { label: "15 phút", weight: 1 },
     { label: "Giữa kì", weight: 2 },
     { label: "Cuối kì", weight: 3 },
   ];
@@ -114,10 +114,7 @@ export default function BatchResultEntryScreen() {
     setScores((p) => ({ ...p, [sid]: v.replace(/[^0-9.]/g, "") }));
   };
 
-  const focusNext = (idx: number) => {
-    if (idx < students.length - 1)
-      inputRefs.current[students[idx + 1].studentId]?.focus();
-  };
+
 
   const handleSave = async () => {
     if (!selectedClassId || !selectedSubjectId) return;
@@ -144,7 +141,7 @@ export default function BatchResultEntryScreen() {
       });
       setScores(s);
     } catch (e) {
-      Alert.alert("Lỗi", "Lưu thất bại.");
+      Alert.alert("Lỗi", getErrorMessage(e));
     } finally {
       setSubmitting(false);
     }
@@ -153,7 +150,6 @@ export default function BatchResultEntryScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar hidden />
-      <Stack.Screen options={{ headerShown: false }} />
       <View
         style={{ paddingTop: 20, paddingBottom: 15 }}
         className="flex-row items-center justify-between px-8 bg-white"
@@ -315,9 +311,6 @@ export default function BatchResultEntryScreen() {
                         </View>
                         <View className="relative">
                           <TextInput
-                            ref={(el) => {
-                              inputRefs.current[st.studentId] = el;
-                            }}
                             value={sc}
                             onChangeText={(v) =>
                               handleScoreChange(st.studentId, v)
@@ -325,11 +318,6 @@ export default function BatchResultEntryScreen() {
                             placeholder="---"
                             placeholderTextColor="#CBD5E1"
                             keyboardType="numeric"
-                            returnKeyType={
-                              i === students.length - 1 ? "done" : "next"
-                            }
-                            onSubmitEditing={() => focusNext(i)}
-                            blurOnSubmit={i === students.length - 1}
                             className={`w-16 h-14 rounded-[22px] text-center text-xl shadow-sm ${inv ? "text-rose-600 bg-rose-50" : fill ? "text-blue-600 bg-blue-50/30" : "text-gray-400 bg-gray-50"}`}
                             style={{ fontFamily: "Poppins-Bold" }}
                           />

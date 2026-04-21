@@ -156,7 +156,6 @@ export default function ClassAssignments() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar hidden />
-      <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
       <View className="flex-row items-center px-6 py-4 border-b border-gray-50">
@@ -308,15 +307,6 @@ function AssignmentRow({ item, onDelete }: any) {
           </Text>
         </View>
         
-        <View className="bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100/30 flex-row items-center">
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-blue-600 text-[10px]"
-          >
-            {item.submissionCount || 0} bài nộp
-          </Text>
-          <Ionicons name="chevron-forward" size={10} color="#2563EB" className="ml-1" />
-        </View>
       </View>
     </TouchableOpacity>
   );

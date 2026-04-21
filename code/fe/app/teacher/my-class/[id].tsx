@@ -125,18 +125,6 @@ export default function TeachingClassDetail() {
               } as any)
             }
           />
-          <FeatureCard
-            label="Nhập nhanh"
-            icon="flash"
-            color="#7C3AED"
-            bg="bg-[#F5F3FF]"
-            onPress={() =>
-              router.push({
-                pathname: "/teacher/my-class/batch-entry",
-                params: { classId: id, subjectId: subjectId },
-              } as any)
-            }
-          />
         </View>
 
         <View className="bg-white rounded-t-[40px] pt-8 min-h-[500px]">
