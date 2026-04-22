@@ -10,6 +10,10 @@ import {
   Modal,
   TextInput,
   Linking,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -80,6 +84,7 @@ export default function AssignmentSubmissions() {
     }
 
     try {
+      Keyboard.dismiss();
       setSubmitting(true);
       await submissionService.scoreSubmission(selectedSubmission.submissionId, score);
       Alert.alert("Thành công", "Đã chấm điểm bài nộp");
@@ -166,59 +171,72 @@ export default function AssignmentSubmissions() {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-[40px] p-8">
-            <View className="flex-row justify-between items-center mb-8">
-              <View>
-                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl">
-                  Chấm điểm bài nộp
-                </Text>
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-xs">
-                  Học sinh: {selectedSubmission?.studentName}
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#94A3B8" />
-              </TouchableOpacity>
-            </View>
-
-            <View className="mb-10">
-              <Text
-                style={{ fontFamily: "Poppins-SemiBold" }}
-                className="text-gray-400 text-[10px] uppercase mb-3 ml-1"
-              >
-                Nhập điểm (Thang điểm 10)
-              </Text>
-              <TextInput
-                value={scoreValue}
-                onChangeText={setScoreValue}
-                placeholder="VD: 8.5"
-                keyboardType="numeric"
-                className="bg-gray-50 p-5 rounded-[24px] text-gray-800 text-2xl text-center"
-                style={{ fontFamily: "Poppins-Bold" }}
-                autoFocus
-              />
-            </View>
-
-            <TouchableOpacity
-              onPress={handleScoreSubmit}
-              disabled={submitting}
-              className="bg-blue-600 py-5 rounded-[24px] items-center shadow-lg shadow-blue-200"
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="flex-1"
+          >
+            <TouchableOpacity 
+              activeOpacity={1} 
+              onPress={() => setModalVisible(false)}
+              className="flex-1 bg-black/50 justify-end"
             >
-              {submitting ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-white text-base"
-                >
-                  Xác nhận chấm điểm
-                </Text>
-              )}
+              <TouchableWithoutFeedback>
+                <View className="bg-white rounded-t-[40px] p-8 pb-12">
+                  <View className="flex-row justify-between items-center mb-8">
+                    <View>
+                      <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl">
+                        Chấm điểm bài nộp
+                      </Text>
+                      <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-xs">
+                        Học sinh: {selectedSubmission?.studentName}
+                      </Text>
+                    </View>
+                    <TouchableOpacity onPress={() => setModalVisible(false)}>
+                      <Ionicons name="close" size={24} color="#94A3B8" />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View className="mb-10">
+                    <Text
+                      style={{ fontFamily: "Poppins-SemiBold" }}
+                      className="text-gray-400 text-[10px] uppercase mb-3 ml-1"
+                    >
+                      Nhập điểm (Thang điểm 10)
+                    </Text>
+                    <TextInput
+                      value={scoreValue}
+                      onChangeText={setScoreValue}
+                      placeholder="VD: 8.5"
+                      keyboardType="numeric"
+                      className="bg-gray-50 p-5 rounded-[24px] text-gray-800 text-2xl text-center"
+                      style={{ fontFamily: "Poppins-Bold" }}
+                      autoFocus
+                      onSubmitEditing={handleScoreSubmit}
+                    />
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={handleScoreSubmit}
+                    disabled={submitting}
+                    className="bg-blue-600 py-5 rounded-[24px] items-center shadow-lg shadow-blue-200"
+                  >
+                    {submitting ? (
+                      <ActivityIndicator color="white" />
+                    ) : (
+                      <Text
+                        style={{ fontFamily: "Poppins-Bold" }}
+                        className="text-white text-base"
+                      >
+                        Xác nhận chấm điểm
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </TouchableWithoutFeedback>
             </TouchableOpacity>
-            <View className="h-6" />
-          </View>
-        </View>
+          </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
       </Modal>
     </SafeAreaView>
   );
