@@ -5,6 +5,7 @@
         public Guid AssignmentId { get; set; }
         public string? Title { get; set; }
         public string? FileUrl { get; set; }
+        public string Description { get; set; } = string.Empty;
         public string? FileTitle { get; set; }
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset FinishTime { get; set; }

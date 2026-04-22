@@ -9,6 +9,7 @@ namespace School_Management.API.Repositories
         public Task<(SubmissionResponse? data, string? message)> GetSubmissionById(Guid submissionId);
         public Task<(SubmissionResponse? data, string? message)> GetSubmissionOfAssignmentForStudent(SubmissionStudentRequest request, Guid userId);
         public Task<(SubmissionResponse? data, string? message)> ScoreSubmission(ScoreSubmissionRequest request, Guid submissionId, Guid userId);
+        public Task<(SubmissionResponse? data, string message)> UpdateSubmission(SubmissionUpdateRequest request, Guid submissionId);
 
     }
 }

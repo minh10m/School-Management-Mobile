@@ -6,6 +6,7 @@
         public string Title { get; set; } = string.Empty;
         public string FileTitle { get; set; } = string.Empty;
         public string FileUrl { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public Guid LessonId { get; set; }
         public string LessonName { get; set; } = string.Empty;
         public int OrderIndex { get; set; }

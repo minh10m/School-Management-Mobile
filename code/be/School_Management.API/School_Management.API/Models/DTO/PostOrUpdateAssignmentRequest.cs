@@ -12,6 +12,11 @@ namespace School_Management.API.Models.DTO
         public string? FileTitle { get; set; }
         [Required(ErrorMessage = "Thời gian bắt đầu là bắt buộc")]
         public DateTimeOffset StartTime { get; set; }
+
+        [Required(ErrorMessage = "Mô tả bài tập là bắt buộc")]
+        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Mô tả bài tập không được phép chứa khoảng trắng")]
+        public string Description { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Thời gian kết thúc là bắt buộc")]
         public DateTimeOffset FinishTime { get; set; }
         [Required(ErrorMessage = "Mã môn học là bắt buộc")]
