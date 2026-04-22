@@ -16,9 +16,10 @@ import { classYearService } from "../../../services/classYear.service";
 import { attendanceService } from "../../../services/attendance.service";
 import { ClassYearResponse } from "../../../types/classYear";
 import { ClassAttendanceItem } from "../../../types/attendance";
-import { SCHOOL_YEAR } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 
 export default function MyHomeroomClass() {
+  const { schoolYear } = useConfigStore();
   const [homeroom, setHomeroom] = useState<ClassYearResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -27,7 +28,7 @@ export default function MyHomeroomClass() {
     try {
       setLoading(true);
       const hr = await classYearService
-        .getHomeroomClass(Number(SCHOOL_YEAR))
+        .getHomeroomClass(schoolYear)
         .catch(() => null);
       setHomeroom(hr);
     } catch (error) {

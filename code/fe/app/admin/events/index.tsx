@@ -16,10 +16,11 @@ import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { eventService } from "../../../services/event.service";
 import { EventItem } from "../../../types/event";
-import { SCHOOL_YEAR, TERM } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 
 export default function AdminEventsScreen() {
   const router = useRouter();
+  const { schoolYear, term } = useConfigStore();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -27,18 +28,16 @@ export default function AdminEventsScreen() {
 
   // Applied Filters
   const [search, setSearch] = useState("");
-  const [selectedTerm, setSelectedTerm] = useState<number>(1);
-  const [selectedYear, setSelectedYear] = useState<number>(
-    parseInt(SCHOOL_YEAR, 10),
-  );
+  const [selectedTerm, setSelectedTerm] = useState<number>(term);
+  const [selectedYear, setSelectedYear] = useState<number>(schoolYear);
   const [activeTab, setActiveTab] = useState<
     "All" | "Upcoming" | "Ongoing" | "Finished"
   >("All");
 
   // Local Modal States
   const [tempSearch, setTempSearch] = useState("");
-  const [tempTerm, setTempTerm] = useState(1);
-  const [tempYear, setTempYear] = useState(parseInt(SCHOOL_YEAR, 10));
+  const [tempTerm, setTempTerm] = useState(term);
+  const [tempYear, setTempYear] = useState(schoolYear);
 
   const fetchEvents = useCallback(async () => {
     try {
@@ -82,11 +81,11 @@ export default function AdminEventsScreen() {
 
   const resetFilters = () => {
     setTempSearch("");
-    setTempTerm(1);
-    setTempYear(parseInt(SCHOOL_YEAR, 10));
+    setTempTerm(term);
+    setTempYear(schoolYear);
     setSearch("");
-    setSelectedTerm(1);
-    setSelectedYear(parseInt(SCHOOL_YEAR, 10));
+    setSelectedTerm(term);
+    setSelectedYear(schoolYear);
     setIsFilterVisible(false);
   };
 

@@ -15,12 +15,13 @@ import SideMenu from "@/components/SideMenu";
 import { assignmentService } from "../../services/assignment.service";
 import { eventService } from "../../services/event.service";
 import { classYearService } from "../../services/classYear.service";
-import { SCHOOL_YEAR } from "../../constants/config";
+import { useConfigStore } from "../../store/configStore";
 import { useAuthStore } from "../../store/authStore";
 import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
 
 export default function HomeScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);
+  const { schoolYear, term } = useConfigStore();
   const { userInfo } = useAuthStore();
   const firstName = userInfo?.fullName?.split(" ").at(-1) ?? "Học sinh";
 
@@ -37,7 +38,7 @@ export default function HomeScreen() {
   const fetchEvents = async () => {
     try {
       setEventLoading(true);
-      const res = await eventService.getEvents({ SchoolYear: 2026, Term: 1 });
+      const res = await eventService.getEvents({ SchoolYear: schoolYear, Term: term });
       setEvents(res.items || []);
     } catch (err) {
       console.error("Error fetching events:", err);
@@ -52,7 +53,7 @@ export default function HomeScreen() {
       
       let params: any = {};
       try {
-        const myClass = await classYearService.getMyClass(parseInt(SCHOOL_YEAR, 10));
+        const myClass = await classYearService.getMyClass(schoolYear);
         if (myClass?.classYearId) {
           params.ClassYearId = myClass.classYearId;
         }

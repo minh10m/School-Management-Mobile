@@ -16,7 +16,7 @@ import { classYearService } from "../../../services/classYear.service";
 import { scheduleService } from "../../../services/schedule.service";
 import { ClassYearSummary } from "../../../types/classYear";
 import { TeacherScheduleDetailItem } from "../../../types/schedule";
-import { SCHOOL_YEAR, TERM } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 import { useAuthStore } from "../../../store/authStore";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 
@@ -29,6 +29,7 @@ const GRADE_OPTIONS = [
 
 export default function MyTeachingClasses() {
   const { userInfo } = useAuthStore();
+  const { schoolYear, term: storeTerm } = useConfigStore();
   const [teaching, setTeaching] = useState<ClassYearSummary[]>([]);
   const [scheduleItems, setScheduleItems] = useState<
     TeacherScheduleDetailItem[]
@@ -44,14 +45,14 @@ export default function MyTeachingClasses() {
       const [tgRes, schRes] = await Promise.all([
         classYearService
           .getTeachingClasses({
-            schoolYear: `${SCHOOL_YEAR}-${Number(SCHOOL_YEAR) + 1}`,
+            schoolYear: `${schoolYear}-${schoolYear + 1}`,
             pageSize: 100,
           })
           .catch(() => []),
         scheduleService
           .getMyTeachingSchedule({
-            Term: TERM,
-            SchoolYear: Number(SCHOOL_YEAR),
+            Term: storeTerm,
+            SchoolYear: schoolYear,
           })
           .catch(() => []),
       ]);

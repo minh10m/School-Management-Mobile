@@ -1,7 +1,7 @@
 import { assignmentService } from "@/services/assignment.service";
 import { studentService } from "@/services/student.service";
 import { classYearService } from "@/services/classYear.service";
-import { SCHOOL_YEAR } from "@/constants/config";
+import { useConfigStore } from "@/store/configStore";
 import { StudentAssignmentResponse } from "@/types/assignment";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
@@ -21,6 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const { width } = Dimensions.get("window");
 
 export default function StudentAssignmentListScreen() {
+  const { schoolYear } = useConfigStore();
   const [assignments, setAssignments] = useState<StudentAssignmentResponse[]>(
     [],
   );
@@ -34,7 +35,7 @@ export default function StudentAssignmentListScreen() {
       const params: any = {};
       try {
           // Fetch current class info for the student based on fixed school year
-          const myClass = await classYearService.getMyClass(parseInt(SCHOOL_YEAR, 10));
+          const myClass = await classYearService.getMyClass(schoolYear);
           if (myClass?.classYearId) {
               params.ClassYearId = myClass.classYearId;
           }

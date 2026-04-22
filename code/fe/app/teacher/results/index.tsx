@@ -19,10 +19,11 @@ import { useAuthStore } from "../../../store/authStore";
 import { ClassYearSummary } from "../../../types/classYear";
 import { TeacherSubject } from "../../../types/teacher";
 import { StudentResultForTeacherResponse } from "../../../types/result";
-import { SCHOOL_YEAR } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 
 export default function TeacherResults() {
   const { userInfo } = useAuthStore();
+  const { schoolYear } = useConfigStore();
   const [classes, setClasses] = useState<ClassYearSummary[]>([]);
   const [subjects, setSubjects] = useState<TeacherSubject[]>([]);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
@@ -92,7 +93,7 @@ export default function TeacherResults() {
 
       // Fetch teaching classes and subjects in parallel
       const [teachingClasses, teacherSubjects] = await Promise.all([
-        classYearService.getTeachingClasses({ schoolYear: SCHOOL_YEAR }),
+        classYearService.getTeachingClasses({ schoolYear: schoolYear.toString() }),
         teacherService.getTeacherSubjects(currentTeacherId),
       ]);
 
@@ -111,7 +112,7 @@ export default function TeacherResults() {
       } else {
         console.warn(
           "[AGENT] No teaching classes found for this teacher in",
-          SCHOOL_YEAR,
+          schoolYear,
         );
       }
     } catch (error) {
@@ -233,7 +234,7 @@ export default function TeacherResults() {
             className="text-gray-400 text-xs mb-1"
             style={{ fontFamily: "Poppins-Medium" }}
           >
-            Học kỳ {term} • {SCHOOL_YEAR} - {parseInt(SCHOOL_YEAR, 10) + 1}
+            Học kỳ {term} • {schoolYear} - {schoolYear + 1}
           </Text>
           <Text
             className="text-black text-2xl"

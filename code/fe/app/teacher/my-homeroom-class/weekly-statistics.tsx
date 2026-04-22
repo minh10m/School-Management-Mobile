@@ -15,11 +15,12 @@ import { StatusBar } from "expo-status-bar";
 import { attendanceService } from "../../../services/attendance.service";
 import { classYearService } from "../../../services/classYear.service";
 import { WeeklyAttendanceResponse } from "../../../types/attendance";
-import { SCHOOL_YEAR } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 
 const DAYS_OF_WEEK = ["T2", "T3", "T4", "T5", "T6"];
 
 export default function WeeklyAttendanceStatistics() {
+  const { schoolYear } = useConfigStore();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [homeroom, setHomeroom] = useState<any>(null);
@@ -38,7 +39,7 @@ export default function WeeklyAttendanceStatistics() {
   const fetchInitialData = async () => {
     try {
       setLoading(true);
-      const hr = await classYearService.getHomeroomClass(Number(SCHOOL_YEAR.split("-")[0]));
+      const hr = await classYearService.getHomeroomClass(schoolYear);
       setHomeroom(hr);
       if (hr) {
         await fetchWeeklyStats(hr.classYearId, startDate);

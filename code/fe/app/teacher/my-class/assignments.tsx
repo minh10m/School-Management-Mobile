@@ -18,7 +18,6 @@ import { router, useLocalSearchParams, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { assignmentService } from "../../../services/assignment.service";
 import { TeacherAssignmentListResponse } from "../../../types/assignment";
-import { SCHOOL_YEAR, TERM } from "../../../constants/config";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function ClassAssignments() {

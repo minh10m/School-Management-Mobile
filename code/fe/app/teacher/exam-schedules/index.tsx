@@ -15,7 +15,7 @@ import { router, Stack } from "expo-router";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { examScheduleService } from "../../../services/examSchedule.service";
 import { MyExamScheduleDetailResponse } from "../../../types/examSchedule";
-import { SCHOOL_YEAR } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 import { StatusBar } from "expo-status-bar";
 
 export default function TeacherExamScheduleScreen() {
@@ -29,7 +29,7 @@ export default function TeacherExamScheduleScreen() {
   const [term, setTerm] = useState(1);
   const [showTypeModal, setShowTypeModal] = useState(false);
   const [showTermModal, setShowTermModal] = useState(false);
-  const sy = useMemo(() => Number(SCHOOL_YEAR.split("-")[0]), []);
+  const { schoolYear } = useConfigStore();
 
   const fetchData = useCallback(async () => {
     try {
@@ -37,7 +37,7 @@ export default function TeacherExamScheduleScreen() {
       const data = await examScheduleService.getMyExamSchedule({
         type: type,
         term: term,
-        schoolYear: sy,
+        schoolYear: schoolYear,
       });
       setSchedules(data);
     } catch (error) {
@@ -46,7 +46,7 @@ export default function TeacherExamScheduleScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [type, term, sy]);
+  }, [type, term, schoolYear]);
 
   useEffect(() => {
     fetchData();
