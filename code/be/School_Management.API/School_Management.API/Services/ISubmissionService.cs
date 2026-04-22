@@ -9,5 +9,6 @@ namespace School_Management.API.Services
         public Task<SubmissionResponse> GetSubmissionById(Guid submissionId);
         public Task<SubmissionResponse> GetSubmissionOfAssignmentForStudent(SubmissionStudentRequest request, Guid userId);
         public Task<SubmissionResponse> ScoreSubmission(ScoreSubmissionRequest request, Guid submissionId, Guid userId);
+        public Task<SubmissionResponse> UpdateSubmission(SubmissionUpdateRequest request, Guid submissionId);
     }
 }

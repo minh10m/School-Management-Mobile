@@ -11,11 +11,13 @@ namespace School_Management.API.Repositories
     {
         private readonly ApplicationDbContext context;
         private readonly Cloudinary cloudinary;
+        private readonly ILogger<SubmissionRepository> logger;
 
-        public SubmissionRepository(ApplicationDbContext context, Cloudinary cloudinary)
+        public SubmissionRepository(ApplicationDbContext context, Cloudinary cloudinary, ILogger<SubmissionRepository> logger)
         {
             this.context = context;
             this.cloudinary = cloudinary;
+            this.logger = logger;
         }
         public async Task<(SubmissionResponse? data, string? message)> CreateSubmission(SubmissionRequest request, Guid userId)
         {
@@ -224,6 +226,85 @@ namespace School_Management.API.Repositories
             };
 
             return (result, "SUCCESS");
+        }
+
+        public async Task<(SubmissionResponse? data, string message)> UpdateSubmission(SubmissionUpdateRequest request, Guid submissionId)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var submission = await context.Submission.FirstOrDefaultAsync(x => x.Id == submissionId);
+                if (submission == null) return (null, "NOT_FOUND_SUBMISSION");
+
+                if (submission.Status == "Đã chấm") return (null, "SUBMISSION_HAS_SCORE");
+                var oldPublicId = submission.PublicId;
+
+                string fileUrl = "Không có dữ liệu";
+                string? fileTitle = request.FileTitle?.ToString().Trim() ?? null;
+                string publicId = "Không có dữ liệu";
+                var longMaxSize = 20 * 1024 * 1024;
+                if (request.File.Length > longMaxSize) return (null, "BIGGER_THAN_MAXSIZE");
+                if (request.File != null && request.File?.Length > 0)
+                {
+                    using var stream = request.File.OpenReadStream();
+                    var uploadParams = new RawUploadParams
+                    {
+                        File = new FileDescription(request.File.FileName, stream),
+                        Folder = "submissions",
+                        PublicId = Guid.NewGuid().ToString(),
+                        Type = "upload",
+                        AccessMode = "public"
+                    };
+                    var resultParams = await cloudinary.UploadAsync(uploadParams);
+                    if (resultParams.Error != null) return (null, "UPLOAD_FAILED");
+
+                    fileUrl = resultParams.SecureUrl.ToString();
+                    if (fileTitle == null) fileTitle = request.File.FileName.ToString();
+                    publicId = resultParams.PublicId;
+                }
+
+                submission.FileUrl = fileUrl;
+                submission.FileTitle = fileTitle;
+                submission.PublicId = publicId;
+                submission.TimeSubmit = DateTime.UtcNow;
+
+                var studentName = await context.Student.Where(x => x.Id == submission.StudentId).Select(g => g.User.FullName).FirstOrDefaultAsync();
+
+                await context.SaveChangesAsync();
+
+                if (!string.IsNullOrEmpty(oldPublicId))
+                {
+                    var destroyParams = new DeletionParams(oldPublicId)
+                    {
+                        ResourceType = ResourceType.Raw
+                    };
+                    var deleteResults = await cloudinary.DestroyAsync(destroyParams);
+                    if (deleteResults.Result != "ok") logger.LogError("CANNOT DELETE FILE IN CLOUDINARY");
+                }
+
+
+                await transaction.CommitAsync();
+                var result = new SubmissionResponse
+                {
+                    AssignmentId = submission.AssignmentId,
+                    Score = submission.Score,
+                    Status = submission.Status,
+                    StudentId = submission.StudentId,
+                    SubmissionId = submission.Id,
+                    TimeSubmit = submission.TimeSubmit,
+                    FileTitle = submission.FileTitle,
+                    FileUrl = submission.FileUrl,
+                    StudentName = studentName ?? "Không có dữ liệu"
+                };
+
+                return (result, "SUCCESS");
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            
         }
     }
 }

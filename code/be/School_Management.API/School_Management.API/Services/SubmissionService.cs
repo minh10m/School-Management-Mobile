@@ -75,5 +75,19 @@ namespace School_Management.API.Services
                 _ => throw new Exception("Lỗi không xác định")
             };
         }
+
+        public async Task<SubmissionResponse> UpdateSubmission(SubmissionUpdateRequest request, Guid submissionId)
+        {
+            var (result, message) = await submissionRepository.UpdateSubmission(request, submissionId);
+            return message switch
+            {
+                "NOT_FOUND_SUBMISSION" => throw new NotFoundException("Không tìm thấy bài nộp ban đầu"),
+                "SUBMISSION_HAS_SCORE" => throw new ForbiddenException("Bài nộp đã được chấm, không thể cập nhật"),
+                "BIGGER_THAN_MAXSIZE" => throw new BadRequestException("Dung lượng tối đa của file là 20MB"),
+                "UPLOAD_FAILED" => throw new BadRequestException("Upload file thất bại"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
     }
 }
