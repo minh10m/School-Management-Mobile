@@ -45,6 +45,16 @@ namespace School_Management.API.Middlewares
             {
                 var errorId = Guid.NewGuid();
 
+                if(ex.Message.Contains("too large"))
+                {
+                    httpContext.Response.StatusCode = 413;
+                    httpContext.Response.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(new
+                    {
+                        message = "File bạn gửi vượt quá giới hạn cho phép của máy chủ (Tối đa 20MB)."
+                    });
+                }
+               
                 //Log error
                 logger.LogError(ex, $"{errorId} : {ex.Message}");
 

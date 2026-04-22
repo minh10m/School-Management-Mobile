@@ -14,6 +14,8 @@ using Microsoft.OpenApi.Models;
 using School_Management.API.ErrorMessageConfiguration;
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,8 +60,21 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+//Clean Expired Payment Automatically
+builder.Services.AddHostedService<PaymentCleanUpService>();
+
 //Cloudinary
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100MB
+});
 
 var account = new Account(
     cloudinaryConfig["CloudName"],
