@@ -16,7 +16,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { submissionService } from "../../../../services/submission.service";
+import { assignmentService } from "../../../../services/assignment.service";
 import { SubmissionResponse } from "../../../../types/submission";
+import { AssignmentResponse } from "../../../../types/assignment";
 import { getErrorMessage } from "../../../../utils/error";
 
 export default function AssignmentSubmissions() {
@@ -25,16 +27,21 @@ export default function AssignmentSubmissions() {
   const [submitting, setSubmitting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [submissions, setSubmissions] = useState<SubmissionResponse[]>([]);
+  const [assignment, setAssignment] = useState<AssignmentResponse | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!assignmentId) return;
     try {
       setLoading(true);
-      const data = await submissionService.getSubmissions({ 
-        AssignmentId: assignmentId as string,
-        PageSize: 100 
-      });
-      setSubmissions(data);
+      const [submissionsData, assignmentData] = await Promise.all([
+        submissionService.getSubmissions({ 
+          AssignmentId: assignmentId as string,
+          PageSize: 100 
+        }),
+        assignmentService.getAssignmentById(assignmentId as string)
+      ]);
+      setSubmissions(submissionsData);
+      setAssignment(assignmentData);
     } catch (error) {
       console.error("Error fetching submissions:", error);
       Alert.alert("Lỗi", "Không thể tải danh sách bài nộp");
@@ -124,26 +131,30 @@ export default function AssignmentSubmissions() {
       >
         {loading && !refreshing ? (
           <ActivityIndicator size="large" color="#136ADA" className="mt-20" />
-        ) : (Array.isArray(submissions) && submissions.length > 0) ? (
-          submissions.map((item) => (
-            <SubmissionCard 
-              key={item.submissionId} 
-              item={item} 
-              onSaveScore={(score: string) => handleUpdateScore(item.submissionId, score)}
-              onViewFile={() => handleOpenLink(item.fileUrl)}
-              submitting={submitting}
-            />
-          ))
         ) : (
-          <View className="py-20 items-center">
-            <Ionicons name="cloud-upload-outline" size={64} color="#E5E7EB" />
-            <Text
-              style={{ fontFamily: "Poppins-Medium" }}
-              className="text-gray-400 mt-4"
-            >
-              Chưa có học sinh nào nộp bài
-            </Text>
-          </View>
+          <>
+            {(Array.isArray(submissions) && submissions.length > 0) ? (
+              submissions.map((item) => (
+                <SubmissionCard 
+                  key={item.submissionId} 
+                  item={item} 
+                  onSaveScore={(score: string) => handleUpdateScore(item.submissionId, score)}
+                  onViewFile={() => handleOpenLink(item.fileUrl)}
+                  submitting={submitting}
+                />
+              ))
+            ) : (
+              <View className="py-20 items-center">
+                <Ionicons name="cloud-upload-outline" size={64} color="#E5E7EB" />
+                <Text
+                  style={{ fontFamily: "Poppins-Medium" }}
+                  className="text-gray-400 mt-4"
+                >
+                  Chưa có học sinh nào nộp bài
+                </Text>
+              </View>
+            )}
+          </>
         )}
         <View className="h-10" />
       </ScrollView>

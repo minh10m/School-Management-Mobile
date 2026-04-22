@@ -237,7 +237,7 @@ export default function ClassAssignments() {
   );
 }
 
-function AssignmentRow({ item, onDelete }: any) {
+function AssignmentRow({ item, onDelete }: { item: TeacherAssignmentListResponse; onDelete: () => void }) {
   const endDate = new Date(item.finishTime);
   const now = new Date();
   const isExpired = endDate < now;
@@ -257,27 +257,16 @@ function AssignmentRow({ item, onDelete }: any) {
           >
             {item.title}
           </Text>
-          {item.description && (
+          <View className="flex-row items-center mt-1">
+            <Ionicons name="reader-outline" size={12} color="#94A3B8" />
             <Text
-              style={{ fontFamily: "Poppins-Regular" }}
-              className="text-gray-400 text-[11px] mt-1"
+              style={{ fontFamily: "Poppins-Medium" }}
+              className="text-gray-400 text-[10px] ml-1.5 flex-1"
               numberOfLines={2}
             >
               {item.description}
             </Text>
-          )}
-          {item.fileUrl && (
-            <View className="flex-row items-center mt-3 bg-blue-50/50 self-start px-3 py-1.5 rounded-xl border border-blue-100/20">
-              <Ionicons name="document-attach-outline" size={12} color="#1D4ED8" />
-              <Text
-                style={{ fontFamily: "Poppins-Medium" }}
-                className="text-[#1D4ED8] text-[9px] ml-1.5"
-                numberOfLines={1}
-              >
-                {item.fileTitle || "Tài liệu đính kèm"}
-              </Text>
-            </View>
-          )}
+          </View>
         </View>
         <TouchableOpacity
           onPress={(e) => {

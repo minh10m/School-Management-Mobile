@@ -3,6 +3,7 @@
 export interface TeacherAssignmentListResponse {
   assignmentId: string;
   title: string;
+  description: string;
   fileTitle: string | null;
   fileUrl: string | null;
   startTime: string; // ISO datetime
@@ -22,7 +23,8 @@ export interface AssignmentResponse {
   subjectName: string;
   classYearId: string;
   className: string;
-  description?: string; // Mô tả chi tiết (nếu có)
+  subjectId: string;
+  description: string; // Mô tả chi tiết
 }
 
 export interface StudentAssignmentResponse {
@@ -57,7 +59,7 @@ export interface CreateAssignmentPayload {
   finishTime: string; // ISO datetime
   subjectId: string;
   classYearId: string;
-  description?: string; // Mô tả chi tiết (nếu có)
+  description: string; // Mô tả chi tiết
 }
 
 /**

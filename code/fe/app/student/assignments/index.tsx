@@ -212,6 +212,13 @@ export default function StudentAssignmentListScreen() {
                       >
                         {item.title}
                       </Text>
+                      <Text
+                        className="text-gray-400 text-[11px] mt-1 mb-2"
+                        style={{ fontFamily: "Poppins-Regular" }}
+                        numberOfLines={1}
+                      >
+                        {item.description}
+                      </Text>
                     </View>
 
                     <View
