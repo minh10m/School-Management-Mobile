@@ -80,6 +80,7 @@ namespace School_Management.API.Repositories
                 TeacherSubjectId = teacherSubject.TeacherSubjectId,
                 Title = request.Title?.Trim(),
                 PublicId = publicId,
+                Description = request.Description,
                 ClassYearId = request.ClassYearId,
                 FileTitle = fileTitle ?? "Không có dữ liệu",
                 FileUrl = fileUrl ?? "Không có dữ liệu"
@@ -97,6 +98,7 @@ namespace School_Management.API.Repositories
                 ClassYearId = assignment.ClassYearId,
                 FileUrl = assignment.FileUrl,
                 Title = assignment.Title,
+                Description = assignment.Description,
                 FinishTime = assignment.FinishTime,
                 TeacherName = teacher.User.FullName,
                 SubjectName = teacherSubject.Subject.SubjectName
@@ -144,6 +146,7 @@ namespace School_Management.API.Repositories
                                                 AssignmentId = x.Id,
                                                 StartTime = x.StartTime,
                                                 FileTitle = x.FileTitle,
+                                                Description = x.Description,
                                                 FileUrl = x.FileUrl,
                                                 FinishTime = x.FinishTime,
                                                 Title = x.Title
@@ -169,6 +172,7 @@ namespace School_Management.API.Repositories
                                                          ClassYearId = assignment.ClassYearId,
                                                          FileTitle = assignment.FileTitle,
                                                          FileUrl = assignment.FileUrl,
+                                                         Description = assignment.Description,
                                                          FinishTime = assignment.FinishTime.ToOffset(vnOffset),
                                                          StartTime = assignment.StartTime.ToOffset(vnOffset),
                                                          SubjectName = assignment.TeacherSubject.Subject.SubjectName,
@@ -198,6 +202,7 @@ namespace School_Management.API.Repositories
                 FileTitle = x.FileTitle,
                 FileUrl = x.FileUrl,
                 FinishTime = x.FinishTime,
+                Description = x.Description,
                 ClassName = x.ClassYear.ClassName,
                 ClassYearId = x.ClassYearId,
                 SubjectName = x.TeacherSubject.Subject.SubjectName,

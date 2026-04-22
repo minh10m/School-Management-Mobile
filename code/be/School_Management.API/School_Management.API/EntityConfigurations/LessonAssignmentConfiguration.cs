@@ -14,6 +14,7 @@ namespace School_Management.API.EntityConfigurations
             builder.Property(x => x.FileUrl).IsRequired().HasMaxLength(300);
             builder.Property(x => x.LessonId).IsRequired();
             builder.Property(x => x.OrderIndex).IsRequired();
+            builder.Property(x => x.Description).IsRequired().HasMaxLength(1000);
 
             builder.HasIndex(x => new { x.LessonId, x.Title }).IsUnique();
             builder.ToTable(x => x.HasCheckConstraint("CK_OrderIndex_CourseAssignment", "\"OrderIndex\" > 0"));

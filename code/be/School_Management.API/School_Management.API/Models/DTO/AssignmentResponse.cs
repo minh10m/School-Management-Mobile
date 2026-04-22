@@ -6,6 +6,7 @@
         public string? Title { get; set; } 
         public string? FileUrl { get; set; }
         public string? FileTitle { get; set; }
+        public string Description { get; set; } = string.Empty;
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset FinishTime { get; set; }
         public Guid TeacherSubjectId { get; set; }
