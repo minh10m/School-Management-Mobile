@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,9 +8,10 @@ import {
   RefreshControl,
   TextInput,
 } from "react-native";
+import { WebView } from "react-native-webview";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams, Stack } from "expo-router";
+import { router, useLocalSearchParams, Stack, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { resultService } from "../../../services/result.service";
 import { StudentResultForTeacherResponse } from "../../../types/result";
@@ -61,9 +62,11 @@ export default function ClassGrades() {
     }
   }, [classId, subjectId, currentTerm]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -77,26 +80,75 @@ export default function ClassGrades() {
   // ─── Summary stats ─────────────────────────────────────────────────────────
   const summary = useMemo(() => {
     const total = studentResults.length;
-    const withGrades = studentResults.filter((r) =>
-      r.subjectResults?.some(
-        (s: any) => s.subjectId === subjectId && s.average !== undefined,
-      ),
-    ).length;
-    const averages = studentResults
-      .map(
-        (r) =>
-          r.subjectResults?.find((s: any) => s.subjectId === subjectId)
-            ?.average,
-      )
-      .filter((a): a is number => a !== undefined);
-    const classAvg =
-      averages.length > 0
+    const stats = {
+      xuatSac: 0,
+      gioi: 0,
+      kha: 0,
+      trungBinh: 0,
+      yeu: 0,
+      chuaNhap: 0,
+    };
+
+    const averages = studentResults.map((r) => {
+      const avg = r.subjectResults?.find((s: any) => s.subjectId === subjectId)?.averageSubject;
+      
+      if (avg === undefined) stats.chuaNhap++;
+      else if (avg >= 9) stats.xuatSac++;
+      else if (avg >= 8) stats.gioi++;
+      else if (avg >= 6.5) stats.kha++;
+      else if (avg >= 5) stats.trungBinh++;
+      else stats.yeu++;
+      
+      return avg;
+    }).filter((a): a is number => a !== undefined);
+
+    const classAvg = averages.length > 0
         ? averages.reduce((a, b) => a + b, 0) / averages.length
         : undefined;
-    return { total, withGrades, classAvg };
+
+    return { total, stats, classAvg };
   }, [studentResults, subjectId]);
 
-  const avgColor = getGradeColor(summary.classAvg);
+  const pieChartHtml = useMemo(() => {
+    const s = summary.stats;
+    const total = summary.total || 1;
+    const data = [
+      { v: s.xuatSac, c: '#10B981' }, // Emerald
+      { v: s.gioi, c: '#136ADA' },    // Blue
+      { v: s.kha, c: '#6366F1' },     // Indigo
+      { v: s.trungBinh, c: '#F59E0B' },// Amber
+      { v: s.yeu, c: '#EF4444' },     // Red
+      { v: s.chuaNhap, c: '#E5E7EB' } // Gray
+    ];
+    
+    let offset = 0;
+    const circles = data.map(d => {
+      const percent = (d.v / total) * 100;
+      if (percent === 0) return '';
+      const dashArray = `${percent} 100`;
+      const dashOffset = -offset;
+      offset += percent;
+      return `<circle r="16" cx="16" cy="16" stroke="${d.c}" stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}" />`;
+    }).join('');
+
+    return `
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <style>
+            body { margin: 0; display: flex; justify-content: center; align-items: center; background: transparent; }
+            svg { transform: rotate(-90deg); border-radius: 50%; }
+            circle { fill: transparent; stroke-width: 32; }
+          </style>
+        </head>
+        <body>
+          <svg width="100" height="100" viewBox="0 0 32 32">
+            ${circles}
+          </svg>
+        </body>
+      </html>
+    `;
+  }, [summary]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -135,6 +187,30 @@ export default function ClassGrades() {
           />
         }
       >
+        {/* Statistics Section */}
+        <View className="px-6 py-4">
+          <View className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm shadow-blue-50/50 flex-row items-center">
+            {/* Pie Chart using WebView SVG */}
+            <View className="w-32 h-32 mr-6">
+              <WebView
+                originWhitelist={['*']}
+                scrollEnabled={false}
+                style={{ backgroundColor: 'transparent' }}
+                source={{ html: pieChartHtml }}
+              />
+            </View>
+
+            {/* Legend */}
+            <View className="flex-1 gap-y-1">
+              <LegendItem color="bg-emerald-500" label="Xuất sắc" count={summary.stats.xuatSac} />
+              <LegendItem color="bg-blue-600" label="Giỏi" count={summary.stats.gioi} />
+              <LegendItem color="bg-indigo-500" label="Khá" count={summary.stats.kha} />
+              <LegendItem color="bg-amber-500" label="Trung bình" count={summary.stats.trungBinh} />
+              <LegendItem color="bg-red-500" label="Yếu" count={summary.stats.yeu} />
+              <LegendItem color="bg-gray-300" label="Chưa chấm" count={summary.stats.chuaNhap} />
+            </View>
+          </View>
+        </View>
         {/* Search */}
         <View className="px-6 py-4 flex-row items-center gap-4">
           <View className="bg-gray-50 px-4 py-3 rounded-2xl flex-row items-center border border-gray-100 flex-1">
@@ -218,7 +294,7 @@ function StudentGradeRow({ item, classId, subjectId, term }: any) {
   const subjectResult = item.subjectResults?.find(
     (s: any) => s.subjectId === subjectId,
   );
-  const average: number | undefined = subjectResult?.average;
+  const average: number | undefined = subjectResult?.averageSubject;
   const gradeColor = getGradeColor(average);
   const initial = item.studentName.split(" ").at(-1)?.[0]?.toUpperCase() ?? "?";
 
@@ -277,12 +353,6 @@ function StudentGradeRow({ item, classId, subjectId, term }: any) {
           >
             {average.toFixed(1)}
           </Text>
-          <Text
-            style={{ fontFamily: "Poppins-Medium" }}
-            className={`text-[9px] text-center ${gradeColor.text} opacity-80`}
-          >
-            {gradeColor.label}
-          </Text>
         </View>
       )}
 
@@ -291,5 +361,17 @@ function StudentGradeRow({ item, classId, subjectId, term }: any) {
         <Ionicons name="create-outline" size={16} color="#136ADA" />
       </View>
     </TouchableOpacity>
+  );
+}
+
+function LegendItem({ color, label, count }: { color: string; label: string; count: number }) {
+  return (
+    <View className="flex-row items-center justify-between">
+      <View className="flex-row items-center">
+        <View className={`w-2 h-2 rounded-full ${color} mr-2`} />
+        <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-[10px]">{label}</Text>
+      </View>
+      <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-[10px]">{count}</Text>
+    </View>
   );
 }

@@ -10,9 +10,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useAuthStore } from "../../store/authStore";
 import { useConfigStore } from "../../store/configStore";
 import SideMenu from "../../components/SideMenu";
@@ -76,9 +76,11 @@ export default function TeacherDashboard() {
     }
   }, [schoolYear, term]);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchDashboardData();
+    }, [fetchDashboardData])
+  );
 
   const fetchAttendanceStats = useCallback(async (classYearId: string) => {
     try {
@@ -111,11 +113,13 @@ export default function TeacherDashboard() {
     }
   }, []);
 
-  useEffect(() => {
-    if (homeroomClass?.classYearId) {
-      fetchAttendanceStats(homeroomClass.classYearId);
-    }
-  }, [homeroomClass, fetchAttendanceStats]);
+  useFocusEffect(
+    useCallback(() => {
+      if (homeroomClass?.classYearId) {
+        fetchAttendanceStats(homeroomClass.classYearId);
+      }
+    }, [homeroomClass, fetchAttendanceStats])
+  );
 
   const TEACHER_STATS = [
     {

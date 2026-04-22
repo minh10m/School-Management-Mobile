@@ -167,7 +167,7 @@ export default function TeacherResults() {
       results.forEach((s) => {
         if (s.subjectResults && Array.isArray(s.subjectResults)) {
           s.subjectResults.forEach((sub) => {
-            totalScore += sub.average;
+            totalScore += sub.averageSubject;
             scoreCount++;
           });
         }
@@ -384,7 +384,7 @@ export default function TeacherResults() {
                             (r) => r.subjectId === sub.id,
                           )
                         : null;
-                      const avg = subjectResult?.average || 0;
+                      const avg = subjectResult?.averageSubject || 0;
                       return (
                         <TouchableOpacity
                           key={sub.id}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams, Stack } from "expo-router";
+import { router, useLocalSearchParams, Stack, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { assignmentService } from "../../../../services/assignment.service";
 import { AssignmentResponse } from "../../../../types/assignment";
@@ -34,9 +34,11 @@ export default function AssignmentDetailPage() {
     }
   }, [id]);
 
-  useEffect(() => {
-    fetchDetail();
-  }, [fetchDetail]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchDetail();
+    }, [fetchDetail])
+  );
 
   const handleOpenFile = async (url: string | null) => {
     if (!url) return;

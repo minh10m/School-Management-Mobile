@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, TextInput, Modal, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { useState, useEffect, useMemo } from 'react';
+import { useLocalSearchParams, router, Stack, useFocusEffect } from 'expo-router';
+import { useState, useCallback, useMemo } from 'react';
 import { resultService } from '../../services/result.service';
 import { StudentResultSubject, CreateResultRequest, UpdateResultPayload } from '../../types/result';
 import { useConfigStore } from '../../store/configStore';
@@ -59,9 +59,11 @@ export default function ManageStudentResult() {
 
   // ─── Lifecycle & Data Fetching ──────────────────────────────────────────────
 
-  useEffect(() => {
-    fetchData();
-  }, [studentId, classYearId, subjectId, term]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [studentId, classYearId, subjectId, term])
+  );
 
   /**
    * Fetches detailed results for a specific student, class, and term.
