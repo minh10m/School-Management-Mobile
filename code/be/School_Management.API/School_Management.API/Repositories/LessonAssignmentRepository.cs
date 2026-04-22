@@ -74,6 +74,7 @@ namespace School_Management.API.Repositories
                     LessonId = request.LessonId,
                     OrderIndex = request.OrderIndex,
                     PublicId = publicId,
+                    Description = request.Description,
                     Title = request.Title
                 };
 
@@ -86,6 +87,7 @@ namespace School_Management.API.Repositories
                     Id = lessonAssignment.Id,
                     FileTitle = lessonAssignment.FileTitle,
                     FileUrl = lessonAssignment.FileUrl,
+                    Description = lessonAssignment.Description,
                     LessonId = lessonAssignment.LessonId,
                     LessonName = lesson.LessonName,
                     OrderIndex = lessonAssignment.OrderIndex,
@@ -119,6 +121,7 @@ namespace School_Management.API.Repositories
                                             Id = lessonAssignment.Id,
                                             FileTitle = lessonAssignment.FileTitle,
                                             FileUrl = lessonAssignment.FileUrl,
+                                            Description = lessonAssignment.Description,
                                             LessonId = lessonAssignment.LessonId,
                                             LessonName = lesson.LessonName,
                                             OrderIndex = lessonAssignment.OrderIndex,
@@ -146,6 +149,7 @@ namespace School_Management.API.Repositories
                 FileUrl = lessonAssignment.FileUrl,
                 LessonId = lessonAssignment.LessonId,
                 LessonName = lessonAssignment.Lesson.LessonName,
+                Description = lessonAssignment.Description,
                 OrderIndex = lessonAssignment.OrderIndex,
                 Title = lessonAssignment.Title
             };
@@ -178,6 +182,7 @@ namespace School_Management.API.Repositories
                 lessonAssignment.FileTitle = request.FileTitle ?? "Không có dữ liệu";
                 lessonAssignment.FileUrl = request.FileUrl ?? "Không có dữ liệu";
                 lessonAssignment.OrderIndex = request.OrderIndex;
+                lessonAssignment.Description = request.Description;
                 lessonAssignment.Title = request.Title;
 
                 await context.SaveChangesAsync();
@@ -190,6 +195,7 @@ namespace School_Management.API.Repositories
                     FileUrl = lessonAssignment.FileUrl,
                     LessonId = lessonAssignment.LessonId,
                     LessonName = lessonAssignment.Lesson.LessonName,
+                    Description = lessonAssignment.Description,
                     OrderIndex = lessonAssignment.OrderIndex,
                     Title = lessonAssignment.Title
                 };
