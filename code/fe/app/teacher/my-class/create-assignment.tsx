@@ -40,7 +40,13 @@ export default function CreateAssignmentPage() {
         copyToCacheDirectory: true,
       });
 
-      if (!result.canceled) {
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const asset = result.assets[0];
+        // Validate file size (20MB)
+        if (asset.size && asset.size > 20 * 1024 * 1024) {
+          Alert.alert("Lỗi", "File quá lớn. Vui lòng chọn file dưới 20MB.");
+          return;
+        }
         setFile(result);
       }
     } catch (error) {
