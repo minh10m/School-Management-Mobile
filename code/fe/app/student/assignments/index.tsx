@@ -4,9 +4,9 @@ import { classYearService } from "@/services/classYear.service";
 import { useConfigStore } from "@/store/configStore";
 import { StudentAssignmentResponse } from "@/types/assignment";
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, router } from "expo-router";
+import { Stack, router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -56,9 +56,11 @@ export default function StudentAssignmentListScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchAssignments();
-  }, [fetchAssignments]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAssignments();
+    }, [fetchAssignments])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);

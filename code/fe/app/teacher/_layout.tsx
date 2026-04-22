@@ -1,4 +1,9 @@
-import { Stack, router } from "expo-router";
+import {
+  Stack,
+  router,
+  useSegments,
+  useRootNavigationState,
+} from "expo-router";
 import { View, ActivityIndicator } from "react-native";
 import { useAuthStore } from "../../store/authStore";
 import { useEffect } from "react";
@@ -6,14 +11,17 @@ import { useEffect } from "react";
 export default function TeacherLayout() {
   const userInfo = useAuthStore((state) => (state as any).userInfo);
   const isLoading = useAuthStore((state) => (state as any).isLoading);
+  const navigationState = useRootNavigationState();
 
   useEffect(() => {
+    if (!navigationState?.key) return;
     if (!isLoading && !userInfo) {
       router.replace("/login");
     }
-  }, [userInfo, isLoading]);
+  }, [userInfo, isLoading, navigationState?.key]);
 
-  if (isLoading || !userInfo) {
+  // Navigation chưa ready hoặc đang load
+  if (!navigationState?.key || isLoading || !userInfo) {
     return (
       <View
         style={{
@@ -54,7 +62,6 @@ export default function TeacherLayout() {
       <Stack.Screen name="my-class/index" />
       <Stack.Screen name="my-class/[id]" />
       <Stack.Screen name="my-homeroom-class/index" />
-
       <Stack.Screen name="schedules/index" />
       <Stack.Screen name="my-class/assignments" />
       <Stack.Screen name="my-class/assignments/[id]" />

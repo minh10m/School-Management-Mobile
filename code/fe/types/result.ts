@@ -25,7 +25,7 @@ export interface StudentResultSubject {
   subjectId: string;
   subjectName: string;
   detailResults: DetailResult[];
-  average: number; // Đã đổi từ averageSubject sang average để khớp BE
+  averageSubject: number;
 }
 
 /** Wrapper cho kết quả của một học sinh (Report) */
@@ -40,12 +40,14 @@ export interface StudentResultForTeacherResponse {
   studentId: string;
   studentName: string;
   subjectResults: SubjectResult[];
+  average?: number;
+  rating?: string;
 }
 
 export interface SubjectResult {
   subjectId: string;
   subjectName: string;
-  average: number;
+  averageSubject: number;
 }
 
 // ─── Query Params ──────────────────────────────────────────────────────────────

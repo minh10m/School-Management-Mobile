@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { lessonService } from "../../../services/lesson.service";
 import { LessonResponse } from "../../../types/lesson";
 
@@ -38,9 +38,11 @@ export default function TeacherLessons() {
     }
   }, [courseId]);
 
-  useEffect(() => {
-    fetchLessons();
-  }, [fetchLessons]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchLessons();
+    }, [fetchLessons])
+  );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);

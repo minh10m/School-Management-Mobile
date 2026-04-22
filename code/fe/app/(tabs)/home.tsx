@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useState, useCallback } from "react";
 import {
   FlatList,
   ScrollView,
@@ -30,10 +30,12 @@ export default function HomeScreen() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [assignmentLoading, setAssignmentLoading] = useState(false);
 
-  useEffect(() => {
-    fetchEvents();
-    fetchAssignments();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchEvents();
+      fetchAssignments();
+    }, [schoolYear, term])
+  );
 
   const fetchEvents = async () => {
     try {
