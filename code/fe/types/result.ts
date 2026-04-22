@@ -40,6 +40,8 @@ export interface StudentResultForTeacherResponse {
   studentId: string;
   studentName: string;
   subjectResults: SubjectResult[];
+  average?: number;
+  rating?: string;
 }
 
 export interface SubjectResult {
