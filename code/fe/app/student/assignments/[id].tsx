@@ -84,6 +84,13 @@ export default function StudentAssignmentDetailScreen() {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
+        
+        // Validate file size (20MB)
+        if (asset.size && asset.size > 20 * 1024 * 1024) {
+          Alert.alert("Lỗi", "File quá lớn. Vui lòng chọn file dưới 20MB.");
+          return;
+        }
+
         setFileAsset(asset);
         setFileTitle(asset.name);
       }
@@ -462,7 +469,7 @@ export default function StudentAssignmentDetailScreen() {
                       className="text-gray-400 text-xs"
                       style={{ fontFamily: "Poppins-Regular" }}
                     >
-                      PDF, Image, Word (Max 10MB)
+                      PDF, Image, Word (Max 20MB)
                     </Text>
                   </View>
                 )}

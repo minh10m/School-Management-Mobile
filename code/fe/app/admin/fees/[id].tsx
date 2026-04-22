@@ -5,10 +5,11 @@ import { AdminPageWrapper } from '../../../components/ui/AdminPageWrapper';
 import { useState, useEffect, useCallback } from 'react';
 import { feeService } from "../../../services/fee.service";
 import { FeeResponse, FeeDetailResponse } from "../../../types/fee";
-import { SCHOOL_YEAR } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 
 export default function AdminFeeDetailScreen() {
   const router = useRouter();
+  const { schoolYear } = useConfigStore();
   const { id, feeData } = useLocalSearchParams<{ id: string, feeData?: string }>();
   
   const [fee, setFee] = useState<FeeResponse | null>(null);
@@ -32,7 +33,7 @@ export default function AdminFeeDetailScreen() {
       
       const detailRes = await feeService.getAllFeeDetails({
           feeId: id,
-          schoolYear: parseInt(SCHOOL_YEAR, 10),
+          schoolYear: schoolYear,
           pageNumber: 1,
           pageSize: 100,
           studentName: search || undefined

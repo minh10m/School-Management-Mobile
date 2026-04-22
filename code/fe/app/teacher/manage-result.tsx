@@ -1,11 +1,11 @@
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, TextInput, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, TextInput, Modal, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { useState, useEffect, useMemo } from 'react';
 import { resultService } from '../../services/result.service';
 import { StudentResultSubject, CreateResultRequest, UpdateResultPayload } from '../../types/result';
-import { SCHOOL_YEAR } from '../../constants/config';
+import { useConfigStore } from '../../store/configStore';
 import { getErrorMessage } from '../../utils/error';
 
 type ResultGroupKey = 'MIENG' | '15P' | 'GK' | 'CK' | 'OTHER';
@@ -46,6 +46,7 @@ const GROUP_META: Record<ResultGroupKey, { title: string; icon: string; iconBg: 
 
 export default function ManageStudentResult() {
   const { studentId, studentName, classYearId, subjectId, term } = useLocalSearchParams();
+  const { schoolYear } = useConfigStore();
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<StudentResultSubject | null>(null);
   
@@ -106,13 +107,14 @@ export default function ManageStudentResult() {
     }
 
     try {
+      Keyboard.dismiss();
       setLoading(true);
       const commonPayload = {
         type: formType,
         value: Number(formValue),
         weight: Number(formWeight),
         term: Number(term),
-        schoolYear: Number(SCHOOL_YEAR)
+        schoolYear: schoolYear
       };
 
       if (editingResult && editingResult.resultId) {
@@ -325,72 +327,90 @@ export default function ManageStudentResult() {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setModalVisible(false);
+          setEditingResult(null);
+        }}
       >
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-[40px] p-8">
-            <View className="flex-row justify-between items-center mb-6">
-              <TouchableOpacity onPress={() => {
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="flex-1"
+          >
+            <TouchableOpacity 
+              activeOpacity={1} 
+              onPress={() => {
                 setModalVisible(false);
                 setEditingResult(null);
-              }}>
-                <Ionicons name="close" size={24} color="#999" />
-              </TouchableOpacity>
-            </View>
-
-            <View className="mb-6">
-                 <Text className="text-gray-800 text-xl" style={{ fontFamily: 'Poppins-Bold' }}>
-                   {editingResult ? 'Cập nhật điểm' : 'Nhập điểm mới'}
-                 </Text>
-            </View>
-
-            {!editingResult && (
-              <View className="mb-6">
-                   <Text className="text-gray-400 text-xs mb-2 uppercase" style={{ fontFamily: 'Poppins-SemiBold' }}>Loại điểm</Text>
-                   <View className="flex-row gap-2">
-                      {scoreTypes.map(st => (
-                          <TouchableOpacity 
-                              key={st.label}
-                              onPress={() => {
-                                  setFormType(st.label);
-                                  setFormWeight(st.weight.toString());
-                              }}
-                              className={`flex-1 py-3 rounded-2xl border ${formType === st.label ? 'bg-blue-50 border-blue-400' : 'bg-gray-50 border-transparent'}`}
-                          >
-                              <Text className={`text-center text-[10px] ${formType === st.label ? 'text-blue-600' : 'text-gray-500'}`} style={{ fontFamily: 'Poppins-Bold' }}>{st.label}</Text>
-                          </TouchableOpacity>
-                      ))}
-                   </View>
-              </View>
-            )}
-
-            <View className="mb-8">
-                 <Text className="text-gray-400 text-xs mb-2 uppercase" style={{ fontFamily: 'Poppins-SemiBold' }}>Điểm số (0 - 10)</Text>
-                 <TextInput 
-                    className="bg-gray-50 rounded-2xl px-5 py-4 text-lg text-gray-800"
-                    placeholder="Nhập số..."
-                    keyboardType="numeric"
-                    value={formValue}
-                    onChangeText={setFormValue}
-                    style={{ fontFamily: 'Poppins-Bold' }}
-                 />
-            </View>
-
-            <TouchableOpacity 
-                onPress={handleSave}
-                disabled={loading}
-                className="bg-blue-600 py-4 rounded-2xl items-center shadow-lg shadow-blue-200"
+              }}
+              className="flex-1 bg-black/50 justify-end"
             >
-                {loading ? (
-                    <ActivityIndicator color="white" />
-                ) : (
-                    <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>
-                      {editingResult ? 'Cập nhật điểm số' : 'Lưu điểm số'}
+              <TouchableWithoutFeedback>
+                <View className="bg-white rounded-t-[40px] p-8 pb-12">
+                  <View className="flex-row justify-between items-center mb-6">
+                    <Text className="text-gray-800 text-xl" style={{ fontFamily: 'Poppins-Bold' }}>
+                      {editingResult ? 'Cập nhật điểm' : 'Nhập điểm mới'}
                     </Text>
-                )}
+                    <TouchableOpacity onPress={() => {
+                      setModalVisible(false);
+                      setEditingResult(null);
+                    }}>
+                      <Ionicons name="close" size={24} color="#999" />
+                    </TouchableOpacity>
+                  </View>
+
+                  {!editingResult && (
+                    <View className="mb-6">
+                         <Text className="text-gray-400 text-xs mb-2 uppercase" style={{ fontFamily: 'Poppins-SemiBold' }}>Loại điểm</Text>
+                         <View className="flex-row gap-2">
+                            {scoreTypes.map(st => (
+                                <TouchableOpacity 
+                                    key={st.label}
+                                    onPress={() => {
+                                        setFormType(st.label);
+                                        setFormWeight(st.weight.toString());
+                                    }}
+                                    className={`flex-1 py-3 rounded-2xl border ${formType === st.label ? 'bg-blue-50 border-blue-400' : 'bg-gray-50 border-transparent'}`}
+                                >
+                                    <Text className={`text-center text-[10px] ${formType === st.label ? 'text-blue-600' : 'text-gray-500'}`} style={{ fontFamily: 'Poppins-Bold' }}>{st.label}</Text>
+                                </TouchableOpacity>
+                            ))}
+                         </View>
+                    </View>
+                  )}
+
+                  <View className="mb-8">
+                       <Text className="text-gray-400 text-xs mb-2 uppercase" style={{ fontFamily: 'Poppins-SemiBold' }}>Điểm số (0 - 10)</Text>
+                       <TextInput 
+                          className="bg-gray-50 rounded-2xl px-5 py-4 text-lg text-gray-800"
+                          placeholder="Nhập số..."
+                          keyboardType="numeric"
+                          value={formValue}
+                          onChangeText={setFormValue}
+                          style={{ fontFamily: 'Poppins-Bold' }}
+                          autoFocus
+                          onSubmitEditing={handleSave}
+                       />
+                  </View>
+
+                  <TouchableOpacity 
+                      onPress={handleSave}
+                      disabled={loading}
+                      className="bg-blue-600 py-4 rounded-2xl items-center shadow-lg shadow-blue-200"
+                  >
+                      {loading ? (
+                          <ActivityIndicator color="white" />
+                      ) : (
+                          <Text className="text-white text-base" style={{ fontFamily: 'Poppins-Bold' }}>
+                            {editingResult ? 'Cập nhật điểm số' : 'Lưu điểm số'}
+                          </Text>
+                      )}
+                  </TouchableOpacity>
+                </View>
+              </TouchableWithoutFeedback>
             </TouchableOpacity>
-          </View>
-        </View>
+          </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
       </Modal>
     </SafeAreaView>
   );

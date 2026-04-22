@@ -16,18 +16,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect, useCallback } from "react";
 import { examScheduleService } from "../../services/examSchedule.service";
 import { MyExamScheduleDetailResponse } from "../../types/examSchedule";
-import { SCHOOL_YEAR, TERM } from "../../constants/config";
+import { useConfigStore } from "../../store/configStore";
 import { getErrorMessage } from "../../utils/error";
 
 export default function ExamScheduleScreen() {
+  const { schoolYear, term: storeTerm } = useConfigStore();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<MyExamScheduleDetailResponse[]>([]);
 
   // Filters
   const [type, setType] = useState("Giữa kì");
-  const [term, setTerm] = useState(TERM);
-  const [schoolYear, setSchoolYear] = useState(parseInt(SCHOOL_YEAR, 10));
+  const [term, setTerm] = useState(storeTerm);
+  const [schoolYearState, setSchoolYearState] = useState(schoolYear);
 
   const fetchData = useCallback(
     async (isRefresh = false) => {
@@ -36,7 +37,7 @@ export default function ExamScheduleScreen() {
         const res = await examScheduleService.getMyExamSchedule({
           type,
           term,
-          schoolYear,
+          schoolYear: schoolYearState,
         });
         setData(res);
       } catch (error) {
@@ -47,7 +48,7 @@ export default function ExamScheduleScreen() {
         setRefreshing(false);
       }
     },
-    [type, term, schoolYear],
+    [type, term, schoolYearState],
   );
 
   useEffect(() => {

@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { scheduleService } from "../../services/schedule.service";
 import { ScheduleDetailItem } from "../../types/schedule";
+import { useConfigStore } from "../../store/configStore";
 
 // dayOfWeek: 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 7=Sun
 const DAY_LABELS = ["Th 2", "Th 3", "Th 4", "Th 5", "Th 6"];
@@ -36,11 +37,12 @@ const TERMS = [1, 2];
 const SCHOOL_YEARS = [2025, 2026, 2027];
 
 export default function TimetableTab() {
+  const { schoolYear: storeYear, term: storeTerm } = useConfigStore();
   const now = new Date();
   const todayDow = now.getDay() === 0 ? 7 : now.getDay(); // 1=Mon...7=Sun
 
-  const [term, setTerm] = useState(1);
-  const [schoolYear, setSchoolYear] = useState(2026);
+  const [term, setTerm] = useState(storeTerm);
+  const [schoolYear, setSchoolYear] = useState(storeYear);
   const [selectedDay, setSelectedDay] = useState(todayDow <= 5 ? todayDow : 1);
   const [schedule, setSchedule] = useState<ScheduleDetailItem[]>([]);
   const [loading, setLoading] = useState(false);

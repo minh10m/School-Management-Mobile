@@ -73,20 +73,8 @@ export default function EventsTab() {
         <View className="w-10" />
       </View>
 
-      {/* Tabs */}
-      <View className="flex-row bg-white border-b border-gray-100 px-6 py-2 gap-2">
-         {['Tất cả', 'Sắp tới', 'Đang diễn ra', 'Đã kết thúc'].map((t: any) => (
-           <TouchableOpacity 
-              key={t} onPress={() => setActiveTab(t)}
-              className={`px-4 py-1.5 rounded-full ${activeTab === t ? 'bg-bright-blue' : 'bg-gray-50'}`}
-           >
-              <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 10, color: activeTab === t ? 'white' : '#9CA3AF' }}>{t.toUpperCase()}</Text>
-           </TouchableOpacity>
-         ))}
-      </View>
-
       {/* Search Bar */}
-      <View className="px-6 py-4 bg-white border-b border-gray-100">
+      <View className="px-6 py-4 bg-white">
         <View className="bg-gray-50 rounded-2xl px-4 py-1 flex-row items-center gap-3 border border-gray-100">
           <Ionicons name="search-outline" size={18} color="#9CA3AF" />
           <TextInput
@@ -98,6 +86,18 @@ export default function EventsTab() {
             onChangeText={setSearch}
           />
         </View>
+      </View>
+
+      {/* Tabs */}
+      <View className="flex-row bg-white border-b border-gray-100 px-6 py-2 pb-4 gap-2">
+         {['Tất cả', 'Sắp tới', 'Đang diễn ra', 'Đã kết thúc'].map((t: any) => (
+           <TouchableOpacity 
+              key={t} onPress={() => setActiveTab(t)}
+              className={`px-4 py-1.5 rounded-full ${activeTab === t ? 'bg-bright-blue' : 'bg-gray-50'}`}
+           >
+              <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 10, color: activeTab === t ? 'white' : '#9CA3AF' }}>{t.toUpperCase()}</Text>
+           </TouchableOpacity>
+         ))}
       </View>
 
       {/* Event List */}

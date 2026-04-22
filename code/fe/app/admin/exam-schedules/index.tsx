@@ -21,11 +21,11 @@ import {
   ExamScheduleFilterRequest,
 } from "../../../types/examSchedule";
 import { PagedResponse } from "../../../types/common";
-
-import { SCHOOL_YEAR, TERM } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 
 const ExamScheduleIndex = () => {
   const router = useRouter();
+  const { schoolYear, term } = useConfigStore();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<PagedResponse<ExamScheduleResponse> | null>(
@@ -34,8 +34,8 @@ const ExamScheduleIndex = () => {
   const [filter, setFilter] = useState<ExamScheduleFilterRequest>({
     pageNumber: 1,
     pageSize: 10,
-    term: parseInt(TERM.toString(), 10),
-    schoolYear: parseInt(SCHOOL_YEAR, 10),
+    term: term,
+    schoolYear: schoolYear,
   });
 
   const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -99,15 +99,15 @@ const ExamScheduleIndex = () => {
   };
 
   const resetFilters = () => {
-    setModalTerm(TERM.toString());
-    setModalYear(SCHOOL_YEAR);
+    setModalTerm(term.toString());
+    setModalYear(schoolYear.toString());
     setModalType("");
     setSearchTitle("");
     setFilter({
       pageNumber: 1,
       pageSize: 10,
-      term: 0,
-      schoolYear: 0,
+      term: term,
+      schoolYear: schoolYear,
     });
     setIsFilterVisible(false);
   };

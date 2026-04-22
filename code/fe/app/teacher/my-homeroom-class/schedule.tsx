@@ -14,7 +14,7 @@ import { StatusBar } from "expo-status-bar";
 import { ScheduleDetailItem } from "../../../types/schedule";
 import { scheduleService } from "../../../services/schedule.service";
 import { classYearService } from "../../../services/classYear.service";
-import { SCHOOL_YEAR, TERM } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 
 const WEEK_DAYS = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6"];
 
@@ -28,6 +28,7 @@ const BG_COLORS = [
 ];
 
 export default function MyHomeroomClassSchedule() {
+  const { schoolYear, term: storeTerm } = useConfigStore();
   const [schedules, setSchedules] = useState<ScheduleDetailItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -46,7 +47,7 @@ export default function MyHomeroomClassSchedule() {
   const fetchInitialData = async () => {
     try {
       setLoading(true);
-      const hr = await classYearService.getHomeroomClass(Number(SCHOOL_YEAR.split("-")[0]));
+      const hr = await classYearService.getHomeroomClass(schoolYear);
       setHomeroom(hr);
       if (hr) {
         await fetchSchedules(hr.classYearId);
@@ -61,8 +62,8 @@ export default function MyHomeroomClassSchedule() {
   const fetchSchedules = async (classYearId: string) => {
     try {
       const data = await scheduleService.getClassSchedule(classYearId, {
-        Term: TERM,
-        SchoolYear: Number(SCHOOL_YEAR.split("-")[0]),
+        Term: storeTerm,
+        SchoolYear: schoolYear,
       });
       setSchedules(data || []);
     } catch (error) {

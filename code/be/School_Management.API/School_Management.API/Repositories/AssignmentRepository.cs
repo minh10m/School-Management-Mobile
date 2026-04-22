@@ -101,6 +101,7 @@ namespace School_Management.API.Repositories
                 Description = assignment.Description,
                 FinishTime = assignment.FinishTime,
                 TeacherName = teacher.User.FullName,
+                SubjectId = teacherSubject.SubjectId,
                 SubjectName = teacherSubject.Subject.SubjectName
             }, "SUCCESS");
         }
@@ -175,9 +176,10 @@ namespace School_Management.API.Repositories
                                                          Description = assignment.Description,
                                                          FinishTime = assignment.FinishTime.ToOffset(vnOffset),
                                                          StartTime = assignment.StartTime.ToOffset(vnOffset),
+                                                         TeacherName = assignment.TeacherSubject.Teacher.User.FullName,
+                                                         SubjectId = assignment.TeacherSubject.SubjectId,
                                                          SubjectName = assignment.TeacherSubject.Subject.SubjectName,
                                                          TeacherSubjectId = assignment.TeacherSubjectId,
-                                                         TeacherName = assignment.TeacherSubject.Teacher.User.FullName,
                                                          Title = assignment.Title
                                                      }).FirstOrDefaultAsync();
             if (assignmentResult == null) return (null, "NOT_FOUND_ASSIGNMENT");
@@ -281,6 +283,7 @@ namespace School_Management.API.Repositories
             assignment.FileTitle = request.FileTitle ?? assignment.FileTitle;
             assignment.TeacherSubjectId = teacherSubject.TeacherSubjectId;
             assignment.ClassYearId = request.ClassYearId;
+            assignment.Description = request.Description;
             await context.Entry(assignment).Reference(x => x.ClassYear).LoadAsync();
 
             await context.SaveChangesAsync();
@@ -290,12 +293,13 @@ namespace School_Management.API.Repositories
                 StartTime = assignment.StartTime,
                 FileTitle = assignment.FileTitle,
                 FileUrl = assignment.FileUrl,
+                Description = assignment.Description,
                 FinishTime = assignment.FinishTime,
                 ClassName = assignment.ClassYear.ClassName,
                 ClassYearId = assignment.ClassYearId,
-                SubjectName = teacherSubject.Subject.SubjectName,
-                TeacherSubjectId = teacherSubject.TeacherSubjectId,
                 TeacherName = teacher.User.FullName,
+                SubjectId = teacherSubject.SubjectId,
+                SubjectName = teacherSubject.Subject.SubjectName,
                 Title = assignment.Title
             }, "SUCCESS");
         }

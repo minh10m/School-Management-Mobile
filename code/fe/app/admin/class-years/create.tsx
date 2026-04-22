@@ -19,7 +19,7 @@ import { classYearService } from "../../../services/classYear.service";
 import { teacherService } from "../../../services/teacher.service";
 import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { TeacherListItem } from "../../../types/teacher";
-import { SCHOOL_YEAR } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 import { getErrorMessage } from "../../../utils/error";
 
 const FormLabel = ({ children }: { children: string }) => (
@@ -34,6 +34,7 @@ const FormLabel = ({ children }: { children: string }) => (
 export default function AdminCreateClassScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { schoolYear: defaultSchoolYear } = useConfigStore();
   const [loading, setLoading] = useState(false);
   const [teachers, setTeachers] = useState<TeacherListItem[]>([]);
   const [fetching, setFetching] = useState(true);
@@ -42,7 +43,7 @@ export default function AdminCreateClassScreen() {
   const [form, setForm] = useState({
     className: "",
     grade: 10,
-    schoolYear: SCHOOL_YEAR,
+    schoolYear: defaultSchoolYear.toString(),
     homeRoomId: "",
   });
 

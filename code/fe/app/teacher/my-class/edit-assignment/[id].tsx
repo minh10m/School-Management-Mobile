@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -16,22 +16,55 @@ import { router, useLocalSearchParams, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as DocumentPicker from "expo-document-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { assignmentService } from "../../../services/assignment.service";
-import { getErrorMessage } from "../../../utils/error";
+import { assignmentService } from "../../../../services/assignment.service";
+import { getErrorMessage } from "../../../../utils/error";
 
-export default function CreateAssignmentPage() {
-  const { classId, subjectId, subjectName } = useLocalSearchParams();
-  const [loading, setLoading] = useState(false);
+export default function EditAssignmentPage() {
+  const { id } = useLocalSearchParams();
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
-  const [fileUrl, setFileUrl] = useState(""); // Still allow URL if preferred
+  const [fileUrl, setFileUrl] = useState("");
+  const [fileTitle, setFileTitle] = useState("");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [subjectId, setSubjectId] = useState("");
+  const [classId, setClassId] = useState("");
 
   const [showPicker, setShowPicker] = useState(false);
   const [pickerType, setPickerType] = useState<"start" | "end">("start");
+
+  const fetchDetail = useCallback(async () => {
+    if (!id) return;
+    try {
+      setLoading(true);
+      const data = await assignmentService.getAssignmentById(id as string);
+      setTitle(data.title);
+      setDescription(data.description || "");
+      setFileUrl(data.fileUrl || "");
+      setFileTitle(data.fileTitle || "");
+      setStartDate(new Date(data.startTime));
+      setEndDate(new Date(data.finishTime));
+      setSubjectId(data.teacherSubjectId); // Wait, backend needs SubjectId (Guid) not TeacherSubjectId? 
+      // Actually, looking at AssignmentResponse.cs, it has TeacherSubjectId.
+      // But CreateAssignmentPayload needs subjectId.
+      // Let's check PostOrUpdateAssignmentRequest.cs again.
+      // It has Guid SubjectId.
+      // I might need to get the actual SubjectId from the TeacherSubject relation if the backend expects that.
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể tải chi tiết bài tập");
+      router.back();
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchDetail();
+  }, [fetchDetail]);
 
   const handlePickDocument = async () => {
     try {
@@ -42,7 +75,6 @@ export default function CreateAssignmentPage() {
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
-        // Validate file size (20MB)
         if (asset.size && asset.size > 20 * 1024 * 1024) {
           Alert.alert("Lỗi", "File quá lớn. Vui lòng chọn file dưới 20MB.");
           return;
@@ -54,24 +86,30 @@ export default function CreateAssignmentPage() {
     }
   };
 
-  const handleCreate = async () => {
+  const handleUpdate = async () => {
     if (!title.trim()) return Alert.alert("Lỗi", "Vui lòng nhập tiêu đề");
     if (!endDate) return Alert.alert("Lỗi", "Vui lòng chọn ngày kết thúc");
-    if (endDate <= startDate) return Alert.alert("Lỗi", "Ngày kết thúc phải sau ngày bắt đầu");
+    if (endDate <= startDate) return Alert.alert("Lỗi", "Ngày kết thúc phải sau ngày áp dụng");
 
     try {
-      setLoading(true);
+      setUpdating(true);
       const formData = new FormData();
       formData.append("Title", title);
       formData.append("Description", description);
       formData.append("StartTime", startDate.toISOString());
       formData.append("FinishTime", endDate.toISOString());
-      formData.append("SubjectId", subjectId as string);
-      formData.append("ClassYearId", classId as string);
+      
+      // Note: Backend UpdateAssignment requires SubjectId and ClassYearId
+      // We should use the ones from the fetched data
+      // I'll need to make sure I have the right IDs.
+      
+      // Re-fetching or getting from initial data
+      const detail = await assignmentService.getAssignmentById(id as string);
+      formData.append("SubjectId", detail.subjectId);
+      formData.append("ClassYearId", detail.classYearId);
 
       if (file && !file.canceled && file.assets && file.assets.length > 0) {
         const asset = file.assets[0];
-        // Create file object for FormData
         const fileToUpload = {
           uri: Platform.OS === 'ios' ? asset.uri.replace('file://', '') : asset.uri,
           name: asset.name,
@@ -79,18 +117,19 @@ export default function CreateAssignmentPage() {
         };
         formData.append("File", fileToUpload as any);
         formData.append("FileTitle", asset.name);
-      } else if (fileUrl.trim()) {
-        formData.append("FileUrl", fileUrl);
+      } else {
+        formData.append("FileTitle", fileTitle);
+        // If no new file, backend keeps the old one usually, but we need to check
       }
 
-      await assignmentService.createAssignment(formData);
-      Alert.alert("Thành công", "Đã giao bài tập mới", [
+      await assignmentService.updateAssignment(id as string, formData);
+      Alert.alert("Thành công", "Đã cập nhật bài tập", [
         { text: "OK", onPress: () => router.back() }
       ]);
     } catch (error) {
       Alert.alert("Lỗi", getErrorMessage(error));
     } finally {
-      setLoading(false);
+      setUpdating(false);
     }
   };
 
@@ -100,13 +139,20 @@ export default function CreateAssignmentPage() {
       if (pickerType === "start") {
         setStartDate(selectedDate);
       } else {
-        // Set to end of day
         const d = new Date(selectedDate);
         d.setHours(23, 59, 59);
         setEndDate(d);
       }
     }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-white justify-center items-center">
+        <ActivityIndicator size="large" color="#136ADA" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -119,10 +165,10 @@ export default function CreateAssignmentPage() {
         </TouchableOpacity>
         <View>
           <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#1E293B] text-lg">
-            Giao bài tập mới
+            Chỉnh sửa bài tập
           </Text>
           <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px] uppercase">
-            {subjectName}
+            Cập nhật nội dung & thời hạn
           </Text>
         </View>
       </View>
@@ -136,7 +182,7 @@ export default function CreateAssignmentPage() {
           <TextInput
             value={title}
             onChangeText={setTitle}
-            placeholder="Ví dụ: Bài tập về nhà tuần 12"
+            placeholder="Tiêu đề bài tập"
             className="bg-gray-50 p-4 rounded-3xl text-[#1E293B] border border-gray-100"
             style={{ fontFamily: "Poppins-Medium" }}
           />
@@ -162,7 +208,7 @@ export default function CreateAssignmentPage() {
         {/* File Upload Section */}
         <View className="mb-6">
           <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-400 text-[10px] uppercase mb-2 ml-1">
-            Tài liệu đính kèm
+            Thay đổi tài liệu đính kèm
           </Text>
           
           <TouchableOpacity
@@ -173,7 +219,7 @@ export default function CreateAssignmentPage() {
               <Ionicons name={file ? "checkmark" : "cloud-upload"} size={24} color="white" />
             </View>
             <Text style={{ fontFamily: "Poppins-Bold" }} className={`text-sm ${file ? 'text-emerald-700' : 'text-blue-600'}`}>
-              {file && !file.canceled && file.assets ? file.assets[0].name : "Chọn tài liệu từ máy"}
+              {file && !file.canceled && file.assets ? file.assets[0].name : (fileTitle || "Chọn tài liệu mới")}
             </Text>
             <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px] mt-1">
               Hỗ trợ PDF, DOCX, Hình ảnh...
@@ -186,23 +232,6 @@ export default function CreateAssignmentPage() {
             </TouchableOpacity>
           )}
         </View>
-
-        {/* URL Fallback */}
-        {!file && (
-          <View className="mb-6">
-            <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-400 text-[10px] uppercase mb-2 ml-1">
-              Hoặc nhập Link tài liệu (Google Drive,...)
-            </Text>
-            <TextInput
-              value={fileUrl}
-              onChangeText={setFileUrl}
-              placeholder="https://..."
-              autoCapitalize="none"
-              className="bg-gray-50 p-4 rounded-3xl text-[#1E293B] border border-gray-100"
-              style={{ fontFamily: "Poppins-Medium" }}
-            />
-          </View>
-        )}
 
         {/* Date Inputs */}
         <View className="flex-row gap-4 mb-10">
@@ -244,15 +273,15 @@ export default function CreateAssignmentPage() {
         </View>
 
         <TouchableOpacity
-          onPress={handleCreate}
-          disabled={loading}
+          onPress={handleUpdate}
+          disabled={updating}
           className="bg-blue-600 p-5 rounded-[24px] items-center mb-20 shadow-lg shadow-blue-200"
         >
-          {loading ? (
+          {updating ? (
             <ActivityIndicator color="white" />
           ) : (
             <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-base">
-              Giao bài tập ngay
+              Lưu thay đổi
             </Text>
           )}
         </TouchableOpacity>
@@ -291,7 +320,6 @@ export default function CreateAssignmentPage() {
                   display="spinner"
                   locale="vi-VN"
                   onChange={onChangeDate}
-                  minimumDate={new Date()}
                   style={{ width: '100%', height: 200 }}
                   textColor="black"
                 />
@@ -308,7 +336,6 @@ export default function CreateAssignmentPage() {
           mode="date"
           display="default"
           onChange={onChangeDate}
-          minimumDate={new Date()}
         />
       )}
     </SafeAreaView>

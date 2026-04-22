@@ -1,4 +1,4 @@
-﻿namespace School_Management.API.Models.DTO
+namespace School_Management.API.Models.DTO
 {
     public class AssignmentResponse
     {
@@ -11,6 +11,7 @@
         public DateTimeOffset FinishTime { get; set; }
         public Guid TeacherSubjectId { get; set; }
         public string TeacherName { get; set; } = string.Empty;
+        public Guid SubjectId { get; set; }
         public string SubjectName { get; set; } = string.Empty;
         public Guid ClassYearId { get; set; }
         public string ClassName { get; set; } = string.Empty;

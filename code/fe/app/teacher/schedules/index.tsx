@@ -13,7 +13,7 @@ import { router, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { TeacherScheduleDetailItem } from "../../../types/schedule";
 import { scheduleService } from "../../../services/schedule.service";
-import { SCHOOL_YEAR, TERM } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 
 const WEEK_DAYS = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6"];
 
@@ -27,6 +27,7 @@ const BG_COLORS = [
 ];
 
 export default function TeacherSchedules() {
+  const { schoolYear, term: storeTerm } = useConfigStore();
   const [schedules, setSchedules] = useState<TeacherScheduleDetailItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -45,8 +46,8 @@ export default function TeacherSchedules() {
     try {
       setLoading(true);
       const data = await scheduleService.getMyTeachingSchedule({
-        Term: TERM,
-        SchoolYear: Number(SCHOOL_YEAR),
+        Term: storeTerm,
+        SchoolYear: schoolYear,
       });
       setSchedules(data || []);
     } catch (error) {
