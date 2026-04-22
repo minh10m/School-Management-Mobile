@@ -63,9 +63,6 @@ builder.Services.AddSwaggerGen(options =>
 //Clean Expired Payment Automatically
 builder.Services.AddHostedService<PaymentCleanUpService>();
 
-//Cloudinary
-var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
-
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
@@ -75,6 +72,9 @@ builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100MB
 });
+
+//Cloudinary
+var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 
 var account = new Account(
     cloudinaryConfig["CloudName"],

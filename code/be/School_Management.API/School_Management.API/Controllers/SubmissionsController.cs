@@ -106,6 +106,20 @@ namespace School_Management.API.Controllers
             });
         }
 
-
+        [HttpPatch]
+        [ValidateModel]
+        [Route("{submissionId}")]
+        [Authorize(Roles = "Student")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateSubmission([FromForm] SubmissionUpdateRequest request, [FromRoute] Guid submissionId)
+        {
+            var result = await submissionService.UpdateSubmission(request, submissionId);
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật bài nộp thành công",
+                data = result
+            });
+        }
     }
 }
