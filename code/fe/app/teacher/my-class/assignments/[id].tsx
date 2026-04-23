@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams, Stack } from "expo-router";
+import { router, useLocalSearchParams, Stack, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { assignmentService } from "../../../../services/assignment.service";
 import { AssignmentResponse } from "../../../../types/assignment";
@@ -34,9 +34,11 @@ export default function AssignmentDetailPage() {
     }
   }, [id]);
 
-  useEffect(() => {
-    fetchDetail();
-  }, [fetchDetail]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchDetail();
+    }, [fetchDetail])
+  );
 
   const handleOpenFile = async (url: string | null) => {
     if (!url) return;
@@ -94,6 +96,15 @@ export default function AssignmentDetailPage() {
             {assignment.subjectName} • {assignment.className}
           </Text>
         </View>
+        <TouchableOpacity
+          onPress={() => router.push({
+            pathname: "/teacher/my-class/edit-assignment/[id]",
+            params: { id }
+          } as any)}
+          className="bg-blue-600 w-10 h-10 rounded-2xl items-center justify-center shadow-lg shadow-blue-200"
+        >
+          <Ionicons name="create-outline" size={20} color="white" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1 px-6 pt-8" showsVerticalScrollIndicator={false}>
@@ -183,7 +194,7 @@ export default function AssignmentDetailPage() {
           } as any)}
           className="bg-blue-600 p-5 rounded-[24px] flex-row items-center justify-center mb-20 shadow-lg shadow-blue-200"
         >
-          <Ionicons name="list" size={20} color="white" className="mr-2" />
+          <Ionicons name="list" size={20} color="white" />
           <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-base ml-2">
             Xem danh sách bài nộp
           </Text>

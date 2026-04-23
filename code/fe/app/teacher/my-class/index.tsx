@@ -16,7 +16,7 @@ import { classYearService } from "../../../services/classYear.service";
 import { scheduleService } from "../../../services/schedule.service";
 import { ClassYearSummary } from "../../../types/classYear";
 import { TeacherScheduleDetailItem } from "../../../types/schedule";
-import { SCHOOL_YEAR, TERM } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 import { useAuthStore } from "../../../store/authStore";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 
@@ -29,6 +29,7 @@ const GRADE_OPTIONS = [
 
 export default function MyTeachingClasses() {
   const { userInfo } = useAuthStore();
+  const { schoolYear, term: storeTerm } = useConfigStore();
   const [teaching, setTeaching] = useState<ClassYearSummary[]>([]);
   const [scheduleItems, setScheduleItems] = useState<
     TeacherScheduleDetailItem[]
@@ -44,14 +45,14 @@ export default function MyTeachingClasses() {
       const [tgRes, schRes] = await Promise.all([
         classYearService
           .getTeachingClasses({
-            schoolYear: `${SCHOOL_YEAR}-${Number(SCHOOL_YEAR) + 1}`,
+            schoolYear: `${schoolYear}-${schoolYear + 1}`,
             pageSize: 100,
           })
           .catch(() => []),
         scheduleService
           .getMyTeachingSchedule({
-            Term: TERM,
-            SchoolYear: Number(SCHOOL_YEAR),
+            Term: storeTerm,
+            SchoolYear: schoolYear,
           })
           .catch(() => []),
       ]);
@@ -150,12 +151,12 @@ export default function MyTeachingClasses() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="px-6 pt-6">
+        <View className="px-6 pt-2">
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             nestedScrollEnabled={true}
-            className="mb-6 pt-2"
+            className="mb-4 pt-1"
             contentContainerStyle={{ paddingRight: 24 }}
           >
             {GRADE_OPTIONS.map((opt) => {
@@ -164,25 +165,25 @@ export default function MyTeachingClasses() {
                 <Pressable
                   key={opt.label}
                   onPress={() => setSelectedGrade(opt.value)}
-                  className="mr-3"
+                  className="mr-2"
                 >
                   <View 
-                    className={`px-6 py-3 rounded-2xl border ${isActive ? 'border-[#136ADA]' : 'border-gray-100'}`}
+                    className={`px-4 py-2 rounded-2xl border ${isActive ? 'border-[#136ADA]' : 'border-gray-100'}`}
                     style={{
                       backgroundColor: isActive ? "#136ADA" : "#F8FAFC",
                       shadowColor: isActive ? "#136ADA" : "#000",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: isActive ? 0.2 : 0.05,
-                      shadowRadius: 4,
-                      elevation: isActive ? 3 : 1,
-                      minWidth: 80,
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: isActive ? 0.1 : 0.05,
+                      shadowRadius: 2,
+                      elevation: isActive ? 2 : 1,
+                      minWidth: 70,
                       alignItems: 'center'
                     }}
                   >
                     <Text
                       style={{
                         fontFamily: "Poppins-Bold",
-                        fontSize: 12,
+                        fontSize: 10,
                         color: isActive ? "white" : "#94A3B8"
                       }}
                     >

@@ -13,10 +13,11 @@ import { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
 import { feeService } from "../../../services/fee.service";
 import { FeeResponse } from "../../../types/fee";
-import { SCHOOL_YEAR } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 
 export default function AdminFeesScreen() {
   const router = useRouter();
+  const { schoolYear } = useConfigStore();
   const [fees, setFees] = useState<FeeResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -27,7 +28,7 @@ export default function AdminFeesScreen() {
     try {
       if (!refreshing) setLoading(true);
       const res = await feeService.getFees({
-        schoolYear: parseInt(SCHOOL_YEAR, 10),
+        schoolYear: schoolYear,
         pageNumber: 1,
         pageSize: 100,
       });

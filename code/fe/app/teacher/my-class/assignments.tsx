@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,11 +14,10 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams, Stack } from "expo-router";
+import { router, useLocalSearchParams, Stack, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { assignmentService } from "../../../services/assignment.service";
 import { TeacherAssignmentListResponse } from "../../../types/assignment";
-import { SCHOOL_YEAR, TERM } from "../../../constants/config";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function ClassAssignments() {
@@ -63,9 +62,11 @@ export default function ClassAssignments() {
     }
   }, [classId, subjectId]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -238,7 +239,7 @@ export default function ClassAssignments() {
   );
 }
 
-function AssignmentRow({ item, onDelete }: any) {
+function AssignmentRow({ item, onDelete }: { item: TeacherAssignmentListResponse; onDelete: () => void }) {
   const endDate = new Date(item.finishTime);
   const now = new Date();
   const isExpired = endDate < now;
@@ -258,27 +259,16 @@ function AssignmentRow({ item, onDelete }: any) {
           >
             {item.title}
           </Text>
-          {item.description && (
+          <View className="flex-row items-center mt-1">
+            <Ionicons name="reader-outline" size={12} color="#94A3B8" />
             <Text
-              style={{ fontFamily: "Poppins-Regular" }}
-              className="text-gray-400 text-[11px] mt-1"
+              style={{ fontFamily: "Poppins-Medium" }}
+              className="text-gray-400 text-[10px] ml-1.5 flex-1"
               numberOfLines={2}
             >
               {item.description}
             </Text>
-          )}
-          {item.fileUrl && (
-            <View className="flex-row items-center mt-3 bg-blue-50/50 self-start px-3 py-1.5 rounded-xl border border-blue-100/20">
-              <Ionicons name="document-attach-outline" size={12} color="#1D4ED8" />
-              <Text
-                style={{ fontFamily: "Poppins-Medium" }}
-                className="text-[#1D4ED8] text-[9px] ml-1.5"
-                numberOfLines={1}
-              >
-                {item.fileTitle || "Tài liệu đính kèm"}
-              </Text>
-            </View>
-          )}
+          </View>
         </View>
         <TouchableOpacity
           onPress={(e) => {

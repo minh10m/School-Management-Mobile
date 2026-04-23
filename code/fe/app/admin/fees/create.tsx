@@ -6,13 +6,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { classYearService } from "../../../services/classYear.service";
 import { feeService } from "../../../services/fee.service";
-import { SCHOOL_YEAR, TERM } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Platform, Modal } from "react-native";
 import { FormActionButton } from "../../../components/ui/FormActionButton";
 
 export default function AdminCreateFeeScreen() {
   const router = useRouter();
+  const { schoolYear } = useConfigStore();
   
   // State
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ export default function AdminCreateFeeScreen() {
   const fetchClasses = async () => {
     try {
       setLoadingClasses(true);
-      const res = await classYearService.getClassYears({ schoolYear: SCHOOL_YEAR, pageSize: 100 });
+      const res = await classYearService.getClassYears({ schoolYear: schoolYear.toString(), pageSize: 100 });
       setClasses(res || []);
     } catch (error) {
       console.error(error);
@@ -56,7 +57,7 @@ export default function AdminCreateFeeScreen() {
         amount: Number(amount),
         dueDate: dueDate.toISOString(),
         classYearId,
-        schoolYear: parseInt(SCHOOL_YEAR, 10)
+        schoolYear: schoolYear
       });
       Alert.alert("Thành công", "Đã tạo khoản phí mới", [
         { text: "OK", onPress: () => router.back() }

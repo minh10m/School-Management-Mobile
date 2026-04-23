@@ -15,7 +15,7 @@ import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { useState, useEffect, useCallback } from "react";
 import { classYearService } from "../../../services/classYear.service";
 import { ClassYearResponse } from "../../../types/classYear";
-import { SCHOOL_YEAR } from "../../../constants/config";
+import { useConfigStore } from "../../../store/configStore";
 import { getErrorMessage } from "../../../utils/error";
 
 interface MappingRule {
@@ -26,12 +26,13 @@ interface MappingRule {
 
 export default function AdminPromoteScreen() {
   const router = useRouter();
+  const { schoolYear } = useConfigStore();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showYearModal, setShowYearModal] = useState(false);
 
   // Years
-  const [targetYear, setTargetYear] = useState(SCHOOL_YEAR);
+  const [targetYear, setTargetYear] = useState(schoolYear.toString());
   const sourceYearInt = parseInt(targetYear.split("-")[0], 10) - 1;
   const sourceYearStr = sourceYearInt.toString();
 

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
-import { useEffect, useState, useCallback } from "react";
+import { router, Stack, useFocusEffect } from "expo-router";
+import { useState, useCallback } from "react";
 import { View, Text, FlatList, ActivityIndicator, RefreshControl, TouchableOpacity } from "react-native";
 import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
 import { eventService } from "../../services/event.service";
@@ -32,9 +32,11 @@ export default function TeacherEventsPage() {
     }
   }, [search, schoolYear, term]);
 
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchEvents();
+    }, [fetchEvents])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);

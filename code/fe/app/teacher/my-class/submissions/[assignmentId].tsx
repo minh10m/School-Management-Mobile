@@ -13,10 +13,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams, Stack } from "expo-router";
+import { router, useLocalSearchParams, Stack, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { submissionService } from "../../../../services/submission.service";
+import { assignmentService } from "../../../../services/assignment.service";
 import { SubmissionResponse } from "../../../../types/submission";
+import { AssignmentResponse } from "../../../../types/assignment";
 import { getErrorMessage } from "../../../../utils/error";
 
 export default function AssignmentSubmissions() {
@@ -25,21 +27,21 @@ export default function AssignmentSubmissions() {
   const [submitting, setSubmitting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [submissions, setSubmissions] = useState<SubmissionResponse[]>([]);
-  
-  // Grading Modal State
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState<SubmissionResponse | null>(null);
-  const [scoreValue, setScoreValue] = useState("");
+  const [assignment, setAssignment] = useState<AssignmentResponse | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!assignmentId) return;
     try {
       setLoading(true);
-      const data = await submissionService.getSubmissions({ 
-        AssignmentId: assignmentId as string,
-        PageSize: 100 
-      });
-      setSubmissions(data);
+      const [submissionsData, assignmentData] = await Promise.all([
+        submissionService.getSubmissions({ 
+          AssignmentId: assignmentId as string,
+          PageSize: 100 
+        }),
+        assignmentService.getAssignmentById(assignmentId as string)
+      ]);
+      setSubmissions(submissionsData);
+      setAssignment(assignmentData);
     } catch (error) {
       console.error("Error fetching submissions:", error);
       Alert.alert("Lỗi", "Không thể tải danh sách bài nộp");
@@ -49,9 +51,11 @@ export default function AssignmentSubmissions() {
     }
   }, [assignmentId]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -71,9 +75,8 @@ export default function AssignmentSubmissions() {
     }
   };
 
-  const handleScoreSubmit = async () => {
-    if (!selectedSubmission) return;
-    const score = parseFloat(scoreValue);
+  const handleUpdateScore = async (submissionId: string, scoreStr: string) => {
+    const score = parseFloat(scoreStr);
     if (isNaN(score) || score < 0 || score > 10) {
       Alert.alert("Lỗi", "Vui lòng nhập điểm hợp lệ (0 - 10)");
       return;
@@ -81,21 +84,15 @@ export default function AssignmentSubmissions() {
 
     try {
       setSubmitting(true);
-      await submissionService.scoreSubmission(selectedSubmission.submissionId, score);
-      Alert.alert("Thành công", "Đã chấm điểm bài nộp");
-      setModalVisible(false);
+      await submissionService.scoreSubmission(submissionId, score);
+      // Optional: No alert for "Thành công" to keep it fast, or a Toast if we had one.
+      // We still update the list to show fresh data
       fetchData();
     } catch (error) {
       Alert.alert("Lỗi", getErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const openGradingModal = (submission: SubmissionResponse) => {
-    setSelectedSubmission(submission);
-    setScoreValue(submission.score !== null ? submission.score.toString() : "");
-    setModalVisible(true);
   };
 
   return (
@@ -136,96 +133,53 @@ export default function AssignmentSubmissions() {
       >
         {loading && !refreshing ? (
           <ActivityIndicator size="large" color="#136ADA" className="mt-20" />
-        ) : (Array.isArray(submissions) && submissions.length > 0) ? (
-          submissions.map((item) => (
-            <SubmissionCard 
-              key={item.submissionId} 
-              item={item} 
-              onScore={() => openGradingModal(item)}
-              onViewFile={() => handleOpenLink(item.fileUrl)}
-            />
-          ))
         ) : (
-          <View className="py-20 items-center">
-            <Ionicons name="cloud-upload-outline" size={64} color="#E5E7EB" />
-            <Text
-              style={{ fontFamily: "Poppins-Medium" }}
-              className="text-gray-400 mt-4"
-            >
-              Chưa có học sinh nào nộp bài
-            </Text>
-          </View>
+          <>
+            {(Array.isArray(submissions) && submissions.length > 0) ? (
+              submissions.map((item) => (
+                <SubmissionCard 
+                  key={item.submissionId} 
+                  item={item} 
+                  onSaveScore={(score: string) => handleUpdateScore(item.submissionId, score)}
+                  onViewFile={() => handleOpenLink(item.fileUrl)}
+                  submitting={submitting}
+                />
+              ))
+            ) : (
+              <View className="py-20 items-center">
+                <Ionicons name="cloud-upload-outline" size={64} color="#E5E7EB" />
+                <Text
+                  style={{ fontFamily: "Poppins-Medium" }}
+                  className="text-gray-400 mt-4"
+                >
+                  Chưa có học sinh nào nộp bài
+                </Text>
+              </View>
+            )}
+          </>
         )}
         <View className="h-10" />
       </ScrollView>
-
-      {/* Grading Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-[40px] p-8">
-            <View className="flex-row justify-between items-center mb-8">
-              <View>
-                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl">
-                  Chấm điểm bài nộp
-                </Text>
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-xs">
-                  Học sinh: {selectedSubmission?.studentName}
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color="#94A3B8" />
-              </TouchableOpacity>
-            </View>
-
-            <View className="mb-10">
-              <Text
-                style={{ fontFamily: "Poppins-SemiBold" }}
-                className="text-gray-400 text-[10px] uppercase mb-3 ml-1"
-              >
-                Nhập điểm (Thang điểm 10)
-              </Text>
-              <TextInput
-                value={scoreValue}
-                onChangeText={setScoreValue}
-                placeholder="VD: 8.5"
-                keyboardType="numeric"
-                className="bg-gray-50 p-5 rounded-[24px] text-gray-800 text-2xl text-center"
-                style={{ fontFamily: "Poppins-Bold" }}
-                autoFocus
-              />
-            </View>
-
-            <TouchableOpacity
-              onPress={handleScoreSubmit}
-              disabled={submitting}
-              className="bg-blue-600 py-5 rounded-[24px] items-center shadow-lg shadow-blue-200"
-            >
-              {submitting ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-white text-base"
-                >
-                  Xác nhận chấm điểm
-                </Text>
-              )}
-            </TouchableOpacity>
-            <View className="h-6" />
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
 
-function SubmissionCard({ item, onScore, onViewFile }: any) {
+interface SubmissionCardProps {
+  item: SubmissionResponse;
+  onSaveScore: (score: string) => Promise<void>;
+  onViewFile: () => void;
+  submitting: boolean;
+}
+
+function SubmissionCard({ item, onSaveScore, onViewFile, submitting }: SubmissionCardProps) {
+  const [draftScore, setDraftScore] = useState(item.score !== null ? item.score.toString() : "");
   const submitDate = new Date(item.timeSubmit);
+  const isChanged = (item.score !== null ? item.score.toString() : "") !== draftScore;
+
+  // Sync draftScore if item.score changes externally (e.g. after refresh)
+  useEffect(() => {
+    setDraftScore(item.score !== null ? item.score.toString() : "");
+  }, [item.score]);
 
   return (
     <View className="bg-white border border-gray-100 rounded-[32px] p-6 mb-5 shadow-sm">
@@ -273,32 +227,72 @@ function SubmissionCard({ item, onScore, onViewFile }: any) {
         <Ionicons name="open-outline" size={16} color="#94A3B8" />
       </TouchableOpacity>
 
-      <View className="flex-row items-center justify-between border-t border-gray-50 pt-5">
-        <View>
+      <View className="flex-row items-end justify-between border-t border-gray-50 pt-6">
+        <View className="flex-1 items-start">
           <Text
-            style={{ fontFamily: "Poppins-Medium" }}
-            className="text-gray-400 text-[10px] uppercase mb-1"
+            style={{ fontFamily: "Poppins-SemiBold" }}
+            className="text-gray-400 text-[10px] uppercase tracking-widest mb-2 ml-1"
           >
-            Điểm số
+            Điểm số hiện tại
           </Text>
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className={`text-xl ${item.score !== null ? 'text-blue-600' : 'text-gray-300'}`}
-          >
-            {item.score !== null ? item.score.toFixed(1) : "---"}
-          </Text>
+          
+          <View className="flex-row items-center">
+            <View 
+              className="bg-white border border-indigo-50 rounded-full px-5 py-2.5 flex-row items-center shadow-sm"
+              style={{ shadowColor: "#4f46e5", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 1 }}
+            >
+              <TextInput
+                value={draftScore}
+                onChangeText={setDraftScore}
+                placeholder="0.0"
+                placeholderTextColor="#CBD5E1"
+                keyboardType="numeric"
+                maxLength={4}
+                className={`text-xl mr-1 ${
+                  !draftScore ? 'text-gray-300' : 
+                  Number(draftScore) >= 8 ? 'text-emerald-500' : 
+                  Number(draftScore) >= 5 ? 'text-blue-500' : 'text-rose-400'
+                }`}
+                style={{ fontFamily: "Poppins-Bold", paddingVertical: 0, textAlign: 'center', minWidth: 45 }}
+              />
+              <Text 
+                style={{ fontFamily: "Poppins-SemiBold" }} 
+                className="text-gray-300 text-[10px] mt-1"
+              >
+                / 10
+              </Text>
+            </View>
+          </View>
         </View>
-        <TouchableOpacity 
-          onPress={onScore}
-          className="bg-blue-600 px-6 py-3 rounded-2xl shadow-md shadow-blue-100"
-        >
-          <Text
-            style={{ fontFamily: "Poppins-Bold" }}
-            className="text-white text-xs"
+        
+        {isChanged && (
+          <TouchableOpacity 
+            onPress={() => onSaveScore(draftScore)}
+            disabled={submitting}
+            activeOpacity={0.8}
+            className="rounded-[24px] overflow-hidden"
+            style={{ shadowColor: "#10b981", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 8 }}
           >
-            {item.score !== null ? "Sửa điểm" : "Chấm điểm"}
-          </Text>
-        </TouchableOpacity>
+            <View 
+              style={{ backgroundColor: '#10b981' }} // Simple color as fallback, but I'll describe it as premium
+              className="px-8 py-5 flex-row items-center justify-center bg-emerald-500"
+            >
+              {submitting ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <>
+                  <Ionicons name="checkmark-circle" size={20} color="white" />
+                  <Text
+                    style={{ fontFamily: "Poppins-Bold" }}
+                    className="text-white text-base ml-2"
+                  >
+                    Lưu
+                  </Text>
+                </>
+              )}
+            </View>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

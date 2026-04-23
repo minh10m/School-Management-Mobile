@@ -20,7 +20,6 @@ import { ClassYearSummary } from "../../../types/classYear";
 import { TeacherSubject } from "../../../types/teacher";
 import { StudentListItem } from "../../../types/student";
 import { CreateResultRequest } from "../../../types/result";
-import { SCHOOL_YEAR } from "../../../constants/config";
 import { StatusBar } from "expo-status-bar";
 import { useConfigStore } from "../../../store/configStore";
 import { getErrorMessage } from "../../../utils/error";
@@ -63,7 +62,7 @@ export default function BatchResultEntryScreen() {
       setLoading(true);
       const me = await teacherService.getMe();
       const [cls, sub] = await Promise.all([
-        classYearService.getTeachingClasses({ schoolYear: SCHOOL_YEAR }),
+        classYearService.getTeachingClasses({ schoolYear: currentSchoolYear.toString() }),
         teacherService.getTeacherSubjects(me.teacherId),
       ]);
       setClasses(cls || []);

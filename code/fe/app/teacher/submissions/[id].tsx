@@ -70,9 +70,7 @@ export default function GradeSubmissionScreen() {
 
     try {
       setSubmitting(true);
-      await submissionService.gradeSubmission(id as string, {
-        score: numericScore,
-      });
+      await submissionService.scoreSubmission(id as string, numericScore);
       
       Alert.alert("Thành công", "Đã chấm điểm thành công", [
         { text: "Đồng ý", onPress: () => fetchDetails() } // Refresh to show graded status
@@ -85,7 +83,8 @@ export default function GradeSubmissionScreen() {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
+    if (!status) return 'bg-yellow-100 text-yellow-700';
     switch (status) {
       case 'graded': return 'bg-green-100 text-green-700';
       case 'late': return 'bg-red-100 text-red-700';
@@ -135,7 +134,7 @@ export default function GradeSubmissionScreen() {
               </View>
               <View className={`px-3 py-1 rounded-full ${getStatusColor(submission.status).split(' ')[0]}`}>
                 <Text style={{ fontFamily: "Poppins-SemiBold" }} className={`text-xs uppercase ${getStatusColor(submission.status).split(' ')[1]}`}>
-                  {statusMap[submission.status] || submission.status}
+                  {statusMap[submission.status || ''] || submission.status || 'Chờ chấm'}
                 </Text>
               </View>
             </View>
@@ -182,6 +181,7 @@ export default function GradeSubmissionScreen() {
                 onChangeText={setScore}
                 placeholder="10"
                 keyboardType="numeric"
+                autoFocus={true}
                 maxLength={4}
                 placeholderTextColor="#9ca3af"
                 className="bg-gray-50 border border-gray-200 rounded-2xl px-4 text-black"

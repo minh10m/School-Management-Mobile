@@ -8,12 +8,13 @@ import { classYearService } from '../../../services/classYear.service';
 import { teacherService } from '../../../services/teacher.service';
 import { ClassYearResponse } from '../../../types/classYear';
 import { TeacherListItem } from '../../../types/teacher';
-import { SCHOOL_YEAR } from '../../../constants/config';
+import { useConfigStore } from '../../../store/configStore';
 
 const GRADES = [10, 11, 12];
 
 export default function AdminClassYearsScreen() {
   const router = useRouter();
+  const { schoolYear: defaultSchoolYear } = useConfigStore();
   const [classes, setClasses] = useState<ClassYearResponse[]>([]);
   const [teachers, setTeachers] = useState<TeacherListItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -22,12 +23,12 @@ export default function AdminClassYearsScreen() {
 
   // States for applied filters
   const [grade, setGrade] = useState<number | undefined>();
-  const [schoolYear, setSchoolYear] = useState(SCHOOL_YEAR);
+  const [schoolYear, setSchoolYear] = useState(defaultSchoolYear.toString());
   const [search, setSearch] = useState("");
 
   // States for modal inputs (temporary selections)
   const [tempGrade, setTempGrade] = useState<number | undefined>();
-  const [tempYear, setTempYear] = useState(SCHOOL_YEAR);
+  const [tempYear, setTempYear] = useState(defaultSchoolYear.toString());
   const [tempSearch, setTempSearch] = useState("");
 
   const fetchClasses = useCallback(async () => {
@@ -68,10 +69,10 @@ export default function AdminClassYearsScreen() {
 
   const resetFilters = () => {
     setTempGrade(undefined);
-    setTempYear(SCHOOL_YEAR);
+    setTempYear(defaultSchoolYear.toString());
     setTempSearch("");
     setGrade(undefined);
-    setSchoolYear(SCHOOL_YEAR);
+    setSchoolYear(defaultSchoolYear.toString());
     setSearch("");
     setIsFilterVisible(false);
   };

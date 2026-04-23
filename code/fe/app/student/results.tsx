@@ -12,17 +12,18 @@ import { useState, useEffect, useMemo } from "react";
 import { resultService } from "../../services/result.service";
 import { StudentResultSubject, StudentResultReport, DetailResult } from "../../types/result";
 import { useAuthStore } from "../../store/authStore";
-import { SCHOOL_YEAR } from "../../constants/config";
+import { useConfigStore } from "../../store/configStore";
 
 export default function ResultsScreen() {
   const { userInfo } = useAuthStore();
+  const { schoolYear, term: storeTerm } = useConfigStore();
   const [results, setResults] = useState<StudentResultSubject[]>([]);
   const [overall, setOverall] = useState<{ average?: number; rating?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [schoolYearLabel] = useState(
-    `${SCHOOL_YEAR} - ${parseInt(SCHOOL_YEAR, 10) + 1}`,
+    `${schoolYear} - ${schoolYear + 1}`,
   );
-  const [term, setTerm] = useState<number>(1);
+  const [term, setTerm] = useState<number>(storeTerm);
 
   // ─── Lifecycle & Data Fetching ──────────────────────────────────────────────
 
@@ -38,7 +39,7 @@ export default function ResultsScreen() {
     try {
       setLoading(true);
       const data = await resultService.getStudentResults({
-        schoolYear: parseInt(SCHOOL_YEAR, 10),
+        schoolYear: schoolYear,
         term: term,
       });
       setResults(data.subjectResults || []);
