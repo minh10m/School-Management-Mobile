@@ -39,6 +39,7 @@ namespace School_Management.API.Data
         public DbSet<SchoolYearInfo> SchoolYearInfo { get; set; }
         public DbSet<Payment> Payment { get; set; }
         public DbSet<EnrollCourse> EnrollCourse { get; set; }
+        public DbSet<AIChatHistory> AIChatHistory { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

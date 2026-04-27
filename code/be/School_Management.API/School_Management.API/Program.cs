@@ -16,6 +16,7 @@ using CloudinaryDotNet;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.SemanticKernel;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -137,6 +138,8 @@ builder.Services.AddScoped<ISchoolYearInfoService, SchoolYearInfoService>();
 builder.Services.AddScoped<ISchoolYearInfoRepository, SchoolYearInfoRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IAIChatbotService, AIChatbotService>();
+builder.Services.AddScoped<IAIChatbotRepository, AIChatbotRepository>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
@@ -201,6 +204,21 @@ builder.Services.AddCors(options => {
     });
 });
 
+// Configure AI Chatbot (Semantic Kernel)
+builder.Services.AddScoped(sp =>
+{
+    var kernelBuilder = Kernel.CreateBuilder();
+
+    var httpClient = new HttpClient { BaseAddress = new Uri("https://generativelanguage.googleapis.com/") };
+
+    kernelBuilder.AddGoogleAIGeminiChatCompletion(
+        modelId: "gemini-2.5-flash", 
+        apiKey: builder.Configuration["Gemini:ApiKey"],
+        httpClient: httpClient 
+    );
+    
+    return kernelBuilder.Build();
+});
 
 // Configure Identity options (password and lockout policy)
 builder.Services.Configure<IdentityOptions>(options =>
