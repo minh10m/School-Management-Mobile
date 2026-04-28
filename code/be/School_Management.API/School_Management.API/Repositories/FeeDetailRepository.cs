@@ -91,7 +91,7 @@ namespace School_Management.API.Repositories
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize,
                 TotalCount = totalCount
-            }, "SUCCESS");
+            }, "SUCCESS");  
         }
 
         public async Task<(FeeDetailResponse? data, string message)> GetFeeDetailById(Guid feeDetailId)
