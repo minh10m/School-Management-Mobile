@@ -17,6 +17,7 @@
         public int Grade { get; set; }
         public int SchoolYear { get; set; }
         public string? ClassName { get; set; }
+        public string? HomeRoomTeacherName { get; set; }
 
     }
 }

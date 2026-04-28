@@ -151,7 +151,8 @@ namespace School_Management.API.Repositories
                                     {
                                         ClassName = scy.ClassYear.ClassName,
                                         Grade = scy.ClassYear.Grade,
-                                        SchoolYear = scy.ClassYear.SchoolYear
+                                        SchoolYear = scy.ClassYear.SchoolYear,
+                                        HomeRoomTeacherName = scy.ClassYear.Teacher.User.FullName ?? "Không có d? li?u"
                                     }).ToList()
 
                 }).FirstOrDefaultAsync();
