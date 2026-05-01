@@ -40,6 +40,7 @@ namespace School_Management.API.Data
         public DbSet<Payment> Payment { get; set; }
         public DbSet<EnrollCourse> EnrollCourse { get; set; }
         public DbSet<AIChatHistory> AIChatHistory { get; set; }
+        public DbSet<KnowledgeBase> KnowledgeBase { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -48,6 +49,7 @@ namespace School_Management.API.Data
             builder.Entity<IdentityRole<Guid>>().ToTable("Role");
             builder.Entity<IdentityUserRole<Guid>>().ToTable("UserRole");
             builder.Entity<LessonAssignment>().ToTable("LessonAssignment");
+            builder.HasPostgresExtension("vector");
 
             Guid adminId = new Guid("ef18be90-de43-45db-9c63-8778ff21e786");
             Guid teacherId = new Guid ("ddfd9f1c-e824-4dd3-9859-5e12d419145f");

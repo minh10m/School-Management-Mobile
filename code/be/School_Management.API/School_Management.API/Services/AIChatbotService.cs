@@ -16,5 +16,10 @@ namespace School_Management.API.Services
             var result = await aIChatbotRepository.ChatWithAI(request, userId, role);
             return result;
         }
+
+        public async Task<bool> UploadKnowledgeBaseAsync(IFormFile file)
+        {
+            return await aIChatbotRepository.UploadKnowledgeBase(file);
+        }
     }
 }
