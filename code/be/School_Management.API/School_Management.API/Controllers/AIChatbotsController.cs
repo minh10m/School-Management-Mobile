@@ -46,5 +46,29 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpPost]
+        [Route("upload")]
+        [Authorize(Roles = "Admin")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadKnowledgeBaseAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("File không hợp lệ");
+
+            var result = await aIChatbotService.UploadKnowledgeBaseAsync(file);
+
+            if(result)
+            {
+                return Ok(new
+                {
+                    success = true,
+                    message = "Thêm tài liệu thành công"
+                });
+            }
+
+            return StatusCode(500, "Có lỗi xảy ra trong quá trình nạp kiến thức.");
+
+        }
     }
 }

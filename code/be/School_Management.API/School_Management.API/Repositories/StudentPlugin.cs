@@ -1,6 +1,8 @@
 ﻿using Azure.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Embeddings;
+using Pgvector.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Exceptions;
 using School_Management.API.Models.DTO;
@@ -15,14 +17,16 @@ namespace School_Management.API.Repositories
         private readonly ApplicationDbContext context;
         private readonly IStudentRepository studentRepository;
         private readonly IScheduleRepository scheduleRepository;
+        private readonly Kernel kernel;
 
-        public StudentPlugin(string role, Guid userId, ApplicationDbContext context, IStudentRepository studentRepository, IScheduleRepository scheduleRepository)
+        public StudentPlugin(string role, Guid userId, ApplicationDbContext context, IStudentRepository studentRepository, IScheduleRepository scheduleRepository, Kernel kernel)
         {
             this.role = role;
             this.userId = userId;
             this.context = context;
             this.studentRepository = studentRepository;
             this.scheduleRepository = scheduleRepository;
+            this.kernel = kernel;
         }
 
         //LỊCH THI
@@ -456,5 +460,7 @@ namespace School_Management.API.Repositories
 
             return result;
         }
+
+        
     }
 }

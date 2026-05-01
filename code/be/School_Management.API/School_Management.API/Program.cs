@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Connectors.Google;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -153,7 +154,7 @@ builder.Logging.AddSerilog(logger);
 
 // Configure IdentityDbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("NeonConnectionString")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("NeonConnectionString"), x => x.UseVector()));
 
 // Configure identity services
 builder.Services.AddIdentityCore<AppUser>()
@@ -216,9 +217,16 @@ builder.Services.AddScoped(sp =>
         apiKey: builder.Configuration["Gemini:ApiKey"],
         httpClient: httpClient 
     );
+
+    kernelBuilder.AddGoogleAIEmbeddingGeneration(
+        modelId: "gemini-embedding-001",
+        apiKey: builder.Configuration["Gemini:ApiKey"],
+        httpClient: httpClient
+    );
     
     return kernelBuilder.Build();
-});
+}); 
+
 
 // Configure Identity options (password and lockout policy)
 builder.Services.Configure<IdentityOptions>(options =>
