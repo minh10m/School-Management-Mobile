@@ -152,6 +152,13 @@ export default function AdminDashboard() {
       iconColor: "#E11D48",
       route: "/admin/courses",
     },
+    {
+      label: "AI Chat",
+      icon: "sparkles-outline",
+      color: "bg-emerald-100",
+      iconColor: "#059669",
+      route: "/admin/ai-chat",
+    },
   ];
 
   const STAT_CARDS = [
@@ -295,6 +302,25 @@ export default function AdminDashboard() {
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+
+        {/* AI Chat Banner */}
+        <View className="mx-6 mb-4 p-5 bg-emerald-500 rounded-3xl overflow-hidden shadow-lg shadow-emerald-200">
+          <View className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10" />
+          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-base">
+            🤖 EduManage AI
+          </Text>
+          <Text style={{ fontFamily: "Poppins-Regular" }} className="text-white/80 text-xs mt-1">
+            Hỏi AI về trường học, upload tài liệu nội quy cho knowledge base.
+          </Text>
+          <TouchableOpacity
+            className="bg-white/20 self-start px-4 py-1.5 rounded-full mt-4"
+            onPress={() => router.push("/admin/ai-chat" as any)}
+          >
+            <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-white text-[10px]">
+              Mở AI Chat
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Bottom Banner/Note */}

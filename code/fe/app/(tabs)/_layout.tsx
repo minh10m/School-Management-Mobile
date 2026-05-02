@@ -14,19 +14,19 @@ export default function TabLayout() {
 
   useEffect(() => {
     if (!userInfo) {
-       router.replace('/login');
-       return;
+      router.replace("/login");
+      return;
     }
-    if (userInfo.role?.toLowerCase() !== 'student') {
-       if (userInfo.role?.toLowerCase() === 'admin') {
-          router.replace('/admin');
-       } else if (userInfo.role?.toLowerCase() === 'teacher') {
-          router.replace('/teacher');
-       }
+    if (userInfo.role?.toLowerCase() !== "student") {
+      if (userInfo.role?.toLowerCase() === "admin") {
+        router.replace("/admin");
+      } else if (userInfo.role?.toLowerCase() === "teacher") {
+        router.replace("/teacher");
+      }
     }
   }, [userInfo]);
 
-  if (!userInfo || userInfo.role?.toLowerCase() !== 'student') return null;
+  if (!userInfo || userInfo.role?.toLowerCase() !== "student") return null;
 
   return (
     <Tabs

@@ -55,6 +55,7 @@ export default function AdminLayout() {
       <Stack.Screen name="events/index" />
       <Stack.Screen name="events/create" />
       <Stack.Screen name="payments/index" />
+      <Stack.Screen name="ai-chat" />
     </Stack>
   );
 }
