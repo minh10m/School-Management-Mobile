@@ -18,6 +18,7 @@ export default function StudentLayout() {
       <Stack.Screen name="attendance" />
       <Stack.Screen name="timetable" />
       <Stack.Screen name="events" />
+      <Stack.Screen name="ai-chat" />
     </Stack>
   );
 }

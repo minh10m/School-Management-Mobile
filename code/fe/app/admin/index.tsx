@@ -7,19 +7,17 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
-import { StatusBar } from "expo-status-bar";
 import { useEffect, useState, useCallback } from "react";
-import { authService } from "../../services/auth.service";
-import { studentService } from "../../services/student.service";
-import { teacherService } from "../../services/teacher.service";
-import { classYearService } from "../../services/classYear.service";
 import { useAuthStore } from "../../store/authStore";
 import { useConfigStore } from "../../store/configStore";
 import SideMenu from "../../components/SideMenu";
+import { dashboardService } from "../../services/dashboard.service";
+import { DashboardStats } from "../../types/dashboard";
+
+import { reportGenerator } from "../../utils/reportGenerator";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -27,51 +25,44 @@ export default function AdminDashboard() {
   const { schoolYear } = useConfigStore();
   const adminName = userInfo?.fullName?.split(" ").at(-1) ?? "Quản trị viên";
 
-  const [stats, setStats] = useState({
-    students: "0",
-    teachers: "0",
-    classes: "0",
-    fees: "0",
-  });
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isMenuVisible, setMenuVisible] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const fetchStats = useCallback(async () => {
     try {
       setLoading(true);
-      const [stuRes, teaRes, claRes] = await Promise.all([
-        studentService.getStudents({ PageSize: 1 }),
-        teacherService.getTeachers({ PageSize: 1 }),
-        classYearService.getClassYears({ schoolYear: schoolYear.toString() }),
-      ]);
-      setStats({
-        students:
-          (stuRes as any).totalCount?.toString() ||
-          (stuRes as any).length?.toString() ||
-          "0",
-        teachers:
-          (teaRes as any).totalCount?.toString() ||
-          (teaRes as any).length?.toString() ||
-          "0",
-        classes: claRes.length?.toString() || "0",
-        fees: "12", // Mock for now
-      });
+      const data = await dashboardService.getStats(Number(schoolYear));
+      setStats(data);
     } catch (err) {
       console.error("Error fetching admin stats:", err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [schoolYear]);
 
   useEffect(() => {
     fetchStats();
-  }, [fetchStats, schoolYear]);
+  }, [fetchStats]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchStats();
     setRefreshing(false);
+  };
+
+  const handleCreateReport = async () => {
+    if (!stats) return;
+    try {
+      setIsGeneratingReport(true);
+      await reportGenerator.generateAdminReport(stats, Number(schoolYear));
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể tạo báo cáo PDF");
+    } finally {
+      setIsGeneratingReport(false);
+    }
   };
 
   const QUICK_ACTIONS = [
@@ -152,38 +143,52 @@ export default function AdminDashboard() {
       iconColor: "#E11D48",
       route: "/admin/courses",
     },
+    {
+      label: "AI Chat",
+      icon: "sparkles-outline",
+      color: "bg-emerald-100",
+      iconColor: "#059669",
+      route: "/admin/ai-chat",
+    },
   ];
 
   const STAT_CARDS = [
     {
       label: "Học sinh",
-      value: stats.students,
+      value: stats?.totalStudents || 0,
       icon: "people",
       color: "#136ADA",
       bg: "bg-blue-50",
     },
     {
       label: "Giáo viên",
-      value: stats.teachers,
+      value: stats?.totalTeachers || 0,
       icon: "person",
       color: "#A855F7",
       bg: "bg-purple-50",
     },
     {
       label: "Lớp học",
-      value: stats.classes,
+      value: stats?.totalClasses || 0,
       icon: "school",
       color: "#14B8A6",
       bg: "bg-teal-50",
     },
     {
-      label: "Học phí",
-      value: stats.fees,
-      icon: "cash",
+      label: "Môn học",
+      value: stats?.totalSubjects || 0,
+      icon: "book",
       color: "#F97316",
       bg: "bg-orange-50",
     },
   ];
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
 
   return (
     <AdminPageWrapper
@@ -264,6 +269,136 @@ export default function AdminDashboard() {
           </View>
         </View>
 
+        {/* Finance & Performance Section */}
+        {stats && (
+          <View className="px-6 mb-6">
+            <Text
+              style={{ fontFamily: "Poppins-SemiBold" }}
+              className="text-gray-500 text-xs mb-3 uppercase tracking-widest"
+            >
+              Tài chính & Hiệu suất
+            </Text>
+            
+            {/* Revenue Card */}
+            <View className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-4">
+              <View className="flex-row justify-between items-center mb-4">
+                <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-800 text-sm">
+                  Doanh thu học phí
+                </Text>
+                <Ionicons name="cash-outline" size={20} color="#F97316" />
+              </View>
+              
+              <View className="flex-row items-end justify-between mb-2">
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-2xl text-orange-600">
+                  {formatCurrency(stats.finance.totalCollectedRevenue)}
+                </Text>
+                <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px]">
+                  / {formatCurrency(stats.finance.totalExpectedRevenue)}
+                </Text>
+              </View>
+              
+              {/* Progress Bar */}
+              <View className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
+                <View 
+                  className="h-full bg-orange-500" 
+                  style={{ width: `${(stats.finance.totalCollectedRevenue / stats.finance.totalExpectedRevenue) * 100 || 0}%` }}
+                />
+              </View>
+              
+              <View className="flex-row justify-between">
+                <View>
+                  <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px]">Cần thu</Text>
+                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-red-500 text-xs">
+                    {formatCurrency(stats.finance.totalPendingRevenue)}
+                  </Text>
+                </View>
+                <View className="items-end">
+                  <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px]">Nợ phí</Text>
+                  <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-800 text-xs">
+                    {stats.finance.studentsWithOverdueFees} học sinh
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View className="flex-row gap-4">
+              {/* Attendance Card */}
+              <View className="flex-1 bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+                <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-400 text-[10px] uppercase">Chuyên cần</Text>
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-teal-600 mt-1">
+                  {stats.attendance.overallAttendanceRate}%
+                </Text>
+                <View className="h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                  <View 
+                    className="h-full bg-teal-500" 
+                    style={{ width: `${stats.attendance.overallAttendanceRate}%` }}
+                  />
+                </View>
+              </View>
+
+              {/* Academics Card */}
+              <View className="flex-1 bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+                <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-400 text-[10px] uppercase">Bài tập</Text>
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-indigo-600 mt-1">
+                  {stats.academic.assignmentCompletionRate}%
+                </Text>
+                <View className="h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                  <View 
+                    className="h-full bg-indigo-500" 
+                    style={{ width: `${stats.academic.assignmentCompletionRate}%` }}
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Recent Activities Section */}
+        {stats && stats.recentActivities.length > 0 && (
+          <View className="px-6 mb-6">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text
+                style={{ fontFamily: "Poppins-SemiBold" }}
+                className="text-gray-500 text-xs uppercase tracking-widest"
+              >
+                Hoạt động gần đây
+              </Text>
+              <TouchableOpacity onPress={() => router.push("/admin/activities" as any)}>
+                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-orange-500 text-xs">
+                  Xem tất cả
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
+              {stats.recentActivities.slice(0, 3).map((activity, index) => (
+                <View 
+                  key={index} 
+                  className={`flex-row items-center p-4 ${index !== Math.min(stats.recentActivities.length, 3) - 1 ? 'border-b border-gray-50' : ''}`}
+                >
+                  <View className={`w-10 h-10 rounded-2xl items-center justify-center mr-3 ${
+                    activity.type === 'Payment' ? 'bg-orange-50' : 
+                    activity.type === 'Submission' ? 'bg-blue-50' : 'bg-gray-50'
+                  }`}>
+                    <Ionicons 
+                      name={activity.type === 'Payment' ? 'cash-outline' : activity.type === 'Submission' ? 'document-text-outline' : 'notifications-outline'} 
+                      size={20} 
+                      color={activity.type === 'Payment' ? '#F97316' : activity.type === 'Submission' ? '#3B82F6' : '#6B7280'}
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-800 text-xs" numberOfLines={1}>
+                      {activity.description}
+                    </Text>
+                    <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-[10px]">
+                      {new Date(activity.time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - {new Date(activity.time).toLocaleDateString('vi-VN')}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
         {/* Quick Actions */}
         <View className="px-6 mb-5">
           <Text
@@ -297,6 +432,25 @@ export default function AdminDashboard() {
           </View>
         </View>
 
+        {/* AI Chat Banner */}
+        <View className="mx-6 mb-4 p-5 bg-emerald-500 rounded-3xl overflow-hidden shadow-lg shadow-emerald-200">
+          <View className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10" />
+          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-base">
+            🤖 EduManage AI
+          </Text>
+          <Text style={{ fontFamily: "Poppins-Regular" }} className="text-white/80 text-xs mt-1">
+            Hỏi AI về trường học, upload tài liệu nội quy cho knowledge base.
+          </Text>
+          <TouchableOpacity
+            className="bg-white/20 self-start px-4 py-1.5 rounded-full mt-4"
+            onPress={() => router.push("/admin/ai-chat" as any)}
+          >
+            <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-white text-[10px]">
+              Mở AI Chat
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Bottom Banner/Note */}
         <View className="mx-6 mb-10 p-5 bg-indigo-500 rounded-3xl overflow-hidden shadow-lg shadow-indigo-200">
           <View className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10" />
@@ -310,14 +464,21 @@ export default function AdminDashboard() {
             style={{ fontFamily: "Poppins-Regular" }}
             className="text-white/80 text-xs mt-1"
           >
-            Xem xét kết quả học tập và điểm danh Học kỳ 1.
+            Xem xét kết quả học tập và điểm danh Học kỳ 1 năm học {schoolYear}.
           </Text>
-          <TouchableOpacity className="bg-white/20 self-start px-4 py-1.5 rounded-full mt-4">
+          <TouchableOpacity 
+            className="bg-white/20 self-start px-4 py-1.5 rounded-full mt-4 flex-row items-center"
+            onPress={handleCreateReport}
+            disabled={isGeneratingReport}
+          >
+            {isGeneratingReport ? (
+              <ActivityIndicator size="small" color="white" className="mr-2" />
+            ) : null}
             <Text
               style={{ fontFamily: "Poppins-SemiBold" }}
               className="text-white text-[10px]"
             >
-              Tạo báo cáo
+              {isGeneratingReport ? "Đang tạo..." : "Tạo báo cáo"}
             </Text>
           </TouchableOpacity>
         </View>

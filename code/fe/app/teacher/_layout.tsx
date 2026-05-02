@@ -77,6 +77,7 @@ export default function TeacherLayout() {
       <Stack.Screen name="submissions/[id]" />
       <Stack.Screen name="attendance/index" />
       <Stack.Screen name="attendance/[classYearId]" />
+      <Stack.Screen name="ai-chat" />
     </Stack>
   );
 }
