@@ -6,5 +6,6 @@ namespace School_Management.API.Services
     {
         public Task<AIChatResponse> ChatWithAI(AIChatRequest request, Guid userId, string role);
         public Task<bool> UploadKnowledgeBaseAsync(IFormFile file);
+        public Task<PagedResponse<UserAIHistoryChatResponse>> GetUserAIHistoryChatResponses(BaseRequestSecond baseRequest, Guid userId);
     }
 }

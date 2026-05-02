@@ -213,5 +213,34 @@ namespace School_Management.API.Repositories
             Console.WriteLine($"--- RAG Context cho câu hỏi '{query}': ---\n{result}\n----------------");
             return result;
         }
+
+        public async Task<PagedResponse<UserAIHistoryChatResponse>> GetUserAIHistoryChatResponses(BaseRequestSecond baseRequest, Guid userId)
+        {
+            var threeDaysAgo = DateTime.UtcNow.AddDays(-3);
+            var query = context.AIChatHistory.AsNoTracking().Where(x => x.UserId == userId && x.CreatedAt >= threeDaysAgo).AsQueryable();
+
+            query = query.OrderByDescending(x => x.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+            var skipResults = (baseRequest.PageNumber - 1) * baseRequest.PageSize;
+
+            var listResult = await query.Skip(skipResults).Take(baseRequest.PageSize)
+                                        .Select(g => new UserAIHistoryChatResponse
+                                        {
+                                            Id = g.Id,
+                                            Content = g.Content,
+                                            CreatedAt = g.CreatedAt,
+                                            Role = g.Role,
+                                            UserId = g.UserId
+                                        }).ToListAsync();
+
+            return new PagedResponse<UserAIHistoryChatResponse>
+            {
+                Items = listResult,
+                PageSize = baseRequest.PageSize,
+                PageNumber = baseRequest.PageNumber,
+                TotalCount = totalCount
+            };
+        }
     }
 }

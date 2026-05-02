@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
@@ -69,6 +70,28 @@ namespace School_Management.API.Controllers
 
             return StatusCode(500, "Có lỗi xảy ra trong quá trình nạp kiến thức.");
 
+        }
+
+        [HttpGet]
+        [Route("chat-history")]
+        [Authorize]
+        public async Task<IActionResult> GetUserAIHistoryChatResponses([FromQuery] BaseRequestSecond request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+            if (request.PageNumber <= 0) request.PageNumber = 1;
+            if (request.PageSize <= 0) request.PageSize = 10;
+            var result = await aIChatbotService.GetUserAIHistoryChatResponses(request, Guid.Parse(userId));
+
+            return Ok(new
+            {
+                success = true,
+                data = result
+            });
         }
     }
 }
