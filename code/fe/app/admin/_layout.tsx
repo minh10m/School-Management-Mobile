@@ -1,27 +1,19 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack, Redirect } from "expo-router";
 import { useAuthStore } from "../../store/authStore";
-import { useEffect } from "react";
 
 export default function AdminLayout() {
   const { userInfo } = useAuthStore();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (!userInfo) {
-      router.replace("/login");
-      return;
-    }
-    if (userInfo.role?.toLowerCase() !== "admin") {
-      // If not admin, send back to home/teacher
-      if (userInfo.role?.toLowerCase() === "teacher") {
-        router.replace("/teacher");
-      } else {
-        router.replace("/home");
-      }
-    }
-  }, [userInfo]);
+  if (!userInfo) {
+    return <Redirect href="/login" />;
+  }
 
-  if (!userInfo || userInfo.role?.toLowerCase() !== "admin") return null;
+  if (userInfo.role?.toLowerCase() !== "admin") {
+    if (userInfo.role?.toLowerCase() === "teacher") {
+      return <Redirect href="/teacher" />;
+    }
+    return <Redirect href="/home" />;
+  }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
