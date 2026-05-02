@@ -17,6 +17,11 @@ namespace School_Management.API.Services
             return result;
         }
 
+        public async Task<PagedResponse<UserAIHistoryChatResponse>> GetUserAIHistoryChatResponses(BaseRequestSecond baseRequest, Guid userId)
+        {
+            return await aIChatbotRepository.GetUserAIHistoryChatResponses(baseRequest, userId);
+        }
+
         public async Task<bool> UploadKnowledgeBaseAsync(IFormFile file)
         {
             return await aIChatbotRepository.UploadKnowledgeBase(file);
