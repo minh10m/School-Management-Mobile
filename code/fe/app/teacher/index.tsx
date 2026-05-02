@@ -393,6 +393,13 @@ export default function TeacherDashboard() {
               color="bg-indigo-100"
               iconColor="#6366F1"
             />
+            <TeachingCard
+              icon="sparkles"
+              label="AI Chat"
+              route="/teacher/ai-chat"
+              color="bg-violet-100"
+              iconColor="#8B5CF6"
+            />
           </View>
         </View>
 

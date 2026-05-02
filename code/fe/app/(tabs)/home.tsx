@@ -34,13 +34,16 @@ export default function HomeScreen() {
     useCallback(() => {
       fetchEvents();
       fetchAssignments();
-    }, [schoolYear, term])
+    }, [schoolYear, term]),
   );
 
   const fetchEvents = async () => {
     try {
       setEventLoading(true);
-      const res = await eventService.getEvents({ SchoolYear: schoolYear, Term: term });
+      const res = await eventService.getEvents({
+        SchoolYear: schoolYear,
+        Term: term,
+      });
       setEvents(res.items || []);
     } catch (err) {
       console.error("Error fetching events:", err);
@@ -52,7 +55,7 @@ export default function HomeScreen() {
   const fetchAssignments = async () => {
     try {
       setAssignmentLoading(true);
-      
+
       let params: any = {};
       try {
         const myClass = await classYearService.getMyClass(schoolYear);
@@ -89,13 +92,29 @@ export default function HomeScreen() {
       const d = new Date(dateStr);
       const day = d.getDate().toString().padStart(2, "0");
       const monthNames = [
-        "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
-        "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+        "Tháng 1",
+        "Tháng 2",
+        "Tháng 3",
+        "Tháng 4",
+        "Tháng 5",
+        "Tháng 6",
+        "Tháng 7",
+        "Tháng 8",
+        "Tháng 9",
+        "Tháng 10",
+        "Tháng 11",
+        "Tháng 12",
       ];
       const month = monthNames[d.getMonth()];
       const year = d.getFullYear();
       const weekDays = [
-        "Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"
+        "Chủ Nhật",
+        "Thứ Hai",
+        "Thứ Ba",
+        "Thứ Tư",
+        "Thứ Năm",
+        "Thứ Sáu",
+        "Thứ Bảy",
       ];
       const weekDay = weekDays[d.getDay()];
       return `${weekDay}, ngày ${day} ${month}, ${year}`;
@@ -109,10 +128,37 @@ export default function HomeScreen() {
   const lastTitlePart = eventTitleParts.slice(1).join(" ");
 
   const STUDENT_STATS = [
-    { label: "Điểm TB", value: "8.5", icon: "stats-chart", color: "#136ADA", bg: "bg-blue-50" },
-    { label: "Chuyên cần", value: "98%", icon: "calendar-clear", color: "#10B981", bg: "bg-emerald-50" },
-    { label: "Bài tập nộp", value: (Array.isArray(assignments) ? assignments : []).filter(a => a.status === 'Submitted').length.toString().padStart(2, '0'), icon: "document-text", color: "#A855F7", bg: "bg-purple-50" },
-    { label: "Sự kiện", value: (events?.length || 0).toString().padStart(2, '0'), icon: "megaphone", color: "#F97316", bg: "bg-orange-50" },
+    {
+      label: "Điểm TB",
+      value: "8.5",
+      icon: "stats-chart",
+      color: "#136ADA",
+      bg: "bg-blue-50",
+    },
+    {
+      label: "Chuyên cần",
+      value: "98%",
+      icon: "calendar-clear",
+      color: "#10B981",
+      bg: "bg-emerald-50",
+    },
+    {
+      label: "Bài tập nộp",
+      value: (Array.isArray(assignments) ? assignments : [])
+        .filter((a) => a.status === "Submitted")
+        .length.toString()
+        .padStart(2, "0"),
+      icon: "document-text",
+      color: "#A855F7",
+      bg: "bg-purple-50",
+    },
+    {
+      label: "Sự kiện",
+      value: (events?.length || 0).toString().padStart(2, "0"),
+      icon: "megaphone",
+      color: "#F97316",
+      bg: "bg-orange-50",
+    },
   ];
 
   const academicsData = [
@@ -172,6 +218,13 @@ export default function HomeScreen() {
       color: "bg-purple-100",
       iconColor: "#A855F7",
     },
+    {
+      id: "10",
+      title: "AI Chat",
+      icon: "sparkles-outline",
+      color: "bg-violet-100",
+      iconColor: "#8B5CF6",
+    },
   ];
 
   return (
@@ -192,7 +245,6 @@ export default function HomeScreen() {
     >
       <StatusBar hidden />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-
         {/* Greeting */}
         <View className="px-6 mt-6 mb-2">
           <Text
@@ -201,15 +253,28 @@ export default function HomeScreen() {
           >
             Chào mừng bạn, {firstName} 👋
           </Text>
-          <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-xs">
-            Bạn có {assignments.filter(a => a.status !== 'Submitted' && a.status !== 'Graded').length} bài tập cần hoàn thành.
+          <Text
+            style={{ fontFamily: "Poppins-Regular" }}
+            className="text-gray-400 text-xs"
+          >
+            Bạn có{" "}
+            {
+              assignments.filter(
+                (a) => a.status !== "Submitted" && a.status !== "Graded",
+              ).length
+            }{" "}
+            bài tập cần hoàn thành.
           </Text>
         </View>
 
-
         {/* Academics Grid */}
         <View className="px-6 mb-8 mt-2">
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Tiện ích học tập</Text>
+          <Text
+            style={{ fontFamily: "Poppins-SemiBold" }}
+            className="text-gray-500 text-xs mb-3 uppercase tracking-widest"
+          >
+            Tiện ích học tập
+          </Text>
           <View className="flex-row flex-wrap justify-between gap-y-4">
             {academicsData.map((item) => (
               <TouchableOpacity
@@ -232,6 +297,8 @@ export default function HomeScreen() {
                     router.push("/student/courses" as any);
                   } else if (item.title === "Khóa của tôi") {
                     router.push("/student/courses/registered" as any);
+                  } else if (item.title === "AI Chat") {
+                    router.push("/student/ai-chat" as any);
                   }
                 }}
               >
@@ -256,7 +323,12 @@ export default function HomeScreen() {
         {/* Assignments */}
         <View className="mb-8 mt-2">
           <View className="flex-row justify-between items-center px-6 mb-4">
-            <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-0 uppercase tracking-widest">Bài tập gần đây</Text>
+            <Text
+              style={{ fontFamily: "Poppins-SemiBold" }}
+              className="text-gray-500 text-xs mb-0 uppercase tracking-widest"
+            >
+              Bài tập gần đây
+            </Text>
             <TouchableOpacity
               onPress={() => router.push("/student/assignments" as any)}
             >
@@ -271,10 +343,13 @@ export default function HomeScreen() {
 
           <FlatList
             data={assignments
-              .filter(a => a.status !== 'Submitted' && a.status !== 'Graded')
-              .sort((a, b) => new Date(a.finishTime).getTime() - new Date(b.finishTime).getTime())
-              .slice(0, 2)
-            }
+              .filter((a) => a.status !== "Submitted" && a.status !== "Graded")
+              .sort(
+                (a, b) =>
+                  new Date(a.finishTime).getTime() -
+                  new Date(b.finishTime).getTime(),
+              )
+              .slice(0, 2)}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 24, gap: 16 }}
@@ -355,7 +430,12 @@ export default function HomeScreen() {
 
         {/* Event Updates */}
         <View className="px-6 pb-20 mt-2">
-          <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-gray-500 text-xs mb-3 uppercase tracking-widest">Sự kiện & Tin tức</Text>
+          <Text
+            style={{ fontFamily: "Poppins-SemiBold" }}
+            className="text-gray-500 text-xs mb-3 uppercase tracking-widest"
+          >
+            Sự kiện & Tin tức
+          </Text>
 
           <View className="bg-white border border-gray-100 rounded-[40px] p-6 shadow-sm overflow-hidden min-h-[190px] relative">
             {/* Background decoration */}
