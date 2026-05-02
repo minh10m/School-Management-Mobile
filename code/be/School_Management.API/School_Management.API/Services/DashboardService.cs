@@ -42,23 +42,24 @@ namespace School_Management.API.Services
 
             // 3. Attendance Stats
             var attendanceData = await context.Attendance
-                .Include(x => x.ClassYear)
-                .Where(x => x.ClassYear.SchoolYear == schoolYear)
+                .Include(x => x.StudentClassYear)
+                .ThenInclude(scy => scy.ClassYear)
+                .Where(x => x.StudentClassYear.SchoolYear == schoolYear)
                 .ToListAsync();
 
             if (attendanceData.Any())
             {
                 var totalSessions = attendanceData.Count;
-                var presentCount = attendanceData.Count(x => x.IsPresent);
+                var presentCount = attendanceData.Count(x => x.Status == "Present");
                 response.Attendance = new AttendanceStats
                 {
                     OverallAttendanceRate = Math.Round((double)presentCount / totalSessions * 100, 2),
                     TopAbsentClasses = attendanceData
-                        .GroupBy(x => x.ClassYear.ClassName)
+                        .GroupBy(x => x.StudentClassYear.ClassYear.ClassName)
                         .Select(g => new ClassAttendanceDto
                         {
                             ClassName = g.Key,
-                            AttendanceRate = Math.Round((double)g.Count(x => x.IsPresent) / g.Count() * 100, 2)
+                            AttendanceRate = Math.Round((double)g.Count(x => x.Status == "Present") / g.Count() * 100, 2)
                         })
                         .OrderBy(x => x.AttendanceRate)
                         .Take(5)
@@ -71,15 +72,17 @@ namespace School_Management.API.Services
             }
 
             // 4. Academic Stats
-            var results = await context.Result
+            var studentAverages = await context.Result
                 .Where(x => x.SchoolYear == schoolYear)
+                .GroupBy(x => x.StudentId)
+                .Select(g => (double)g.Average(x => x.Value))
                 .ToListAsync();
 
             response.Academic = new AcademicStats
             {
                 AssignmentCompletionRate = await CalculateCompletionRate(),
-                GradeDistribution = results
-                    .GroupBy(x => GetGradeLabel(x.AverageScore))
+                GradeDistribution = studentAverages
+                    .GroupBy(v => GetGradeLabel(v))
                     .Select(g => new GradeDistributionDto
                     {
                         GradeLabel = g.Key,
