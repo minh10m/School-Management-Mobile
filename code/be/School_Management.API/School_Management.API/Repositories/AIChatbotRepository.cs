@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.Google;
@@ -23,8 +24,10 @@ namespace School_Management.API.Repositories
         private readonly IStudentRepository studentRepository;
         private readonly IScheduleRepository scheduleRepository;
         private readonly ITeacherRepository teacherRepository;
+        private readonly UserManager<AppUser> userManager;
+        private readonly RoleManager<IdentityRole<Guid>> roleManager;
 
-        public AIChatbotRepository(ApplicationDbContext context, Kernel kernel, ISchoolYearInfoService schoolYearInfo, IStudentRepository studentRepository, IScheduleRepository scheduleRepository, ITeacherRepository teacherRepository)
+        public AIChatbotRepository(ApplicationDbContext context, Kernel kernel, ISchoolYearInfoService schoolYearInfo, IStudentRepository studentRepository, IScheduleRepository scheduleRepository, ITeacherRepository teacherRepository, UserManager<AppUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
         {
             this.context = context;
             this.kernel = kernel;
@@ -32,6 +35,8 @@ namespace School_Management.API.Repositories
             this.studentRepository = studentRepository;
             this.scheduleRepository = scheduleRepository;
             this.teacherRepository = teacherRepository;
+            this.userManager = userManager;
+            this.roleManager = roleManager;
         }
         public async Task<AIChatResponse> ChatWithAI(AIChatRequest request, Guid userId, string role)
         {
@@ -49,11 +54,12 @@ namespace School_Management.API.Repositories
                 if (string.IsNullOrWhiteSpace(contextFromRag)) contextFromRag = "Không có dữ liệu";
 
 
-                if (role == "Student")  
+                if (role == "Student")
                     chatKernel.Plugins.AddFromObject(new StudentPlugin(role, userId, context, studentRepository, scheduleRepository, kernel));
                 else if (role == "Teacher")
                     chatKernel.Plugins.AddFromObject(new TeacherPlugin(role, userId, context, scheduleRepository, teacherRepository, kernel));
-
+                else if (role == "Admin")
+                    chatKernel.Plugins.AddFromObject(new AdminPlugin(role, userId, context, userManager, roleManager));
 
                     var chatHistory = new ChatHistory();
                 chatHistory.AddSystemMessage($@"Bạn là trợ lý EduManage. ĐÂY LÀ DỮ LIỆU NỘI QUY HỌC ĐƯỜNG HOẶC HƯỚNG DẪN SỬ DỤNG APP TRONG FILE RAG HỆ THỐNG. Context {contextFromRag}
@@ -63,13 +69,13 @@ namespace School_Management.API.Repositories
                                                    Quy tắc: 
                                                 1. NGHIỆP VỤ: Chỉ hỗ trợ điểm, lịch học/thi, sự kiện, học phí, nội quy, hướng dẫn sử dụng app. Khác: Từ chối lịch sự. Sai định dạng: Yêu cầu cung cấp câu hỏi phù hợp.
                                                 2. DỮ LIỆU: Trả về [] -> Báo chưa có dữ liệu. Không Thêm/Xóa/Sửa -> Báo nằm ngoài khả năng. Danh sách >15: Chỉ hiện 5 bản ghi mới nhất + yêu cầu lọc thêm.
-                                                3. BẢO MẬT (Role hiện tại: {role}): Chỉ xem thông tin cá nhân. Hỏi về người khác -> Từ chối. Hỏi theo tên -> Yêu cầu xác nhận chính chủ.
+                                                3. BẢO MẬT (Role hiện tại: {role}): Chỉ xem thông tin cá nhân áp dụng với role hiện tại là Student. Hỏi về người khác -> Từ chối nếu role hiện tại là Student nhé. Hỏi theo tên -> Yêu cầu xác nhận chính chủ cũng chỉ áp dụng với role hiện tại là Student nhé.
                                                 4. HIỂN THỊ: Hiển thị dạng danh sách trên xuống, không bảng + Icon (📅, 📘, ⏱️, ✅). Tiền tệ: Thêm dấu phân cách (VD: 2.000.000 VNĐ).
                                                 5. STYLE: Thân thiện. Thiếu tham số bắt buộc (VD: Năm học) -> Phải hỏi lại người dùng.
                                                 6. Năm học hiện tại: {schoolyearInfoDetail?.SchoolYear} - {schoolyearInfoDetail?.SchoolYear + 1}, học kì hiện tại là {schoolyearInfoDetail?.Term}. Vẫn yêu cầu người dùng cung cấp năm học kì học nếu không có.
                                                 7. STRICT RULE: Tuyệt đối KHÔNG sử dụng định dạng bảng (Markdown Table) cho danh sách. Hãy sử dụng định dạng danh sách có ký hiệu đầu dòng (Bullet points) hoặc đánh số. Mỗi mục phải phân tách rõ ràng bằng xuống dòng.
                                                 8. Nếu người dùng hỏi về nghiệp vụ, và không có plugin đáp ứng cho ra dữ liệu được, hãy tìm kiếm về hướng dẫn sử dụng, thao tác app và tiến hành định hướng bước làm cho người dùng để họ đạt được mục tiêu rồi trả lời cho phù hợp, NẾU KHÔNG CÓ DỮ LIỆU PHÙ HỢP TUYỆT ĐỐI KO BỊA
-                                                9. ""Hãy ưu tiên dữ liệu trong Context. Nếu câu hỏi của người dùng có ý nghĩa tương đồng với chỉ dẫn trong Context (ví dụ: 'đổi mật khẩu' và 'thay đổi pass'), hãy dùng dữ liệu đó để trả lời."" ");
+                                                9. ""Hãy ưu tiên dữ liệu trong Context. Nếu câu hỏi của người dùng có ý nghĩa tương đồng với chỉ dẫn trong Context (ví dụ: 'đổi mật khẩu' và 'thay đổi pass'), hãy dùng dữ liệu đó để trả lời."".");
 
                 foreach (var message in messages)
                 {
@@ -116,7 +122,7 @@ namespace School_Management.API.Repositories
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Lỗi rồi: {ex.Message}");
+                Console.WriteLine($"Lỗi rồi: {ex.InnerException?.Message}");
                 return new AIChatResponse { AIResponse = "Hiện hệ thống đang gặp một chút sự cố, bạn vui lòng chờ một chút hoặc thử lại sau nhé." };
             }
             
@@ -204,7 +210,7 @@ namespace School_Management.API.Repositories
             // 2. Tìm kiếm top 5 đoạn văn bản tương đồng nhất
             var chunks = await context.KnowledgeBase
                 .OrderBy(x => x.Embedding.CosineDistance(vectorQuery))
-                .Take(5)
+                .Take(6)
                 .Select(x => x.Content)
                 .ToListAsync();
 

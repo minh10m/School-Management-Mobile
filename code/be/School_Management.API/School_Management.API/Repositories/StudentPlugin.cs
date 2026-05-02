@@ -39,7 +39,7 @@ namespace School_Management.API.Repositories
                     [Description("Học kỳ (1 hoặc 2). Bắt buộc phải có.")]
                     int? Term = null,
 
-                    [Description("Năm học bắt đầu (ví dụ: 2024). Bắt buộc phải có.")]
+                    [Description("Năm học bắt đầu, là điều kiện lọc không bắt buộc nếu năm 2026-2027 thì lấy giá trị là 2026")]
                     int? SchoolYear = null
         )
         {
@@ -88,7 +88,7 @@ namespace School_Management.API.Repositories
         [Description("Lấy danh sách học phí và lệ phí liên quan của học sinh đang chat. Yêu cầu cung cấp năm học.")]
         public async Task<List<object>> GetAllMyFeeForStudent
         (
-            [Description("Năm học bắt đầu (ví dụ: 2024). Bắt buộc phải có.")]
+            [Description("Năm học bắt đầu, là điều kiện lọc không bắt buộc nếu năm 2026-2027 thì lấy giá trị là 2026")]
             int? SchoolYear = null
         )
         {
@@ -119,7 +119,7 @@ namespace School_Management.API.Repositories
         [Description("Lấy thông tin sự kiện diễn ra ở trường, yêu cầu cung cấp năm học bắt đầu và kì học")]
         public async Task<List<object>> GetAllEvent
         (
-            [Description("Năm học bắt đầu. Bắt buộc phải có")]
+            [Description("Năm học bắt đầu, là điều kiện lọc không bắt buộc nếu năm 2026-2027 thì lấy giá trị là 2026")]
             int? SchoolYear = null,
 
             [Description("Học kì.Bắt buộc phải có")]
@@ -175,7 +175,7 @@ namespace School_Management.API.Repositories
             "nhỏ hơn thời gian hiện tại hãy hiển thị là Qúa hạn, nếu thời gian kết thúc vẫn lớn hơn hiện tại hãy hiển thị chưa nộp")]
         public async Task<List<object>> GetAllAssignment
         (
-            [Description("Năm học bắt đầu. Bắt buộc phải có")]
+            [Description("Năm học bắt đầu, là điều kiện lọc không bắt buộc nếu năm 2026-2027 thì lấy giá trị là 2026")]
             int? SchoolYear = null
 
         )
@@ -215,7 +215,7 @@ namespace School_Management.API.Repositories
             [Description("Học kỳ (1 hoặc 2). Bắt buộc phải có.")]
             int? Term = null,
 
-            [Description("Năm học bắt đầu (ví dụ: 2024). Bắt buộc phải có.")]
+            [Description("Năm học bắt đầu, là điều kiện lọc không bắt buộc nếu năm 2026-2027 thì lấy giá trị là 2026")]
             int? SchoolYear = null
         )
         {
@@ -270,7 +270,7 @@ namespace School_Management.API.Repositories
             [Description("Học kỳ (1 hoặc 2). Bắt buộc phải có.")]
             int? Term = null,
 
-            [Description("Năm học bắt đầu (ví dụ: 2024). Bắt buộc phải có.")]
+            [Description("Năm học bắt đầu, là điều kiện lọc không bắt buộc nếu năm 2026-2027 thì lấy giá trị là 2026")]
             int? SchoolYear = null
         )
         {
