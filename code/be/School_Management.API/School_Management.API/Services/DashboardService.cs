@@ -141,7 +141,7 @@ namespace School_Management.API.Services
                 }).ToListAsync();
             activities.AddRange(recentSubmissions);
 
-            return activities.OrderByDescending(x => x.Time).Take(10).ToList();
+            return activities.OrderByDescending(x => x.Time).Take(30).ToList();
         }
     }
 }
