@@ -207,10 +207,10 @@ namespace School_Management.API.Services
                 query = query.Where(x => x.FullName.Contains(request.FullName));
 
             if (!string.IsNullOrWhiteSpace(request.Email))
-                query = query.Where(x => x.FullName.Contains(request.Email));
+                query = query.Where(x => x.Email.Contains(request.Email));
 
             if (!string.IsNullOrWhiteSpace(request.Address))
-                query = query.Where(x => x.FullName.Contains(request.Address));
+                query = query.Where(x => x.Address.Contains(request.Address));
 
             if (!string.IsNullOrWhiteSpace(request.Role))
             {

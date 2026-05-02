@@ -10,6 +10,7 @@ namespace School_Management.API.EntityConfigurations
         {
             builder.Property(x => x.Content)
                    .IsRequired();
+                   
 
             builder.Property(x => x.Embedding)
                    .HasColumnType("vector(3072)");
