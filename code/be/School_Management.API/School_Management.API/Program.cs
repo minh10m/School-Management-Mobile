@@ -141,6 +141,7 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IAIChatbotService, AIChatbotService>();
 builder.Services.AddScoped<IAIChatbotRepository, AIChatbotRepository>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
