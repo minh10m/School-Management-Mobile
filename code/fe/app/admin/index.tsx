@@ -3,6 +3,7 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Alert,
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
@@ -16,6 +17,8 @@ import SideMenu from "../../components/SideMenu";
 import { dashboardService } from "../../services/dashboard.service";
 import { DashboardStats } from "../../types/dashboard";
 
+import { reportGenerator } from "../../utils/reportGenerator";
+
 export default function AdminDashboard() {
   const router = useRouter();
   const { userInfo } = useAuthStore();
@@ -26,6 +29,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isMenuVisible, setMenuVisible] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -47,6 +51,18 @@ export default function AdminDashboard() {
     setRefreshing(true);
     await fetchStats();
     setRefreshing(false);
+  };
+
+  const handleCreateReport = async () => {
+    if (!stats) return;
+    try {
+      setIsGeneratingReport(true);
+      await reportGenerator.generateAdminReport(stats, Number(schoolYear));
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể tạo báo cáo PDF");
+    } finally {
+      setIsGeneratingReport(false);
+    }
   };
 
   const QUICK_ACTIONS = [
@@ -448,14 +464,21 @@ export default function AdminDashboard() {
             style={{ fontFamily: "Poppins-Regular" }}
             className="text-white/80 text-xs mt-1"
           >
-            Xem xét kết quả học tập và điểm danh Học kỳ 1.
+            Xem xét kết quả học tập và điểm danh Học kỳ 1 năm học {schoolYear}.
           </Text>
-          <TouchableOpacity className="bg-white/20 self-start px-4 py-1.5 rounded-full mt-4">
+          <TouchableOpacity 
+            className="bg-white/20 self-start px-4 py-1.5 rounded-full mt-4 flex-row items-center"
+            onPress={handleCreateReport}
+            disabled={isGeneratingReport}
+          >
+            {isGeneratingReport ? (
+              <ActivityIndicator size="small" color="white" className="mr-2" />
+            ) : null}
             <Text
               style={{ fontFamily: "Poppins-SemiBold" }}
               className="text-white text-[10px]"
             >
-              Tạo báo cáo
+              {isGeneratingReport ? "Đang tạo..." : "Tạo báo cáo"}
             </Text>
           </TouchableOpacity>
         </View>
