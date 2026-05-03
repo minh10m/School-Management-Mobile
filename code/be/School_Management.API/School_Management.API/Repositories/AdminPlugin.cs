@@ -131,7 +131,7 @@ namespace School_Management.API.Repositories
                 })
                 .ToListAsync();
 
-            return items;
+            return  items;
         }
 
         //LẤY DANH SÁCH VAI TRÒ 
