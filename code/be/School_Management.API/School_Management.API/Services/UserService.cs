@@ -200,64 +200,67 @@ namespace School_Management.API.Services
 
         public async Task<PagedResponse<UserListResponse>> GetAllUser(UserFilterRequest request)
         {
-            var query = userManager.Users.AsQueryable();
+            // 1. Khởi tạo query kết hợp bảng ngay từ đầu để lấy Role
+            // Dùng Left Join (DefaultIfEmpty) để tránh mất User nếu họ chưa được gán Role
+            var query = from user in context.Users
+                        join userRole in context.UserRoles on user.Id equals userRole.UserId into ur
+                        from userRole in ur.DefaultIfEmpty()
+                        join role in context.Roles on userRole.RoleId equals role.Id into r
+                        from role in r.DefaultIfEmpty()
+                        select new { user, roleName = role.Name };
 
-            // Filtering
-            if(!string.IsNullOrWhiteSpace(request.FullName))
-                query = query.Where(x => x.FullName.Contains(request.FullName));
+            // 2. Filtering
+            if (!string.IsNullOrWhiteSpace(request.FullName))
+                query = query.Where(x => x.user.FullName.Contains(request.FullName));
 
             if (!string.IsNullOrWhiteSpace(request.Email))
-                query = query.Where(x => x.Email.Contains(request.Email));
+                query = query.Where(x => x.user.Email.Contains(request.Email));
 
             if (!string.IsNullOrWhiteSpace(request.Address))
-                query = query.Where(x => x.Address.Contains(request.Address));
+                query = query.Where(x => x.user.Address.Contains(request.Address));
 
             if (!string.IsNullOrWhiteSpace(request.Role))
             {
-                query = from user in query
-                        join userRole in context.UserRoles on user.Id equals userRole.UserId
-                        join role in context.Roles on userRole.RoleId equals role.Id
-                        where role.Name.ToLower() == request.Role.ToLower()
-                        select user;
+                // Lọc theo Role đã join sẵn
+                query = query.Where(x => x.roleName.ToLower() == request.Role.ToLower());
             }
-            
 
-            //Sorting
-            if(!string.IsNullOrWhiteSpace(request.SortBy))
+            // 3. Sorting (Sử dụng x.user để truy cập thuộc tính)
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
             {
-                if(request.SortBy.Equals("FullName", StringComparison.OrdinalIgnoreCase))
+                query = request.SortBy.ToLower() switch
                 {
-                    query = request.IsAscending ? query.OrderBy(x => x.FullName) : query.OrderByDescending(x => x.FullName);
-                }
-                else if(request.SortBy.Equals("Address", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = request.IsAscending ? query.OrderBy(x => x.Address) : query.OrderByDescending(x => x.Address);
-                }
-                else if(request.SortBy.Equals("Email", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = request.IsAscending ? query.OrderBy(x => x.Email) : query.OrderByDescending(x => x.Email);
-                }
-                else if(request.SortBy.Equals("Birthday", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = request.IsAscending ? query.OrderBy(x => x.Birthday) : query.OrderByDescending(x => x.Birthday);
-                }
-                else if (request.SortBy.Equals("CreatedAt", StringComparison.OrdinalIgnoreCase))
-                {
-                    query = request.IsAscending ? query.OrderBy(x => x.CreatedAt) : query.OrderByDescending(x => x.CreatedAt);
-                }
+                    "fullname" => request.IsAscending ? query.OrderBy(x => x.user.FullName) : query.OrderByDescending(x => x.user.FullName),
+                    "address" => request.IsAscending ? query.OrderBy(x => x.user.Address) : query.OrderByDescending(x => x.user.Address),
+                    "email" => request.IsAscending ? query.OrderBy(x => x.user.Email) : query.OrderByDescending(x => x.user.Email),
+                    "birthday" => request.IsAscending ? query.OrderBy(x => x.user.Birthday) : query.OrderByDescending(x => x.user.Birthday),
+                    "createdat" => request.IsAscending ? query.OrderBy(x => x.user.CreatedAt) : query.OrderByDescending(x => x.user.CreatedAt),
+                    _ => query.OrderBy(x => x.user.FullName) // Mặc định
+                };
             }
+            else
+            {
+                query = query.OrderBy(x => x.user.FullName);
+            }
+
+            // 4. Count và Pagination
             var totalCount = await query.CountAsync();
-
-            //Pagination
             var skipResults = (request.PageNumber - 1) * request.PageSize;
-            var users = await query.Skip(skipResults).Take(request.PageSize).ToListAsync();
 
-            var items = new List<UserListResponse>();
-            foreach (var user in users)
-            {
-                var roles = await userManager.GetRolesAsync(user);
-                items.Add(ReturnListData(user, roles.FirstOrDefault()));
-            }
+            // 5. Select trực tiếp ra DTO để không còn vòng lặp foreach gọi DB nữa
+            var items = await query
+                .Skip(skipResults)
+                .Take(request.PageSize)
+                .Select(x => new UserListResponse
+                {
+                    UserId = x.user.Id,
+                    UserName = x.user.UserName,
+                    FullName = x.user.FullName,
+                    LockoutEnd = x.user.LockoutEnd,
+                    Role = x.roleName,
+                    CreatedAt = x.user.CreatedAt
+                })
+                .ToListAsync();
 
             return new PagedResponse<UserListResponse>
             {
@@ -267,7 +270,6 @@ namespace School_Management.API.Services
                 TotalCount = totalCount
             };
         }
-
         public async Task<UserInfoResponse> CreateUser(CreateUserRequest createUserRequest)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
