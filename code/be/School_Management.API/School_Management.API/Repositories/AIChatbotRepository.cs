@@ -222,7 +222,7 @@ namespace School_Management.API.Repositories
 
         public async Task<PagedResponse<UserAIHistoryChatResponse>> GetUserAIHistoryChatResponses(BaseRequestSecond baseRequest, Guid userId)
         {
-            var threeDaysAgo = DateTime.UtcNow.AddDays(-3);
+            var threeDaysAgo = DateTime.UtcNow.AddDays(-1);
             var query = context.AIChatHistory.AsNoTracking().Where(x => x.UserId == userId && x.CreatedAt >= threeDaysAgo).AsQueryable();
 
             query = query.OrderByDescending(x => x.CreatedAt);

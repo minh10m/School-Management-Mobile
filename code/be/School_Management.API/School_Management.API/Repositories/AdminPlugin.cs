@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using School_Management.API.Data;
@@ -94,63 +95,43 @@ namespace School_Management.API.Repositories
             [Description("Vai trò người dùng (Admin, giáo viên, học sinh), điều kiện lọc, không bắt buộc")]
             string? Role = null )
         {
-            var query = userManager.Users.AsQueryable();
+            var query = from user in context.Users
+                        join userRole in context.UserRoles on user.Id equals userRole.UserId into ur
+                        from userRole in ur.DefaultIfEmpty()
+                        join role in context.Roles on userRole.RoleId equals role.Id into r
+                        from role in r.DefaultIfEmpty()
+                        select new { user, roleName = role.Name };
 
-            // Filtering
+            // 2. Filtering
             if (!string.IsNullOrWhiteSpace(FullName))
-                query = query.Where(x => x.FullName.Contains(FullName));
+                query = query.Where(x => x.user.FullName.Contains(FullName));
 
             if (!string.IsNullOrWhiteSpace(Email))
-                query = query.Where(x => x.Email.Contains(Email));
+                query = query.Where(x => x.user.Email.Contains(Email));
 
             if (!string.IsNullOrWhiteSpace(Address))
-                query = query.Where(x => x.Address.Contains(Address));
+                query = query.Where(x => x.user.Address.Contains(Address));
 
             if (!string.IsNullOrWhiteSpace(Role))
             {
-                query = from user in query
-                        join userRole in context.UserRoles on user.Id equals userRole.UserId
-                        join role in context.Roles on userRole.RoleId equals role.Id
-                        where role.Name.ToLower() == Role.ToLower()
-                        select user;
+                query = query.Where(x => x.roleName.ToLower() == Role.ToLower());
             }
 
+            query = query.OrderBy(x => x.user.FullName);
 
-            //Sorting
-            query = query.OrderBy(x => x.FullName);
-
-            //Pagination
-            var users = await query.Take(50).Select(g => new AppUser
-            {
-                Id = g.Id,
-                CreatedAt = g.CreatedAt,
-                FullName = g.FullName,
-                LockoutEnd = g.LockoutEnd,
-                UserName = g.UserName
-            }).ToListAsync();
-
-            var items = new List<UserListResponse>();
-            foreach (var user in users)
-            {
-                var roles = await userManager.GetRolesAsync(user);
-                items.Add(ReturnListData(user, roles.FirstOrDefault()));
-            }
+            var items = await query
+                .Select(x => new UserListResponse
+                {
+                    UserId = x.user.Id,
+                    UserName = x.user.UserName,
+                    FullName = x.user.FullName,
+                    LockoutEnd = x.user.LockoutEnd,
+                    Role = x.roleName,
+                    CreatedAt = x.user.CreatedAt
+                })
+                .ToListAsync();
 
             return items;
-            
-        }
-
-        public UserListResponse ReturnListData(AppUser user, string? role)
-        {
-            return new UserListResponse
-            {
-                UserId = user.Id,
-                UserName = user.UserName,
-                FullName = user.FullName,
-                LockoutEnd = user.LockoutEnd,
-                Role = role,
-                CreatedAt = user.CreatedAt
-            };
         }
 
         //LẤY DANH SÁCH VAI TRÒ 
