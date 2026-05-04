@@ -41,6 +41,9 @@ namespace School_Management.API.Data
         public DbSet<EnrollCourse> EnrollCourse { get; set; }
         public DbSet<AIChatHistory> AIChatHistory { get; set; }
         public DbSet<KnowledgeBase> KnowledgeBase { get; set; }
+        public DbSet<Conversation> Conversation { get; set; }
+        public DbSet<UserConversation> UserConversation { get; set; }
+        public DbSet<Message> Message { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
