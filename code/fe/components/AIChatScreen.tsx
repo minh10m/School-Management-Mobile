@@ -11,8 +11,8 @@ import {
   Alert,
   Animated,
   StyleSheet,
-  Image,
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -21,6 +21,8 @@ import { aiChatService } from "../services/aiChat.service";
 import { useAuthStore } from "../store/authStore";
 
 // Inline types to avoid stale module resolution
+const AI_AVATAR = require("../assets/images/AI-Assist.png");
+
 interface ChatMessage {
   id: string;
   content: string;
@@ -309,9 +311,9 @@ export default function AIChatScreen({ role }: Props) {
         <View style={styles.aiBubbleWrap}>
           <View style={styles.aiAvatar}>
             <Image
-              source={require("../assets/images/AI-Assist.png")}
+              source={AI_AVATAR}
               style={{ width: "100%", height: "100%", borderRadius: 15 }}
-              resizeMode="cover"
+              contentFit="cover"
             />
           </View>
           <View style={styles.aiBubble}>
@@ -336,9 +338,9 @@ export default function AIChatScreen({ role }: Props) {
         <View style={styles.headerCenter}>
           <View style={styles.headerAvatar}>
             <Image
-              source={require("../assets/images/AI-Assist.png")}
-              style={{ width: "120%", height: "120%" }}
-              resizeMode="cover"
+              source={AI_AVATAR}
+              style={{ width: "100%", height: "100%" }}
+              contentFit="cover"
             />
           </View>
           <View>
@@ -397,9 +399,9 @@ export default function AIChatScreen({ role }: Props) {
               <View style={styles.emptyState}>
                 <View style={styles.emptyIcon}>
                   <Image
-                    source={require("../assets/images/AI-Assist.png")}
+                    source={AI_AVATAR}
                     style={{ width: "100%", height: "100%", borderRadius: 36 }}
-                    resizeMode="cover"
+                    contentFit="cover"
                   />
                 </View>
                 <Text style={[styles.emptyTitle, { color: config.accent }]}>
@@ -432,13 +434,13 @@ export default function AIChatScreen({ role }: Props) {
                 <View style={styles.aiBubbleWrap}>
                   <View style={styles.aiAvatar}>
                     <Image
-                      source={require("../assets/images/AI-Assist.png")}
+                      source={AI_AVATAR}
                       style={{
                         width: "100%",
                         height: "100%",
                         borderRadius: 15,
                       }}
-                      resizeMode="cover"
+                      contentFit="cover"
                     />
                   </View>
                   <View style={styles.aiBubble}>
