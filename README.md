@@ -1,3 +1,4 @@
+<img width="870" height="1883" alt="z7798077776061_48128ac22ea20a9039b730604045110e" src="https://github.com/user-attachments/assets/7f391682-9002-4f05-a319-acc7b9d8779e" />
 # 📚 School Management System (Mobile Application)
 
 A scalable mobile application for managing students, courses, enrollments, and academic workflows. The system integrates modern backend architecture with real-time features, third-party services, and AI capabilities.
