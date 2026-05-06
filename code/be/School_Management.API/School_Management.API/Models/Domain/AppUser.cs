@@ -16,5 +16,7 @@ namespace School_Management.API.Models.Domain
         public Teacher? Teacher { get; set; }
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
         public ICollection<AIChatHistory> AIChatHistories { get; set; } = new List<AIChatHistory>();
+        public ICollection<UserConversation> UserConversations { get; set; } = new List<UserConversation>();
+        public ICollection<Message> Messages { get; set; } = new List<Message>();
     }
 }
