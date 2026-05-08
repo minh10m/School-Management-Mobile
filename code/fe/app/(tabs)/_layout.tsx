@@ -68,12 +68,13 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
-        name="events"
+        name="chat"
         options={{
-          title: "Sự kiện",
+          title: "Tin nhắn",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="megaphone-outline" size={24} color={color} />
+            <Ionicons name="chatbubbles-outline" size={24} color={color} />
           ),
         }}
       />
@@ -88,6 +89,7 @@ export default function TabLayout() {
       />
       {/* Hidden screens - not shown in tab bar */}
       <Tabs.Screen name="calendar" options={{ href: null }} />
+      <Tabs.Screen name="events" options={{ href: null }} />
     </Tabs>
   );
 }
