@@ -68,8 +68,6 @@ A scalable mobile application for managing students, courses, enrollments, and a
 ### 1. Backend
 The backend is already deployed and managed via CI/CD (GitHub Actions).  
 
-Swagger Documentation: https://api.tuan-minh-dev-soc.io.vn/swagger
-
 ### 2. Mobile (Frontend)
 Follow these steps to run the mobile application locally:
 
