@@ -199,10 +199,10 @@ export default function HomeScreen() {
     },
     {
       id: "7",
-      title: "Điểm danh",
-      icon: "checkbox-outline",
-      color: "bg-emerald-100",
-      iconColor: "#10B981",
+      title: "Sự kiện",
+      icon: "megaphone-outline",
+      color: "bg-rose-100",
+      iconColor: "#F43F5E",
     },
     {
       id: "8",
@@ -291,8 +291,8 @@ export default function HomeScreen() {
                     router.push("/student/results" as any);
                   } else if (item.title === "Lịch học") {
                     router.push("/(tabs)/timetable" as any);
-                  } else if (item.title === "Điểm danh") {
-                    router.push("/(tabs)/attendance" as any);
+                  } else if (item.title === "Sự kiện") {
+                    router.push("/events" as any);
                   } else if (item.title === "Khóa học") {
                     router.push("/student/courses" as any);
                   } else if (item.title === "Khóa của tôi") {

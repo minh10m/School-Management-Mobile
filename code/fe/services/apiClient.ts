@@ -96,6 +96,7 @@ apiClient.interceptors.response.use(
 
         const newAccessToken = response.data.accessToken;
         const newRefreshToken = response.data.refreshToken;
+        const newFirebaseToken = response.data.firebaseToken || useAuthStore.getState().firebaseToken;
 
         // Optionally update user info if returned
         const currentUserInfo = useAuthStore.getState().userInfo;
@@ -104,6 +105,7 @@ apiClient.interceptors.response.use(
         await setAuth(
           newAccessToken,
           newRefreshToken,
+          newFirebaseToken || null,
           currentUserInfo || undefined,
         );
 

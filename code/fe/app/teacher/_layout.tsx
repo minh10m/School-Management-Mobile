@@ -66,7 +66,6 @@ export default function TeacherLayout() {
       <Stack.Screen name="my-class/assignments" />
       <Stack.Screen name="my-class/assignments/[id]" />
       <Stack.Screen name="my-class/create-assignment" />
-      <Stack.Screen name="results/index" />
       <Stack.Screen name="my-homeroom-class/results" />
       <Stack.Screen name="my-class/batch-entry" />
       <Stack.Screen name="manage-result" />

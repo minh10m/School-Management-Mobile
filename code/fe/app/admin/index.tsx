@@ -150,6 +150,13 @@ export default function AdminDashboard() {
       iconColor: "#059669",
       route: "/admin/ai-chat",
     },
+    {
+      label: "Tin nhắn",
+      icon: "chatbubbles-outline",
+      color: "bg-cyan-100",
+      iconColor: "#06B6D4",
+      route: "/admin/chat",
+    },
   ];
 
   const STAT_CARDS = [

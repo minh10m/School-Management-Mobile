@@ -400,6 +400,13 @@ export default function TeacherDashboard() {
               color="bg-violet-100"
               iconColor="#8B5CF6"
             />
+            <TeachingCard
+              icon="chatbubbles"
+              label="Tin nhắn"
+              route="/teacher/chat"
+              color="bg-cyan-100"
+              iconColor="#06B6D4"
+            />
           </View>
         </View>
 
