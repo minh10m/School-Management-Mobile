@@ -110,7 +110,7 @@ namespace School_Management.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> GetAllUsers([FromQuery] UserFilterRequest request)
         {
             if (request.SortBy == null) request.SortBy = "FullName";

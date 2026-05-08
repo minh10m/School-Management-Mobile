@@ -75,12 +75,14 @@ namespace School_Management.API.Repositories
             var senderId = request.SenderId;
             var receiverId = request.ReceiverId;
 
-            var conversationId = await context.UserConversation.AsNoTracking()
-                                                          .Where(x => x.UserId == senderId && !x.Conversation.IsGroup
-                                                                   && context.UserConversation.Any(uc => uc.ConversationId == x.ConversationId && x.UserId == receiverId))
-                                                          .Select(g => g.ConversationId)
-                                                          .FirstOrDefaultAsync();
-            if (conversationId == Guid.Empty) return new CheckMessageExistedResponse { ConversationId = null};
+            var conversationId = await context.UserConversation
+                .AsNoTracking()
+                .Where(uc => uc.UserId == senderId && !uc.Conversation.IsGroup)
+                .Where(uc => context.UserConversation.Any(inner =>
+                    inner.ConversationId == uc.ConversationId && inner.UserId == receiverId))
+                .Select(uc => (Guid?)uc.ConversationId) 
+                .FirstOrDefaultAsync();
+
             return new CheckMessageExistedResponse { ConversationId = conversationId };
         }
 
