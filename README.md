@@ -3,6 +3,49 @@
 A scalable mobile application for managing students, courses, enrollments, and academic workflows. The system integrates modern backend architecture with real-time features, third-party services, and AI capabilities.
 
 ---
+
+## 📱 Demo Screenshots
+### Admin screen 
+<p align="left">
+<img src="https://github.com/user-attachments/assets/e68bdc31-8f50-41e1-8b5f-0026926b5a7f" width="30%" />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/710eeaf0-778f-4f39-9ae4-4cc80044d5fc" width="30%" />
+</p>
+
+### AI chatbot screen
+<p align="left">
+<img src="https://github.com/user-attachments/assets/bb9d0171-1add-42f6-8fc1-10efabbe9404" width="30%" />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/22258c07-47b5-4fb9-bbd7-c17354af91dc" width="30%" />
+</p>
+
+### Course screen
+<p align="left">
+<img src="https://github.com/user-attachments/assets/4375ae3b-447b-4514-8f15-06ea03a3319a" width="30%"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/4bb0bef3-a5b2-4e5d-a534-882b940a0869" width="30%"/>
+</p>
+
+### Login and Attendance screen
+<p align="left">
+<img src="https://github.com/user-attachments/assets/0b3df493-a526-46e6-9662-dff202c082ee" width="30%"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/9b43c3a4-7066-4902-9905-9a49e7d0060b" width="30%"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/7d30339b-146a-4000-80b3-678071bbf67d" width="30%"/>
+</p>
+
+## Teacher and Student screen
+<p align="left">
+<img src="https://github.com/user-attachments/assets/e691eb19-cb21-4230-b867-e65b156cb510" width="30%"/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/c7165f4b-2027-4694-97a4-54c07d073cae" width="30%"/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/ecced54e-1870-432a-a1e8-1d6ec009571d" width="30%"/>
+</p>
+
+---
+
 ## 📱 Project Overview
 
 - **Comprehensive Management:** Handles students, courses, enrollments, and scheduling  
