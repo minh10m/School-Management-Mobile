@@ -10,13 +10,10 @@ namespace School_Management.API.Models.Domain
         public string? ConversationName { get; set; }
         public bool IsGroup { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
-        public Guid? LastMessageId { get; set; }
-
+        public DateTimeOffset LastUpdatedAt { get; set; }
         //Navigation properties
         public ICollection<UserConversation> UserConversations { get; set; } = new List<UserConversation>();
         public ICollection<Message> Messages { get; set; } = new List<Message>();
 
-        [ForeignKey("LastMessageId")]
-        public Message? LastMessage { get; set; }
     }
 }
