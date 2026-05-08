@@ -11,11 +11,6 @@ namespace School_Management.API.EntityConfigurations
             builder.Property(x => x.Id).IsRequired();
             builder.Property(x => x.IsGroup).IsRequired();
             builder.Property(x => x.CreatedAt).IsRequired();
-
-            builder.HasOne(x => x.LastMessage)
-               .WithMany() 
-               .HasForeignKey(x => x.LastMessageId)
-               .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

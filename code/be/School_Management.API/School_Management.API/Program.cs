@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.Google;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -142,6 +144,8 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IAIChatbotService, AIChatbotService>();
 builder.Services.AddScoped<IAIChatbotRepository, AIChatbotRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
@@ -205,6 +209,21 @@ builder.Services.AddCors(options => {
               .AllowCredentials(); // Bắt buộc cho SignalR
     });
 });
+
+//Firebase
+string firebaseConfigJson = builder.Configuration["Firebase:Config"];
+
+if (!string.IsNullOrEmpty(firebaseConfigJson))
+{
+    FirebaseApp.Create(new AppOptions()
+    {
+        // Dùng FromJson thay vì FromFile để truyền trực tiếp nội dung
+        Credential = GoogleCredential.FromJson(firebaseConfigJson)
+    });
+}
+
+builder.Services.AddSingleton<IFirebaseService, FirebaseService>();
+
 
 // Configure AI Chatbot (Semantic Kernel)
 builder.Services.AddScoped(sp =>

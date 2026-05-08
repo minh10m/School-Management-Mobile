@@ -8,7 +8,7 @@ namespace School_Management.API.Models.Domain
         [Key]
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
-
+        public int UnReadCount { get; set; }
         public Guid ConversationId { get; set; }
 
         //Navigation properties
@@ -17,7 +17,5 @@ namespace School_Management.API.Models.Domain
 
         [ForeignKey("ConversationId")]
         public Conversation Conversation { get; set; } = null!;
-
-
     }
 }

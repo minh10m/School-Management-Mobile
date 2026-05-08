@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -12,9 +13,11 @@ using School_Management.API.Data;
 namespace School_Management.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507122454_UpdateChatMessage")]
+    partial class UpdateChatMessage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -428,10 +431,12 @@ namespace School_Management.API.Migrations
                     b.Property<bool>("IsGroup")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTimeOffset>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<Guid?>("LastMessageId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LastMessageId");
 
                     b.ToTable("Conversation");
                 });
@@ -1451,6 +1456,16 @@ namespace School_Management.API.Migrations
                         .HasForeignKey("HomeRoomId");
 
                     b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("School_Management.API.Models.Domain.Conversation", b =>
+                {
+                    b.HasOne("School_Management.API.Models.Domain.Message", "LastMessage")
+                        .WithMany()
+                        .HasForeignKey("LastMessageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("LastMessage");
                 });
 
             modelBuilder.Entity("School_Management.API.Models.Domain.Course", b =>

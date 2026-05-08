@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FirebaseAdmin.Auth;
+using Microsoft.AspNetCore.Identity;
 using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
@@ -90,6 +91,8 @@ namespace School_Management.API.Services
             // Call insert RToken method
             await authRepository.AddRefreshToken(RToken);
 
+            var firebaseToken = await FirebaseAuth.DefaultInstance.CreateCustomTokenAsync(user.Id.ToString());
+
             return new AuthResponse
             {
                 AccessToken = accessToken,
@@ -98,7 +101,8 @@ namespace School_Management.API.Services
                 Role = roles.FirstOrDefault(),
                 FullName = user.FullName,
                 Email = user.Email,
-                UserId = user.Id
+                UserId = user.Id,
+                FirebaseToken = firebaseToken
             };
         }
 

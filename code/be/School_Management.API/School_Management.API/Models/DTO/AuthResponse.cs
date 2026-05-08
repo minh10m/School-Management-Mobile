@@ -6,7 +6,8 @@ namespace School_Management.API.Models.DTO
     {
         public string AccessToken { get; set; } = string.Empty;
         public string RefreshToken { get; set; } = string.Empty;
-        public DateTimeOffset AccessTokenExpireTime { get; set; } 
+        public DateTimeOffset AccessTokenExpireTime { get; set; }
+        public string FirebaseToken { get; set; }
 
         public Guid? UserId { get; set; }
         public string? FullName { get; set; } = string.Empty;
