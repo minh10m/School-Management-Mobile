@@ -17,7 +17,7 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ### Backend (Core System)
 - **Language/Framework:** C#, ASP.NET Core  
-- **Data Access:** Entity Framework Core, ADO.NET  
+- **Data Access:** Entity Framework Core
 - **Databases:** PostgreSQL (relational), Firebase Firestore (real-time), Redis (caching)  
 - **Security:** JWT, RBAC, Cloudflare WAF  
 
