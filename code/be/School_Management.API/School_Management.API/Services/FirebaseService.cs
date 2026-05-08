@@ -1,4 +1,5 @@
-﻿using Google.Cloud.Firestore;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
 
 namespace School_Management.API.Services
@@ -9,15 +10,30 @@ namespace School_Management.API.Services
 
         public FirebaseService(IConfiguration configuration)
         {
-            var projectId = configuration["Firebase:ProjectId"];
-            var configJson = configuration["Firebase:Config"];
-
-            var firestoreClient = new FirestoreClientBuilder
+            try
             {
-                JsonCredentials = configJson
-            }.Build();
+                var projectId = configuration["Firebase:ProjectId"];
+                var configJson = configuration["Firebase:Config"];
 
-            _db = FirestoreDb.Create(projectId, firestoreClient);
+                if (string.IsNullOrEmpty(configJson))
+                {
+                    Console.WriteLine("[FIREBASE ERROR] ConfigJson is null or empty!");
+                    return;
+                }
+
+                var credential = GoogleCredential.FromJson(configJson);
+                var client = new FirestoreClientBuilder
+                {
+                    Credential = credential
+                }.Build();
+
+                _db = FirestoreDb.Create(projectId, client);
+                Console.WriteLine("[FIREBASE SUCCESS] FirestoreDb initialized successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[FIREBASE ERROR] Critical initialization failure: {ex.Message}");
+            }
         }
         public async Task UpdateGroupMembers(Guid conversationId, List<Guid> allMemberIds)
         {

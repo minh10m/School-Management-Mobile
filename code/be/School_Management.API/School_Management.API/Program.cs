@@ -210,19 +210,24 @@ builder.Services.AddCors(options => {
     });
 });
 
-//Firebase
-string firebaseConfigJson = builder.Configuration["Firebase:Config"];
-
-if (!string.IsNullOrEmpty(firebaseConfigJson))
+try
 {
-    FirebaseApp.Create(new AppOptions()
+    string firebaseConfigJson = builder.Configuration["Firebase:Config"];
+    if (!string.IsNullOrEmpty(firebaseConfigJson) && FirebaseApp.DefaultInstance == null)
     {
-        // Dùng FromJson thay vì FromFile để truyền trực tiếp nội dung
-        Credential = GoogleCredential.FromJson(firebaseConfigJson)
-    });
+        FirebaseApp.Create(new AppOptions()
+        {
+            Credential = GoogleCredential.FromJson(firebaseConfigJson)
+        });
+        Console.WriteLine("[FIREBASE] DefaultInstance created successfully.");
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[FIREBASE WARNING] DefaultInstance init failed: {ex.Message}");
 }
 
-builder.Services.AddSingleton<IFirebaseService, FirebaseService>();
+builder.Services.AddScoped<IFirebaseService, FirebaseService>();
 
 
 // Configure AI Chatbot (Semantic Kernel)
