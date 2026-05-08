@@ -1,0 +1,74 @@
+import { ApiResponse, BaseRequestSecond, PagedResponse } from "../types/common";
+import {
+  AddMembersRequest,
+  CheckMessageExistedResponse,
+  ConversationResponse,
+  CreateGroupRequest,
+  GetConversationFilterRequest,
+  GetMessageResponseDto,
+  MessageResponse,
+  SendMessageRequest,
+} from "../types/conversation";
+import apiClient from "./apiClient";
+
+export const conversationService = {
+  // ─── CHECK CONVERSATION ───────────────────────────────────────────────────────
+  /**
+   * Kiểm tra xem đã có cuộc trò chuyện giữa người dùng hiện tại và otherUserId chưa
+   * GET /conversations/check/{otherUserId}
+   */
+  checkConversation: async (otherUserId: string): Promise<ApiResponse<CheckMessageExistedResponse>> => {
+    const response = await apiClient.get<ApiResponse<CheckMessageExistedResponse>>(`/conversations/check/${otherUserId}`);
+    return response.data;
+  },
+
+  // ─── SEND MESSAGE ─────────────────────────────────────────────────────────────
+  /**
+   * Gửi tin nhắn mới
+   * POST /conversations/send
+   */
+  sendMessage: async (payload: SendMessageRequest): Promise<ApiResponse<string>> => {
+    const response = await apiClient.post<ApiResponse<string>>("/conversations/send", payload);
+    return response.data;
+  },
+
+  // ─── GET MY CONVERSATIONS ─────────────────────────────────────────────────────
+  /**
+   * Lấy danh sách các cuộc trò chuyện của tôi
+   * GET /conversations
+   */
+  getMyConversations: async (params?: GetConversationFilterRequest): Promise<PagedResponse<ConversationResponse>> => {
+    const response = await apiClient.get<PagedResponse<ConversationResponse>>("/conversations", { params });
+    return response.data;
+  },
+
+  // ─── GET MESSAGES ─────────────────────────────────────────────────────────────
+  /**
+   * Lấy danh sách tin nhắn trong một cuộc trò chuyện
+   * GET /conversations/{conversationId}/messages
+   */
+  getMessages: async (conversationId: string, params?: BaseRequestSecond): Promise<ApiResponse<GetMessageResponseDto>> => {
+    const response = await apiClient.get<ApiResponse<GetMessageResponseDto>>(`/conversations/${conversationId}/messages`, { params });
+    return response.data;
+  },
+
+  // ─── CREATE GROUP ─────────────────────────────────────────────────────────────
+  /**
+   * Tạo nhóm trò chuyện mới
+   * POST /conversations/group
+   */
+  createGroup: async (payload: CreateGroupRequest): Promise<ApiResponse<ConversationResponse>> => {
+    const response = await apiClient.post<ApiResponse<ConversationResponse>>("/conversations/group", payload);
+    return response.data;
+  },
+
+  // ─── ADD MEMBERS TO GROUP ─────────────────────────────────────────────────────
+  /**
+   * Thêm thành viên vào nhóm trò chuyện
+   * POST /conversations/group/members
+   */
+  addMembersToGroup: async (payload: AddMembersRequest): Promise<ApiResponse<ConversationResponse>> => {
+    const response = await apiClient.post<ApiResponse<ConversationResponse>>("/conversations/group/members", payload);
+    return response.data;
+  },
+};

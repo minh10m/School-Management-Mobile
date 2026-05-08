@@ -3,6 +3,7 @@
 A scalable mobile application for managing students, courses, enrollments, and academic workflows. The system integrates modern backend architecture with real-time features, third-party services, and AI capabilities.
 
 ---
+
 ## 📱 Demo Screenshots
 ### Admin screen 
 <p align="left">
@@ -43,6 +44,8 @@ A scalable mobile application for managing students, courses, enrollments, and a
 <img src="https://github.com/user-attachments/assets/ecced54e-1870-432a-a1e8-1d6ec009571d" width="30%"/>
 </p>
 
+---
+
 ## 📱 Project Overview
 
 - **Comprehensive Management:** Handles students, courses, enrollments, and scheduling  
@@ -57,7 +60,7 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ### Backend (Core System)
 - **Language/Framework:** C#, ASP.NET Core  
-- **Data Access:** Entity Framework Core, ADO.NET  
+- **Data Access:** Entity Framework Core
 - **Databases:** PostgreSQL (relational), Firebase Firestore (real-time), Redis (caching)  
 - **Security:** JWT, RBAC, Cloudflare WAF  
 
@@ -107,8 +110,6 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ### 1. Backend
 The backend is already deployed and managed via CI/CD (GitHub Actions).  
-
-Swagger Documentation: https://api.tuan-minh-dev-soc.io.vn/swagger
 
 ### 2. Mobile (Frontend)
 Follow these steps to run the mobile application locally:

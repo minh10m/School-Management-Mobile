@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
@@ -43,7 +43,7 @@ namespace School_Management.API.Controllers
         //
         [HttpGet]
         [Route("{userId}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> GetUserById([FromRoute] Guid userId)
         {
             var result = await userService.GetUserById(userId.ToString());

@@ -5,8 +5,10 @@ import { View, Text, FlatList, TextInput, ActivityIndicator, RefreshControl, Tou
 import { SafeAreaView } from "react-native-safe-area-context";
 import { eventService } from "../../services/event.service";
 import { EventItem } from "../../types/event";
+import { useConfigStore } from "../../store/configStore";
 
 export default function EventsTab() {
+  const { schoolYear, term } = useConfigStore();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -18,8 +20,8 @@ export default function EventsTab() {
       setLoading(true);
       const response = await eventService.getEvents({ 
         Title: search || undefined,
-        SchoolYear: 2026, 
-        Term: 1 
+        SchoolYear: schoolYear, 
+        Term: term 
       });
       setEvents(response.items);
     } catch (error) {

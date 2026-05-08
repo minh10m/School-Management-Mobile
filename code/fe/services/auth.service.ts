@@ -20,7 +20,7 @@ export const authService = {
 
     await useAuthStore
       .getState()
-      .setAuth(data.accessToken, data.refreshToken, userInfo);
+      .setAuth(data.accessToken, data.refreshToken, data.firebaseToken || null, userInfo);
 
     return data;
   },

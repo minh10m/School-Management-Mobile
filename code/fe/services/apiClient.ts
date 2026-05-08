@@ -12,6 +12,7 @@ const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
   },
   timeout: 10000,
 });
@@ -95,6 +96,7 @@ apiClient.interceptors.response.use(
 
         const newAccessToken = response.data.accessToken;
         const newRefreshToken = response.data.refreshToken;
+        const newFirebaseToken = response.data.firebaseToken || useAuthStore.getState().firebaseToken;
 
         // Optionally update user info if returned
         const currentUserInfo = useAuthStore.getState().userInfo;
@@ -103,6 +105,7 @@ apiClient.interceptors.response.use(
         await setAuth(
           newAccessToken,
           newRefreshToken,
+          newFirebaseToken || null,
           currentUserInfo || undefined,
         );
 
@@ -123,7 +126,7 @@ apiClient.interceptors.response.use(
     }
 
     if (error.response) {
-      console.log('API Error Response:', error.response.status, error.response.data);
+      console.log('API Error Response:', error.response.status, error.response.data, 'URL:', error.config?.url);
     }
     return Promise.reject(error);
   },

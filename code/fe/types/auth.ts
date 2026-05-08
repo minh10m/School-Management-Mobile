@@ -9,6 +9,7 @@ export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   accessTokenExpireTime: string;
+  firebaseToken?: string;
   userId: string;
   fullName: string;
   email: string;
