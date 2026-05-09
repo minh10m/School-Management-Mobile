@@ -5,6 +5,8 @@ import axios, {
 } from "axios";
 import Constants from "expo-constants";
 import { useAuthStore } from "../store/authStore";
+import { Alert } from "react-native";
+import { router } from "expo-router";
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl;
 
@@ -119,6 +121,8 @@ apiClient.interceptors.response.use(
         processQueue(refreshError, null);
         // Force logout if refresh fails
         await clearAuth();
+        Alert.alert("Phiên đăng nhập hết hạn", "Vui lòng đăng nhập lại để tiếp tục.");
+        router.replace("/login");
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

@@ -46,7 +46,7 @@ export default function HomeScreen() {
       });
       setEvents(res.items || []);
     } catch (err) {
-      console.error("Error fetching events:", err);
+      console.log("Error fetching events:", err);
     } finally {
       setEventLoading(false);
     }
@@ -69,7 +69,7 @@ export default function HomeScreen() {
       const res = await assignmentService.getMyAssignments(params);
       setAssignments(res || []);
     } catch (err) {
-      console.error("Error fetching assignments:", err);
+      console.log("Error fetching assignments:", err);
     } finally {
       setAssignmentLoading(false);
     }
