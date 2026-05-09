@@ -211,18 +211,23 @@ namespace School_Management.API.Services
 
             // 2. Filtering
             if (!string.IsNullOrWhiteSpace(request.FullName))
-                query = query.Where(x => x.user.FullName.Contains(request.FullName));
+            {
+                var name = request.FullName.Trim().ToLower();
+                query = query.Where(x => x.user.FullName.Trim().ToLower().Contains(name));
+            }    
 
             if (!string.IsNullOrWhiteSpace(request.Email))
-                query = query.Where(x => x.user.Email.Contains(request.Email));
+            {
+                var email = request.Email.Trim().ToLower();
+                query = query.Where(x => x.user.Email.Trim().ToLower().Contains(email));
+            }
 
             if (!string.IsNullOrWhiteSpace(request.Address))
                 query = query.Where(x => x.user.Address.Contains(request.Address));
 
             if (!string.IsNullOrWhiteSpace(request.Role))
             {
-                // Lọc theo Role đã join sẵn
-                query = query.Where(x => x.roleName.ToLower() == request.Role.ToLower());
+                query = query.Where(x => x.roleName.ToLower().Trim() == request.Role.ToLower().Trim());
             }
 
             // 3. Sorting (Sử dụng x.user để truy cập thuộc tính)
