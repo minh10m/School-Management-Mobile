@@ -12,6 +12,17 @@ A scalable mobile application for managing students, courses, enrollments, and a
 <img src="https://github.com/user-attachments/assets/710eeaf0-778f-4f39-9ae4-4cc80044d5fc" width="30%" />
 </p>
 
+### Payment screen
+<img src="https://github.com/user-attachments/assets/568deeda-9190-4d70-9529-f3e65028e739" width="30%"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/53217d3c-e83b-4a86-9f3f-ae6583490c0e" width="30%"/>
+
+### Chat message screen
+<img src="https://github.com/user-attachments/assets/0b665578-83b6-441e-a01d-80b561f7bc06" width="30%"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/24c0038e-473c-43c8-a6d3-4291c588f96b" width="30%"/>
+
+
 ### AI chatbot screen
 <p align="left">
 <img src="https://github.com/user-attachments/assets/bb9d0171-1add-42f6-8fc1-10efabbe9404" width="30%" />
