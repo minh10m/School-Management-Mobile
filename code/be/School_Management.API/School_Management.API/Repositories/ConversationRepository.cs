@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
@@ -227,7 +227,9 @@ namespace School_Management.API.Repositories
             if(!string.IsNullOrWhiteSpace(request.DisplayName))
             {
                 var name = request.DisplayName.Trim().ToLower();
-                query = query.Where(x => x.IsGroup ? x.ConversationName.Contains(name) : x.UserConversations.Any(uc => uc.UserId != userId && uc.User.FullName.Contains(name)));
+                query = query.Where(x => x.IsGroup 
+                    ? x.ConversationName.ToLower().Contains(name) 
+                    : x.UserConversations.Any(uc => uc.UserId != userId && uc.User.FullName.ToLower().Contains(name)));
             }
 
             //sorting

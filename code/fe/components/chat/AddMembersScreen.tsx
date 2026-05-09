@@ -17,26 +17,26 @@ import { userService } from "../../services/user.service";
 import { conversationService } from "../../services/conversation.service";
 import { UserListItem } from "../../types/user";
 
-interface NewGroupScreenProps {
+interface AddMembersScreenProps {
   rolePrefix?: "admin" | "teacher" | "student";
 }
 
-// Color constant based on the app's theme
 const PRIMARY_COLOR = "#136ADA";
 const PRIMARY_LIGHT = "#E7F0FB";
 
-export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupScreenProps) {
+export default function AddMembersScreen({ rolePrefix: rolePrefixProp }: AddMembersScreenProps) {
   const router = useRouter();
-  const params = useLocalSearchParams<{ rolePrefix?: string }>();
-  const rolePrefix = rolePrefixProp || params.rolePrefix || "student";
+  const { conversationId, rolePrefix: paramRolePrefix } = useLocalSearchParams<{ 
+    conversationId: string;
+    rolePrefix?: string;
+  }>();
+  const rolePrefix = rolePrefixProp || paramRolePrefix || "student";
 
-  // States
-  const [groupName, setGroupName] = useState("");
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState<UserListItem[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<UserListItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [creating, setCreating] = useState(false);
+  const [adding, setAdding] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   // Debounce search
@@ -47,7 +47,7 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
     return () => clearTimeout(handler);
   }, [search]);
 
-  // Fetch users when search term changes or on mount
+  // Fetch users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -80,34 +80,29 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
     });
   };
 
-  const handleCreateGroup = async () => {
-    if (!groupName.trim()) {
-      Alert.alert("Thông báo", "Vui lòng nhập tên nhóm");
-      return;
-    }
+  const handleAddMembers = async () => {
+    if (!conversationId) return;
     if (selectedUsers.length === 0) {
-      Alert.alert("Thông báo", "Vui lòng chọn ít nhất 1 thành viên");
+      Alert.alert("Thông báo", "Vui lòng chọn ít nhất 1 thành viên để thêm");
       return;
     }
 
     try {
-      setCreating(true);
-      const res = await conversationService.createGroup({
-        groupName: groupName.trim(),
+      setAdding(true);
+      await conversationService.addMembersToGroup({
+        conversationId,
         memberIds: selectedUsers.map(u => u.userId),
       });
 
-      if (res.data) {
-        router.replace({
-          pathname: `/${rolePrefix}/chat/${res.data}` as any,
-          params: { name: groupName.trim(), isGroup: "true" }
-        });
-      }
-    } catch (err) {
-      console.error("Create group error:", err);
-      Alert.alert("Lỗi", "Không thể tạo nhóm lúc này. Vui lòng thử lại sau.");
+      Alert.alert("Thành công", "Đã thêm thành viên vào nhóm", [
+        { text: "OK", onPress: () => router.back() }
+      ]);
+    } catch (err: any) {
+      console.error("Add members error:", err);
+      const errorMsg = err.response?.data?.message || "Không thể thêm thành viên lúc này.";
+      Alert.alert("Lỗi", errorMsg);
     } finally {
-      setCreating(false);
+      setAdding(false);
     }
   };
 
@@ -129,50 +124,33 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
             <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 16 }}>
               <Ionicons name="arrow-back" size={24} color="#000000" />
             </TouchableOpacity>
-            <Text style={{ fontSize: 20, fontWeight: "bold", color: "#000000" }}>Tạo nhóm mới</Text>
+            <Text style={{ fontSize: 20, fontWeight: "bold", color: "#000000" }}>Thêm thành viên</Text>
           </View>
           
           <TouchableOpacity 
-            onPress={handleCreateGroup}
-            disabled={creating || !groupName.trim() || selectedUsers.length === 0}
+            onPress={handleAddMembers}
+            disabled={adding || selectedUsers.length === 0}
             style={{ 
-              backgroundColor: (creating || !groupName.trim() || selectedUsers.length === 0) ? "#F3F4F6" : PRIMARY_COLOR,
+              backgroundColor: (adding || selectedUsers.length === 0) ? "#F3F4F6" : PRIMARY_COLOR,
               paddingHorizontal: 16,
               paddingVertical: 8,
               borderRadius: 12
             }}
           >
-            {creating ? (
+            {adding ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
               <Text style={{ 
-                color: (creating || !groupName.trim() || selectedUsers.length === 0) ? "#9CA3AF" : "#FFFFFF", 
+                color: (adding || selectedUsers.length === 0) ? "#9CA3AF" : "#FFFFFF", 
                 fontWeight: "bold",
                 fontSize: 14
-              }}>Tạo nhóm</Text>
+              }}>Thêm</Text>
             )}
           </TouchableOpacity>
         </View>
 
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-          {/* 1. Group Name Input */}
-          <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
-            <Text style={{ fontSize: 13, fontWeight: "600", color: PRIMARY_COLOR, textTransform: "uppercase", marginBottom: 12, letterSpacing: 1 }}>Tên nhóm</Text>
-            <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "#F9FAFB", paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, borderWidth: 1, borderColor: "#F3F4F6" }}>
-              <View style={{ marginRight: 12 }}>
-                <Ionicons name="pencil" size={18} color={PRIMARY_COLOR} />
-              </View>
-              <TextInput
-                placeholder="Nhập tên nhóm..."
-                style={{ flex: 1, fontSize: 16, color: "#1F2937" }}
-                value={groupName}
-                onChangeText={setGroupName}
-                autoCorrect={false}
-              />
-            </View>
-          </View>
-
-          {/* 2. Selected Users Chips */}
+          {/* Selected Users Chips */}
           {selectedUsers.length > 0 && (
             <View style={{ paddingHorizontal: 24, marginTop: 24 }}>
               <Text style={{ fontSize: 13, fontWeight: "600", color: PRIMARY_COLOR, textTransform: "uppercase", marginBottom: 12, letterSpacing: 1 }}>Đã chọn ({selectedUsers.length})</Text>
@@ -194,9 +172,9 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
             </View>
           )}
 
-          {/* 3. Search Bar */}
+          {/* Search Bar */}
           <View style={{ paddingHorizontal: 24, marginTop: 24 }}>
-            <Text style={{ fontSize: 13, fontWeight: "600", color: PRIMARY_COLOR, textTransform: "uppercase", marginBottom: 12, letterSpacing: 1 }}>Thêm thành viên</Text>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: PRIMARY_COLOR, textTransform: "uppercase", marginBottom: 12, letterSpacing: 1 }}>Tìm kiếm</Text>
             <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "#F9FAFB", paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, borderWidth: 1, borderColor: "#F3F4F6" }}>
               <View style={{ marginRight: 12 }}>
                 <Ionicons name="search" size={18} color="#9CA3AF" />
@@ -212,7 +190,7 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
             </View>
           </View>
 
-          {/* 4. User Results List */}
+          {/* User Results List */}
           <View style={{ marginTop: 16 }}>
             {users.length > 0 ? (
               users.map(item => {

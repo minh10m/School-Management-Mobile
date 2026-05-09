@@ -24,9 +24,12 @@ interface ChatListScreenProps {
 export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
   const router = useRouter();
   const { conversations: fbConversations } = useConversationsListener();
+  const [activeTab, setActiveTab] = useState<"chats" | "users">("chats");
   const [conversations, setConversations] = useState<ConversationResponse[]>([]);
   const [users, setUsers] = useState<UserListItem[]>([]);
+  const [allUsers, setAllUsers] = useState<UserListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -37,6 +40,27 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
     return () => clearTimeout(handler);
   }, [search]);
 
+  useEffect(() => {
+    if (activeTab === "users" && allUsers.length === 0) {
+      fetchAllUsers();
+    }
+  }, [activeTab]);
+
+  const fetchAllUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const res = await userService.getUsers({
+        FullName: debouncedSearch,
+        PageSize: 50,
+      });
+      setAllUsers(res.items);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
   const fetchConversations = async () => {
     try {
       const res = await conversationService.getMyConversations({
@@ -45,21 +69,21 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
       });
       setConversations(res.items);
 
-      if (debouncedSearch.length > 1) {
+      if (debouncedSearch.length > 1 && activeTab === "chats") {
         const userRes = await userService.getUsers({
           FullName: debouncedSearch,
           PageSize: 10,
         });
         
-        // Lấy tất cả user IDs đang trò chuyện hiện tại (loại bỏ trùng lặp)
         const existingUserIds = new Set(fbConversations.flatMap((c) => c.members));
-        
-        // Lọc ra những người dùng chưa có cuộc trò chuyện
         const filteredUsers = userRes.items.filter((u) => !existingUserIds.has(u.userId));
-        
         setUsers(filteredUsers);
       } else {
         setUsers([]);
+      }
+      
+      if (activeTab === "users") {
+        fetchAllUsers();
       }
     } catch (err) {
       console.error(err);
@@ -70,7 +94,7 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
 
   useEffect(() => {
     fetchConversations();
-  }, [fbConversations, debouncedSearch]); // Re-fetch khi Firebase có dữ liệu mới hoặc tìm kiếm thay đổi
+  }, [fbConversations, debouncedSearch, activeTab]);
 
   const getAvatarColor = (name: string) => {
     const colors = [
@@ -183,30 +207,52 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-50">
-        <View className="w-16 items-start">
+      <View className="bg-white border-b border-gray-50 pt-2">
+        <View className="flex-row items-center justify-between px-6 py-2">
           <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
             <Ionicons name="arrow-back" size={24} color="#1F2937" />
           </TouchableOpacity>
-        </View>
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-gray-900">
-          Tin nhắn
-        </Text>
-        <View className="flex-row justify-end items-center">
+          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-xl text-gray-900">
+            Trò chuyện
+          </Text>
           <TouchableOpacity 
             onPress={() => router.push(`/${rolePrefix}/chat/new-group` as any)}
-            style={{ backgroundColor: "#136ADA", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 }}
+            className="bg-indigo-600 px-3 py-1.5 rounded-xl shadow-sm shadow-indigo-200"
           >
-            <Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "bold", fontFamily: "Poppins-Bold" }}>Tạo nhóm</Text>
+            <View className="flex-row items-center">
+              <Ionicons name="add" size={16} color="white" />
+              <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "bold", fontFamily: "Poppins-Bold", marginLeft: 2 }}>Nhóm</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Tabs */}
+        <View className="flex-row px-6 mb-2">
+          <TouchableOpacity 
+            onPress={() => setActiveTab("chats")}
+            className={`mr-6 py-2 border-b-2 ${activeTab === "chats" ? "border-indigo-600" : "border-transparent"}`}
+          >
+            <Text style={{ fontFamily: activeTab === "chats" ? "Poppins-Bold" : "Poppins-Medium" }} className={`text-sm ${activeTab === "chats" ? "text-indigo-600" : "text-gray-400"}`}>
+              Tin nhắn
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => setActiveTab("users")}
+            className={`py-2 border-b-2 ${activeTab === "users" ? "border-indigo-600" : "border-transparent"}`}
+          >
+            <Text style={{ fontFamily: activeTab === "users" ? "Poppins-Bold" : "Poppins-Medium" }} className={`text-sm ${activeTab === "users" ? "text-indigo-600" : "text-gray-400"}`}>
+              Người dùng
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <View className="px-6 py-4 border-b border-gray-50">
+      {/* Search Bar */}
+      <View className="px-6 py-3">
         <View className="flex-row items-center bg-gray-50 px-4 py-2.5 rounded-2xl border border-gray-100">
           <Ionicons name="search" size={18} color="#9CA3AF" />
           <TextInput
-            placeholder="Tìm kiếm cuộc trò chuyện..."
+            placeholder={activeTab === "chats" ? "Tìm kiếm cuộc trò chuyện..." : "Tìm kiếm người dùng..."}
             className="flex-1 ml-2 text-sm text-gray-800"
             style={{ fontFamily: "Poppins-Regular" }}
             value={search}
@@ -215,79 +261,135 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
             autoCapitalize="none"
             autoCorrect={false}
           />
+          {(loading || loadingUsers) && <ActivityIndicator size="small" color="#6366F1" />}
         </View>
       </View>
 
-      <ScrollView className="flex-1">
-        {loading ? (
-          <View className="flex-1 items-center justify-center p-10">
-            <ActivityIndicator size="large" color="#6366F1" />
-          </View>
-        ) : (
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {activeTab === "chats" ? (
           <View className="flex-1">
-            {/* Conversations Section */}
-            {conversations.length > 0 && (
-              <View>
-                {debouncedSearch.length > 0 && (
-                  <View className="px-6 py-2 bg-gray-50">
-                    <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-[10px] text-gray-500 uppercase tracking-wider">
-                      Cuộc trò chuyện hiện tại
+            {loading && conversations.length === 0 ? (
+              <View className="flex-1 items-center justify-center p-10">
+                <ActivityIndicator size="large" color="#6366F1" />
+              </View>
+            ) : (
+              <>
+                {/* Conversations Section */}
+                {conversations.length > 0 && (
+                  <View>
+                    {debouncedSearch.length > 0 && (
+                      <View className="px-6 py-2 bg-gray-50">
+                        <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-[10px] text-gray-500 uppercase tracking-wider">
+                          Kết quả trò chuyện
+                        </Text>
+                      </View>
+                    )}
+                    <FlatList
+                      data={conversations}
+                      keyExtractor={(item) => item.conversationId}
+                      renderItem={renderItem}
+                      scrollEnabled={false}
+                    />
+                  </View>
+                )}
+
+                {/* New Users Search Results */}
+                {users.length > 0 && (
+                  <View>
+                    <View className="px-6 py-2 bg-gray-50">
+                      <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-[10px] text-gray-500 uppercase tracking-wider">
+                        Người dùng mới
+                      </Text>
+                    </View>
+                    {users.map((user) => (
+                      <TouchableOpacity
+                        key={user.userId}
+                        onPress={() => handleSelectUser(user)}
+                        className="flex-row items-center p-4 border-b border-gray-100 bg-white"
+                      >
+                        <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${getAvatarColor(user.fullName)}`}>
+                          <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-lg">
+                            {user.fullName.charAt(0).toUpperCase()}
+                          </Text>
+                        </View>
+                        <View className="flex-1">
+                          <Text style={{ fontFamily: "Poppins-Medium" }} className="text-sm text-gray-800">
+                            {user.fullName}
+                          </Text>
+                          <Text style={{ fontFamily: "Poppins-Regular" }} className="text-xs text-gray-500">
+                            {user.role}
+                          </Text>
+                        </View>
+                        <Ionicons name="chatbubble-outline" size={20} color="#6366F1" />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+
+                {conversations.length === 0 && users.length === 0 && !loading && (
+                  <View className="flex-1 items-center justify-center p-10 mt-10">
+                    <View className="bg-gray-50 p-6 rounded-full mb-4">
+                      <Ionicons name="chatbubbles-outline" size={48} color="#D1D5DB" />
+                    </View>
+                    <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-900 text-lg mb-1">
+                      Chưa có cuộc trò chuyện nào
+                    </Text>
+                    <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-500 text-center text-sm">
+                      {debouncedSearch ? "Không tìm thấy kết quả phù hợp" : "Hãy bắt đầu cuộc trò chuyện với bạn bè hoặc giáo viên của bạn"}
                     </Text>
                   </View>
                 )}
-                <FlatList
-                  data={conversations}
-                  keyExtractor={(item) => item.conversationId}
-                  renderItem={renderItem}
-                  scrollEnabled={false}
-                />
-              </View>
+              </>
             )}
-
-            {/* New Users Search Results */}
-            {users.length > 0 && (
+          </View>
+        ) : (
+          <View className="flex-1">
+            {loadingUsers && allUsers.length === 0 ? (
+              <View className="flex-1 items-center justify-center p-10">
+                <ActivityIndicator size="large" color="#6366F1" />
+              </View>
+            ) : (
               <View>
-                <View className="px-6 py-2 bg-gray-50">
-                  <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-[10px] text-gray-500 uppercase tracking-wider">
-                    Tìm kiếm người dùng mới
-                  </Text>
-                </View>
-                {users.map((user) => (
-                  <TouchableOpacity
-                    key={user.userId}
-                    onPress={() => handleSelectUser(user)}
-                    className="flex-row items-center p-4 border-b border-gray-100 bg-white"
-                  >
-                    <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${getAvatarColor(user.fullName)}`}>
-                      <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-lg">
-                        {user.fullName.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text style={{ fontFamily: "Poppins-Medium" }} className="text-sm text-gray-800">
-                        {user.fullName}
-                      </Text>
-                      <Text style={{ fontFamily: "Poppins-Regular" }} className="text-xs text-gray-500">
-                        {user.role}
-                      </Text>
-                    </View>
-                    <Ionicons name="chatbubble-outline" size={20} color="#6366F1" />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-
-            {conversations.length === 0 && users.length === 0 && (
-              <View className="flex-1 items-center justify-center p-10 mt-10">
-                <View className="bg-gray-50 p-6 rounded-full mb-4">
-                  <Ionicons name="chatbubbles-outline" size={48} color="#D1D5DB" />
-                </View>
-                <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-900 text-lg mb-1">
-                  Chưa có cuộc trò chuyện nào
-                </Text>
-                <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-500 text-center text-sm">
-                  {debouncedSearch ? "Không tìm thấy kết quả phù hợp" : "Hãy bắt đầu cuộc trò chuyện với bạn bè hoặc giáo viên của bạn"}
-                </Text>
+                {allUsers.length > 0 ? (
+                  allUsers.map((user) => (
+                    <TouchableOpacity
+                      key={user.userId}
+                      onPress={() => handleSelectUser(user)}
+                      className="flex-row items-center p-4 border-b border-gray-100 bg-white"
+                    >
+                      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${getAvatarColor(user.fullName)}`}>
+                        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-lg">
+                          {user.fullName.charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+                      <View className="flex-1">
+                        <Text style={{ fontFamily: "Poppins-Medium" }} className="text-sm text-gray-800">
+                          {user.fullName}
+                        </Text>
+                        <View className="flex-row items-center">
+                          <View className="bg-indigo-50 px-2 py-0.5 rounded-md mr-2">
+                            <Text style={{ fontFamily: "Poppins-Medium" }} className="text-[10px] text-indigo-600">
+                              {user.role}
+                            </Text>
+                          </View>
+                          <Text style={{ fontFamily: "Poppins-Regular" }} className="text-[10px] text-gray-400">
+                            {user.userName}
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="bg-indigo-50 p-2 rounded-full">
+                        <Ionicons name="paper-plane-outline" size={18} color="#6366F1" />
+                      </View>
+                    </TouchableOpacity>
+                  ))
+                ) : (
+                  <View className="flex-1 items-center justify-center p-10 mt-10">
+                    <Ionicons name="people-outline" size={48} color="#D1D5DB" />
+                    <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-900 text-lg mt-4">
+                      Không tìm thấy người dùng nào
+                    </Text>
+                  </View>
+                )}
               </View>
             )}
           </View>

@@ -35,8 +35,9 @@ export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
   useEffect(() => {
     if (debouncedSearch.length > 1) {
       searchUsers();
-    } else {
-      setUsers([]);
+    } else if (debouncedSearch.length === 0) {
+      // Load initial users when search is empty
+      searchUsers();
     }
   }, [debouncedSearch]);
 
@@ -143,8 +144,9 @@ export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
         )}
         ListEmptyComponent={() => (
           <View className="flex-1 items-center justify-center p-10">
-            <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-400 text-center">
-              {search.length > 1 ? "Không tìm thấy người dùng nào" : "Nhập tên người dùng để tìm kiếm"}
+            <Ionicons name="people-outline" size={64} color="#E5E7EB" />
+            <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-center mt-4">
+              {search.length > 1 ? "Không tìm thấy người dùng nào" : "Đang tải danh sách người dùng..."}
             </Text>
           </View>
         )}
