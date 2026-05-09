@@ -71,4 +71,13 @@ export const conversationService = {
     const response = await apiClient.post<ApiResponse<ConversationResponse>>("/conversations/group/members", payload);
     return response.data;
   },
+  // ─── LEAVE GROUP ──────────────────────────────────────────────────────────────
+  /**
+   * Rời khỏi nhóm trò chuyện
+   * DELETE /conversations/group/{conversationId}/leave
+   */
+  leaveGroup: async (conversationId: string): Promise<ApiResponse<boolean>> => {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/conversations/group/${conversationId}/leave`);
+    return response.data;
+  },
 };
