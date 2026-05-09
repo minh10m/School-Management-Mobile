@@ -10,6 +10,6 @@ namespace School_Management.API.Repositories
         public Task<(GetMessageResponse? result, string message)> GetMessage(BaseRequestSecond request, Guid conversationId, Guid userId);
         public Task<(Guid? conversationId, string message)> CreateGroup(CreateGroupRequest request, Guid creatorId);
         public Task<(bool result, string message)> AddMembersToGroup(AddMembersRequest request, Guid userId);
-
+        public Task<(bool result, string message)> LeaveGroup(Guid conversationId, Guid userId);
     }
 }

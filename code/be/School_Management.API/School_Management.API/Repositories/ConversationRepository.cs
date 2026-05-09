@@ -69,7 +69,38 @@ namespace School_Management.API.Repositories
                 throw;
             }
         }
+        public async Task<(bool result, string message)> LeaveGroup(Guid conversationId, Guid userId)
+        {
+            var conversation = await context.Conversation
+                .FirstOrDefaultAsync(x => x.Id == conversationId && x.IsGroup);
+            if (conversation == null) return (false, "NOT_FOUND_GROUP");
 
+            var userConversation = await context.UserConversation
+                .FirstOrDefaultAsync(x => x.ConversationId == conversationId && x.UserId == userId);
+            if (userConversation == null) return (false, "NOT_IN_GROUP");
+
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                context.UserConversation.Remove(userConversation);
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                var remainingMemberIds = await context.UserConversation
+                    .Where(x => x.ConversationId == conversationId)
+                    .Select(x => x.UserId)
+                    .ToListAsync();
+
+                await firebaseService.UpdateGroupMembers(conversationId, remainingMemberIds);
+
+                return (true, "SUCCESS");
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
         public async Task<CheckMessageExistedResponse> CheckMessageExisted(CheckMessageExistedRequest request)
         {
             var senderId = request.SenderId;

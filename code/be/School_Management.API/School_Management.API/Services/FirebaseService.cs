@@ -39,12 +39,10 @@ namespace School_Management.API.Services
         {
             var docRef = _db.Collection("conversations").Document(conversationId.ToString());
             var snapshot = await docRef.GetSnapshotAsync();
-
             var newMemberStrings = allMemberIds.Select(m => m.ToString()).ToList();
 
             if (!snapshot.Exists)
             {
-                // Không có doc thì tạo mới — trường hợp hiếm gặp
                 await docRef.SetAsync(new Dictionary<string, object>
         {
             { "lastMessageAt", Timestamp.GetCurrentTimestamp() },
@@ -54,21 +52,19 @@ namespace School_Management.API.Services
             }
             else
             {
-                // Chỉ update members, giữ nguyên unreadCounts và lastMessageAt
                 var existingUnreadCounts = snapshot.GetValue<Dictionary<string, object>>("unreadCounts");
 
-                // Thêm unreadCount = 0 cho member mới nếu chưa có
-                foreach (var memberId in allMemberIds)
-                {
-                    var key = memberId.ToString();
-                    if (!existingUnreadCounts.ContainsKey(key))
-                        existingUnreadCounts[key] = 0;
-                }
+                var newUnreadCounts = allMemberIds.ToDictionary(
+                    m => m.ToString(),
+                    m => existingUnreadCounts.ContainsKey(m.ToString())
+                        ? existingUnreadCounts[m.ToString()]
+                        : (object)0
+                );
 
                 await docRef.UpdateAsync(new Dictionary<string, object>
         {
             { "members", newMemberStrings },
-            { "unreadCounts", existingUnreadCounts }
+            { "unreadCounts", newUnreadCounts }
         });
             }
         }

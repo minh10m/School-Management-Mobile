@@ -61,6 +61,18 @@ namespace School_Management.API.Services
             return result;
         }
 
+        public async Task<bool> LeaveGroup(Guid conversationId, Guid userId)
+        {
+            var (result, message) = await conversationRepository.LeaveGroup(conversationId, userId);
+            return message switch
+            {
+                "NOT_FOUND_GROUP" => throw new NotFoundException("Không tìm thấy nhóm"),
+                "NOT_IN_GROUP" => throw new ForbiddenException("Bạn không có trong nhóm này"),
+                "SUCCESS" => result,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<Guid?> SendMessage(SendMessageRequest request, Guid SenderId)
         {
             var (result, message) = await conversationRepository.SendMessage(request, SenderId);

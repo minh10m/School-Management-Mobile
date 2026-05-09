@@ -100,5 +100,17 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpDelete("group/{conversationId}/leave")]
+        [Authorize]
+        public async Task<IActionResult> LeaveGroup([FromRoute]Guid conversationId)
+        {
+            var result = await conversationService.LeaveGroup(conversationId, GetCurrentUserId());
+            return Ok(new
+            {
+                success = result,
+                message = "Rời nhóm thành công"
+            });
+        }
     }
 }
