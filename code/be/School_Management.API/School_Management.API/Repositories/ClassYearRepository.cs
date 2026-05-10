@@ -125,16 +125,24 @@ namespace School_Management.API.Repositories
 
             if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
 
-            var classQueryId = context.ScheduleDetail.AsNoTracking()
+            var query = context.ScheduleDetail.AsNoTracking()
                                               .Where(x => x.TeacherSubject.TeacherId == teacherId
                                                      && x.Schedule.SchoolYear == request.SchoolYear)
-                                              .Select(g => g.Schedule.ClassYearId)
+                                              .Select(x => new ClassYearResponse
+                                              {
+                                                  ClassYearId = x.Schedule.ClassYearId,
+                                                  ClassName = x.Schedule.ClassYear.ClassName,
+                                                  Grade = x.Schedule.ClassYear.Grade,
+                                                  SchoolYear = x.Schedule.SchoolYear,
+                                                  SubjectName = x.TeacherSubject.Subject.SubjectName,
+                                                  HomeRoomId = x.Schedule.ClassYear.HomeRoomId ?? Guid.Empty,
+                                                  HomeRoomName = x.Schedule.ClassYear.Teacher != null ? x.Schedule.ClassYear.Teacher.User.FullName : null,
+                                                  StudentCount = x.Schedule.ClassYear.StudentClassYears.Count()
+                                              })
                                               .Distinct();
 
-            var query = context.ClassYear.Where(x => classQueryId.Contains(x.Id));
-
             //Filtering
-            if(!string.IsNullOrWhiteSpace(request.ClassName))
+            if (!string.IsNullOrWhiteSpace(request.ClassName))
             {
                 var className = request.ClassName.Trim().ToLower();
                 query = query.Where(x => x.ClassName.ToLower().Contains(className));
@@ -143,9 +151,9 @@ namespace School_Management.API.Repositories
                 query = query.Where(x => x.Grade == request.Grade);
 
             //Sorting
-            if(!string.IsNullOrWhiteSpace(request.SortBy))
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
             {
-                if(request.SortBy.Equals("ClassName"))
+                if (request.SortBy.Equals("ClassName"))
                 {
                     query = request.IsAscending ? query.OrderBy(x => x.ClassName) : query.OrderByDescending(x => x.ClassName);
                 }
@@ -156,17 +164,7 @@ namespace School_Management.API.Repositories
             var classList = await query
                 .Skip(skipResults)
                 .Take(request.PageSize)
-                .Select(x => new ClassYearResponse
-            {
-                SchoolYear = x.SchoolYear,
-                ClassName = x.ClassName,
-                ClassYearId = x.Id,
-                Grade = x.Grade,
-                HomeRoomId = (Guid)x.HomeRoomId!,
-                HomeRoomName = null,
-                StudentCount = x.StudentClassYears.Count()
-            })
-             .ToListAsync();
+                .ToListAsync();
 
             return (new PagedResponse<ClassYearResponse>
             {
@@ -249,13 +247,21 @@ namespace School_Management.API.Repositories
 
             if (teacher == null) return (null, "NOT_FOUND_TEACHER");
 
-            var classQueryId = context.ScheduleDetail.AsNoTracking()
+            var query = context.ScheduleDetail.AsNoTracking()
                                               .Where(x => x.TeacherSubject.TeacherId == teacherId
                                                      && x.Schedule.SchoolYear == request.SchoolYear)
-                                              .Select(g => g.Schedule.ClassYearId)
+                                              .Select(x => new ClassYearResponse
+                                              {
+                                                  ClassYearId = x.Schedule.ClassYearId,
+                                                  ClassName = x.Schedule.ClassYear.ClassName,
+                                                  Grade = x.Schedule.ClassYear.Grade,
+                                                  SchoolYear = x.Schedule.SchoolYear,
+                                                  SubjectName = x.TeacherSubject.Subject.SubjectName,
+                                                  HomeRoomId = x.Schedule.ClassYear.HomeRoomId ?? Guid.Empty,
+                                                  HomeRoomName = x.Schedule.ClassYear.Teacher != null ? x.Schedule.ClassYear.Teacher.User.FullName : null,
+                                                  StudentCount = x.Schedule.ClassYear.StudentClassYears.Count()
+                                              })
                                               .Distinct();
-
-            var query = context.ClassYear.Where(x => classQueryId.Contains(x.Id));
 
             //Filtering
             if (!string.IsNullOrWhiteSpace(request.ClassName))
@@ -280,17 +286,7 @@ namespace School_Management.API.Repositories
             var classList = await query
                 .Skip(skipResults)
                 .Take(request.PageSize)
-                .Select(x => new ClassYearResponse
-                {
-                    SchoolYear = x.SchoolYear,
-                    ClassName = x.ClassName,
-                    ClassYearId = x.Id,
-                    Grade = x.Grade,
-                    HomeRoomId = (Guid)x.HomeRoomId!,
-                    HomeRoomName = null,
-                    StudentCount = x.StudentClassYears.Count()
-                })
-             .ToListAsync();
+                .ToListAsync();
 
             return (new PagedResponse<ClassYearResponse>
             {
@@ -318,8 +314,8 @@ namespace School_Management.API.Repositories
                                                            ClassName = g.ClassName,
                                                            ClassYearId = g.Id,
                                                            Grade = g.Grade,
-                                                           HomeRoomId = (Guid)g.HomeRoomId!,
-                                                           HomeRoomName = null,
+                                                           HomeRoomId = g.HomeRoomId ?? Guid.Empty,
+                                                           HomeRoomName = g.Teacher != null ? g.Teacher.User.FullName : null,
                                                            StudentCount = g.StudentClassYears.Count()
 
                                                        }).FirstOrDefaultAsync();
