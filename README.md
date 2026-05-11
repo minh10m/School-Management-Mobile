@@ -39,7 +39,7 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ### Login and Attendance screen
 <p align="left">
-<img src="https://github.com/user-attachments/assets/0b3df493-a526-46e6-9662-dff202c082ee" width="30%"/>
+<img src="https://github.com/user-attachments/assets/fd1dce6c-2790-445e-a7af-ddb568e0d928" width="30%"/>  
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="https://github.com/user-attachments/assets/9b43c3a4-7066-4902-9905-9a49e7d0060b" width="30%"/>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
