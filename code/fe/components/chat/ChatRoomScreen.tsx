@@ -57,6 +57,7 @@ export default function ChatRoomScreen() {
     null,
   );
   const [viewingMember, setViewingMember] = useState<MemberInfo | null>(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -165,6 +166,29 @@ export default function ChatRoomScreen() {
     }
   };
 
+  const isGroup =
+    isGroupParam === "true" ||
+    (currentConversation ? currentConversation.members.length > 2 : false) ||
+    membersInfo.length > 2;
+
+  const getDateLabel = (date: Date) => {
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Hôm nay";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return "Hôm qua";
+    } else {
+      return date.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    }
+  };
+
   const renderMessage = ({
     item,
     index,
@@ -173,12 +197,19 @@ export default function ChatRoomScreen() {
     index: number;
   }) => {
     const isMe = item.senderId === userInfo?.id;
-    const prevItem = messages[index + 1]; // Because inverted, the previous message is index + 1
+    const prevItem = messages[index + 1]; // Previous in time (below in inverted list)
+    const nextItem = messages[index - 1]; // Next in time (above in inverted list)
+    
     const isSameSenderAsPrev = prevItem && prevItem.senderId === item.senderId;
+    const isSameSenderAsNext = nextItem && nextItem.senderId === item.senderId;
+
+    // Date separator logic
+    const itemDate = new Date(item.createdAt);
+    const prevItemDate = prevItem ? new Date(prevItem.createdAt) : null;
+    const showDateSeparator = !prevItemDate || itemDate.toDateString() !== prevItemDate.toDateString();
 
     // Determine seen status for 1-on-1 chats
     let displayStatus = item.status;
-
     if (isMe && index === 0 && !isGroup) {
       if (item.status === "Đã xem") {
         displayStatus = "Đã xem";
@@ -186,9 +217,6 @@ export default function ChatRoomScreen() {
         const otherMemberId = currentConversation.members.find(
           (m) => m !== userInfo?.id,
         );
-
-        // Check if message is older than 3 seconds to avoid flickering
-        // because unreadCounts might be 0 from the previous state for a moment.
         const messageAge = Date.now() - new Date(item.createdAt).getTime();
         const isStale = messageAge > 3000;
 
@@ -203,85 +231,104 @@ export default function ChatRoomScreen() {
       }
     }
 
-    return (
-      <View
-        className={`flex-row mb-1 px-4 ${isMe ? "justify-end" : "justify-start"} ${
-          !isSameSenderAsPrev ? "mt-3" : ""
-        }`}
-      >
-        {!isMe && !isSameSenderAsPrev && (
-          <View className="w-8 h-8 rounded-full bg-rose-500 items-center justify-center mr-2">
-            <Text
-              style={{ fontFamily: "Poppins-Bold" }}
-              className="text-white text-xs"
-            >
-              {item.senderName.charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )}
-        {!isMe && isSameSenderAsPrev && <View className="w-8 mr-2" />}
+    // Detect if content is only emojis
+    const emojiRegex = /^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]+$/u;
+    const isEmojiOnly = emojiRegex.test(item.content.replace(/\s/g, ""));
 
-        <View style={{ alignItems: isMe ? "flex-end" : "flex-start" }}>
-          <View
-            className={`px-4 py-2.5 ${
-              isMe
-                ? "bg-indigo-500 rounded-2xl rounded-tr-sm"
-                : "bg-gray-100 rounded-2xl rounded-tl-sm border border-gray-200/50"
-            }`}
-            style={
-              isMe
-                ? {
-                    shadowColor: "#6366F1",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 3,
-                  }
-                : {}
-            }
-          >
-            {!isMe && !isSameSenderAsPrev && (
+    return (
+      <View>
+        {showDateSeparator && (
+          <View className="items-center my-6">
+            <View className="bg-gray-100 px-4 py-1.5 rounded-full">
               <Text
                 style={{ fontFamily: "Poppins-SemiBold" }}
-                className="text-[11px] text-gray-600 mb-1"
+                className="text-[11px] text-gray-500 uppercase tracking-wider"
               >
-                {item.senderName}
+                {getDateLabel(itemDate)}
               </Text>
+            </View>
+          </View>
+        )}
+        <View
+          className={`flex-row px-4 ${isMe ? "justify-end" : "justify-start"} ${
+            !isSameSenderAsPrev || showDateSeparator ? "mt-4" : "mt-1"
+          }`}
+        >
+        {!isMe && (
+          <View className="w-9 mr-1 items-center justify-end pb-1">
+            {!isSameSenderAsNext && (
+              <View className="w-8 h-8 rounded-full bg-rose-500 items-center justify-center shadow-sm">
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-[10px]">
+                  {item.senderName.charAt(0).toUpperCase()}
+                </Text>
+              </View>
             )}
+          </View>
+        )}
+
+        <View style={{ maxWidth: "80%", alignItems: isMe ? "flex-end" : "flex-start" }}>
+          {!isMe && !isSameSenderAsPrev && isGroup && (
             <Text
-              style={{ fontFamily: "Poppins-Regular" }}
-              className={`text-[15px] leading-5 ${isMe ? "text-white" : "text-gray-800"}`}
+              style={{ fontFamily: "Poppins-SemiBold" }}
+              className="text-[11px] text-gray-500 ml-3 mb-1"
+            >
+              {item.senderName}
+            </Text>
+          )}
+          
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setSelectedMessageId(selectedMessageId === item.id ? null : item.id)}
+            className={`px-3.5 py-2 ${
+              isMe
+                ? "bg-indigo-600"
+                : isEmojiOnly ? "bg-transparent" : "bg-gray-100 border border-gray-200/50"
+            }`}
+            style={{
+              borderRadius: 20,
+              shadowColor: isMe ? "#4F46E5" : "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: isMe ? 0.2 : 0.05,
+              shadowRadius: 2,
+              elevation: 1,
+            }}
+          >
+            <Text
+              style={{ 
+                fontFamily: "Poppins-Regular",
+                fontSize: isEmojiOnly ? 32 : 15,
+                lineHeight: isEmojiOnly ? 40 : 22
+              }}
+              className={`${isMe ? "text-white" : "text-gray-800"}`}
             >
               {item.content}
             </Text>
-            <View className="flex-row items-center justify-end">
+          </TouchableOpacity>
+
+          {(selectedMessageId === item.id || (!isSameSenderAsNext && index === 0)) && (
+            <View className={`flex-row items-center mt-1 ${isMe ? "justify-end" : "justify-start"} px-1`}>
               <Text
-                style={{ fontFamily: "Poppins-Medium" }}
-                className={`text-[10px] mt-1 text-right ${isMe ? "text-indigo-200" : "text-gray-400"}`}
+                style={{ fontFamily: "Poppins-Regular" }}
+                className="text-[10px] text-gray-400"
               >
                 {new Date(item.createdAt).toLocaleTimeString("vi-VN", {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
               </Text>
+              {isMe && index === 0 && (
+                <Text style={{ fontFamily: "Poppins-Regular" }} className="text-[10px] text-gray-400 ml-1">
+                  • {displayStatus}
+                </Text>
+              )}
             </View>
-          </View>
-          {isMe && index === 0 && (
-            <Text
-              style={{ fontFamily: "Poppins-Medium" }}
-              className="text-[9px] text-gray-400 mt-1"
-            >
-              {displayStatus}
-            </Text>
           )}
         </View>
       </View>
+    </View>
     );
   };
 
-  const isGroup =
-    isGroupParam === "true" ||
-    (currentConversation ? currentConversation.members.length > 2 : false) ||
-    membersInfo.length > 2;
   const otherMember = membersInfo.find((m) => m.userId !== userInfo?.id);
 
   const fetchUserProfile = async (userId: string) => {

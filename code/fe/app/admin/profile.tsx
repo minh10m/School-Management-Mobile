@@ -87,15 +87,11 @@ export default function AdminProfileScreen() {
 
   return (
     <AdminPageWrapper
-      title="Hồ sơ Quản trị viên"
+      title="Hồ sơ"
+      centerTitle={true}
       rightComponent={
-        <TouchableOpacity onPress={openEdit}>
-          <Text
-            style={{ fontFamily: "Poppins-SemiBold" }}
-            className="text-bright-blue text-sm"
-          >
-            Sửa
-          </Text>
+        <TouchableOpacity onPress={openEdit} className="p-2">
+          <Ionicons name="create-outline" size={24} color="#136ADA" />
         </TouchableOpacity>
       }
     >
@@ -271,7 +267,7 @@ function InfoField({ label, value, icon }: any) {
           {label}
         </Text>
         <Text
-          style={{ fontFamily: "Poppins-Bold" }}
+          style={{ fontFamily: "Poppins-Medium" }}
           className="text-black text-sm"
         >
           {value}

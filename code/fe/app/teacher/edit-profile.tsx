@@ -99,10 +99,10 @@ export default function TeacherProfileScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>
-          Hồ sơ Giáo viên
+          Hồ sơ
         </Text>
         <TouchableOpacity className="p-2" onPress={openEdit}>
-          <Ionicons name="pencil-outline" size={22} color="#136ADA" />
+          <Ionicons name="create-outline" size={24} color="#136ADA" />
         </TouchableOpacity>
       </View>
 
@@ -199,7 +199,7 @@ function InfoField({ label, value, icon }: any) {
       </View>
       <View className="flex-1">
          <Text style={{ fontFamily: 'Poppins-Regular' }} className="text-gray-400 text-[10px] uppercase tracking-wider">{label}</Text>
-         <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-sm">{value}</Text>
+         <Text style={{ fontFamily: 'Poppins-Medium' }} className="text-black text-sm">{value}</Text>
       </View>
     </View>
   );

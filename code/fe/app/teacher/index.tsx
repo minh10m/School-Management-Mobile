@@ -66,8 +66,16 @@ export default function TeacherDashboard() {
         };
       });
 
+      // Filter out duplicate classYearId-subjectId pairs if any
+      const uniqueTeaching = mappedTeaching.filter(
+        (v: any, i: number, a: any[]) =>
+          a.findIndex(
+            (t) =>
+              t.classYearId === v.classYearId && t.subjectId === v.subjectId,
+          ) === i,
+      );
       setHomeroomClass(hrRes);
-      setTeachingClasses(mappedTeaching);
+      setTeachingClasses(uniqueTeaching);
     } catch (err) {
       console.log("Error fetching teacher dashboard data:", err);
     } finally {
@@ -334,7 +342,7 @@ export default function TeacherDashboard() {
                 </View>
               </TouchableOpacity>
             )}
-            keyExtractor={(item) => item.classYearId.toString()}
+            keyExtractor={(item, index) => `${item.classYearId}-${item.subjectId || index}`}
             ListEmptyComponent={() => (
               <View className="w-64 bg-gray-50 border border-gray-100 p-5 rounded-[32px] items-center justify-center">
                 <Ionicons name="school-outline" size={32} color="#CCC" />
