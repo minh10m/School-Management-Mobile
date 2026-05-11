@@ -51,7 +51,7 @@ export default function TeacherSchedules() {
       });
       setSchedules(data || []);
     } catch (error) {
-      console.error("Failed to fetch teacher schedules:", error);
+      console.log("Failed to fetch teacher schedules:", error);
       setSchedules([]);
     } finally {
       setLoading(false);

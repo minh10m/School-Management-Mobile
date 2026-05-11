@@ -19,7 +19,7 @@ export const schoolYearInfoService = {
       );
       return response.data.data;
     } catch (error) {
-      console.error("Error fetching school year info:", error);
+      console.log("Error fetching school year info:", error);
       return null;
     }
   },

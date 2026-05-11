@@ -44,7 +44,7 @@ export default function AdminStudentsScreen() {
       const data = Array.isArray(res) ? res : (res as any).items || [];
       setStudents(data);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }

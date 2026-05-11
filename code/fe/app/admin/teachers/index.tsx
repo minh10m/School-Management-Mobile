@@ -39,7 +39,7 @@ export default function AdminTeachersScreen() {
       const subRes = await subjectService.getSubjects();
       setSubjects(Array.isArray(subRes) ? subRes : []);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     }
   };
 
@@ -56,7 +56,7 @@ export default function AdminTeachersScreen() {
       const data = Array.isArray(res) ? res : (res as any).items || [];
       setTeachers(data);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }

@@ -59,7 +59,7 @@ export default function PaymentDetailScreen() {
       const data = await feeDetailService.getFeeDetailById(id as string);
       setDetail(data);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,7 @@ export default function PaymentDetailScreen() {
       setPaymentInfo(response);
       setShowQR(true);
     } catch (err) {
-      console.error(err);
+      console.log(err);
       Alert.alert("Lỗi", "Không thể khởi tạo giao dịch. Vui lòng thử lại sau.");
     } finally {
       setIsProcessing(false);

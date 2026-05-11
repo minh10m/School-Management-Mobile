@@ -27,7 +27,7 @@ export default function ActivitiesPage() {
       const data = await dashboardService.getStats(Number(schoolYear));
       setActivities(data.recentActivities);
     } catch (err) {
-      console.error("Error fetching activities:", err);
+      console.log("Error fetching activities:", err);
     } finally {
       setLoading(false);
     }

@@ -60,7 +60,7 @@ export const usePaymentHub = (
       } catch (err: any) {
         // Bỏ qua lỗi negotiation thường gặp khi render quá nhanh
         if (!err.message?.includes('stopped during negotiation')) {
-          console.error('SignalR: Connection Error:', err.message);
+          console.log('SignalR: Connection Error:', err.message);
         }
         setIsConnected(false);
       }

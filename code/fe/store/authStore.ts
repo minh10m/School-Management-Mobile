@@ -47,7 +47,7 @@ export const useAuthStore = create<AuthState>((set: any) => ({
         await signInWithCustomToken(auth, firebaseToken);
         console.log("Firebase signed in successfully");
       } catch (error) {
-        console.error("Firebase sign in failed:", error);
+        console.log("Firebase sign in failed:", error);
       }
     }
 
@@ -76,7 +76,7 @@ export const useAuthStore = create<AuthState>((set: any) => ({
         );
       }
     } catch (error) {
-      console.error("Error saving auth to SecureStore:", error);
+      console.log("Error saving auth to SecureStore:", error);
     }
   },
 
@@ -86,7 +86,7 @@ export const useAuthStore = create<AuthState>((set: any) => ({
       await signOut(auth);
       console.log("Firebase signed out successfully");
     } catch (error) {
-      console.error("Firebase sign out failed:", error);
+      console.log("Firebase sign out failed:", error);
     }
 
     // Clear memory
@@ -105,7 +105,7 @@ export const useAuthStore = create<AuthState>((set: any) => ({
       await SecureStore.deleteItemAsync(SECURE_STORE_FIREBASE_TOKEN_KEY);
       await SecureStore.deleteItemAsync(SECURE_STORE_USER_INFO_KEY);
     } catch (error) {
-      console.error("Error clearing auth from SecureStore:", error);
+      console.log("Error clearing auth from SecureStore:", error);
     }
   },
 
@@ -142,11 +142,11 @@ export const useAuthStore = create<AuthState>((set: any) => ({
         try {
           await signInWithCustomToken(auth, firebaseToken);
         } catch (error) {
-          console.error("Firebase sign in from storage failed:", error);
+          console.log("Firebase sign in from storage failed:", error);
         }
       }
     } catch (error) {
-      console.error("Error loading auth from SecureStore:", error);
+      console.log("Error loading auth from SecureStore:", error);
       set({ isLoading: false });
     }
   },

@@ -48,7 +48,7 @@ export default function AdminStudentDetailScreen() {
         birthday: res.birthday ? res.birthday.split("T")[0] : "",
       });
     } catch (err) {
-      console.error(err);
+      console.log(err);
       Alert.alert("Lỗi", "Không thể tải thông tin học sinh");
     } finally {
       setLoading(false);

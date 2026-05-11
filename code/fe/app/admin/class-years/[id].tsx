@@ -74,7 +74,7 @@ export default function AdminClassDetailScreen() {
       setTeachers(tdata);
       setStudentsInClass(sdata);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }

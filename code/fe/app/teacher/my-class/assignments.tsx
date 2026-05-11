@@ -55,7 +55,7 @@ export default function ClassAssignments() {
       const data = await assignmentService.getAssignments(params);
       setAssignments(data);
     } catch (error) {
-      console.error("Error fetching assignments:", error);
+      console.log("Error fetching assignments:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -129,7 +129,7 @@ export default function ClassAssignments() {
       setStartDate(new Date());
       fetchData();
     } catch (error) {
-      console.error("Error creating assignment:", error);
+      console.log("Error creating assignment:", error);
       Alert.alert("Lỗi", getErrorMessage(error));
     } finally {
       setLoading(false);

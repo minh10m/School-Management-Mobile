@@ -41,7 +41,7 @@ export default function ExamScheduleScreen() {
         });
         setData(res);
       } catch (error) {
-        console.error(error);
+        console.log(error);
         Alert.alert("Lỗi", getErrorMessage(error));
       } finally {
         setLoading(false);

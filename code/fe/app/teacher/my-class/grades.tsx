@@ -55,7 +55,7 @@ export default function ClassGrades() {
       });
       setStudentResults(data);
     } catch (error) {
-      console.error("Error fetching class results:", error);
+      console.log("Error fetching class results:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

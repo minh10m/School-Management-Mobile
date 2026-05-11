@@ -83,7 +83,7 @@ export default function AdminCoursesScreen() {
       const subList = await subjectService.getSubjects();
       setSubjects(subList);
     } catch (err) {
-      console.error("Error fetching initial data:", err);
+      console.log("Error fetching initial data:", err);
     }
   };
 
@@ -101,7 +101,7 @@ export default function AdminCoursesScreen() {
       });
       setCourses(res.items || []);
     } catch (err) {
-      console.error("Error fetching courses:", err);
+      console.log("Error fetching courses:", err);
       setCourses([]);
     } finally {
       setLoading(false);

@@ -52,7 +52,7 @@ export default function EditCourseScreen() {
         setPrice(course.price.toString());
         setSelectedSubjectId(course.subjectId || null);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.log("Error fetching data:", error);
         Alert.alert("Lỗi", "Không thể tải thông tin khóa học. Vui lòng thử lại.");
         router.back();
       } finally {

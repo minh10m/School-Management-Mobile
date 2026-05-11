@@ -32,7 +32,7 @@ export default function MyHomeroomClass() {
         .catch(() => null);
       setHomeroom(hr);
     } catch (error) {
-      console.error("Error fetching homeroom data:", error);
+      console.log("Error fetching homeroom data:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

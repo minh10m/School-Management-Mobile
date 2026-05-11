@@ -65,7 +65,7 @@ export default function StudentCourseDetail() {
         setFirstLesson(lessonsResult.items[0]);
       }
     } catch (error) {
-      console.error("Error fetching course detail:", error);
+      console.log("Error fetching course detail:", error);
       Alert.alert("Lỗi", "Không thể tải chi tiết khóa học.");
     } finally {
       setLoading(false);

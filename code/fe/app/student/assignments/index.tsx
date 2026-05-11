@@ -48,7 +48,7 @@ export default function StudentAssignmentListScreen() {
       const assignmentsList = Array.isArray(data) ? data : (data?.items || []);
       setAssignments(assignmentsList);
     } catch (error) {
-      console.error("Error fetching assignments:", error);
+      console.log("Error fetching assignments:", error);
       setAssignments([]);
     } finally {
       setLoading(false);

@@ -43,7 +43,7 @@ export default function AdminClassYearsScreen() {
       setClasses(data);
       setTeachers(tdata);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }

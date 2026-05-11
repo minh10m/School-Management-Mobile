@@ -44,6 +44,12 @@ export default function ChatRoomScreen() {
     isNew === "true" ? null : id,
   );
 
+  useEffect(() => {
+    if (isNew !== "true") {
+      setRealConversationId(id);
+    }
+  }, [id, isNew]);
+
   const [messages, setMessages] = useState<MessageResponse[]>([]);
   const [membersInfo, setMembersInfo] = useState<MemberInfo[]>([]);
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -63,10 +69,18 @@ export default function ChatRoomScreen() {
   );
 
   const fetchMessages = async () => {
-    if (!realConversationId) {
+    if (!realConversationId || realConversationId === "add-members" || realConversationId === "new-group") {
       setLoading(false);
       return;
     }
+    
+    // Quick check for GUID format (basic check)
+    const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(realConversationId);
+    if (!isGuid && isNew !== "true") {
+       setLoading(false);
+       return;
+    }
+
     try {
       // Call API to get latest messages
       const res = await conversationService.getMessages(realConversationId, {
@@ -77,7 +91,7 @@ export default function ChatRoomScreen() {
       setMessages(res.data.messageResponse.items);
       setMembersInfo(res.data.memberInfos);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -142,7 +156,7 @@ export default function ChatRoomScreen() {
         setRealConversationId(returnedConversationId);
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
       // Remove the optimistic message on error and restore input
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
       setInputText(textToSend);
@@ -228,21 +242,21 @@ export default function ChatRoomScreen() {
             {!isMe && !isSameSenderAsPrev && (
               <Text
                 style={{ fontFamily: "Poppins-SemiBold" }}
-                className="text-[10px] text-gray-500 mb-0.5"
+                className="text-[11px] text-gray-600 mb-1"
               >
                 {item.senderName}
               </Text>
             )}
             <Text
               style={{ fontFamily: "Poppins-Regular" }}
-              className={`text-sm ${isMe ? "text-white" : "text-gray-800"}`}
+              className={`text-[15px] leading-5 ${isMe ? "text-white" : "text-gray-800"}`}
             >
               {item.content}
             </Text>
             <View className="flex-row items-center justify-end">
               <Text
                 style={{ fontFamily: "Poppins-Medium" }}
-                className={`text-[9px] mt-1 text-right ${isMe ? "text-indigo-200" : "text-gray-400"}`}
+                className={`text-[10px] mt-1 text-right ${isMe ? "text-indigo-200" : "text-gray-400"}`}
               >
                 {new Date(item.createdAt).toLocaleTimeString("vi-VN", {
                   hour: "2-digit",
@@ -308,8 +322,8 @@ export default function ChatRoomScreen() {
       router.back();
       Alert.alert("Thành công", "Rời nhóm thành công");
     } catch (err) {
-      console.error(err);
-      alert("Không thể rời nhóm. Vui lòng thử lại sau.");
+      console.log(err);
+      Alert.alert("Thông báo", "Không thể rời nhóm. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
     }

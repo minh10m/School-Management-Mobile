@@ -41,7 +41,7 @@ export default function StudentProfileScreen() {
       const data = await studentService.getMe();
       setProfile(data);
     } catch (error) {
-      console.error("Error loading student profile:", error);
+      console.log("Error loading student profile:", error);
       Alert.alert("Lỗi", "Không thể tải thông tin hồ sơ.");
     } finally {
       setLoading(false);

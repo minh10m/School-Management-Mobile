@@ -58,7 +58,7 @@ export default function StudentAssignmentDetailScreen() {
         setSubmission(null);
       }
     } catch (error) {
-      console.error("Error fetching assignment detail:", error);
+      console.log("Error fetching assignment detail:", error);
       Alert.alert("Lỗi", "Không thể tải thông tin chi tiết bài tập.");
     } finally {
       setLoading(false);
@@ -95,7 +95,7 @@ export default function StudentAssignmentDetailScreen() {
         setFileTitle(asset.name);
       }
     } catch (err) {
-      console.error("Error picking document:", err);
+      console.log("Error picking document:", err);
     }
   };
 
@@ -128,7 +128,7 @@ export default function StudentAssignmentDetailScreen() {
       Alert.alert("Thành công", "Nộp bài tập thành công!");
       fetchData(); // Refresh to show submission status
     } catch (error: any) {
-      console.error("Error submitting assignment:", error);
+      console.log("Error submitting assignment:", error);
       const errMsg =
         error.response?.data?.message || "Nộp bài thất bại. Vui lòng thử lại.";
       Alert.alert("Lỗi", errMsg);

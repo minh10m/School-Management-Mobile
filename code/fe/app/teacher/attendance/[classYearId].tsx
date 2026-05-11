@@ -46,7 +46,7 @@ export default function TakeAttendanceScreen() {
       });
       setStudents(mappedData);
     } catch (error) {
-      console.error("Error fetching class students:", error);
+      console.log("Error fetching class students:", error);
       Alert.alert("Lỗi", "Không thể tải danh sách học sinh.");
     } finally {
       setLoading(false);
@@ -96,7 +96,7 @@ export default function TakeAttendanceScreen() {
       Alert.alert("Thành công", "Đã lưu điểm danh thành công!");
       router.back();
     } catch (error) {
-      console.error("Error saving attendance:", error);
+      console.log("Error saving attendance:", error);
       Alert.alert("Lỗi", "Lưu điểm danh thất bại.");
     } finally {
       setSubmitting(false);

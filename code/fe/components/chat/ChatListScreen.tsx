@@ -55,7 +55,7 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
       });
       setAllUsers(res.items);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoadingUsers(false);
     }
@@ -86,7 +86,7 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
         fetchAllUsers();
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -114,6 +114,17 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
     const initial = item.displayName.charAt(0).toUpperCase();
     const avatarColor = getAvatarColor(item.displayName);
 
+    const fbConvo = fbConversations.find((c) => c.id === item.conversationId);
+    
+    const getMessageText = (msg: any) => {
+      if (!msg) return null;
+      if (typeof msg === "string") return msg;
+      if (typeof msg === "object" && msg.content) return msg.content;
+      return null;
+    };
+
+    const lastMessageText = getMessageText(fbConvo?.lastMessage) || getMessageText(item.lastMessage) || "Chạm để xem tin nhắn";
+
     return (
       <TouchableOpacity
         onPress={() => router.push({
@@ -138,21 +149,21 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
             </Text>
           )}
         </View>
-
+        
         <View className="flex-1">
           <View className="flex-row justify-between items-center mb-1">
             <Text
               style={{ fontFamily: isUnread ? "Poppins-Bold" : "Poppins-Medium" }}
-              className={`text-sm ${isUnread ? "text-black" : "text-gray-800"}`}
+              className={`text-[15px] ${isUnread ? "text-black" : "text-gray-800"}`}
               numberOfLines={1}
             >
               {item.displayName}
             </Text>
             <Text
               style={{ fontFamily: "Poppins-Regular" }}
-              className={`text-[10px] ${isUnread ? "text-indigo-600 font-bold" : "text-gray-400"}`}
+              className={`text-[11px] ${isUnread ? "text-indigo-600 font-bold" : "text-gray-400"}`}
             >
-              {new Date(item.lastUpdatedAt).toLocaleTimeString("vi-VN", {
+              {new Date(fbConvo?.lastMessageAt || item.lastUpdatedAt).toLocaleTimeString("vi-VN", {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
@@ -161,12 +172,12 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
           <View className="flex-row justify-between items-center">
             <Text
               style={{ fontFamily: isUnread ? "Poppins-SemiBold" : "Poppins-Regular" }}
-              className={`text-xs flex-1 mr-4 ${
+              className={`text-[13px] flex-1 mr-4 ${
                 isUnread ? "text-indigo-600" : "text-gray-500"
               }`}
               numberOfLines={1}
             >
-              {isUnread ? "Bạn có tin nhắn mới" : "Chạm để xem tin nhắn"}
+              {lastMessageText}
             </Text>
             {isUnread && (
               <View className="bg-rose-500 w-5 h-5 rounded-full items-center justify-center shadow-sm shadow-rose-200">
@@ -197,7 +208,7 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
         });
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
       setSearch(""); // Clear search after selection

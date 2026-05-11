@@ -64,7 +64,7 @@ export default function LessonViewScreen() {
         await selectLesson(lessonToShow, lessonsData.items, enrolled);
       }
     } catch (error) {
-      console.error("Error fetching initial lesson data:", error);
+      console.log("Error fetching initial lesson data:", error);
       Alert.alert("Lỗi", "Không thể tải nội dung bài học.");
     } finally {
       setLoading(false);
@@ -113,7 +113,7 @@ export default function LessonViewScreen() {
         }
       }
     } catch (error) {
-      console.error("Error selecting lesson:", error);
+      console.log("Error selecting lesson:", error);
     } finally {
       setLoading(false);
     }

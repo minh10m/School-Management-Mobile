@@ -43,7 +43,7 @@ export default function TeacherProfileScreen() {
       const data = await teacherService.getMe();
       setProfile(data);
     } catch (error) {
-      console.error("Error loading teacher profile:", error);
+      console.log("Error loading teacher profile:", error);
       Alert.alert("Lỗi", "Không thể tải thông tin cá nhân.");
       router.back();
     } finally {

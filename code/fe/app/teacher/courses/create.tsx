@@ -43,7 +43,7 @@ export default function CreateCourseScreen() {
           setSelectedSubjectId(subjects[0].subjectId);
         }
       } catch (error) {
-        console.error("Error fetching subjects:", error);
+        console.log("Error fetching subjects:", error);
         Alert.alert("Lỗi", "Không thể tải danh sách môn học. Vui lòng thử lại.");
       } finally {
         setFetchingSubjects(false);

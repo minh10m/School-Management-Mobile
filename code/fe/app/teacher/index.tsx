@@ -69,7 +69,7 @@ export default function TeacherDashboard() {
       setHomeroomClass(hrRes);
       setTeachingClasses(mappedTeaching);
     } catch (err) {
-      console.error("Error fetching teacher dashboard data:", err);
+      console.log("Error fetching teacher dashboard data:", err);
     } finally {
       setLoadingHomeroom(false);
       setLoadingStats(false);
@@ -107,7 +107,7 @@ export default function TeacherDashboard() {
 
       setAttendanceStats({ present, absent, late, rate, total });
     } catch (err) {
-      console.error("Error fetching attendance stats:", err);
+      console.log("Error fetching attendance stats:", err);
     } finally {
       setLoadingAttendance(false);
     }

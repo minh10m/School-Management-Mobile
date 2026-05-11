@@ -57,7 +57,7 @@ export default function RootLayout() {
           // school-year-info is public, so load config immediately on app start.
           await Promise.allSettled([loadConfig(), loadAuthFromStorage()]);
         } catch (error) {
-          console.error("Initialization error:", error);
+          console.log("Initialization error:", error);
         } finally {
           await SplashScreen.hideAsync();
         }

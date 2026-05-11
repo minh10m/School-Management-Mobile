@@ -38,7 +38,7 @@ export default function AdminCreateFeeScreen() {
       const res = await classYearService.getClassYears({ schoolYear: schoolYear.toString(), pageSize: 100 });
       setClasses(res || []);
     } catch (error) {
-      console.error(error);
+      console.log(error);
       Alert.alert("Lỗi", "Không thể tải danh sách lớp học");
     } finally {
       setLoadingClasses(false);
@@ -63,7 +63,7 @@ export default function AdminCreateFeeScreen() {
         { text: "OK", onPress: () => router.back() }
       ]);
     } catch (error: any) {
-      console.error(error);
+      console.log(error);
       Alert.alert("Lỗi", error.response?.data?.message || "Không thể tạo khoản phí");
     } finally {
       setLoading(false);

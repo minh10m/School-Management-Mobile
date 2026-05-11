@@ -44,7 +44,7 @@ export default function TeacherStudentListScreen() {
           });
         }
       } catch (error) {
-        console.error("Error fetching homeroom:", error);
+        console.log("Error fetching homeroom:", error);
       }
     };
     fetchHomeroom();
@@ -76,7 +76,7 @@ export default function TeacherStudentListScreen() {
       });
       setStudents(response.items);
     } catch (error) {
-      console.error(error);
+      console.log(error);
     } finally {
       setLoading(false);
     }

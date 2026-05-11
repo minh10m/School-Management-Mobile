@@ -44,7 +44,7 @@ export default function AdminProfileScreen() {
       const data = await userService.getMe();
       setProfile(data);
     } catch (error) {
-      console.error("Error loading admin profile:", error);
+      console.log("Error loading admin profile:", error);
     } finally {
       setLoading(false);
     }

@@ -33,7 +33,7 @@ export default function TeacherSubmissions() {
       });
       setSubmissions(data);
     } catch (error) {
-      console.error("Error fetching submissions:", error);
+      console.log("Error fetching submissions:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

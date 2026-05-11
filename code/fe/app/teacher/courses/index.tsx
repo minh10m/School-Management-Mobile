@@ -30,7 +30,7 @@ export default function TeacherCourses() {
       });
       setCourses(response.items);
     } catch (error) {
-      console.error("Error fetching teacher courses:", error);
+      console.log("Error fetching teacher courses:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

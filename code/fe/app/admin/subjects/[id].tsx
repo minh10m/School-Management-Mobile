@@ -50,7 +50,7 @@ export default function AdminSubjectDetailScreen() {
         maxPeriod: subRes.maxPeriod.toString()
       });
     } catch (err) {
-      console.error(err);
+      console.log(err);
       Alert.alert('Lỗi', 'Không thể tải chi tiết môn học');
     } finally {
       setLoading(false);
@@ -62,7 +62,7 @@ export default function AdminSubjectDetailScreen() {
       const res = await teacherService.getTeachers({ PageSize: 100 });
       setAllTeachers(Array.isArray(res) ? res : (res as any).items || []);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     }
   };
 

@@ -41,7 +41,7 @@ export default function AdminCourseDetailScreen() {
       setCourse(courseData);
       setLessons(lessonData.items || []);
     } catch (err) {
-      console.error("Error fetching course detail:", err);
+      console.log("Error fetching course detail:", err);
       Alert.alert("Lỗi", "Không thể tải thông tin khóa học.");
     } finally {
       setLoading(false);

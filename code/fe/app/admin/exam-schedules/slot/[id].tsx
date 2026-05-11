@@ -36,7 +36,7 @@ const ExamSlotAssignments = () => {
       const result = await examScheduleService.getAssignments(id, filter);
       setData(result);
     } catch (error) {
-      console.error(error);
+      console.log(error);
       Alert.alert("Error", "Could not fetch candidate list");
     } finally {
       setLoading(false);
