@@ -65,6 +65,9 @@ export default function LoginScreen() {
       await authService.login(payload);
       const updatedUserInfo = useAuthStore.getState().userInfo;
       redirectUser(updatedUserInfo?.role);
+      setTimeout(() => {
+        Alert.alert("Thành công", "Đăng nhập thành công!");
+      }, 500);
     } catch (error: any) {
       console.log(error);
 
