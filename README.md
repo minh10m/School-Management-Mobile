@@ -109,72 +109,14 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ## 🏗️ System Architecture
 
-- **Mobile Client:** Handles UI and real-time listeners  
+- **Mobile Client:** Handles UI and real-time listeners
+- **WAF(Web Application Firewall)**  
 - **Backend API (.NET):** Processes business logic and integrations  
 - **Database Layer:** PostgreSQL (primary), Redis (caching)  
 - **Realtime Layer:** Firebase Firestore  
-- **AI Layer:** Semantic Kernel + Gemini API  
-┌─────────────────────────────────────────────────────────────────┐
-│                        CLIENT TIER                              │
-│                                                                 │
-│   ┌──────────────────┐        ┌──────────────────┐             │
-│   │   Mobile App     │        │   Web Admin      │             │
-│   │  React Native    │        │    ReactJS SPA   │             │
-│   │  iOS / Android   │        │   (Dashboard)    │             │
-│   └────────┬─────────┘        └────────┬─────────┘             │
-└────────────┼──────────────────────────┼─────────────────────────┘
-             │                          │
-             ▼                          ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   SECURITY LAYER                                │
-│                                                                 │
-│   ┌─────────────────────────────────────────────────────────┐   │
-│   │                  Cloudflare WAF                         │   │
-│   │   SQL Injection Filter · DDoS Protection · Rate Limit   │   │
-│   │              TLS Termination · Bot Shield               │   │
-│   └─────────────────────────────┬───────────────────────────┘   │
-└─────────────────────────────────┼───────────────────────────────┘
-                                  │
-                                  ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              BACKEND — Azure Cloud                              │
-│                                                                 │
-│   ┌─────────────────────────────────────────────────────────┐   │
-│   │               ASP.NET Core Web API                      │   │
-│   │                                                         │   │
-│   │  ┌────────────┐ ┌────────────┐ ┌────────────────────┐  │   │
-│   │  │ REST API   │ │ Auth / JWT │ │  Business Logic    │  │   │
-│   │  │Controllers │ │  Identity  │ │  Services / CQRS   │  │   │
-│   │  └────────────┘ └────────────┘ └────────────────────┘  │   │
-│   │                                                         │   │
-│   │  ┌─────────────────────────────────────────────────┐   │   │
-│   │  │   Background Jobs (Hangfire) · EF Core ORM      │   │   │
-│   │  │         Middleware Pipeline · Repository        │   │   │
-│   │  └─────────────────────────────────────────────────┘   │   │
-│   └─────────────────────────────────────────────────────────┘   │
-└───────┬──────────────┬──────────────┬──────────────┬────────────┘
-        │              │              │              │
-        ▼              ▼              ▼              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              DATA · AI · REALTIME                               │
-│                                                                 │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────────────┐    │
-│  │    Neon      │ │   Firebase   │ │      Gemini API      │    │
-│  │  PostgreSQL  │ │  Firestore   │ │   AI Integration     │    │
-│  │              │ │              │ │                      │    │
-│  │ Primary DB   │ │ Realtime DB  │ │  ┌───────────────┐   │    │
-│  │ Serverless   │ │ Chat msgs    │ │  │  RAG Pipeline │   │    │
-│  │ Auto-scale   │ │ Notifications│ │  │ Embed·Retrieve│   │    │
-│  │              │ │ Online status│ │  └───────┬───────┘   │    │
-│  └──────────────┘ └──────────────┘ │          │           │    │
-│                                    │  ┌───────▼───────┐   │    │
-│  ┌──────────────┐                  │  │ Func. Calling │   │    │
-│  │    SePay     │                  │  │ Tool dispatch │   │    │
-│  │   Payment    │                  │  └───────────────┘   │    │
-│  │   Webhook    │                  │                      │    │
-│  │  callback    │                  └──────────────────────┘    │
-│  └──────────────┘                                              │
-└─────────────────────────────────────────────────────────────────┘
+- **AI Layer:** Semantic Kernel + Gemini API
+<img width="1000" height="731" alt="diagram-export-23_45_14-11-5-2026" src="https://github.com/user-attachments/assets/e18116d9-2913-4a67-ab4f-e4f983a985f2" />
+
 ---
 
 ## ⚙️ Setup & Run
