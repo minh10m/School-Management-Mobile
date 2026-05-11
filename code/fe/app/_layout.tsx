@@ -82,14 +82,14 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={CustomDefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="change-password" options={{ headerShown: false }} />
-        <Stack.Screen name="settings" options={{ headerShown: false }} />
-        <Stack.Screen name="student" options={{ headerShown: false }} />
-        <Stack.Screen name="admin" options={{ headerShown: false }} />
-        <Stack.Screen name="teacher" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Trang chủ" }} />
+        <Stack.Screen name="index" options={{ headerShown: false, title: "Chào mừng" }} />
+        <Stack.Screen name="login" options={{ headerShown: false, title: "Đăng nhập" }} />
+        <Stack.Screen name="change-password" options={{ headerShown: false, title: "Đổi mật khẩu" }} />
+        <Stack.Screen name="settings" options={{ headerShown: false, title: "Cài đặt" }} />
+        <Stack.Screen name="student" options={{ headerShown: false, title: "Học sinh" }} />
+        <Stack.Screen name="admin" options={{ headerShown: false, title: "Quản trị viên" }} />
+        <Stack.Screen name="teacher" options={{ headerShown: false, title: "Giáo viên" }} />
       </Stack>
       <StatusBar hidden />
     </ThemeProvider>
