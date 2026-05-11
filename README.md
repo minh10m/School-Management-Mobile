@@ -145,7 +145,7 @@ Steps:
 ```bash
 # Clone the project
 git clone https://github.com/minh10m/School-Management-Mobile.git
-cd School-Management-Mobile\code\fe
+cd School-Management-Mobile/code/fe
 
 # Install dependencies
 npm install
