@@ -1,22 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { AppLogo } from "../components/ui/AppLogo";
-import { Href, Link, router } from "expo-router";
+import { Href, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  KeyboardAvoidingView,
-  Platform,
   TouchableWithoutFeedback,
-  Keyboard,
-  ScrollView,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AppLogo } from "../components/ui/AppLogo";
 import { authService } from "../services/auth.service";
 import { useAuthStore } from "../store/authStore";
 
@@ -97,7 +96,7 @@ export default function LoginScreen() {
               {/* Illustration */}
               <View className="items-center mb-5 mt-4">
                 <Image
-                  source={require("../assets/images/edu_login_vibe.png")}
+                  source={require("../assets/images/login.png")}
                   style={{ width: 280, height: 280 }}
                   contentFit="contain"
                 />

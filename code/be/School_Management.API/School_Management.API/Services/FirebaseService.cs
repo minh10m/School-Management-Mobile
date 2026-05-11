@@ -124,6 +124,4 @@ namespace School_Management.API.Services
     });
         }
     }
-
-
 }
