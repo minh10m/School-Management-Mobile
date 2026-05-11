@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using School_Management.API.Data;
@@ -11,11 +12,15 @@ namespace School_Management.API.Repositories
     {
         private readonly ApplicationDbContext context;
         private readonly IFirebaseService firebaseService;
+        private readonly UserManager<AppUser> userManager;
+        private readonly ILogger<ConversationRepository> logger;
 
-        public ConversationRepository(ApplicationDbContext context, IFirebaseService firebaseService)
+        public ConversationRepository(ApplicationDbContext context, IFirebaseService firebaseService, UserManager<AppUser> userManager, ILogger<ConversationRepository> logger)
         {
             this.context = context;
             this.firebaseService = firebaseService;
+            this.userManager = userManager;
+            this.logger = logger;
         }
 
         public async Task<(bool result, string message)> AddMembersToGroup(AddMembersRequest request, Guid userId)
@@ -259,12 +264,15 @@ namespace School_Management.API.Repositories
 
         public async Task<(Guid? conversationId, string message)> SendMessage(SendMessageRequest request, Guid senderId)
         {
+            var finalConversationId = request.ConversationId ?? Guid.NewGuid();
+            Message message = null;
+            List<Guid> receiverIds = new List<Guid>();
+            var sender = await userManager.FindByIdAsync(senderId.ToString());
+            string senderName = sender?.FullName ?? "Người dùng";
+
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var conversationId = Guid.NewGuid();
-                List<Guid> receiverIds;
-
                 if (request.ConversationId.HasValue)
                 {
                     receiverIds = await context.UserConversation
@@ -272,7 +280,7 @@ namespace School_Management.API.Repositories
                         .Select(x => x.UserId)
                         .ToListAsync();
 
-                    var message = new Message
+                    message = new Message
                     {
                         Id = Guid.NewGuid(),
                         SenderId = senderId,
@@ -300,8 +308,7 @@ namespace School_Management.API.Repositories
 
                     var conversation = new Conversation
                     {
-                        Id = conversationId,
-                        ConversationName = null,
+                        Id = finalConversationId,
                         IsGroup = false,
                         CreatedAt = DateTimeOffset.UtcNow,
                         LastUpdatedAt = DateTimeOffset.UtcNow
@@ -309,17 +316,17 @@ namespace School_Management.API.Repositories
 
                     var userConversations = new List<UserConversation>
             {
-                new() { Id = Guid.NewGuid(), ConversationId = conversationId, UserId = senderId, UnReadCount = 0 },
-                new() { Id = Guid.NewGuid(), ConversationId = conversationId, UserId = request.ReceiverId.Value, UnReadCount = 1 }
+                new() { Id = Guid.NewGuid(), ConversationId = finalConversationId, UserId = senderId, UnReadCount = 0 },
+                new() { Id = Guid.NewGuid(), ConversationId = finalConversationId, UserId = request.ReceiverId.Value, UnReadCount = 1 }
             };
 
-                    var message = new Message
+                    message = new Message
                     {
                         Id = Guid.NewGuid(),
                         SenderId = senderId,
                         Status = "Đã gửi",
                         Content = request.Content,
-                        ConversationId = conversationId,
+                        ConversationId = finalConversationId,
                         CreatedAt = DateTimeOffset.UtcNow,
                     };
 
@@ -329,18 +336,28 @@ namespace School_Management.API.Repositories
                 }
 
                 await context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                var finalConversationId = request.ConversationId ?? conversationId;
-                await firebaseService.UpdateConversation(finalConversationId, senderId, receiverIds);
-
-                return (finalConversationId, "SUCCESS");
+                await transaction.CommitAsync(); 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+                if (context.Database.CurrentTransaction != null)
+                {
+                    await transaction.RollbackAsync();
+                }
+                logger.LogError(ex, "Lỗi SQL khi gửi tin nhắn");
                 throw;
             }
+
+            try
+            {
+                await firebaseService.UpdateConversation(finalConversationId, receiverIds, message, senderName);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "SQL lưu thành công nhưng Firebase Signal thất bại");
+            }
+
+            return (finalConversationId, "SUCCESS");
         }
     }
 }

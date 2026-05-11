@@ -14,7 +14,7 @@ namespace School_Management.API.EntityConfigurations
             builder.Property(x => x.CreatedAt).IsRequired();
             builder.Property(x => x.IsPopup).IsRequired();
             builder.Property(x => x.IsRead).IsRequired();
-            builder.Property(x => x.Tiltle).IsRequired().HasMaxLength(80);
+            builder.Property(x => x.Title).IsRequired().HasMaxLength(80);
             builder.Property(x => x.Type).IsRequired().HasMaxLength(50);
             builder.Property(x => x.SchoolYear).IsRequired();
 

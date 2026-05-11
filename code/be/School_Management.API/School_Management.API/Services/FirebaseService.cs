@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
+using School_Management.API.Models.Domain;
 
 namespace School_Management.API.Services
 {
@@ -68,31 +69,51 @@ namespace School_Management.API.Services
         });
             }
         }
-        public async Task UpdateConversation(Guid conversationId, Guid senderId, List<Guid> receiverIds)
+        public async Task UpdateConversation(Guid conversationId, List<Guid> receiverIds, Message message, string senderName)
         {
             var docRef = _db.Collection("conversations").Document(conversationId.ToString());
             var snapshot = await docRef.GetSnapshotAsync();
 
             var allMembers = receiverIds.Select(r => r.ToString())
-                                        .Append(senderId.ToString()).ToList();
+                                        .Append(message.SenderId.ToString()).ToList();
 
             if (!snapshot.Exists)
             {
                 var unreadCounts = receiverIds.ToDictionary(r => r.ToString(), r => (object)1);
-                unreadCounts[senderId.ToString()] = 0;
+                unreadCounts[message.SenderId.ToString()] = 0;
 
                 await docRef.SetAsync(new Dictionary<string, object>
         {
             { "lastMessageAt", Timestamp.GetCurrentTimestamp() },
             { "members", allMembers },
-            { "unreadCounts", unreadCounts }
+            { "unreadCounts", unreadCounts },
+            { "lastMessage", new Dictionary<string, object>
+            {
+                { "id", message.Id.ToString()},
+                { "senderId", message.SenderId.ToString()},
+                { "content", message.Content},
+                { "senderName", senderName},
+                { "conversationId", message.ConversationId.ToString()}
+            }
+
+            }
         });
             }
             else
             {
                 var updates = new Dictionary<string, object>
         {
-            { "lastMessageAt", Timestamp.GetCurrentTimestamp() }
+            { "lastMessageAt", Timestamp.GetCurrentTimestamp() },
+            { "lastMessage", new Dictionary<string, object>
+            {
+                { "id", message.Id.ToString()},
+                { "senderId", message.SenderId.ToString()},
+                { "content", message.Content},
+                { "senderName", senderName},
+                { "conversationId", message.ConversationId.ToString()}
+            }
+
+            }
         };
                 foreach (var receiverId in receiverIds)
                     updates[$"unreadCounts.{receiverId}"] = FieldValue.Increment(1);
@@ -110,6 +131,26 @@ namespace School_Management.API.Services
     });
         }
 
+        public async Task CreateNotification(Guid userId, int unReadQuantity, Notification request)
+        {
+            var docRef = _db.Collection("notifications").Document(userId.ToString());
+
+            await docRef.SetAsync(new Dictionary<string, object>
+    {
+        { "lastUpdate", Timestamp.GetCurrentTimestamp() },
+        { "unReadCounts", unReadQuantity},
+        { "lastNoti", new Dictionary<string, object>
+            {
+                { "id" , request.Id.ToString() },
+                { "title" , request.Title },
+                { "type", request.Type},
+                { "content", request.Content },
+                { "createdAt", request.CreatedAt}
+            }
+        }
+    }, SetOptions.MergeAll);
+        }
+
         public async Task CreateGroupConversation(Guid conversationId, List<Guid> memberIds)
         {
             var docRef = _db.Collection("conversations").Document(conversationId.ToString());
@@ -122,6 +163,15 @@ namespace School_Management.API.Services
         { "members", memberIds.Select(m => m.ToString()).ToList() },
         { "unreadCounts", unreadCounts }
     });
+        }
+
+        public async Task ResetUnreadCountNoti(Guid userId)
+        {
+            var docRef = _db.Collection("notifications").Document(userId.ToString());
+            await docRef.SetAsync(new Dictionary<string, object>
+            {
+                {"unReadCounts" , 0 }
+            }, SetOptions.MergeAll);
         }
     }
 }
