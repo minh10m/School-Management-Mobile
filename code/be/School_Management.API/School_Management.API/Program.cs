@@ -146,6 +146,8 @@ builder.Services.AddScoped<IAIChatbotRepository, AIChatbotRepository>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IConversationService, ConversationService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()

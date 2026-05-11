@@ -18,5 +18,6 @@ namespace School_Management.API.Models.Domain
         public ICollection<AIChatHistory> AIChatHistories { get; set; } = new List<AIChatHistory>();
         public ICollection<UserConversation> UserConversations { get; set; } = new List<UserConversation>();
         public ICollection<Message> Messages { get; set; } = new List<Message>();
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }
 }
