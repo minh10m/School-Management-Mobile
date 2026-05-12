@@ -12,6 +12,17 @@ A scalable mobile application for managing students, courses, enrollments, and a
 <img src="https://github.com/user-attachments/assets/710eeaf0-778f-4f39-9ae4-4cc80044d5fc" width="30%" />
 </p>
 
+### Payment screen
+<img src="https://github.com/user-attachments/assets/568deeda-9190-4d70-9529-f3e65028e739" width="30%"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/53217d3c-e83b-4a86-9f3f-ae6583490c0e" width="30%"/>
+
+### Chat message screen
+<img src="https://github.com/user-attachments/assets/0b665578-83b6-441e-a01d-80b561f7bc06" width="30%"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img src="https://github.com/user-attachments/assets/24c0038e-473c-43c8-a6d3-4291c588f96b" width="30%"/>
+
+
 ### AI chatbot screen
 <p align="left">
 <img src="https://github.com/user-attachments/assets/bb9d0171-1add-42f6-8fc1-10efabbe9404" width="30%" />
@@ -28,7 +39,7 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ### Login and Attendance screen
 <p align="left">
-<img src="https://github.com/user-attachments/assets/0b3df493-a526-46e6-9662-dff202c082ee" width="30%"/>
+<img src="https://github.com/user-attachments/assets/fd1dce6c-2790-445e-a7af-ddb568e0d928" width="30%"/>  
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="https://github.com/user-attachments/assets/9b43c3a4-7066-4902-9905-9a49e7d0060b" width="30%"/>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -98,11 +109,13 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ## 🏗️ System Architecture
 
-- **Mobile Client:** Handles UI and real-time listeners  
+- **Mobile Client:** Handles UI and real-time listeners
+- **WAF(Web Application Firewall)**  
 - **Backend API (.NET):** Processes business logic and integrations  
 - **Database Layer:** PostgreSQL (primary), Redis (caching)  
 - **Realtime Layer:** Firebase Firestore  
-- **AI Layer:** Semantic Kernel + Gemini API  
+- **AI Layer:** Semantic Kernel + Gemini API
+<img width="1000" height="731" alt="diagram-export-23_45_14-11-5-2026" src="https://github.com/user-attachments/assets/e18116d9-2913-4a67-ab4f-e4f983a985f2" />
 
 ---
 
@@ -134,7 +147,7 @@ Steps:
 ```bash
 # Clone the project
 git clone https://github.com/minh10m/School-Management-Mobile.git
-cd School-Management-Mobile
+cd School-Management-Mobile/code/fe
 
 # Install dependencies
 npm install

@@ -250,7 +250,8 @@ namespace School_Management.API.Repositories
                                             IsGroup = g.IsGroup,
                                             DisplayName = g.IsGroup ? g.ConversationName : g.UserConversations.Where(uc => uc.UserId != userId).Select(y => y.User.FullName).FirstOrDefault(),
                                             LastUpdatedAt = g.LastUpdatedAt,
-                                            UnReadCount = g.UserConversations.Where(uc => uc.UserId == userId).Select(y => y.UnReadCount).FirstOrDefault()
+                                            UnReadCount = g.UserConversations.Where(uc => uc.UserId == userId).Select(y => y.UnReadCount).FirstOrDefault(),
+                                            LastMessage = g.Messages.OrderByDescending(m => m.CreatedAt).Select(m => m.Content).FirstOrDefault()
                                         }).ToListAsync();
             return new PagedResponse<ConversationResponse>
             {
