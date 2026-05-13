@@ -20,6 +20,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import { useAuthStore } from "../store/authStore";
 import { useConfigStore } from "../store/configStore";
+import { useAppPushNotifications } from "@/hooks/useAppPushNotifications";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -49,6 +50,8 @@ export default function RootLayout() {
 
   const { loadAuthFromStorage } = useAuthStore();
   const { loadConfig } = useConfigStore();
+
+  useAppPushNotifications();
 
   useEffect(() => {
     const init = async () => {
