@@ -26,7 +26,7 @@ namespace School_Management.API.Repositories
             var schoolYear = await schoolYearInfoRepository.GetSchoolYearInfo();
             if (schoolYear == null) return (false, "NOT_FOUND_SCHOOLYEAR");
 
-            var notification = new Notification
+            var notifications = request.UserId.Select(userId => new Notification
             {
                 Id = Guid.NewGuid(),
                 SchoolYear = schoolYear.SchoolYear,
@@ -34,34 +34,53 @@ namespace School_Management.API.Repositories
                 CreatedAt = DateTimeOffset.UtcNow,
                 IsPopup = false,
                 IsRead = false,
-                Title = request.Tiltle,
+                Title = request.Title,
                 Type = request.Type,
-                UserId = request.UserId
-            };
+                UserId = userId
+            }).ToList();
 
-            using (var transaction = await context.Database.BeginTransactionAsync())
+
+            try
             {
-                try
-                {
-                    context.Notification.Add(notification);
-                    await context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch (Exception)
-                {
-                    await transaction.RollbackAsync();
-                    return (false, "DATABASE_ERROR"); 
-                }
+                context.Notification.AddRange(notifications);
+                await context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Create notification database failed");
+                return (false, "DATABASE_ERROR");
             }
 
             try
             {
-                var unReadCounts = await context.Notification.AsNoTracking().CountAsync(x => x.UserId == request.UserId && !x.IsRead);
-                await firebaseService.CreateNotification(notification.UserId, unReadCounts, notification);
+                var unreadCounts = await context.Notification
+                    .AsNoTracking()
+                    .Where(x =>
+                        request.UserId.Contains(x.UserId) &&
+                        !x.IsRead)
+                    .GroupBy(x => x.UserId)
+                    .Select(g => new
+                    {
+                        UserId = g.Key,
+                        Count = g.Count()
+                    })
+                    .ToDictionaryAsync(x => x.UserId, x => x.Count);
+
+                var firebaseTasks = notifications.Select(notification =>
+                {
+                    var count = unreadCounts.GetValueOrDefault(notification.UserId, 0);
+
+                    return firebaseService.CreateNotification(
+                        notification.UserId,
+                        count,
+                        notification);
+                });
+
+                await Task.WhenAll(firebaseTasks);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Firebase signal failed for user {UserId}", notification.UserId);
+                logger.LogError(ex, "Firebase push failed");
             }
 
             return (true, "SUCCESS");

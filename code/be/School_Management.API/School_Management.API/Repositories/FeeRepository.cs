@@ -1,17 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CloudinaryDotNet;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using School_Management.API.Services;
 
 namespace School_Management.API.Repositories
 {
     public class FeeRepository : IFeeRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly INotificationService notificationService;
+        private readonly ILogger<FeeRepository> logger;
 
-        public FeeRepository(ApplicationDbContext context)
+        public FeeRepository(ApplicationDbContext context, INotificationService notificationService, ILogger<FeeRepository> logger)
         {
             this.context = context;
+            this.notificationService = notificationService;
+            this.logger = logger;
         }
         public async Task<(FeeResponse? data, string message)> CreateFee(FeeRequest request)
         {
@@ -33,6 +39,8 @@ namespace School_Management.API.Repositories
                 var studentIds = await context.StudentClassYear.AsNoTracking().Where(x => x.ClassYearId == request.ClassYearId)
                                                                .Select(g => g.StudentId)
                                                                .ToListAsync();
+
+                var userIds = await context.Student.Where(x => studentIds.Contains(x.Id)).Select(g => g.UserId).ToListAsync();
 
                 var fee = new Fee
                 {
@@ -67,6 +75,21 @@ namespace School_Management.API.Repositories
                 context.FeeDetail.AddRange(listFeeDetail);
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                try
+                {
+                    await notificationService.CreateNotification(new CreateNotificationRequest
+                    {
+                        Content = $"Bạn có học phí mới năm học {request.SchoolYear} - {request.SchoolYear + 1}",
+                        Title = "Học phí mới",
+                        Type = "Tạo học phí",
+                        UserId = userIds
+                    });
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Push notification failed");
+                }
 
                 var result = new FeeResponse
                 {

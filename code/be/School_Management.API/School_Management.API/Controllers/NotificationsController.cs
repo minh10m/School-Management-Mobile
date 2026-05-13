@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using School_Management.API.CustomActionFilter;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
 using System.Security.Claims;
@@ -18,6 +19,19 @@ namespace School_Management.API.Controllers
             this.notificationService = notificationService;
         }
         private Guid GetCurrentUserId() => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        [HttpPost]
+        [Authorize]
+        [ValidateModel]
+        public async Task<IActionResult> CreateNotification([FromBody] CreateNotificationRequest request)
+        {
+            var result = await notificationService.CreateNotification(request);
+            return Ok(new
+            {
+                success = true,
+                message = "Tạo thông báo thành công"
+            });
+        }
 
         [HttpGet]
         [Authorize]

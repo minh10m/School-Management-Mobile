@@ -109,11 +109,13 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ## 🏗️ System Architecture
 
-- **Mobile Client:** Handles UI and real-time listeners  
+- **Mobile Client:** Handles UI and real-time listeners
+- **WAF(Web Application Firewall)**  
 - **Backend API (.NET):** Processes business logic and integrations  
 - **Database Layer:** PostgreSQL (primary), Redis (caching)  
 - **Realtime Layer:** Firebase Firestore  
-- **AI Layer:** Semantic Kernel + Gemini API  
+- **AI Layer:** Semantic Kernel + Gemini API
+<img width="1000" height="731" alt="diagram-export-23_45_14-11-5-2026" src="https://github.com/user-attachments/assets/e18116d9-2913-4a67-ab4f-e4f983a985f2" />
 
 ---
 
