@@ -126,7 +126,7 @@ namespace School_Management.API.Repositories
 
             var payment = await context.Payment
                 .Where(x => x.Status == "Chưa đóng")
-                .FirstOrDefaultAsync(x => x.OrderCode.ToLower().Contains(orderCode));
+                .FirstOrDefaultAsync(x => orderCode.Contains(x.OrderCode.ToLower()));
             if (payment == null) return (false, "PAYMENT_NOT_FOUND");
 
             string userId = payment.UserId.ToString();
