@@ -1,9 +1,11 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using FirebaseAdmin.Messaging;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using School_Management.API.Services;
 
 namespace School_Management.API.Repositories
 {
@@ -11,101 +13,196 @@ namespace School_Management.API.Repositories
     {
         private readonly ApplicationDbContext context;
         private readonly Cloudinary cloudinary;
+        private readonly INotificationService notificationService;
+        private readonly ILogger<AssignmentRepository> logger;
 
-        public AssignmentRepository(ApplicationDbContext context, Cloudinary cloudinary)
+        public AssignmentRepository(ApplicationDbContext context, Cloudinary cloudinary, INotificationService notificationService, ILogger<AssignmentRepository> logger)
         {
             this.context = context;
             this.cloudinary = cloudinary;
+            this.notificationService = notificationService;
+            this.logger = logger;
         }
 
-        public async Task<(AssignmentResponse? data, string? message)> CreateAssignment(PostOrUpdateAssignmentRequest request, Guid userId)
+        public async Task<(AssignmentResponse? data, string? message)> CreateAssignment(
+            PostOrUpdateAssignmentRequest request,
+            Guid userId)
         {
-
             var teacher = await context.Teacher
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.UserId == userId);
-            if (teacher == null) return (null, "NOT_FOUND_TEACHER");
 
-            var teacherSubject = await context.TeacherSubject.Include(x => x.Subject)
-                                                             .Where(x => x.SubjectId == request.SubjectId
-                                                                     && x.TeacherId == teacher.Id)
-                                                             .FirstOrDefaultAsync();
-            if (teacherSubject == null) return (null, "FORBIDDEN_TEACHER_SUBJECT");
+            if (teacher == null)
+                return (null, "NOT_FOUND_TEACHER");
+
+            var teacherSubject = await context.TeacherSubject
+                .Include(x => x.Subject)
+                .FirstOrDefaultAsync(x =>
+                    x.SubjectId == request.SubjectId &&
+                    x.TeacherId == teacher.Id);
+
+            if (teacherSubject == null)
+                return (null, "FORBIDDEN_TEACHER_SUBJECT");
 
             var normalizedName = request.Title?.Trim().ToLower();
-            var isExistedName = await context.Assignment.AnyAsync(x => x.Title.Trim().ToLower() == normalizedName
-                                                                 && x.TeacherSubject.SubjectId == request.SubjectId
-                                                                 && x.ClassYearId == request.ClassYearId);
-            if (isExistedName) return (null, "CONFLICT_TITLE");
+
+            var isExistedName = await context.Assignment.AnyAsync(x =>
+                x.Title != null &&
+                x.Title.Trim().ToLower() == normalizedName &&
+                x.TeacherSubject.SubjectId == request.SubjectId &&
+                x.ClassYearId == request.ClassYearId);
+
+            if (isExistedName)
+                return (null, "CONFLICT_TITLE");
 
             var startTimeVN = request.StartTime.ToOffset(TimeSpan.FromHours(7));
             var finishTimeVN = request.FinishTime.ToOffset(TimeSpan.FromHours(7));
 
-            var officialStartTime = new DateTimeOffset(startTimeVN.Year, startTimeVN.Month, startTimeVN.Day,
-                                                       startTimeVN.Hour, startTimeVN.Minute, 0, startTimeVN.Offset);
-            var officialFinishTime = new DateTimeOffset(finishTimeVN.Year, finishTimeVN.Month, finishTimeVN.Day,
-                                                        finishTimeVN.Hour, finishTimeVN.Minute, 0, finishTimeVN.Offset);
+            var officialStartTime = new DateTimeOffset(
+                startTimeVN.Year,
+                startTimeVN.Month,
+                startTimeVN.Day,
+                startTimeVN.Hour,
+                startTimeVN.Minute,
+                0,
+                startTimeVN.Offset);
+
+            var officialFinishTime = new DateTimeOffset(
+                finishTimeVN.Year,
+                finishTimeVN.Month,
+                finishTimeVN.Day,
+                finishTimeVN.Hour,
+                finishTimeVN.Minute,
+                0,
+                finishTimeVN.Offset);
+
             string fileUrl = "Không có dữ liệu";
-            string? fileTitle = request.FileTitle?.Trim() ?? null;
+            string? fileTitle = request.FileTitle?.Trim();
             string? publicId = null;
 
-            var longMaxSize = 20 * 1024 * 1024;
-            if (request.File.Length > longMaxSize) return (null, "BIGGER_THAN_MAXSIZE");
-
-            if(request.File != null && request.File.Length > 0)
+            try
             {
-                using var stream = request.File.OpenReadStream();
-                var uploadParams = new RawUploadParams
+                // Upload file
+                if (request.File != null)
                 {
-                    File = new FileDescription(request.File.FileName, stream),
-                    Folder = "assignments",
-                    PublicId = Guid.NewGuid().ToString(),
-                    Type = "upload",
-                    AccessMode = "public"
+                    var maxSize = 20 * 1024 * 1024;
+
+                    if (request.File.Length > maxSize)
+                        return (null, "BIGGER_THAN_MAXSIZE");
+
+                    if (request.File.Length > 0)
+                    {
+                        using var stream = request.File.OpenReadStream();
+
+                        var uploadParams = new RawUploadParams
+                        {
+                            File = new FileDescription(request.File.FileName, stream),
+                            Folder = "assignments",
+                            PublicId = Guid.NewGuid().ToString(),
+                            Type = "upload",
+                            AccessMode = "public"
+                        };
+
+                        var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                        if (uploadResult.Error != null)
+                            return (null, "UPLOAD_FILE_FAILED");
+
+                        fileUrl = uploadResult.SecureUrl.ToString();
+                        publicId = uploadResult.PublicId;
+
+                        if (string.IsNullOrWhiteSpace(fileTitle))
+                            fileTitle = request.File.FileName;
+                    }
+                }
+
+                var assignment = new Assignment
+                {
+                    Id = Guid.NewGuid(),
+                    StartTime = officialStartTime.ToUniversalTime(),
+                    FinishTime = officialFinishTime.ToUniversalTime(),
+                    TeacherSubjectId = teacherSubject.TeacherSubjectId,
+                    Title = request.Title?.Trim(),
+                    PublicId = publicId,
+                    Description = request.Description,
+                    ClassYearId = request.ClassYearId,
+                    FileTitle = fileTitle ?? "Không có dữ liệu",
+                    FileUrl = fileUrl
                 };
-                var uploadResult = await cloudinary.UploadAsync(uploadParams);
-                if (uploadResult.Error != null) return (null, "UPLOAD_FILE_FAILED");
 
-                fileUrl = uploadResult.SecureUrl.ToString();
-                if (string.IsNullOrEmpty(fileTitle)) fileTitle = request.File.FileName;
-                publicId = uploadResult.PublicId;
+                // Save assignment
+                context.Assignment.Add(assignment);
+                await context.SaveChangesAsync();
 
+                // Push notification (non-critical)
+                try
+                {
+                    var userIds = await context.StudentClassYear
+                        .AsNoTracking()
+                        .Where(x => x.ClassYearId == request.ClassYearId)
+                        .Select(x => x.Student.UserId)
+                        .Distinct()
+                        .ToListAsync();
+
+                    await notificationService.CreateNotification(
+                        new CreateNotificationRequest
+                        {
+                            Title = $"Bài tập môn {teacherSubject.Subject.SubjectName}",
+                            Type = "Bài tập",
+                            Content =
+                                $"Giáo viên {teacher.User.FullName} đã tạo một bài tập mới của môn {teacherSubject.Subject.SubjectName}",
+                            UserId = userIds
+                        });
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(
+                        ex,
+                        "Push notification failed for class {ClassYearId}",
+                        request.ClassYearId);
+                }
+
+                return (new AssignmentResponse
+                {
+                    AssignmentId = assignment.Id,
+                    StartTime = assignment.StartTime,
+                    FinishTime = assignment.FinishTime,
+                    TeacherSubjectId = assignment.TeacherSubjectId,
+                    ClassYearId = assignment.ClassYearId,
+                    FileTitle = assignment.FileTitle,
+                    FileUrl = assignment.FileUrl,
+                    Title = assignment.Title,
+                    Description = assignment.Description,
+                    TeacherName = teacher.User.FullName,
+                    SubjectId = teacherSubject.SubjectId,
+                    SubjectName = teacherSubject.Subject.SubjectName
+                }, "SUCCESS");
             }
-
-            var assignment = new Assignment
+            catch (Exception ex)
             {
-                Id = Guid.NewGuid(),
-                StartTime = officialStartTime.ToUniversalTime(),
-                FinishTime = officialFinishTime.ToUniversalTime(),
-                TeacherSubjectId = teacherSubject.TeacherSubjectId,
-                Title = request.Title?.Trim(),
-                PublicId = publicId,
-                Description = request.Description,
-                ClassYearId = request.ClassYearId,
-                FileTitle = fileTitle ?? "Không có dữ liệu",
-                FileUrl = fileUrl ?? "Không có dữ liệu"
-            };
+                // rollback uploaded cloud file if DB save failed
+                if (!string.IsNullOrWhiteSpace(publicId))
+                {
+                    try
+                    {
+                        await cloudinary.DestroyAsync(new DeletionParams(publicId)
+                        {
+                            ResourceType = ResourceType.Raw
+                        });
+                    }
+                    catch (Exception cloudinaryEx)
+                    {
+                        logger.LogError(
+                            cloudinaryEx,
+                            "Failed to delete uploaded assignment file");
+                    }
+                }
 
-            context.Assignment.Add(assignment);
-            await context.SaveChangesAsync();
+                logger.LogError(ex, "Create assignment failed");
 
-            return (new AssignmentResponse
-            {
-                AssignmentId = assignment.Id,
-                StartTime = assignment.StartTime,
-                FileTitle = assignment.FileTitle,
-                TeacherSubjectId = assignment.TeacherSubjectId,
-                ClassYearId = assignment.ClassYearId,
-                FileUrl = assignment.FileUrl,
-                Title = assignment.Title,
-                Description = assignment.Description,
-                FinishTime = assignment.FinishTime,
-                TeacherName = teacher.User.FullName,
-                SubjectId = teacherSubject.SubjectId,
-                SubjectName = teacherSubject.Subject.SubjectName
-            }, "SUCCESS");
+                return (null, "CREATE_ASSIGNMENT_FAILED");
+            }
         }
-
         public async Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request, Guid userId)
         {
             var teacher = await context.Teacher.FirstOrDefaultAsync(x => x.UserId == userId);

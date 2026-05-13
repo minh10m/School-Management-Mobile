@@ -25,7 +25,9 @@ namespace School_Management.API.Services
                 "EMPTY_REQUEST" => throw new BadRequestException("Danh sách điểm trống, vui lòng cung cấp thông tin"),
                 "NOT_FOUND_CLASSYEAR" => throw new NotFoundException("Không tìm thấy lớp của các học sinh này"),
                 "FORBIDDEN_CREATE_RESULT" => throw new ForbiddenException("Có môn học trong danh sách không thuộc sự giảng dạy của bạn"),
-                _ => throw new Exception("Lỗi không xác định")
+                "INVALID_SUBJECT" => throw new BadRequestException("Danh sách điểm gửi hàng loạt có môn học khác"),
+
+               _ => throw new Exception("Lỗi không xác định")
             };
         }
 

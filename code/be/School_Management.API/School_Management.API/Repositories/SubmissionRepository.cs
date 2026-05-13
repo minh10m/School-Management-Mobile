@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using School_Management.API.Services;
 
 namespace School_Management.API.Repositories
 {
@@ -12,12 +13,14 @@ namespace School_Management.API.Repositories
         private readonly ApplicationDbContext context;
         private readonly Cloudinary cloudinary;
         private readonly ILogger<SubmissionRepository> logger;
+        private readonly INotificationService notificationService;
 
-        public SubmissionRepository(ApplicationDbContext context, Cloudinary cloudinary, ILogger<SubmissionRepository> logger)
+        public SubmissionRepository(ApplicationDbContext context, Cloudinary cloudinary, ILogger<SubmissionRepository> logger, INotificationService notificationService)
         {
             this.context = context;
             this.cloudinary = cloudinary;
             this.logger = logger;
+            this.notificationService = notificationService;
         }
         public async Task<(SubmissionResponse? data, string? message)> CreateSubmission(SubmissionRequest request, Guid userId)
         {
@@ -197,8 +200,8 @@ namespace School_Management.API.Repositories
 
         public async Task<(SubmissionResponse? data, string? message)> ScoreSubmission(ScoreSubmissionRequest request, Guid submissionId, Guid userId)
         {
-            var teacherId = await context.Teacher.Where(x => x.UserId == userId).Select(g => g.Id).FirstOrDefaultAsync();
-            if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
+            var teacher = await context.Teacher.Include(x => x.User).Where(x => x.UserId == userId).FirstOrDefaultAsync();
+            if (teacher == null) return (null, "NOT_FOUND_TEACHER");
             var submission = await context.Submission.Include(x => x.Student)
                                                      .ThenInclude(x => x.User)
                                                      .Include(x => x.Assignment)
@@ -206,12 +209,31 @@ namespace School_Management.API.Repositories
                                                      .FirstOrDefaultAsync(x => x.Id == submissionId);
             if (submission == null) return (null, "NOT_FOUND_SUBMISSION");
 
-            if (teacherId != submission.Assignment.TeacherSubject.TeacherId)
+            if (teacher.Id != submission.Assignment.TeacherSubject.TeacherId)
                 return (null, "NOT_A_TEACHER_OF_ASSIGNMENT");
 
             submission.Score = request.Score;
             submission.Status = "Đã chấm";
             await context.SaveChangesAsync();
+
+            var listUserId = new List<Guid> { submission.Student.User.Id};
+         
+
+            try
+            {
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Giáo viên đã chấm điểm bài nộp : {submission.FileTitle}",
+                    Title = "Chấm điểm bài nộp",
+                    Type = "Chấm điểm",
+                    UserId = listUserId
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification failed with submissionId {SubmissionId}", submissionId);
+            }
+
             var result =  new SubmissionResponse
             {
                 AssignmentId = submission.AssignmentId,
