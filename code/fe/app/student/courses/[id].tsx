@@ -1,26 +1,25 @@
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useCallback, useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
   Alert,
+  Image,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { router, Stack, useLocalSearchParams } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { useState, useEffect, useCallback } from "react";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { usePaymentHub } from "../../../hooks/usePaymentHub";
 import { courseService } from "../../../services/course.service";
 import { lessonService } from "../../../services/lesson.service";
 import { paymentService } from "../../../services/payment.service";
-import { usePaymentHub } from "../../../hooks/usePaymentHub";
 import { CourseResponse } from "../../../types/course";
 import { LessonResponse } from "../../../types/lesson";
 import { PaymentResponse } from "../../../types/payment";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Modal, Image } from "react-native";
-import { useRef } from "react";
 
 export default function StudentCourseDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -31,24 +30,26 @@ export default function StudentCourseDetail() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState<PaymentResponse | null>(null);
+  const [hubEnabled, setHubEnabled] = useState(false); // ✅ state riêng cho hub
 
   const insets = useSafeAreaInsets();
 
   const { isConnected: isSignalRConnected } = usePaymentHub((status) => {
+    setHubEnabled(false); // ✅ dừng hub sau khi nhận event
     if (status.status === "Success") {
       setShowQR(false);
       setIsEnrolled(true);
       router.push({
         pathname: "/payment/success",
-        params: { 
+        params: {
           courseId: id,
-          courseName: course?.courseName || ""
-        }
+          courseName: course?.courseName || "",
+        },
       });
     } else {
       Alert.alert("Thanh toán thất bại", status.message);
     }
-  }, showQR);
+  }, hubEnabled); // ✅ dùng hubEnabled thay vì showQR
 
   const fetchCourseDetail = useCallback(async () => {
     if (!id || id === "lessons" || id === "create") return;
@@ -76,10 +77,8 @@ export default function StudentCourseDetail() {
     fetchCourseDetail();
   }, [fetchCourseDetail]);
 
-
   const handleRegister = async () => {
     if (isEnrolled) {
-      // Logic để vào xem bài học (giả sử là push qua màn danh sách bài học)
       router.push(`/student/courses/lessons?courseId=${id}` as any);
       return;
     }
@@ -90,7 +89,8 @@ export default function StudentCourseDetail() {
         courseId: id as string,
       });
       setPaymentInfo(response);
-      setShowQR(true);
+      setHubEnabled(true); // ✅ bật hub trước
+      setShowQR(true);     // ✅ show QR sau
     } catch (err: any) {
       if (err.response?.data?.message === "YOU_BUY_THIS_COURSE") {
         setIsEnrolled(true);
@@ -109,10 +109,7 @@ export default function StudentCourseDetail() {
 
       {/* Header */}
       <View className="px-6 py-4 bg-white border-b border-gray-100 flex-row items-center justify-between">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="p-2"
-        >
+        <TouchableOpacity onPress={() => router.back()} className="p-2">
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text
@@ -219,7 +216,7 @@ export default function StudentCourseDetail() {
                   <TouchableOpacity
                     onPress={() =>
                       router.push(
-                        `/student/courses/lessons?courseId=${id}&previewId=${firstLesson.id}` as any,
+                        `/student/courses/lessons?courseId=${id}&previewId=${firstLesson.id}` as any
                       )
                     }
                     activeOpacity={0.8}
@@ -271,14 +268,9 @@ export default function StudentCourseDetail() {
                           Quyền lợi tham gia
                         </Text>
                       </View>
-
                       <View className="gap-y-3">
                         <View className="flex-row items-center">
-                          <Ionicons
-                            name="play-circle"
-                            size={18}
-                            color="#93C5FD"
-                          />
+                          <Ionicons name="play-circle" size={18} color="#93C5FD" />
                           <Text
                             style={{ fontFamily: "Poppins-Regular" }}
                             className="text-blue-50 text-xs ml-3"
@@ -287,11 +279,7 @@ export default function StudentCourseDetail() {
                           </Text>
                         </View>
                         <View className="flex-row items-center">
-                          <Ionicons
-                            name="document-text"
-                            size={18}
-                            color="#FCD34D"
-                          />
+                          <Ionicons name="document-text" size={18} color="#FCD34D" />
                           <Text
                             style={{ fontFamily: "Poppins-Regular" }}
                             className="text-blue-50 text-xs ml-3"
@@ -300,11 +288,7 @@ export default function StudentCourseDetail() {
                           </Text>
                         </View>
                         <View className="flex-row items-center">
-                          <Ionicons
-                            name="chatbubbles"
-                            size={18}
-                            color="#6EE7B7"
-                          />
+                          <Ionicons name="chatbubbles" size={18} color="#6EE7B7" />
                           <Text
                             style={{ fontFamily: "Poppins-Regular" }}
                             className="text-blue-50 text-xs ml-3"
@@ -376,7 +360,6 @@ export default function StudentCourseDetail() {
         <View className="flex-1 bg-black/50 justify-end">
           <View className="bg-white rounded-t-[40px] px-6 pt-8 pb-10">
             <View className="w-12 h-1.5 bg-gray-200 rounded-full self-center mb-8" />
-
             <View className="flex-row justify-between items-center mb-6">
               <View>
                 <Text
@@ -393,7 +376,10 @@ export default function StudentCourseDetail() {
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => setShowQR(false)}
+                onPress={() => {
+                  setShowQR(false);
+                  setHubEnabled(false); // ✅ tắt hub khi user đóng modal
+                }}
                 className="w-8 h-8 rounded-full bg-gray-100 items-center justify-center"
               >
                 <Ionicons name="close" size={20} color="#64748B" />
@@ -449,10 +435,14 @@ export default function StudentCourseDetail() {
                   />
                   <Text
                     style={{ fontFamily: "Poppins-Medium" }}
-                    className={isSignalRConnected ? "text-emerald-600 text-sm" : "text-blue-600 text-sm"}
+                    className={
+                      isSignalRConnected
+                        ? "text-emerald-600 text-sm"
+                        : "text-blue-600 text-sm"
+                    }
                   >
-                    {isSignalRConnected 
-                      ? "Đã kết nối trực tiếp - Chờ thanh toán..." 
+                    {isSignalRConnected
+                      ? "Đã kết nối trực tiếp - Chờ thanh toán..."
                       : "Đang chờ bạn thanh toán..."}
                   </Text>
                 </View>
