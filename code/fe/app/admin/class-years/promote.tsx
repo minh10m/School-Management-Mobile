@@ -57,7 +57,7 @@ export default function AdminPromoteScreen() {
       setSourceClasses(sourceRes);
       setTargetClasses(targetRes);
     } catch (err) {
-      console.error(err);
+      console.log(err);
       Alert.alert("Lỗi", "Không thể tải danh sách lớp học");
     } finally {
       setLoading(false);

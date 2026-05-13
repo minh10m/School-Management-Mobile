@@ -53,7 +53,7 @@ export default function MyHomeroomClassSchedule() {
         await fetchSchedules(hr.classYearId);
       }
     } catch (error) {
-      console.error("Failed to fetch homeroom:", error);
+      console.log("Failed to fetch homeroom:", error);
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ export default function MyHomeroomClassSchedule() {
       });
       setSchedules(data || []);
     } catch (error) {
-      console.error("Failed to fetch class schedules:", error);
+      console.log("Failed to fetch class schedules:", error);
       setSchedules([]);
     }
   };

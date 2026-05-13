@@ -30,7 +30,7 @@ export default function TeacherLessonAssignmentDetailScreen() {
       const data = await lessonAssignmentService.getLessonAssignmentById(id);
       setAssignment(data);
     } catch (error) {
-      console.error("Error fetching assignment detail:", error);
+      console.log("Error fetching assignment detail:", error);
       Alert.alert("Lỗi", "Không thể tải chi tiết bài tập.");
     } finally {
       setLoading(false);

@@ -51,7 +51,7 @@ const ExamScheduleIndex = () => {
       const result = await examScheduleService.getAllSchedules(filter);
       setData(result);
     } catch (error) {
-      console.error(error);
+      console.log(error);
       Alert.alert("Lỗi", "Không thể tải lịch thi");
     } finally {
       setLoading(false);

@@ -26,7 +26,7 @@ export default function StudentRegisteredCourses() {
       const data = await courseService.getRegisteredCourses();
       setCourses(data.items);
     } catch (error) {
-      console.error("Error fetching registered courses:", error);
+      console.log("Error fetching registered courses:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

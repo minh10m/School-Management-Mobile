@@ -50,7 +50,7 @@ export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
       });
       setUsers(res.items);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,7 @@ export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
         });
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }

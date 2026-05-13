@@ -45,7 +45,7 @@ export default function ResultsScreen() {
       setResults(data.subjectResults || []);
       setOverall({ average: data.average, rating: data.rating });
     } catch (error) {
-      console.error("[AGENT] Error fetching student results:", error);
+      console.log("[AGENT] Error fetching student results:", error);
       setResults([]);
       setOverall(null);
     } finally {

@@ -61,7 +61,7 @@ export default function TimetableTab() {
       });
       setSchedule(data);
     } catch (e) {
-      console.error("Schedule load error:", e);
+      console.log("Schedule load error:", e);
     } finally {
       setLoading(false);
     }

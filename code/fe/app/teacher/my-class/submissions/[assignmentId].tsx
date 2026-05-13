@@ -43,7 +43,7 @@ export default function AssignmentSubmissions() {
       setSubmissions(submissionsData);
       setAssignment(assignmentData);
     } catch (error) {
-      console.error("Error fetching submissions:", error);
+      console.log("Error fetching submissions:", error);
       Alert.alert("Lỗi", "Không thể tải danh sách bài nộp");
     } finally {
       setLoading(false);

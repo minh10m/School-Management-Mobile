@@ -63,7 +63,7 @@ export default function MyTeachingClasses() {
       setTeaching(teachingData);
       setScheduleItems(schRes);
     } catch (error) {
-      console.error("Error fetching teaching data:", error);
+      console.log("Error fetching teaching data:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

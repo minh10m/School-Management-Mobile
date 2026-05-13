@@ -28,7 +28,7 @@ export const useConfigStore = create<ConfigState>((set) => ({
         set({ isLoading: false });
       }
     } catch (error) {
-      console.error("Error loading school configuration:", error);
+      console.log("Error loading school configuration:", error);
       set({ isLoading: false });
     }
   },

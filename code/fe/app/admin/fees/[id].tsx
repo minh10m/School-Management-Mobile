@@ -41,7 +41,7 @@ export default function AdminFeeDetailScreen() {
 
       setDetails(detailRes.items);
     } catch (err) {
-      console.error(err);
+      console.log(err);
       Alert.alert("Lỗi", "Không thể tải thông tin chi tiết học phí");
     } finally {
       setLoading(false);

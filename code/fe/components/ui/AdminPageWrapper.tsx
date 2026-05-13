@@ -18,6 +18,7 @@ interface AdminPageWrapperProps {
   leftComponent?: React.ReactNode;
   centerComponent?: React.ReactNode;
   rightComponent?: React.ReactNode;
+  centerTitle?: boolean;
   showLogo?: boolean;
   searchProps?: {
     value: string;
@@ -35,6 +36,7 @@ export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({
   leftComponent,
   centerComponent,
   rightComponent,
+  centerTitle,
   showLogo,
   searchProps,
   children,
@@ -57,7 +59,7 @@ export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({
             </TouchableOpacity>
           )}
 
-          {title && !showLogo && (
+          {title && !showLogo && !centerTitle && (
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"
@@ -78,6 +80,13 @@ export const AdminPageWrapper: React.FC<AdminPageWrapperProps> = ({
             <AppLogo size="medium" />
           ) : centerComponent ? (
             centerComponent
+          ) : title && centerTitle ? (
+            <Text
+              style={{ fontFamily: "Poppins-Bold" }}
+              className="text-lg text-black"
+            >
+              {title}
+            </Text>
           ) : null}
         </View>
 

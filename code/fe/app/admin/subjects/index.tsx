@@ -30,7 +30,7 @@ export default function AdminSubjectsScreen() {
       const data = Array.isArray(res) ? res : (res as any).items || [];
       setSubjects(data);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }

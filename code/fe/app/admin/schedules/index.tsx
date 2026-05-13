@@ -43,7 +43,7 @@ export default function AdminSchedulesScreen() {
       const res = await classYearService.getClassYears({ schoolYear: "2026" });
       setClasses(Array.isArray(res) ? res : []);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     }
   };
 
@@ -58,7 +58,7 @@ export default function AdminSchedulesScreen() {
       const data = Array.isArray(res) ? res : (res as any).items || [];
       setSchedules(data);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }

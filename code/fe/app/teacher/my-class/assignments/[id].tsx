@@ -27,7 +27,7 @@ export default function AssignmentDetailPage() {
       const data = await assignmentService.getAssignmentById(id as string);
       setAssignment(data);
     } catch (error) {
-      console.error("Error fetching assignment detail:", error);
+      console.log("Error fetching assignment detail:", error);
       Alert.alert("Lỗi", "Không thể tải chi tiết bài tập");
     } finally {
       setLoading(false);

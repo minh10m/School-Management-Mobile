@@ -50,7 +50,7 @@ export default function CreateLessonScreen() {
         { text: "Đồng ý", onPress: () => router.back() }
       ]);
     } catch (error: any) {
-      console.error("Error creating lesson:", error);
+      console.log("Error creating lesson:", error);
       Alert.alert("Lỗi", getErrorMessage(error));
     } finally {
       setLoading(false);

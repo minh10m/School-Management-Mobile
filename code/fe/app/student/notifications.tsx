@@ -1,145 +1,185 @@
-import { View, Text, SectionList, TouchableOpacity, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
+import { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  SectionList,
+  TouchableOpacity,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Stack, router, useFocusEffect } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
+import { notificationService } from "../../services/notification.service";
+import { NotificationResponse } from "../../types/notification";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
-const NOTIFICATIONS = [
-  {
-    title: 'Hôm nay',
-    data: [
-      {
-        id: '1',
-        title: 'Maths Teacher',
-        message: 'Lorem ipsum dolor sit amet, consectetur',
-        time: '15 phút',
-        unread: true,
-        avatar: require('../../assets/images/on-boarding-1.png'),
-      },
-      {
-        id: '2',
-        title: 'Science Teacher',
-        message: 'Lorem ipsum dolor sit amet, consectetur',
-        time: '2 giờ trước',
-        unread: true,
-        avatar: require('../../assets/images/on-boarding-2.png'),
-      },
-    ],
-  },
-  {
-    title: 'Hôm qua',
-    data: [
-      {
-        id: '3',
-        title: 'English Teacher',
-        message: 'Lorem ipsum dolor sit amet, consectetur',
-        time: '09/03',
-        unread: false,
-        avatar: require('../../assets/images/on-boarding-3.png'),
-      },
-      {
-        id: '4',
-        title: 'Maths Teacher',
-        message: 'Lorem ipsum dolor sit amet, consectetur',
-        time: '08/03',
-        unread: false,
-        avatar: require('../../assets/images/on-boarding-1.png'),
-      },
-      {
-        id: '5',
-        title: 'Social Teacher',
-        message: 'Lorem ipsum dolor sit amet, consectetur',
-        time: '05/03',
-        unread: false,
-        avatar: require('../../assets/images/on-boarding-2.png'),
-      },
-      {
-        id: '6',
-        title: 'English Teacher',
-        message: 'Lorem ipsum dolor sit amet, consectetur',
-        time: '03/03',
-        unread: false,
-        avatar: require('../../assets/images/on-boarding-3.png'),
-      },
-      {
-        id: '7',
-        title: 'Social Teacher',
-        message: 'Lorem ipsum dolor sit amet, consectetur',
-        time: '27/02',
-        unread: false,
-        avatar: require('../../assets/images/on-boarding-2.png'),
-      },
-    ],
-  },
-];
+// helper function to group notifications
+const groupNotifications = (notifications: NotificationResponse[]) => {
+  const grouped: { [key: string]: NotificationResponse[] } = {};
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  notifications.forEach((notif) => {
+    const notifDate = new Date(notif.createdAt);
+    let groupKey = "";
+
+    if (notifDate.toDateString() === today.toDateString()) {
+      groupKey = "Hôm nay";
+    } else if (notifDate.toDateString() === yesterday.toDateString()) {
+      groupKey = "Hôm qua";
+    } else {
+      groupKey = notifDate.toLocaleDateString("vi-VN");
+    }
+
+    if (!grouped[groupKey]) {
+      grouped[groupKey] = [];
+    }
+    grouped[groupKey].push(notif);
+  });
+
+  return Object.keys(grouped).map((key) => ({
+    title: key,
+    data: grouped[key],
+  }));
+};
+
+const formatTime = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 export default function NotificationScreen() {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchNotifications();
+    }, []),
+  );
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const res = await notificationService.getAllNotifications({
+        pageNumber: 1,
+        pageSize: 50,
+      });
+      const grouped = groupNotifications(res.items);
+      setNotifications(grouped);
+    } catch (error) {
+      console.log("Error loading notifications", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <Stack.Screen 
-        options={{
-            headerShown: true,
-            title: 'Thông báo',
-            headerTitleAlign: 'center',
-            headerTitleStyle: {
-                fontFamily: 'Poppins-Bold',
-                fontSize: 18,
-            },
-            headerLeft: () => (
-                <TouchableOpacity onPress={() => router.back()} className="text-black">
-                    <Ionicons name="arrow-back" size={24} color="black" />
-                </TouchableOpacity>
-            ),
-            headerShadowVisible: false,
-            headerStyle: { backgroundColor: 'white' },
-        }}
-    />
+      <Stack.Screen options={{ headerShown: false }} />
       <StatusBar hidden />
-      
-      <SectionList
-        sections={NOTIFICATIONS}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View className="flex-row items-center px-6 py-4">
-             {/* Unread Dot - Placeholder logic */}
-             <View className="w-4 items-center justify-center mr-2">
-                {item.unread && (
-                    <View className="w-2.5 h-2.5 bg-bright-blue rounded-full" />
+
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-50">
+        <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <View className="flex-1 items-center">
+          <Text className="text-black text-lg" style={{ fontFamily: "Poppins-Bold" }}>Thông báo</Text>
+        </View>
+        <View className="w-10" />
+      </View>
+
+
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#136ADA" />
+        </View>
+      ) : notifications.length === 0 ? (
+        <View className="flex-1 justify-center items-center">
+          <Ionicons name="notifications-off-outline" size={64} color="#CCC" />
+          <Text
+            className="text-gray-400 mt-4"
+            style={{ fontFamily: "Poppins-Medium" }}
+          >
+            Chưa có thông báo nào
+          </Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={notifications}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View className="flex-row items-center px-6 py-4">
+              {/* Unread Dot */}
+              <View className="w-4 items-center justify-center mr-2">
+                {!item.isRead && (
+                  <View className="w-2.5 h-2.5 bg-bright-blue rounded-full" />
                 )}
-             </View>
+              </View>
 
-            {/* Avatar */}
-            <View className="w-14 h-14 rounded-full overflow-hidden mr-4 bg-gray-100">
-                <Image 
-                    source={item.avatar} 
-                    style={{ width: '100%', height: '100%' }}
-                    contentFit="cover"
+              {/* Icon instead of avatar based on type */}
+              <View className="w-14 h-14 rounded-full overflow-hidden mr-4 bg-bright-blue/10 items-center justify-center">
+                <Ionicons
+                  name={
+                    item.type === "Assignment"
+                      ? "document-text"
+                      : item.type === "Event"
+                        ? "calendar"
+                        : "notifications"
+                  }
+                  size={24}
+                  color="#136ADA"
                 />
-            </View>
+              </View>
 
-            {/* Content */}
-            <View className="flex-1">
+              {/* Content */}
+              <View className="flex-1">
                 <View className="flex-row justify-between items-start">
-                    <Text className="text-black text-base" style={{ fontFamily: 'Poppins-Bold' }}>{item.title}</Text>
-                    <Text className="text-gray-400 text-xs" style={{ fontFamily: 'Poppins-Regular' }}>{item.time}</Text>
+                  <Text
+                    className="text-black text-base"
+                    style={{ fontFamily: "Poppins-Bold" }}
+                  >
+                    {item.title}
+                  </Text>
+                  <Text
+                    className="text-gray-400 text-xs"
+                    style={{ fontFamily: "Poppins-Regular" }}
+                  >
+                    {formatTime(item.createdAt)}
+                  </Text>
                 </View>
-                <Text className="text-gray-400 text-sm pr-4 mt-1" style={{ fontFamily: 'Poppins-Regular' }} numberOfLines={2}>
-                    {item.message}
+                <Text
+                  className="text-gray-400 text-sm pr-4 mt-1"
+                  style={{ fontFamily: "Poppins-Regular" }}
+                  numberOfLines={2}
+                >
+                  {item.content}
                 </Text>
+              </View>
             </View>
-          </View>
-        )}
-        renderSectionHeader={({ section: { title } }) => (
-          <View className="px-6 py-2 bg-white mt-4">
-            <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Medium' }}>{title}</Text>
-          </View>
-        )}
-        stickySectionHeadersEnabled={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
+          )}
+          renderSectionHeader={({ section: { title } }) => (
+            <View className="px-6 py-2 bg-white mt-4">
+              <Text
+                className="text-black text-lg"
+                style={{ fontFamily: "Poppins-Medium" }}
+              >
+                {title}
+              </Text>
+            </View>
+          )}
+          stickySectionHeadersEnabled={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        />
+      )}
     </SafeAreaView>
   );
 }

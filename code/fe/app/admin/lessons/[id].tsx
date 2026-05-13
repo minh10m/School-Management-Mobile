@@ -37,7 +37,7 @@ export default function AdminLessonDetailScreen() {
       setVideos(videosResponse?.items || []);
       setAssignments(assignmentsData?.items || []);
     } catch (error) {
-      console.error("Error fetching lesson details:", error);
+      console.log("Error fetching lesson details:", error);
       Alert.alert("Lỗi", "Không thể tải chi tiết bài giảng.");
     } finally {
       setLoading(false);

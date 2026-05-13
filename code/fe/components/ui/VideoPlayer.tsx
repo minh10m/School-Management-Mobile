@@ -30,7 +30,7 @@ const NativeVideoPlayer = ({ url, autoPlay, loop }: VideoPlayerProps) => {
     try {
       await WebBrowser.openBrowserAsync(url);
     } catch (e) {
-      console.error(e);
+      console.log(e);
     }
   };
 

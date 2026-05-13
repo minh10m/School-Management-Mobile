@@ -31,7 +31,7 @@ export default function AdminRolesScreen() {
       const data = Array.isArray(res) ? res : res.items || [];
       setRoles(data);
     } catch (err) {
-      console.error("Error fetching roles:", err);
+      console.log("Error fetching roles:", err);
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,7 @@ export interface ConversationResponse {
   unReadCount: number;
   lastUpdatedAt: string;
   isGroup: boolean;
+  lastMessage?: string | null;
 }
 
 export interface MessageResponse {

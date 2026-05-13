@@ -92,7 +92,7 @@ export default function ManageStudentResult() {
         }
       }
     } catch (error) {
-      console.error('[AGENT] Error fetching student result:', error);
+      console.log('[AGENT] Error fetching student result:', error);
       Alert.alert('Lỗi', getErrorMessage(error));
     } finally {
       setLoading(false);
@@ -138,7 +138,7 @@ export default function ManageStudentResult() {
       setEditingResult(null);
       fetchData();
     } catch (error: any) {
-      console.error('Error saving result:', error);
+      console.log('Error saving result:', error);
       Alert.alert('Lỗi', getErrorMessage(error));
     } finally {
       setLoading(false);

@@ -45,7 +45,7 @@ export default function WeeklyAttendanceStatistics() {
         await fetchWeeklyStats(hr.classYearId, startDate);
       }
     } catch (error) {
-      console.error("Failed to fetch homeroom:", error);
+      console.log("Failed to fetch homeroom:", error);
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ export default function WeeklyAttendanceStatistics() {
       });
       setStats(data);
     } catch (error) {
-      console.error("Failed to fetch weekly stats:", error);
+      console.log("Failed to fetch weekly stats:", error);
       setStats([]);
     }
   };

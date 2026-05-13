@@ -124,7 +124,7 @@ export const reportGenerator = {
       const { uri } = await Print.printToFileAsync({ html });
       await Sharing.shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.log("Error generating PDF:", error);
       throw error;
     }
   },

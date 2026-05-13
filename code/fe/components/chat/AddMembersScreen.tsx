@@ -58,7 +58,7 @@ export default function AddMembersScreen({ rolePrefix: rolePrefixProp }: AddMemb
         });
         setUsers(res.items || []);
       } catch (err) {
-        console.error("Fetch users error:", err);
+        console.log("Fetch users error:", err);
       } finally {
         setLoading(false);
       }
@@ -98,7 +98,7 @@ export default function AddMembersScreen({ rolePrefix: rolePrefixProp }: AddMemb
         { text: "OK", onPress: () => router.back() }
       ]);
     } catch (err: any) {
-      console.error("Add members error:", err);
+      console.log("Add members error:", err);
       const errorMsg = err.response?.data?.message || "Không thể thêm thành viên lúc này.";
       Alert.alert("Lỗi", errorMsg);
     } finally {

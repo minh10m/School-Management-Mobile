@@ -31,7 +31,7 @@ export default function TeacherLessons() {
       const response = await lessonService.getLessons({ courseId, pageNumber: 1, pageSize: 100 });
       setLessons(response.items);
     } catch (error) {
-      console.error("Error fetching course lessons:", error);
+      console.log("Error fetching course lessons:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

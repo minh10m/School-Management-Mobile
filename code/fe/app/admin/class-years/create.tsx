@@ -56,7 +56,7 @@ export default function AdminCreateClassScreen() {
       if (tdata.length > 0)
         setForm((f) => ({ ...f, homeRoomId: tdata[0].teacherId }));
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setFetching(false);
     }

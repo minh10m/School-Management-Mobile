@@ -45,7 +45,7 @@ export default function GradeSubmissionScreen() {
       }
 
     } catch (error) {
-      console.error("Error fetching submission details:", error);
+      console.log("Error fetching submission details:", error);
       Alert.alert("Lỗi", "Không thể tải chi tiết bài nộp.");
     } finally {
       setLoading(false);
@@ -76,7 +76,7 @@ export default function GradeSubmissionScreen() {
         { text: "Đồng ý", onPress: () => fetchDetails() } // Refresh to show graded status
       ]);
     } catch (error: any) {
-      console.error("Error grading submission:", error);
+      console.log("Error grading submission:", error);
       Alert.alert("Lỗi", error.response?.data?.message || "Lỗi khi chấm điểm bài nộp");
     } finally {
       setSubmitting(false);

@@ -40,7 +40,7 @@ const ExamScheduleDetail = () => {
       const result = await examScheduleService.getScheduleDetails(id, filter);
       setData(result);
     } catch (error) {
-      console.error(error);
+      console.log(error);
       Alert.alert("Lỗi", "Không thể tải chi tiết ca thi");
     } finally {
       setLoading(false);
@@ -76,7 +76,7 @@ const ExamScheduleDetail = () => {
         }
       }
     } catch (error: any) {
-      console.error(error);
+      console.log(error);
       Alert.alert("Lỗi", getErrorMessage(error));
     } finally {
       setLoading(false);
