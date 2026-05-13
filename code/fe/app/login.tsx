@@ -19,6 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { AppLogo } from "../components/ui/AppLogo";
 import { authService } from "../services/auth.service";
 import { useAuthStore } from "../store/authStore";
+import { useConfigStore } from "../store/configStore";
 import { getErrorMessage } from "../utils/error";
 
 export default function LoginScreen() {
@@ -30,11 +31,11 @@ export default function LoginScreen() {
   const { accessToken, userInfo } = useAuthStore();
 
   useEffect(() => {
-    // If we have an access token and user info, we can redirect immediately
+    // If we have an access token and user info on mount, we can redirect immediately
     if (accessToken && userInfo) {
       redirectUser(userInfo.role);
     }
-  }, [accessToken, userInfo]);
+  }, []); // Only run on mount to avoid double-redirects during manual login
 
   const redirectUser = (role?: string) => {
     const r = role?.toLowerCase();
@@ -63,8 +64,14 @@ export default function LoginScreen() {
       console.log("Login Payload:", payload);
 
       await authService.login(payload);
+
+      // Đợi tải cấu hình hệ thống xong rồi mới cho vào app
+      const { loadConfig } = useConfigStore.getState();
+      await loadConfig();
+
       const updatedUserInfo = useAuthStore.getState().userInfo;
       redirectUser(updatedUserInfo?.role);
+      
       setTimeout(() => {
         Alert.alert("Thành công", "Đăng nhập thành công!");
       }, 100);
