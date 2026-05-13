@@ -127,15 +127,16 @@ namespace School_Management.API.Repositories
             var payment = await context.Payment
                 .Where(x => x.Status == "Chưa đóng")
                 .FirstOrDefaultAsync(x => orderCode.Contains(x.OrderCode.ToLower()));
+
             if (payment == null) return (false, "PAYMENT_NOT_FOUND");
 
             string userId = payment.UserId.ToString();
 
             var student = await context.Student
                 .Include(x => x.User)
-                .AsNoTracking()
                 .Where(x => x.UserId == payment.UserId)
                 .FirstOrDefaultAsync();
+
             if (student == null)
             {
                 await SendPaymentNotify(userId, false, "Không tìm thấy thông tin sinh viên.");
@@ -149,8 +150,6 @@ namespace School_Management.API.Repositories
             }
 
             Course? course = null;
-            FeeDetail? feeDetail = null;
-
             if (payment.CourseId.HasValue)
             {
                 course = await context.Course
@@ -159,6 +158,10 @@ namespace School_Management.API.Repositories
                     .AsNoTracking()
                     .FirstOrDefaultAsync(x => x.Id == payment.CourseId);
             }
+
+            string studentName = student.User?.FullName ?? "Học viên";
+            string itemName = "Học phí";
+            if (payment.CourseId.HasValue && course != null) itemName = course.CourseName;
 
             var adminIds = await (
                 from user in context.Users
@@ -169,7 +172,7 @@ namespace School_Management.API.Repositories
             ).Distinct().ToListAsync();
 
             var notifyUserIds = new List<Guid>();
-            if (payment.CourseId.HasValue && course != null) 
+            if (payment.CourseId.HasValue && course != null)
                 notifyUserIds.Add(course.TeacherSubject.Teacher.UserId);
             else
                 notifyUserIds.AddRange(adminIds);
@@ -194,13 +197,14 @@ namespace School_Management.API.Repositories
                 }
                 else if (payment.FeeDetailId.HasValue)
                 {
-                    feeDetail = await context.FeeDetail
+                    var feeDetail = await context.FeeDetail
                         .FirstOrDefaultAsync(x => x.Id == payment.FeeDetailId.Value);
                     if (feeDetail != null)
                     {
                         feeDetail.AmountPaid = payment.ActualAmount;
                         feeDetail.PaidAt = DateTimeOffset.UtcNow.ToUniversalTime();
                         feeDetail.Status = "Đã đóng";
+                        itemName = feeDetail.Reason; // Cập nhật tên lý do học phí thực tế
                     }
                 }
 
@@ -215,28 +219,33 @@ namespace School_Management.API.Repositories
             }
 
             await SendPaymentNotify(userId, true, "Thanh toán thành công!");
-            //try
-            //{
-            //    await notificationService.CreateNotification(new CreateNotificationRequest
-            //    {
-            //        Content = payment.CourseId.HasValue
-            //            ? $"Học sinh {student.User.FullName} đã mua khóa học [{course?.CourseName}]"
-            //            : $"Học sinh {student.User.FullName} đã thanh toán [{feeDetail?.Reason}]",
-            //        Title = payment.CourseId.HasValue ? "Mua khóa học mới" : "Thanh toán học phí",
-            //        Type = payment.CourseId.HasValue ? "Mua khóa học" : "Thanh toán học phí",
-            //        UserId = notifyUserIds
-            //    });
 
-            //}
-            //catch (Exception ex)
-            //{
-            //    logger.LogError(ex, "Push notification failed PaymentId: {Id}", payment.Id);
-            //}
+            try
+            {
+                // Thêm dòng log này để biết là code đã chạy tới đây
+                Console.WriteLine($"--- ĐANG GỬI FIRESTORE CHO USER: {string.Join(", ", notifyUserIds)} ---");
 
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Học sinh {studentName} đã thanh toán [{itemName}]",
+                    Title = payment.CourseId.HasValue ? "Mua khóa học mới" : "Thanh toán học phí",
+                    Type = payment.CourseId.HasValue ? "Mua khóa học" : "Thanh toán học phí",
+                    UserId = notifyUserIds
+                });
+
+                Console.WriteLine("--- FIRESTORE XỬ LÝ XONG ---");
+            }
+            catch (Exception ex)
+            {
+                // In ra toàn bộ nội dung lỗi thật sự
+                Console.WriteLine("!!! LỖI FIRESTORE RỒI !!!");
+                Console.WriteLine($"Message: {ex.Message}");
+                Console.WriteLine($"Inner: {ex.InnerException?.Message}");
+                Console.WriteLine($"Stack: {ex.StackTrace}");
+            }
 
             return (true, "SUCCESS");
         }
-
         private async Task SendPaymentNotify(string userId, bool isSuccess, string msg)
         {
             await _hubContext.Clients.User(userId).SendAsync("ReceivePaymentStatus", new
