@@ -65,7 +65,7 @@ export default function CreateExamScheduleScreen() {
         { text: "Đồng ý", onPress: () => router.back() },
       ]);
     } catch (error: any) {
-      console.error("Error creating exam schedule:", error);
+      console.log("Error creating exam schedule:", error);
       Alert.alert("Lỗi", getErrorMessage(error));
     } finally {
       setLoading(false);

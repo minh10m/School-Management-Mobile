@@ -87,7 +87,7 @@ export default function AdminScheduleDetailScreen() {
       setDetails(Array.isArray(res) ? res : []);
       setSubjects(Array.isArray(subjectsRes) ? subjectsRes : []);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -105,7 +105,7 @@ export default function AdminScheduleDetailScreen() {
       const res = await subjectService.getTeachersBySubject(subId);
       setTeachersBySubject(Array.isArray(res) ? res : (res as any).items || []);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     }
   };
 

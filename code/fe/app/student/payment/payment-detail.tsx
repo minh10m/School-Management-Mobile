@@ -31,7 +31,7 @@ export default function PaymentDetailScreen() {
   const [isVerifying, setIsVerifying] = useState(false);
 
   const insets = useSafeAreaInsets();
-  
+
   // Use SignalR Hub for real-time payment status
   const { isConnected: isSignalRConnected } = usePaymentHub((status) => {
     if (status.status === "Success") {
@@ -59,7 +59,7 @@ export default function PaymentDetailScreen() {
       const data = await feeDetailService.getFeeDetailById(id as string);
       setDetail(data);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -78,14 +78,12 @@ export default function PaymentDetailScreen() {
       setPaymentInfo(response);
       setShowQR(true);
     } catch (err) {
-      console.error(err);
+      console.log(err);
       Alert.alert("Lỗi", "Không thể khởi tạo giao dịch. Vui lòng thử lại sau.");
     } finally {
       setIsProcessing(false);
     }
   };
-
-
 
   if (loading) {
     return (
@@ -116,7 +114,6 @@ export default function PaymentDetailScreen() {
 
   return (
     <View className="flex-1 bg-white">
-
       {/* Header */}
       <View
         className="px-6 pb-4 flex-row items-center justify-between"
@@ -377,10 +374,14 @@ export default function PaymentDetailScreen() {
                   />
                   <Text
                     style={{ fontFamily: "Poppins-Medium" }}
-                    className={isSignalRConnected ? "text-emerald-600 text-sm" : "text-blue-600 text-sm"}
+                    className={
+                      isSignalRConnected
+                        ? "text-emerald-600 text-sm"
+                        : "text-blue-600 text-sm"
+                    }
                   >
-                    {isSignalRConnected 
-                      ? "Đã kết nối trực tiếp - Chờ thanh toán..." 
+                    {isSignalRConnected
+                      ? "Đã kết nối trực tiếp - Chờ thanh toán..."
                       : "Đang chờ bạn thanh toán..."}
                   </Text>
                 </View>

@@ -35,7 +35,7 @@ export default function AttendanceTab() {
       const result = await attendanceService.getMyAttendance({ month, year });
       setData(result);
     } catch (e) {
-      console.error("Attendance load error:", e);
+      console.log("Attendance load error:", e);
     } finally {
       setLoading(false);
     }

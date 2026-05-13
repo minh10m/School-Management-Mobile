@@ -69,7 +69,7 @@ export default function LessonDetailScreen() {
         }
       }
     } catch (err) {
-      console.error("Error picking document:", err);
+      console.log("Error picking document:", err);
     }
   };
 
@@ -86,7 +86,7 @@ export default function LessonDetailScreen() {
       setVideos(videosResponse?.items || []);
       setAssignments(assignmentsData?.items || []);
     } catch (error) {
-      console.error("Error fetching lesson details:", error);
+      console.log("Error fetching lesson details:", error);
       Alert.alert("Lỗi", "Không thể tải chi tiết bài giảng.");
     } finally {
       setLoading(false);

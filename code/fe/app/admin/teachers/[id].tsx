@@ -69,7 +69,7 @@ export default function AdminTeacherDetailScreen() {
         birthday: res.birthday ? res.birthday.split("T")[0] : "",
       });
     } catch (err) {
-      console.error(err);
+      console.log(err);
       Alert.alert("Lỗi", "Không thể tải thông tin giáo viên");
     } finally {
       setLoading(false);

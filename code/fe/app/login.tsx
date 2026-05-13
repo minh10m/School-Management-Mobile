@@ -12,12 +12,15 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View
+  View,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppLogo } from "../components/ui/AppLogo";
 import { authService } from "../services/auth.service";
 import { useAuthStore } from "../store/authStore";
+import { useConfigStore } from "../store/configStore";
+import { getErrorMessage } from "../utils/error";
 
 export default function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -28,11 +31,11 @@ export default function LoginScreen() {
   const { accessToken, userInfo } = useAuthStore();
 
   useEffect(() => {
-    // If we have an access token and user info, we can redirect immediately
+    // If we have an access token and user info on mount, we can redirect immediately
     if (accessToken && userInfo) {
       redirectUser(userInfo.role);
     }
-  }, [accessToken, userInfo]);
+  }, []); // Only run on mount to avoid double-redirects during manual login
 
   const redirectUser = (role?: string) => {
     const r = role?.toLowerCase();
@@ -47,7 +50,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!username || !password) {
-      alert("Vui lòng nhập tên đăng nhập và mật khẩu");
+      Alert.alert("Thông báo", "Vui lòng nhập tên đăng nhập và mật khẩu");
       return;
     }
 
@@ -61,15 +64,39 @@ export default function LoginScreen() {
       console.log("Login Payload:", payload);
 
       await authService.login(payload);
+
+      // Đợi tải cấu hình hệ thống xong rồi mới cho vào app
+      const { loadConfig } = useConfigStore.getState();
+      await loadConfig();
+
       const updatedUserInfo = useAuthStore.getState().userInfo;
       redirectUser(updatedUserInfo?.role);
+      
+      setTimeout(() => {
+        Alert.alert("Thành công", "Đăng nhập thành công!");
+      }, 100);
     } catch (error: any) {
-      console.error(error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Đăng nhập thất bại. Vui lòng thử lại.";
-      alert(errorMessage);
+      console.log(error);
+
+      let errorMessage = "Đăng nhập thất bại. Vui lòng thử lại.";
+
+      // If it's a 400/401/403, it's usually incorrect credentials or validation
+      if (error.response?.status === 401 || error.response?.status === 400) {
+        errorMessage = "Tên đăng nhập hoặc mật khẩu không chính xác";
+
+        // If there are specific validation errors (like the ones in the prompt), we can show them
+        const detailedError = getErrorMessage(error);
+        if (
+          detailedError &&
+          detailedError !== "An unexpected error occurred."
+        ) {
+          errorMessage = detailedError;
+        }
+      } else {
+        errorMessage = getErrorMessage(error);
+      }
+
+      Alert.alert("Thông báo", errorMessage);
     } finally {
       setLoading(false);
     }

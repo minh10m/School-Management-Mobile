@@ -58,7 +58,7 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
         });
         setUsers(res.items || []);
       } catch (err) {
-        console.error("Fetch users error:", err);
+        console.log("Fetch users error:", err);
       } finally {
         setLoading(false);
       }
@@ -104,7 +104,7 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
         });
       }
     } catch (err) {
-      console.error("Create group error:", err);
+      console.log("Create group error:", err);
       Alert.alert("Lỗi", "Không thể tạo nhóm lúc này. Vui lòng thử lại sau.");
     } finally {
       setCreating(false);

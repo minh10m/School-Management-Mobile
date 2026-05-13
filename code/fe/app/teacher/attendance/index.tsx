@@ -16,7 +16,7 @@ export default function AttendanceRedirect() {
           router.replace("/teacher");
         }
       } catch (error) {
-        console.error("Redirect error:", error);
+        console.log("Redirect error:", error);
         router.replace("/teacher");
       }
     };

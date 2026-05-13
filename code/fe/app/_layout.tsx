@@ -20,6 +20,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import { useAuthStore } from "../store/authStore";
 import { useConfigStore } from "../store/configStore";
+import { useAppPushNotifications } from "@/hooks/useAppPushNotifications";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -50,6 +51,8 @@ export default function RootLayout() {
   const { loadAuthFromStorage } = useAuthStore();
   const { loadConfig } = useConfigStore();
 
+  useAppPushNotifications();
+
   useEffect(() => {
     const init = async () => {
       if (loaded) {
@@ -57,7 +60,7 @@ export default function RootLayout() {
           // school-year-info is public, so load config immediately on app start.
           await Promise.allSettled([loadConfig(), loadAuthFromStorage()]);
         } catch (error) {
-          console.error("Initialization error:", error);
+          console.log("Initialization error:", error);
         } finally {
           await SplashScreen.hideAsync();
         }
@@ -82,14 +85,14 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={CustomDefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="change-password" options={{ headerShown: false }} />
-        <Stack.Screen name="settings" options={{ headerShown: false }} />
-        <Stack.Screen name="student" options={{ headerShown: false }} />
-        <Stack.Screen name="admin" options={{ headerShown: false }} />
-        <Stack.Screen name="teacher" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Trang chủ" }} />
+        <Stack.Screen name="index" options={{ headerShown: false, title: "Chào mừng" }} />
+        <Stack.Screen name="login" options={{ headerShown: false, title: "Đăng nhập" }} />
+        <Stack.Screen name="change-password" options={{ headerShown: false, title: "Đổi mật khẩu" }} />
+        <Stack.Screen name="settings" options={{ headerShown: false, title: "Cài đặt" }} />
+        <Stack.Screen name="student" options={{ headerShown: false, title: "Học sinh" }} />
+        <Stack.Screen name="admin" options={{ headerShown: false, title: "Quản trị viên" }} />
+        <Stack.Screen name="teacher" options={{ headerShown: false, title: "Giáo viên" }} />
       </Stack>
       <StatusBar hidden />
     </ThemeProvider>

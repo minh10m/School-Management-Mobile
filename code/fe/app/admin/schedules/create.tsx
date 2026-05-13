@@ -44,7 +44,7 @@ export default function AdminCreateScheduleScreen() {
       if (cdata.length > 0)
         setForm((f) => ({ ...f, classYearId: cdata[0].classYearId }));
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setFetching(false);
     }

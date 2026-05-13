@@ -55,7 +55,7 @@ export default function AdminLessonViewScreen() {
         await selectLesson(lessonToShow);
       }
     } catch (error) {
-      console.error("Error fetching initial lesson data:", error);
+      console.log("Error fetching initial lesson data:", error);
       Alert.alert("Lỗi", "Không thể tải nội dung bài học.");
     } finally {
       setLoading(false);
@@ -85,7 +85,7 @@ export default function AdminLessonViewScreen() {
         }
       }
     } catch (error) {
-      console.error("Error selecting lesson:", error);
+      console.log("Error selecting lesson:", error);
     } finally {
       setLoading(false);
     }

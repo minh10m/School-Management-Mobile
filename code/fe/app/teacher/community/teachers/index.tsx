@@ -33,7 +33,7 @@ export default function TeacherListScreen() {
       });
       setTeachers(response.items);
     } catch (error) {
-      console.error(error);
+      console.log(error);
     } finally {
       setLoading(false);
     }

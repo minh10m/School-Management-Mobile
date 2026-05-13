@@ -32,7 +32,7 @@ export const authService = {
         await apiClient.post("/auth/logout", { refreshToken });
       }
     } catch (error) {
-      console.error("Logout API failed, clearing local data anyway", error);
+      console.log("Logout API failed, clearing local data anyway", error);
     } finally {
       // Always clear local auth state regardless of API success
       await useAuthStore.getState().clearAuth();

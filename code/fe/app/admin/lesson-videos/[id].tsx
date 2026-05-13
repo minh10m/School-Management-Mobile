@@ -30,7 +30,7 @@ export default function AdminLessonVideoDetailScreen() {
       const videoData = await lessonVideoService.getLessonVideoById(id);
       setVideo(videoData);
     } catch (error) {
-      console.error("Error fetching video detail:", error);
+      console.log("Error fetching video detail:", error);
       Alert.alert("Lỗi", "Không thể tải chi tiết video.");
     } finally {
       setLoading(false);

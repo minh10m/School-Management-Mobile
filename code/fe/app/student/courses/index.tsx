@@ -32,7 +32,7 @@ export default function StudentBrowseCourses() {
       });
       setCourses(response.items);
     } catch (error) {
-      console.error("Error fetching approved courses:", error);
+      console.log("Error fetching approved courses:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

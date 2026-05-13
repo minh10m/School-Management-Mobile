@@ -41,6 +41,13 @@ export default {
           }
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/edu_logo_clean.png",
+          "color": "#ffffff"
+        }
+      ],
       "expo-secure-store",
       "expo-web-browser"
     ],

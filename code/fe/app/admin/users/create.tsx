@@ -131,7 +131,7 @@ export default function AdminCreateUserScreen() {
       );
       if (studentRole) setForm((f) => ({ ...f, roleId: studentRole.name }));
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setFetching(false);
     }

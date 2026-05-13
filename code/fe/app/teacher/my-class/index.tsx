@@ -63,7 +63,7 @@ export default function MyTeachingClasses() {
       setTeaching(teachingData);
       setScheduleItems(schRes);
     } catch (error) {
-      console.error("Error fetching teaching data:", error);
+      console.log("Error fetching teaching data:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -82,16 +82,20 @@ export default function MyTeachingClasses() {
   // Combine teaching classes with subject info from schedule
   const teachingWithSubject = useMemo(() => {
     return teaching.map((cls) => {
-      // Find a schedule item that matches this class
+      const clsSubjectId = cls.subjectId;
+      
+      // Find a schedule item that matches this class and subject
       const scheduleMatch = scheduleItems.find(
-        (s) => s.className === cls.className,
+        (s) => s.className === cls.className && (clsSubjectId ? s.subjectId === clsSubjectId : true)
       );
+
       return {
         ...cls,
-        subjectId: scheduleMatch?.subjectId ?? "",
-        subjectName: scheduleMatch?.subjectName ?? "",
-        periods: scheduleItems.filter((s) => s.className === cls.className)
-          .length,
+        subjectId: cls.subjectId || scheduleMatch?.subjectId || "",
+        subjectName: cls.subjectName || scheduleMatch?.subjectName || "",
+        periods: scheduleItems.filter(
+          (s) => s.className === cls.className && (clsSubjectId ? s.subjectId === clsSubjectId : true)
+        ).length,
       };
     });
   }, [teaching, scheduleItems]);
@@ -214,9 +218,9 @@ export default function MyTeachingClasses() {
                       KHỐI {grade} ({classes.length} lớp)
                     </Text>
                   </View>
-                  {classes.map((item) => (
+                  {classes.map((item, index) => (
                     <ClassCard
-                      key={item.classYearId}
+                      key={`${item.classYearId}-${item.subjectId}-${index}`}
                       item={item}
                       periods={item.periods}
                     />

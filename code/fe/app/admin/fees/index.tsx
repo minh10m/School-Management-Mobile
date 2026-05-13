@@ -34,7 +34,7 @@ export default function AdminFeesScreen() {
       });
       setFees(res.items);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
       setRefreshing(false);

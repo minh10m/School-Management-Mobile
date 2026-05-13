@@ -22,7 +22,7 @@ export default function StudentFeesScreen() {
       });
       setFees(response.items);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
       setRefreshing(false);

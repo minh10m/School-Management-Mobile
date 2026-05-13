@@ -37,7 +37,7 @@ export default function TeachingClassDetail() {
       setClassInfo(classRes);
       setStudents(studentsRes.items || []);
     } catch (error) {
-      console.error("Error fetching class detail:", error);
+      console.log("Error fetching class detail:", error);
     } finally {
       setLoading(false);
     }

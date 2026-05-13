@@ -67,7 +67,7 @@ export const usePaymentHub = (
         setIsConnected(true);
       } catch (err: any) {
         if (!err.message?.includes('stopped during negotiation')) {
-          console.error('SignalR: Connection Error:', err.message);
+          console.log('SignalR: Connection Error:', err.message);
         }
         setIsConnected(false);
       }

@@ -56,7 +56,7 @@ export default function AdminUserDetailScreen() {
       const res = await userService.getUserById(id);
       setUser(res);
     } catch (err) {
-      console.error(err);
+      console.log(err);
       Alert.alert("Lỗi", "Không thể tải thông tin người dùng");
     } finally {
       setLoading(false);

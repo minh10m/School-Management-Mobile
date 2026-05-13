@@ -41,7 +41,7 @@ export default function TeacherExamScheduleScreen() {
       });
       setSchedules(data);
     } catch (error) {
-      console.error("Error fetching teacher exam schedule:", error);
+      console.log("Error fetching teacher exam schedule:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

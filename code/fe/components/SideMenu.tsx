@@ -162,9 +162,12 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                     {/* Footer - Log Out */}
                     <View className="px-6 pb-10 pt-4 border-t border-gray-200">
                          <TouchableOpacity className="flex-row items-center justify-between py-2" onPress={() => {
-                             onClose();
-                             clearAuth();
-                             router.replace('/login');
+                              onClose();
+                              clearAuth();
+                              router.replace('/login');
+                              setTimeout(() => {
+                                  Alert.alert('Thông báo', 'Bạn đã đăng xuất thành công!');
+                              }, 500);
                          }}>
                             <View className="flex-row items-center gap-4">
                                 <View className="w-8 h-8 items-center justify-center rounded-lg border border-red-500 bg-red-50">

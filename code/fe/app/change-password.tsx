@@ -9,7 +9,8 @@ import { KeyboardAvoidingView,
   Text,
   TextInput,
   TouchableOpacity,
-  View } from "react-native";
+  View,
+  Alert } from "react-native";
 import { authService } from "../services/auth.service";
 
 export default function ChangePasswordScreen() {
@@ -24,12 +25,12 @@ export default function ChangePasswordScreen() {
 
   const handleChangePassword = async () => {
     if (!oldPassword || !newPassword || !confirmedPassword) {
-      alert("Vui lòng điền đầy đủ thông tin");
+      Alert.alert("Thông báo", "Vui lòng điền đầy đủ thông tin");
       return;
     }
 
     if (newPassword !== confirmedPassword) {
-      alert("Mật khẩu mới và xác nhận mật khẩu không khớp");
+      Alert.alert("Thông báo", "Mật khẩu mới và xác nhận mật khẩu không khớp");
       return;
     }
 
@@ -45,11 +46,12 @@ export default function ChangePasswordScreen() {
 
       await authService.changePassword(payload);
 
-      alert("Đổi mật khẩu thành công!");
+      Alert.alert("Thông báo", "Đổi mật khẩu thành công!");
       router.back();
     } catch (error: any) {
-      console.error(error);
-      alert(
+      console.log(error);
+      Alert.alert(
+        "Thông báo",
         "Đổi mật khẩu thất bại: " +
           (error.response?.data?.message || error.message),
       );

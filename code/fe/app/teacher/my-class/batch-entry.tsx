@@ -74,7 +74,7 @@ export default function BatchResultEntryScreen() {
       if (!selectedSubjectId && sub?.length > 0)
         setSelectedSubjectId(sub[0].subjectId);
     } catch (e) {
-      console.error(e);
+      console.log(e);
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ export default function BatchResultEntryScreen() {
       });
       setScores(s);
     } catch (e) {
-      console.error(e);
+      console.log(e);
     } finally {
       setLoadingStudents(false);
     }

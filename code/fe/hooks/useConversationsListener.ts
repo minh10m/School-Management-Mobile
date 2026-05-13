@@ -6,6 +6,7 @@ import { useAuthStore } from "../store/authStore";
 export interface RealtimeConversation {
   id: string;
   lastMessageAt: Date | null;
+  lastMessage: string | null;
   members: string[];
   unreadCounts: Record<string, number>;
 }
@@ -32,9 +33,19 @@ export const useConversationsListener = () => {
 
         snapshot.forEach((doc) => {
           const data = doc.data();
+          let lastMsg = null;
+          if (data.lastMessage) {
+            if (typeof data.lastMessage === "string") {
+              lastMsg = data.lastMessage;
+            } else if (typeof data.lastMessage === "object" && data.lastMessage.content) {
+              lastMsg = data.lastMessage.content;
+            }
+          }
+
           const convo: RealtimeConversation = {
             id: doc.id,
             lastMessageAt: data.lastMessageAt ? data.lastMessageAt.toDate() : null,
+            lastMessage: lastMsg,
             members: data.members || [],
             unreadCounts: data.unreadCounts || {},
           };
@@ -57,7 +68,7 @@ export const useConversationsListener = () => {
         setTotalUnread(unreadSum);
       },
       (error) => {
-        console.error("Lỗi khi lắng nghe thay đổi Firestore:", error);
+        console.log("Lỗi khi lắng nghe thay đổi Firestore:", error);
       }
     );
 

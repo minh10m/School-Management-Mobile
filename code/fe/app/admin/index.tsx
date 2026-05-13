@@ -37,7 +37,7 @@ export default function AdminDashboard() {
       const data = await dashboardService.getStats(Number(schoolYear));
       setStats(data);
     } catch (err) {
-      console.error("Error fetching admin stats:", err);
+      console.log("Error fetching admin stats:", err);
     } finally {
       setLoading(false);
     }

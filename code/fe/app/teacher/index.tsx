@@ -12,14 +12,65 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { useAuthStore } from "../../store/authStore";
 import { useConfigStore } from "../../store/configStore";
-import SideMenu from "../../components/SideMenu";
+import SideMenu from "@/components/SideMenu";
 import { classYearService } from "../../services/classYear.service";
 import { attendanceService } from "../../services/attendance.service";
 import { scheduleService } from "../../services/schedule.service";
 import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
+
+const TeachingClassCard = memo(({ item, onPress }: { item: any; onPress: () => void }) => (
+  <TouchableOpacity
+    onPress={onPress}
+    className="bg-[#136ADA] w-64 p-6 rounded-[32px] shadow-lg shadow-blue-100"
+  >
+    <View className="flex-row justify-between items-start mb-6">
+      <View className="flex-row items-center gap-3">
+        <View className="bg-white/20 p-2 rounded-xl">
+          <Ionicons name="school-outline" size={22} color="white" />
+        </View>
+        <View>
+          <Text
+            className="text-white text-lg"
+            style={{ fontFamily: "Poppins-Bold" }}
+          >
+            {item.className}
+          </Text>
+          <Text
+            className="text-white/80 text-[10px]"
+            style={{ fontFamily: "Poppins-Medium" }}
+          >
+            {item.subjectName} • Khối {item.grade}
+          </Text>
+        </View>
+      </View>
+    </View>
+
+    <View className="flex-row items-center justify-between mt-2">
+      <View className="flex-row items-center gap-1">
+        <Ionicons name="people-outline" size={14} color="white" />
+        <Text
+          className="text-white text-xs"
+          style={{ fontFamily: "Poppins-Bold" }}
+        >
+          {item.studentCount || "40"}
+        </Text>
+        <Text
+          className="text-white/70 text-[10px] ml-0.5"
+          style={{ fontFamily: "Poppins-Regular" }}
+        >
+          Học sinh
+        </Text>
+      </View>
+      <View className="bg-white/20 px-3 py-1.5 rounded-xl">
+        <Ionicons name="arrow-forward" size={16} color="white" />
+      </View>
+    </View>
+  </TouchableOpacity>
+));
+
 export default function TeacherDashboard() {
   const { userInfo } = useAuthStore();
   const { schoolYear, term } = useConfigStore();
@@ -66,10 +117,18 @@ export default function TeacherDashboard() {
         };
       });
 
+      // Filter out duplicate classYearId-subjectId pairs if any
+      const uniqueTeaching = mappedTeaching.filter(
+        (v: any, i: number, a: any[]) =>
+          a.findIndex(
+            (t) =>
+              t.classYearId === v.classYearId && t.subjectId === v.subjectId,
+          ) === i,
+      );
       setHomeroomClass(hrRes);
-      setTeachingClasses(mappedTeaching);
+      setTeachingClasses(uniqueTeaching);
     } catch (err) {
-      console.error("Error fetching teacher dashboard data:", err);
+      console.log("Error fetching teacher dashboard data:", err);
     } finally {
       setLoadingHomeroom(false);
       setLoadingStats(false);
@@ -79,7 +138,7 @@ export default function TeacherDashboard() {
   useFocusEffect(
     useCallback(() => {
       fetchDashboardData();
-    }, [fetchDashboardData])
+    }, [fetchDashboardData]),
   );
 
   const fetchAttendanceStats = useCallback(async (classYearId: string) => {
@@ -107,7 +166,7 @@ export default function TeacherDashboard() {
 
       setAttendanceStats({ present, absent, late, rate, total });
     } catch (err) {
-      console.error("Error fetching attendance stats:", err);
+      console.log("Error fetching attendance stats:", err);
     } finally {
       setLoadingAttendance(false);
     }
@@ -118,39 +177,8 @@ export default function TeacherDashboard() {
       if (homeroomClass?.classYearId) {
         fetchAttendanceStats(homeroomClass.classYearId);
       }
-    }, [homeroomClass, fetchAttendanceStats])
+    }, [homeroomClass, fetchAttendanceStats]),
   );
-
-  const TEACHER_STATS = [
-    {
-      label: "Lớp chủ nhiệm",
-      value: homeroomClass ? 1 : 0,
-      icon: "star",
-      color: "#136ADA",
-      bg: "bg-blue-50",
-    },
-    {
-      label: "Lớp giảng dạy",
-      value: teachingClasses.length,
-      icon: "book",
-      color: "#22C55E",
-      bg: "bg-green-50",
-    },
-    {
-      label: "Học sinh CN",
-      value: homeroomClass?.students?.length || 0,
-      icon: "people",
-      color: "#A855F7",
-      bg: "bg-purple-50",
-    },
-    {
-      label: "Tiết dạy hôm nay",
-      value: "04",
-      icon: "time",
-      color: "#F97316",
-      bg: "bg-orange-50",
-    },
-  ];
 
   return (
     <AdminPageWrapper
@@ -276,9 +304,14 @@ export default function TeacherDashboard() {
             data={teachingClasses}
             horizontal
             showsHorizontalScrollIndicator={false}
+            initialNumToRender={5}
+            maxToRenderPerBatch={5}
+            windowSize={3}
+            removeClippedSubviews={true}
             contentContainerStyle={{ paddingHorizontal: 24, gap: 16 }}
             renderItem={({ item }) => (
-              <TouchableOpacity
+              <TeachingClassCard
+                item={item}
                 onPress={() =>
                   router.push({
                     pathname: `/teacher/my-class/${item.classYearId}`,
@@ -288,53 +321,11 @@ export default function TeacherDashboard() {
                     },
                   } as any)
                 }
-                className="bg-[#136ADA] w-64 p-6 rounded-[32px] shadow-lg shadow-blue-100"
-              >
-                <View className="flex-row justify-between items-start mb-6">
-                  <View className="flex-row items-center gap-3">
-                    <View className="bg-white/20 p-2 rounded-xl">
-                      <Ionicons name="school-outline" size={22} color="white" />
-                    </View>
-                    <View>
-                      <Text
-                        className="text-white text-lg"
-                        style={{ fontFamily: "Poppins-Bold" }}
-                      >
-                        {item.className}
-                      </Text>
-                      <Text
-                        className="text-white/80 text-[10px]"
-                        style={{ fontFamily: "Poppins-Medium" }}
-                      >
-                        {item.subjectName} • Khối {item.grade}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-
-                <View className="flex-row items-center justify-between mt-2">
-                  <View className="flex-row items-center gap-1">
-                    <Ionicons name="people-outline" size={14} color="white" />
-                    <Text
-                      className="text-white text-xs"
-                      style={{ fontFamily: "Poppins-Bold" }}
-                    >
-                      {item.studentCount || "40"}
-                    </Text>
-                    <Text
-                      className="text-white/70 text-[10px]"
-                      style={{ fontFamily: "Poppins-Regular" }}
-                    >
-                      Học sinh
-                    </Text>
-                  </View>
-                  <View className="bg-white/20 px-3 py-1.5 rounded-xl">
-                    <Ionicons name="arrow-forward" size={16} color="white" />
-                  </View>
-                </View>
-              </TouchableOpacity>
+              />
             )}
-            keyExtractor={(item) => item.classYearId.toString()}
+            keyExtractor={(item, index) =>
+              `${item.classYearId}-${item.subjectId || index}`
+            }
             ListEmptyComponent={() => (
               <View className="w-64 bg-gray-50 border border-gray-100 p-5 rounded-[32px] items-center justify-center">
                 <Ionicons name="school-outline" size={32} color="#CCC" />

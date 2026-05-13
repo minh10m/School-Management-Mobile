@@ -60,7 +60,7 @@ export default function AdminUsersScreen() {
       const data = Array.isArray(res) ? res : (res as any).items || [];
       setUsers(data);
     } catch (err) {
-      console.error(err);
+      console.log(err);
     } finally {
       setLoading(false);
     }
