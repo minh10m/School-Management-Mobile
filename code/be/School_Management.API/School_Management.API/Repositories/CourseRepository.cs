@@ -1,8 +1,9 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using School_Management.API.Services;
 using System.Security.Claims;
 
 namespace School_Management.API.Repositories
@@ -10,10 +11,14 @@ namespace School_Management.API.Repositories
     public class CourseRepository : ICourseRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly INotificationService notificationService;
+        private readonly ILogger<CourseRepository> logger;
 
-        public CourseRepository(ApplicationDbContext context)
+        public CourseRepository(ApplicationDbContext context, INotificationService notificationService, ILogger<CourseRepository> logger)
         {
             this.context = context;
+            this.notificationService = notificationService;
+            this.logger = logger;
         }
         public async Task<(CourseResponse? data, string? message)> CreateCourse(CreateCourseRequest request, Guid userId)
         {
@@ -24,7 +29,7 @@ namespace School_Management.API.Repositories
             if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
             var teacherSubjectInfo = await context.TeacherSubject.AsNoTracking()
                                                                               .Where(x => x.TeacherId == teacherId && x.SubjectId == request.SubjectId)
-                                                                              .Select(g => new { g.TeacherSubjectId, g.SubjectId, g.Teacher.User.FullName, g.Subject.SubjectName })
+                                                                              .Select(g => new { g.TeacherSubjectId, g.SubjectId, TeacherName = g.Teacher.User.FullName, SubjectName1 = g.Subject.SubjectName })
                                                                               .FirstOrDefaultAsync();
             if (teacherSubjectInfo == null) return (null, "NOT_FOUND_TEACHERSUBJECTID");
 
@@ -47,6 +52,25 @@ namespace School_Management.API.Repositories
 
             context.Course.Add(course);
             await context.SaveChangesAsync();
+            var query = from user in context.Users
+                        select user.Id;
+
+            var userIds = await query.ToListAsync();
+
+            try
+            {
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Khóa học mới của giáo viên {teacherSubjectInfo.TeacherName}, môn học {teacherSubjectInfo.SubjectName1} đã được đăng tải",
+                    Title = "Khóa học mới",
+                    Type = "Tạo khóa học",
+                    UserId = userIds
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification failed");
+            }
 
             return (new CourseResponse
             {
@@ -57,10 +81,10 @@ namespace School_Management.API.Repositories
                 Price = course.Price,
                 Status = course.Status,
                 PublishedAt = course.PublishedAt,
-                SubjectName = teacherSubjectInfo.SubjectName,
+                SubjectName = teacherSubjectInfo.SubjectName1,
                 TeacherSubjectId = course.TeacherSubjectId,
                 SubjectId = teacherSubjectInfo.SubjectId,
-                TeacherName = teacherSubjectInfo.FullName
+                TeacherName = teacherSubjectInfo.TeacherName
             }, "SUCCESS");
         }
 
@@ -328,7 +352,7 @@ namespace School_Management.API.Repositories
 
             var teacherSubjectInfo = await context.TeacherSubject.AsNoTracking()
                                                                               .Where(x => x.TeacherId == teacherId && x.SubjectId == request.SubjectId)
-                                                                              .Select(g => new { g.TeacherSubjectId, g.Teacher.User.FullName, g.Subject.SubjectName })
+                                                                              .Select(g => new { g.TeacherSubjectId, TeacherName = g.Teacher.User.FullName, SubjectName1 = g.Subject.SubjectName })
                                                                               .FirstOrDefaultAsync();
             if (teacherSubjectInfo == null) return (null, "NOT_FOUND_TEACHERSUBJECTID");
             var isExisted = await context.Course.AnyAsync(x => x.CourseName.Trim().ToLower() == request.CourseName.Trim().ToLower() && x.TeacherSubject.TeacherId == teacherId && x.Id != courseId);
@@ -341,7 +365,27 @@ namespace School_Management.API.Repositories
             course.Description = request.Description;
             course.TeacherSubjectId = teacherSubjectInfo.TeacherSubjectId;
 
+
             await context.SaveChangesAsync();
+            var query = from user in context.Users
+                        select user.Id;
+
+            var userIds = await query.ToListAsync();
+
+            try
+            {
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Khóa học của giáo viên {teacherSubjectInfo.TeacherName}, môn học {teacherSubjectInfo.SubjectName1} đã được cập nhật",
+                    Title = "Khóa học cập nhật",
+                    Type = "Cập nhật khóa học",
+                    UserId = userIds
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification failed");
+            }
             return (new CourseResponse
             {
                 Id = course.Id,
@@ -351,9 +395,9 @@ namespace School_Management.API.Repositories
                 Price = course.Price,
                 Status = course.Status,
                 PublishedAt = course.PublishedAt,
-                SubjectName = teacherSubjectInfo.SubjectName,
+                SubjectName = teacherSubjectInfo.SubjectName1,
                 TeacherSubjectId = course.TeacherSubjectId,
-                TeacherName = teacherSubjectInfo.FullName
+                TeacherName = teacherSubjectInfo.TeacherName
             }, "SUCCESS");
 
         }

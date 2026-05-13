@@ -3,16 +3,22 @@ using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using School_Management.API.Services;
+using Xceed.Document.NET;
 
 namespace School_Management.API.Repositories
 {
     public class ResultRepository : IResultRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly INotificationService notificationService;
+        private readonly ILogger<ResultRepository> logger;
 
-        public ResultRepository(ApplicationDbContext context)
+        public ResultRepository(ApplicationDbContext context, INotificationService notificationService, ILogger<ResultRepository> logger)
         {
             this.context = context;
+            this.notificationService = notificationService;
+            this.logger = logger;
         }
         public async Task<(bool result, string? message)> CreateResult(List<ResultRequest> requests, Guid userId)
         {
@@ -28,6 +34,7 @@ namespace School_Management.API.Repositories
                                                             .Where(x => x.StudentId == studentId && x.ClassYear.SchoolYear == requests[0].SchoolYear)
                                                             .Select(g => g.ClassYearId)
                                                             .FirstOrDefaultAsync();
+
 
             if (classYearId == Guid.Empty) return (false, "NOT_FOUND_CLASSYEAR");
 
@@ -49,10 +56,23 @@ namespace School_Management.API.Repositories
                                        .Any(g => g.Count() > 1);
             if (isDuplicated) return (false, "DUPLICATED_TYPE");
 
+            var isSameSubject = requests
+                        .Select(x => x.SubjectId)
+                        .Distinct()
+                        .Count() == 1;
+
+            if (!isSameSubject)
+                return (false, "INVALID_SUBJECT");
+
+            var subjectName = await context.Subject.Where(x => x.Id == requests[0].SubjectId).Select(g => g.SubjectName).FirstOrDefaultAsync();
+
             var studentIds = requests.Select(x => x.StudentId).Distinct().ToList();
             var subjectIds = requests.Select(x => x.SubjectId).Distinct().ToList();
             var term = requests.Select(x => x.Term).FirstOrDefault();
             var schoolYear = requests.Select(x => x.SchoolYear).FirstOrDefault();
+
+            var userIds = await context.Student.Where(x => studentIds.Contains(x.Id)).Select(g => g.UserId).ToListAsync();
+
 
             var isExistingList = await context.Result.Where(x => studentIds.Contains(x.StudentId) && subjectIds.Contains(x.SubjectId) && x.Term == term && x.SchoolYear == schoolYear)
                                                      .Select(g => new { g.StudentId, g.SubjectId, g.Term, g.SchoolYear, g.Type } )
@@ -95,7 +115,23 @@ namespace School_Management.API.Repositories
                 }
                 context.Result.AddRange(listResult);
                 await context.SaveChangesAsync();
+
+
                 await transaction.CommitAsync();
+                try
+                {
+                    await notificationService.CreateNotification(new CreateNotificationRequest
+                    {
+                        Content = $"Giáo viên đã chấm điểm môn {subjectName}, loại điểm : {requests[0].Type}",
+                        Title = "Chấm điểm môn học",
+                        Type = "Chấm điểm",
+                        UserId = userIds
+                    });
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Push notification failed");
+                }
                 return (true, "SUCCESS");
             }
             catch (Exception)
@@ -330,8 +366,24 @@ namespace School_Management.API.Repositories
             result.SchoolYear = request.SchoolYear;
             result.Value = request.Value;
             result.Weight = weight;
+            var listUser = new List<Guid> { result.Student.UserId };
 
             await context.SaveChangesAsync();
+
+            try
+            {
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Giáo viên đã cập nhật điểm môn {result.Subject.SubjectName}, loại điểm : {result.Type}",
+                    Title = "Cập nhật điểm môn học",
+                    Type = "Cập nhật điểm",
+                    UserId = listUser
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification failed");
+            }
             return (new ResultResponse
             {
                 Term = result.Term,
