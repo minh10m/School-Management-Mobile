@@ -214,27 +214,25 @@ namespace School_Management.API.Repositories
                 return (false, "INTERNAL_ERROR");
             }
 
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await notificationService.CreateNotification(new CreateNotificationRequest
-                    {
-                        Content = payment.CourseId.HasValue
-                            ? $"Học sinh {student.User.FullName} đã mua khóa học [{course?.CourseName}]"
-                            : $"Học sinh {student.User.FullName} đã thanh toán [{feeDetail?.Reason}]",
-                        Title = payment.CourseId.HasValue ? "Mua khóa học mới" : "Thanh toán học phí",
-                        Type = payment.CourseId.HasValue ? "Mua khóa học" : "Thanh toán học phí",
-                        UserId = notifyUserIds
-                    });
+            await SendPaymentNotify(userId, true, "Thanh toán thành công!");
+            //try
+            //{
+            //    await notificationService.CreateNotification(new CreateNotificationRequest
+            //    {
+            //        Content = payment.CourseId.HasValue
+            //            ? $"Học sinh {student.User.FullName} đã mua khóa học [{course?.CourseName}]"
+            //            : $"Học sinh {student.User.FullName} đã thanh toán [{feeDetail?.Reason}]",
+            //        Title = payment.CourseId.HasValue ? "Mua khóa học mới" : "Thanh toán học phí",
+            //        Type = payment.CourseId.HasValue ? "Mua khóa học" : "Thanh toán học phí",
+            //        UserId = notifyUserIds
+            //    });
 
-                    await SendPaymentNotify(userId, true, "Thanh toán thành công!");
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Push notification failed PaymentId: {Id}", payment.Id);
-                }
-            });
+            //}
+            //catch (Exception ex)
+            //{
+            //    logger.LogError(ex, "Push notification failed PaymentId: {Id}", payment.Id);
+            //}
+
 
             return (true, "SUCCESS");
         }
