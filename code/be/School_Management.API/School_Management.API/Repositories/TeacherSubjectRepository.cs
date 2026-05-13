@@ -1,17 +1,23 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using School_Management.API.Services;
+using Xceed.Document.NET;
 
 namespace School_Management.API.Repositories
 {
     public class TeacherSubjectRepository : ITeacherSubjectRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly INotificationService notificationService;
+        private readonly ILogger<TeacherSubjectRepository> logger;
 
-        public TeacherSubjectRepository(ApplicationDbContext context)
+        public TeacherSubjectRepository(ApplicationDbContext context, INotificationService notificationService, ILogger<TeacherSubjectRepository> logger)
         {
             this.context = context;
+            this.notificationService = notificationService;
+            this.logger = logger;
         }
 
         public async Task<(TeacherSubjectResponse? data, string? errorCode)> AssignSubjectForTeacher(TeacherSubjectRequest request)
@@ -31,17 +37,33 @@ namespace School_Management.API.Repositories
             var teacherSubjectInfo = await context.TeacherSubject.Where(x => x.TeacherSubjectId == teacherSubject.TeacherSubjectId)
                                                                  .Select(g => new
                                                                  {
-                                                                     g.Teacher.User.FullName,
-                                                                     g.Subject.SubjectName
+                                                                    TeacherName = g.Teacher.User.FullName,
+                                                                     SubjectNamee = g.Subject.SubjectName,
+                                                                     UserOfTeacherId = g.Teacher.UserId
                                                                  }).FirstOrDefaultAsync();
+            var userIds = new List<Guid> { teacherSubjectInfo.UserOfTeacherId };
+            try
+            {
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Bạn đã được admin thêm môn {teacherSubjectInfo.SubjectNamee} vào danh sách môn mình dạy",
+                    Title = "Gán môn dạy mới",
+                    Type = "Gán môn dạy",
+                    UserId = userIds
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification failed");
+            }
 
             return (new TeacherSubjectResponse
             {
                 TeacherSubjectId = teacherSubject.TeacherSubjectId,
                 TeacherId = teacherSubject.TeacherId,
                 SubjectId = teacherSubject.SubjectId,
-                TeacherName = teacherSubjectInfo.FullName,
-                SubjectName = teacherSubjectInfo.SubjectName
+                TeacherName = teacherSubjectInfo.TeacherName,
+                SubjectName = teacherSubjectInfo.SubjectNamee
             }, "SUCCESS");
         }
 
@@ -93,11 +115,28 @@ namespace School_Management.API.Repositories
 
         public async Task<bool> DeleteTeacherSubject(Guid teacherSubjectId)
         {
-            var teacherSubject = await context.TeacherSubject.FindAsync(teacherSubjectId);
+            var teacherSubject = await context.TeacherSubject.Include(x => x.Teacher).Include(x => x.Subject).FirstOrDefaultAsync(x => x.TeacherSubjectId == teacherSubjectId);
             if (teacherSubject == null) return false;
 
             context.TeacherSubject.Remove(teacherSubject);
             await context.SaveChangesAsync();
+
+            var userIds = new List<Guid> { teacherSubject.Teacher.UserId };
+
+            try
+            {
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Admin đã xóa môn {teacherSubject.Subject.SubjectName} ra khỏi danh sách môn dạy của bạn",
+                    Title = "Xóa môn dạy",
+                    Type = "Xóa môn dạy",
+                    UserId = userIds
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification failed");
+            }
             return true;
         }
     }
