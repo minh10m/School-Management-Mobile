@@ -2,16 +2,21 @@
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using School_Management.API.Services;
 
 namespace School_Management.API.Repositories
 {
     public class EventRepository : IEventRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly INotificationService notificationService;
+        private readonly ILogger<EventRepository> logger;
 
-        public EventRepository(ApplicationDbContext context)
+        public EventRepository(ApplicationDbContext context, INotificationService notificationService, ILogger<EventRepository> logger)
         {
             this.context = context;
+            this.notificationService = notificationService;
+            this.logger = logger;
         }
 
         public async Task<(EventResponse? data, string? errorCode)> CreateEvent(PostOrUpdateEventRequest request)
@@ -40,6 +45,35 @@ namespace School_Management.API.Repositories
 
             context.Event.Add(newEvent);
             await context.SaveChangesAsync();
+
+            var query = from user in context.Users
+                        select user.Id;
+            var adminIds = await (
+                from user in context.Users
+                join userRole in context.UserRoles on user.Id equals userRole.UserId
+                join role in context.Roles on userRole.RoleId equals role.Id
+                where role.Name == "Admin" 
+                select user.Id
+            ).Distinct().ToListAsync();
+            var userIds = await query.ToListAsync();
+            var finalUserIds = userIds.Except(adminIds).ToList();
+
+            try
+            {
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Sự kiện [{newEvent.Title}] mới được đăng tải",
+                    Title = "Sự kiện mới",
+                    Type = "Tạo sự kiện",
+                    UserId = finalUserIds
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification failed");
+            }
+
+
             return (new EventResponse
             {
                 EventId = newEvent.Id,
@@ -92,7 +126,7 @@ namespace School_Management.API.Repositories
                 .Skip(skipResults)
                 .Take(request.PageSize)
                 .Select(x => new EventResponse
-            {
+                {
                     EventId = x.Id,
                     Body = x.Body,
                     SchoolYear = x.SchoolYear,
@@ -101,7 +135,7 @@ namespace School_Management.API.Repositories
                     EventDate = x.EventDate,
                     FinishTime = x.FinishTime,
                     Title = x.Title
-            }).ToListAsync();
+                }).ToListAsync();
 
             return new PagedResponse<EventResponse>
             {
@@ -155,6 +189,33 @@ namespace School_Management.API.Repositories
 
             context.Event.Update(myEvent);
             await context.SaveChangesAsync();
+
+            var query = from user in context.Users
+                        select user.Id;
+            var adminIds = await (
+                from user in context.Users
+                join userRole in context.UserRoles on user.Id equals userRole.UserId
+                join role in context.Roles on userRole.RoleId equals role.Id
+                where role.Name == "Admin"
+                select user.Id
+            ).Distinct().ToListAsync();
+            var userIds = await query.ToListAsync();
+            var finalUserIds = userIds.Except(adminIds).ToList();
+
+            try
+            {
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Sự kiện [{myEvent.Title}] mới được cập nhật",
+                    Title = "Cập nhật sự kiện",
+                    Type = "Cập nhật sự kiện",
+                    UserId = finalUserIds
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification failed");
+            }
 
             return (new EventResponse
             {

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using School_Management.API.Services;
 
 namespace School_Management.API.Repositories
 {
@@ -9,11 +10,15 @@ namespace School_Management.API.Repositories
     {
         private readonly ApplicationDbContext context;
         private readonly IStudentRepository studentRepository;
+        private readonly INotificationService notificationService;
+        private readonly ILogger<ScheduleRepository> logger;
 
-        public ScheduleRepository(ApplicationDbContext context, IStudentRepository studentRepository)
+        public ScheduleRepository(ApplicationDbContext context, IStudentRepository studentRepository, INotificationService notificationService, ILogger<ScheduleRepository> logger)
         {
             this.context = context;
             this.studentRepository = studentRepository;
+            this.notificationService = notificationService;
+            this.logger = logger;
         }
         public async Task<ScheduleResponse?> CreateSchedule(PostUpdateScheduleRequest request)
         {
@@ -54,9 +59,29 @@ namespace School_Management.API.Repositories
                     ClassYearId = request.ClassYearId
                 };
 
+                var userIds = await context.StudentClassYear.AsNoTracking().Where(x => x.ClassYearId == request.ClassYearId).Select(g => g.Student.UserId).ToListAsync();
+
                 context.Schedule.Add(schedule);
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                if(request.IsActive)
+                {
+                    try
+                    {
+                        await notificationService.CreateNotification(new CreateNotificationRequest
+                        {
+                            Content = $"Đã có thời khóa biểu học kì {request.Term} năm học {request.SchoolYear}-{request.SchoolYear + 1}",
+                            Title = "Thời khóa biểu mới",
+                            Type = "Tạo thời khóa biểu",
+                            UserId = userIds
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Push notification failed");
+                    }
+                }    
                 return new ScheduleResponse
                 {
                     Term = schedule.Term,

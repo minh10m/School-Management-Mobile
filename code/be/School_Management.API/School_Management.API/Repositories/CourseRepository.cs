@@ -56,6 +56,7 @@ namespace School_Management.API.Repositories
                         select user.Id;
 
             var userIds = await query.ToListAsync();
+            userIds.Remove(userId);
 
             try
             {
@@ -302,7 +303,7 @@ namespace School_Management.API.Repositories
 
         public async Task<(CourseResponse? data, string? message)> ReviseCourseForAdmin(Guid courseId, UpdateStatusCourseRequest request)
         {
-            var course = await context.Course
+            var course = await context.Course.Include(x => x.TeacherSubject).ThenInclude(x => x.Teacher)
                 .FirstOrDefaultAsync(x => x.Id == courseId);
 
             if (course == null) return (null, "NOT_FOUND_COURSE");
@@ -315,6 +316,25 @@ namespace School_Management.API.Repositories
             }
 
             await context.SaveChangesAsync();
+
+            var userId = new List<Guid> { course.TeacherSubject.Teacher.UserId};
+            var status = request.Status == "Approved" ? "được duyệt" : "bị từ chối";
+
+            try
+            {
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Khóa học [{course.CourseName}] của bạn đã {status} bởi admin",
+                    Title = "Duyệt khóa học",
+                    Type = "Duyệt khóa học",
+                    UserId = userId
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification failed");
+            }
+
 
             var result = await context.Course.AsNoTracking()
                 .Where(x => x.Id == courseId)
@@ -371,6 +391,7 @@ namespace School_Management.API.Repositories
                         select user.Id;
 
             var userIds = await query.ToListAsync();
+            userIds.Remove(userId);
 
             try
             {

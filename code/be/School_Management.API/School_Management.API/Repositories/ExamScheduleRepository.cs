@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using School_Management.API.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
@@ -12,10 +13,16 @@ namespace School_Management.API.Repositories
     public class ExamScheduleRepository : IExamScheduleRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly ISchoolYearInfoService schoolYearInfoService;
+        private readonly INotificationService notificationService;
+        private readonly ILogger<ExamScheduleRepository> logger;
 
-        public ExamScheduleRepository(ApplicationDbContext context)
+        public ExamScheduleRepository(ApplicationDbContext context, ISchoolYearInfoService schoolYearInfoService, INotificationService notificationService, ILogger<ExamScheduleRepository> logger)
         {
             this.context = context;
+            this.schoolYearInfoService = schoolYearInfoService;
+            this.notificationService = notificationService;
+            this.logger = logger;
         }
 
         public async Task<(bool result, string? message)> AssignStudentIntoExamScheduleDetail(Guid examScheduleId)
@@ -108,9 +115,9 @@ namespace School_Management.API.Repositories
                         activeTrueExamSCH.IsActive = false;
 
                 }
-
-                
-
+                var schoolYearInfo = await schoolYearInfoService.GetSchoolYearInfo();
+                var schoolYear = schoolYearInfo?.SchoolYear;
+                var userIds = await context.StudentClassYear.AsNoTracking().Where(x => x.ClassYear.SchoolYear == schoolYear && x.ClassYear.Grade == request.Grade).Select(g => g.Student.UserId).Distinct().ToListAsync();
 
                 var examschedule = new ExamSchedule
                 {
@@ -126,6 +133,22 @@ namespace School_Management.API.Repositories
                 context.ExamSchedule.Add(examschedule);
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                try
+                {
+                    await notificationService.CreateNotification(new CreateNotificationRequest
+                    {
+                        Content = $"Đã có lịch thi [{request.Type}] học kì {request.Term} năm học {request.SchoolYear}-{request.SchoolYear + 1}",
+                        Title = "Lịch thi mới",
+                        Type = "Tạo lịch thi",
+                        UserId = userIds
+                    });
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Push notification failed");
+                }
+
                 return (new ExamScheduleResponse
                 {
                     ExamScheduleId = examschedule.Id,
