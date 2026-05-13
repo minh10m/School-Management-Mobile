@@ -12,7 +12,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { usePaymentHub } from "../../../hooks/usePaymentHub";
 import { courseService } from "../../../services/course.service";
 import { lessonService } from "../../../services/lesson.service";
@@ -90,7 +93,7 @@ export default function StudentCourseDetail() {
       });
       setPaymentInfo(response);
       setHubEnabled(true); // ✅ bật hub trước
-      setShowQR(true);     // ✅ show QR sau
+      setShowQR(true); // ✅ show QR sau
     } catch (err: any) {
       if (err.response?.data?.message === "YOU_BUY_THIS_COURSE") {
         setIsEnrolled(true);
@@ -216,7 +219,7 @@ export default function StudentCourseDetail() {
                   <TouchableOpacity
                     onPress={() =>
                       router.push(
-                        `/student/courses/lessons?courseId=${id}&previewId=${firstLesson.id}` as any
+                        `/student/courses/lessons?courseId=${id}&previewId=${firstLesson.id}` as any,
                       )
                     }
                     activeOpacity={0.8}
@@ -270,7 +273,11 @@ export default function StudentCourseDetail() {
                       </View>
                       <View className="gap-y-3">
                         <View className="flex-row items-center">
-                          <Ionicons name="play-circle" size={18} color="#93C5FD" />
+                          <Ionicons
+                            name="play-circle"
+                            size={18}
+                            color="#93C5FD"
+                          />
                           <Text
                             style={{ fontFamily: "Poppins-Regular" }}
                             className="text-blue-50 text-xs ml-3"
@@ -279,7 +286,11 @@ export default function StudentCourseDetail() {
                           </Text>
                         </View>
                         <View className="flex-row items-center">
-                          <Ionicons name="document-text" size={18} color="#FCD34D" />
+                          <Ionicons
+                            name="document-text"
+                            size={18}
+                            color="#FCD34D"
+                          />
                           <Text
                             style={{ fontFamily: "Poppins-Regular" }}
                             className="text-blue-50 text-xs ml-3"
@@ -288,7 +299,11 @@ export default function StudentCourseDetail() {
                           </Text>
                         </View>
                         <View className="flex-row items-center">
-                          <Ionicons name="chatbubbles" size={18} color="#6EE7B7" />
+                          <Ionicons
+                            name="chatbubbles"
+                            size={18}
+                            color="#6EE7B7"
+                          />
                           <Text
                             style={{ fontFamily: "Poppins-Regular" }}
                             className="text-blue-50 text-xs ml-3"
