@@ -85,6 +85,7 @@ namespace School_Management.API.Services
                 "SUBMISSION_HAS_SCORE" => throw new ForbiddenException("Bài nộp đã được chấm, không thể cập nhật"),
                 "BIGGER_THAN_MAXSIZE" => throw new BadRequestException("Dung lượng tối đa của file là 20MB"),
                 "UPLOAD_FAILED" => throw new BadRequestException("Upload file thất bại"),
+                "NOT_FOUND_ASSIGNMENT" => throw new NotFoundException("Không tìm thấy bài tập cho bài nộp"),
                 "SUCCESS" => result!,
                 _ => throw new Exception("Lỗi không xác định")
             };

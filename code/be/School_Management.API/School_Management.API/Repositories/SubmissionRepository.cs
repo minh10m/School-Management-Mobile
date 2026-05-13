@@ -5,6 +5,7 @@ using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
+using Xceed.Document.NET;
 
 namespace School_Management.API.Repositories
 {
@@ -28,7 +29,7 @@ namespace School_Management.API.Repositories
             if (student == null) return (null, "NOT_FOUND_STUDENT");
 
             var timeSubmit = DateTimeOffset.UtcNow;
-            var assignment = await context.Assignment.FirstOrDefaultAsync(x => x.Id == request.AssignmentId);
+            var assignment = await context.Assignment.Include(x => x.TeacherSubject).ThenInclude(x => x.Teacher).FirstOrDefaultAsync(x => x.Id == request.AssignmentId);
             if (assignment == null) return (null, "NOT_FOUND_ASSIGNMENT");
             string status = string.Empty;
 
@@ -75,6 +76,23 @@ namespace School_Management.API.Repositories
 
             context.Submission.Add(submission);
             await context.SaveChangesAsync();
+
+            var userIds = new List<Guid> {assignment.TeacherSubject.Teacher.UserId};
+            try
+            {
+                await notificationService.CreateNotification(new CreateNotificationRequest
+                {
+                    Content = $"Học sinh {student.User.FullName} đã nộp bài cho bài tập {assignment.Title}",
+                    Title = "Nộp bài tập",
+                    Type = "Nộp bài",
+                    UserId = userIds
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Push notification failed");
+            }
+
             return (new SubmissionResponse
             {
                 Score = null,
@@ -261,6 +279,11 @@ namespace School_Management.API.Repositories
                 if (submission.Status == "Đã chấm") return (null, "SUBMISSION_HAS_SCORE");
                 var oldPublicId = submission.PublicId;
 
+                var assignment = await context.Assignment.Include(x => x.TeacherSubject).ThenInclude(x => x.Teacher).FirstOrDefaultAsync(x => x.Id == submission.AssignmentId);
+                if (assignment == null) return (null, "NOT_FOUND_ASSIGNMENT");
+
+                var student = await context.Student.AsNoTracking().Include(x => x.User).Where(x => x.Id == submission.StudentId).FirstOrDefaultAsync();
+
                 string fileUrl = "Không có dữ liệu";
                 string? fileTitle = request.FileTitle?.ToString().Trim() ?? null;
                 string publicId = "Không có dữ liệu";
@@ -318,6 +341,21 @@ namespace School_Management.API.Repositories
                     FileUrl = submission.FileUrl,
                     StudentName = studentName ?? "Không có dữ liệu"
                 };
+                var userIds = new List<Guid> { assignment.TeacherSubject.Teacher.UserId };
+                try
+                {
+                    await notificationService.CreateNotification(new CreateNotificationRequest
+                    {
+                        Content = $"Học sinh {student.User.FullName} đã cập nhật bài nộp cho bài tập {assignment.Title}",
+                        Title = "Cập nhật bài tập",
+                        Type = "Cập nhật bài",
+                        UserId = userIds
+                    });
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Push notification failed");
+                }
 
                 return (result, "SUCCESS");
             }
