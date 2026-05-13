@@ -117,11 +117,16 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
         return apiClient(originalRequest);
-      } catch (refreshError) {
+      } catch (refreshError: any) {
         processQueue(refreshError, null);
         // Force logout if refresh fails
         await clearAuth();
-        Alert.alert("Phiên đăng nhập hết hạn", "Vui lòng đăng nhập lại để tiếp tục.");
+
+        // Only show alert if it's not a missing token error (which happens during manual logout)
+        if (refreshError?.message !== "No refresh token available") {
+          Alert.alert("Phiên đăng nhập hết hạn", "Vui lòng đăng nhập lại để tiếp tục.");
+        }
+        
         router.replace("/login");
         return Promise.reject(refreshError);
       } finally {

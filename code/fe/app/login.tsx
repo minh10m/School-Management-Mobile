@@ -67,7 +67,7 @@ export default function LoginScreen() {
       redirectUser(updatedUserInfo?.role);
       setTimeout(() => {
         Alert.alert("Thành công", "Đăng nhập thành công!");
-      }, 500);
+      }, 100);
     } catch (error: any) {
       console.log(error);
 
