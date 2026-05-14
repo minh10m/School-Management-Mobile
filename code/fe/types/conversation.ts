@@ -7,6 +7,7 @@ export interface ConversationResponse {
   lastUpdatedAt: string;
   isGroup: boolean;
   lastMessage?: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface MessageResponse {
@@ -14,6 +15,7 @@ export interface MessageResponse {
   senderId: string;
   senderName: string;
   conversationId: string;
+  type: string;
   content: string;
   status: string;
   createdAt: string;
@@ -22,6 +24,7 @@ export interface MessageResponse {
 export interface MemberInfo {
   userId: string;
   fullName: string;
+  avatarUrl?: string | null;
 }
 
 export interface GetMessageResponseDto {
@@ -51,4 +54,9 @@ export interface CheckMessageExistedResponse {
 
 export interface GetConversationFilterRequest extends BaseRequestSecond {
   displayName?: string;
+}
+
+export interface UpdateGroupRequest {
+  conversationName?: string;
+  avatar?: any; // For FormData
 }

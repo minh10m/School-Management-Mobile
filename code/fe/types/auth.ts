@@ -3,6 +3,7 @@ export interface UserInfo {
   fullName: string;
   email: string;
   role: string;
+  avatarUrl?: string | null;
 }
 
 export interface AuthResponse {
