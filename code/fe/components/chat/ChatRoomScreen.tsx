@@ -100,7 +100,46 @@ export default function ChatRoomScreen() {
 
   useEffect(() => {
     fetchMessages();
-  }, [realConversationId, currentConversation?.lastMessageAt]); // Refetch when lastMessageAt changes in Firebase
+  }, [realConversationId]); // Only fetch on initial load or ID change
+
+  // Listen to realtime new messages
+  useEffect(() => {
+    if (currentConversation?.lastMessageObj) {
+      const newMsg = currentConversation.lastMessageObj as MessageResponse;
+      setMessages((prev) => {
+        // Prevent duplicate appending by real ID, but update if changed (like status)
+        const existingIndex = prev.findIndex((msg) => msg.id === newMsg.id);
+        if (existingIndex !== -1) {
+          // Update the message if there's any change
+          if (prev[existingIndex].status !== newMsg.status || prev[existingIndex].content !== newMsg.content) {
+            const newArray = [...prev];
+            newArray[existingIndex] = newMsg;
+            return newArray;
+          }
+          return prev;
+        }
+
+        // If it's a message from us, try to find the optimistic 'temp' message
+        // and replace it with the real one to avoid duplicates.
+        if (newMsg.senderId === userInfo?.id) {
+          const tempMsgIndex = prev.findIndex(
+            (msg) =>
+              msg.id.startsWith("temp-") &&
+              msg.content === newMsg.content
+          );
+
+          if (tempMsgIndex !== -1) {
+            const newArray = [...prev];
+            newArray[tempMsgIndex] = newMsg;
+            return newArray;
+          }
+        }
+
+        // Otherwise just append to the top (which is index 0 since list is inverted)
+        return [newMsg, ...prev];
+      });
+    }
+  }, [currentConversation?.lastMessageObj]);
 
   const handleSend = async () => {
     if (!inputText.trim() || sending || !id) return;
