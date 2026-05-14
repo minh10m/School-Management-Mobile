@@ -81,8 +81,19 @@ export const teacherService = {
    * PATCH /teachers/me
    * AuthN(login) + AuthZ(Teacher)
    */
-  updateMe: async (payload: UpdateTeacherSelfPayload): Promise<TeacherResponse> => {
-    const response = await apiClient.patch<TeacherResponse>("/teachers/me", payload);
+  updateMe: async (payload: UpdateTeacherSelfPayload | FormData): Promise<TeacherResponse> => {
+    let requestData: any = payload;
+    let config = {};
+
+    if (payload instanceof FormData) {
+      config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+    }
+
+    const response = await apiClient.patch<TeacherResponse>("/teachers/me", requestData, config);
     return response.data;
   },
 };

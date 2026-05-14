@@ -12,14 +12,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
 import { userService } from "../../services/user.service";
 import { useAuthStore } from "../../store/authStore";
 import { UserResponse } from "../../types/user";
 
 export default function AdminProfileScreen() {
   const router = useRouter();
-  const { userInfo } = useAuthStore();
+  const { userInfo, updateUserInfo } = useAuthStore();
   const [profile, setProfile] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
@@ -32,6 +34,8 @@ export default function AdminProfileScreen() {
     phoneNumber: "",
     address: "",
     birthday: "",
+    avatarUri: "",
+    avatarFile: null as any,
   });
 
   useEffect(() => {
@@ -58,23 +62,56 @@ export default function AdminProfileScreen() {
       phoneNumber: profile.phoneNumber || "",
       address: profile.address || "",
       birthday: profile.birthday ? profile.birthday.split("T")[0] : "",
+      avatarUri: profile.avatarUrl || "",
+      avatarFile: null,
     });
     setEditVisible(true);
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      setEditForm((prev) => ({
+        ...prev,
+        avatarUri: asset.uri,
+        avatarFile: {
+          uri: asset.uri,
+          type: asset.mimeType || "image/jpeg",
+          name: asset.fileName || "avatar.jpg",
+        },
+      }));
+    }
   };
 
   const handleSave = async () => {
     try {
       setSaving(true);
-      const updated = await userService.updateMe({
-        email: editForm.email,
-        phone: editForm.phoneNumber,
-        fullName: editForm.fullName,
-        address: editForm.address,
-        birthday: editForm.birthday
-          ? new Date(editForm.birthday).toISOString()
-          : undefined,
-      });
+      const formData = new FormData();
+      formData.append("FullName", editForm.fullName);
+      formData.append("Email", editForm.email);
+      if (editForm.phoneNumber) formData.append("PhoneNumber", editForm.phoneNumber);
+      if (editForm.address) formData.append("Address", editForm.address);
+      if (editForm.birthday) formData.append("Birthday", editForm.birthday);
+      if (editForm.avatarFile) {
+        formData.append("Avatar", editForm.avatarFile as any);
+      }
+
+      const updated = await userService.updateMe(formData as any);
       setProfile(updated);
+      
+      // Update global auth store to reflect changes in SideMenu/Headers
+      updateUserInfo({
+        fullName: updated.fullName,
+        avatarUrl: updated.avatarUrl
+      });
+      
       setEditVisible(false);
       Alert.alert("Thành công", "Cập nhật hồ sơ thành công!");
     } catch (error: any) {
@@ -104,7 +141,15 @@ export default function AdminProfileScreen() {
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           {/* Summary Card */}
           <View className="bg-white items-center py-10 border-b border-gray-50">
-            <View className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center mb-4 border-4 border-white shadow-sm">
+            <View className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
+              {profile?.avatarUrl ? (
+                <Image 
+                  source={{ uri: profile.avatarUrl }} 
+                  style={{ width: 96, height: 96 }}
+                  contentFit="cover"
+                  transition={200}
+                />
+              ) : (
               <Text
                 style={{
                   fontFamily: "Poppins-Bold",
@@ -114,6 +159,7 @@ export default function AdminProfileScreen() {
               >
                 {profile?.fullName?.charAt(0) || "A"}
               </Text>
+              )}
             </View>
             <Text
               className="text-black text-xl mb-1"
@@ -206,7 +252,23 @@ export default function AdminProfileScreen() {
             className="flex-1 px-6 pt-6"
             showsVerticalScrollIndicator={false}
           >
-            <View className="gap-5">
+            <View className="items-center mb-6">
+              <TouchableOpacity onPress={pickImage} className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center border-4 border-white shadow-sm overflow-hidden">
+                {editForm.avatarUri ? (
+                  <Image 
+                    source={{ uri: editForm.avatarUri }} 
+                    style={{ width: 96, height: 96 }}
+                    contentFit="cover"
+                    transition={200}
+                  />
+                ) : (
+                  <Ionicons name="camera-outline" size={32} color="#136ADA" />
+                )}
+              </TouchableOpacity>
+              <Text className="text-blue-600 mt-2 text-xs" style={{ fontFamily: "Poppins-Medium" }}>Thay đổi ảnh đại diện</Text>
+            </View>
+
+            <View className="gap-5 pb-20">
               <EditInput
                 label="Họ và Tên"
                 value={editForm.fullName}

@@ -7,6 +7,7 @@ import {
   RefreshControl,
   Alert,
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, router, Stack } from "expo-router";
@@ -179,13 +180,22 @@ export default function TakeAttendanceScreen() {
                 className="bg-white p-5 rounded-3xl mb-4 border border-gray-100 shadow-sm"
               >
                 <View className="flex-row items-center mb-4">
-                  <View className="w-12 h-12 rounded-2xl bg-blue-50 items-center justify-center mr-3 border border-blue-100">
-                    <Text
-                      style={{ fontFamily: "Poppins-Bold" }}
-                      className="text-[#136ADA] text-lg"
-                    >
-                      {item.studentName.charAt(0)}
-                    </Text>
+                  <View className="w-12 h-12 rounded-2xl bg-blue-50 items-center justify-center mr-3 border border-blue-100 overflow-hidden">
+                    {item.avatarUrl ? (
+                      <Image 
+                        source={{ uri: item.avatarUrl }} 
+                        style={{ width: 48, height: 48 }}
+                        contentFit="cover"
+                        transition={200}
+                      />
+                    ) : (
+                      <Text
+                        style={{ fontFamily: "Poppins-Bold" }}
+                        className="text-[#136ADA] text-lg"
+                      >
+                        {item.studentName.charAt(0)}
+                      </Text>
+                    )}
                   </View>
                   <View className="flex-1">
                     <Text

@@ -71,8 +71,19 @@ export const studentService = {
    * PATCH /students/me
    * AuthN(login) + AuthZ(Student)
    */
-  updateMe: async (payload: UpdateStudentSelfPayload): Promise<StudentResponse> => {
-    const response = await apiClient.patch<StudentResponse>("/students/me", payload);
+  updateMe: async (payload: UpdateStudentSelfPayload | FormData): Promise<StudentResponse> => {
+    let requestData: any = payload;
+    let config = {};
+
+    if (payload instanceof FormData) {
+      config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+    }
+
+    const response = await apiClient.patch<StudentResponse>("/students/me", requestData, config);
     return response.data;
   },
 

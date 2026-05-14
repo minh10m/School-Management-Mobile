@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -131,16 +132,25 @@ export default function StudentDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="items-center mb-6">
-          <View className="w-20 h-20 rounded-full bg-blue-100 items-center justify-center mb-2">
-            <Text
-              style={{
-                fontFamily: "Poppins-Bold",
-                color: "#136ADA",
-                fontSize: 30,
-              }}
-            >
-              {student?.fullName?.charAt(0)}
-            </Text>
+          <View className="w-20 h-20 rounded-full bg-blue-100 items-center justify-center mb-2 overflow-hidden">
+            {student?.avatarUrl ? (
+              <Image 
+                source={{ uri: student.avatarUrl }} 
+                style={{ width: 80, height: 80 }}
+                contentFit="cover"
+                transition={200}
+              />
+            ) : (
+              <Text
+                style={{
+                  fontFamily: "Poppins-Bold",
+                  color: "#136ADA",
+                  fontSize: 30,
+                }}
+              >
+                {student?.fullName?.charAt(0)}
+              </Text>
+            )}
           </View>
           <Text
             style={{ fontFamily: "Poppins-SemiBold" }}

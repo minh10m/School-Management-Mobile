@@ -8,6 +8,7 @@ import {
   StyleSheet,
   FlatList,
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -193,7 +194,16 @@ function StudentRow({ item, index }: { item: StudentListItem; index: number }) {
       activeOpacity={0.7}
     >
       <View style={styles.avatarContainer}>
-        <Text style={styles.avatarText}>{item.fullName.charAt(0).toUpperCase()}</Text>
+        {item.avatarUrl ? (
+          <Image 
+            source={{ uri: item.avatarUrl }} 
+            style={{ width: 45, height: 45 }}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : (
+          <Text style={styles.avatarText}>{item.fullName.charAt(0).toUpperCase()}</Text>
+        )}
       </View>
       <View style={styles.studentInfo}>
         <Text style={styles.studentName}>{item.fullName}</Text>
@@ -293,6 +303,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginRight: 15,
+    overflow: "hidden",
   },
   avatarText: {
     fontFamily: "Poppins-Bold",

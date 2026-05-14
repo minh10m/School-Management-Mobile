@@ -5,22 +5,48 @@ import {
   LoginPayload,
 } from "../types/auth";
 import apiClient from "./apiClient";
+import { userService } from "./user.service";
+import { teacherService } from "./teacher.service";
+import { studentService } from "./student.service";
 
 export const authService = {
   login: async (payload: LoginPayload): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>("/auth/login", payload);
     const data = response.data;
 
-    const userInfo = {
+    const initialUserInfo = {
       id: data.userId,
       fullName: data.fullName,
       email: data.email,
       role: data.role,
+      avatarUrl: data.avatarUrl,
     };
 
-    await useAuthStore
-      .getState()
-      .setAuth(data.accessToken, data.refreshToken, data.firebaseToken || null, userInfo);
+    const authStore = useAuthStore.getState();
+    await authStore.setAuth(data.accessToken, data.refreshToken, data.firebaseToken || null, initialUserInfo);
+
+    // Fetch full profile based on role to get missing details (like avatarUrl if it wasn't in login)
+    try {
+      let fullProfile: any = null;
+      const role = data.role.toLowerCase();
+      
+      if (role === 'admin') {
+        fullProfile = await userService.getMe();
+      } else if (role === 'teacher') {
+        fullProfile = await teacherService.getMe();
+      } else {
+        fullProfile = await studentService.getMe();
+      }
+
+      if (fullProfile) {
+        await authStore.updateUserInfo({
+          fullName: fullProfile.fullName,
+          avatarUrl: fullProfile.avatarUrl
+        });
+      }
+    } catch (err) {
+      console.log("Could not fetch full profile after login:", err);
+    }
 
     return data;
   },

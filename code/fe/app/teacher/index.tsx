@@ -21,55 +21,57 @@ import { attendanceService } from "../../services/attendance.service";
 import { scheduleService } from "../../services/schedule.service";
 import { AdminPageWrapper } from "../../components/ui/AdminPageWrapper";
 
-const TeachingClassCard = memo(({ item, onPress }: { item: any; onPress: () => void }) => (
-  <TouchableOpacity
-    onPress={onPress}
-    className="bg-[#136ADA] w-64 p-6 rounded-[32px] shadow-lg shadow-blue-100"
-  >
-    <View className="flex-row justify-between items-start mb-6">
-      <View className="flex-row items-center gap-3">
-        <View className="bg-white/20 p-2 rounded-xl">
-          <Ionicons name="school-outline" size={22} color="white" />
+const TeachingClassCard = memo(
+  ({ item, onPress }: { item: any; onPress: () => void }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      className="bg-[#136ADA] w-64 p-6 rounded-[32px] shadow-lg shadow-blue-100"
+    >
+      <View className="flex-row justify-between items-start mb-6">
+        <View className="flex-row items-center gap-3">
+          <View className="bg-white/20 p-2 rounded-xl">
+            <Ionicons name="school-outline" size={22} color="white" />
+          </View>
+          <View>
+            <Text
+              className="text-white text-lg"
+              style={{ fontFamily: "Poppins-Bold" }}
+            >
+              {item.className}
+            </Text>
+            <Text
+              className="text-white/80 text-[10px]"
+              style={{ fontFamily: "Poppins-Medium" }}
+            >
+              {item.subjectName} • Khối {item.grade}
+            </Text>
+          </View>
         </View>
-        <View>
+      </View>
+
+      <View className="flex-row items-center justify-between mt-2">
+        <View className="flex-row items-center gap-1">
+          <Ionicons name="people-outline" size={14} color="white" />
           <Text
-            className="text-white text-lg"
+            className="text-white text-xs"
             style={{ fontFamily: "Poppins-Bold" }}
           >
-            {item.className}
+            {item.studentCount || "40"}
           </Text>
           <Text
-            className="text-white/80 text-[10px]"
-            style={{ fontFamily: "Poppins-Medium" }}
+            className="text-white/70 text-[10px] ml-0.5"
+            style={{ fontFamily: "Poppins-Regular" }}
           >
-            {item.subjectName} • Khối {item.grade}
+            Học sinh
           </Text>
         </View>
+        <View className="bg-white/20 px-3 py-1.5 rounded-xl">
+          <Ionicons name="arrow-forward" size={16} color="white" />
+        </View>
       </View>
-    </View>
-
-    <View className="flex-row items-center justify-between mt-2">
-      <View className="flex-row items-center gap-1">
-        <Ionicons name="people-outline" size={14} color="white" />
-        <Text
-          className="text-white text-xs"
-          style={{ fontFamily: "Poppins-Bold" }}
-        >
-          {item.studentCount || "40"}
-        </Text>
-        <Text
-          className="text-white/70 text-[10px] ml-0.5"
-          style={{ fontFamily: "Poppins-Regular" }}
-        >
-          Học sinh
-        </Text>
-      </View>
-      <View className="bg-white/20 px-3 py-1.5 rounded-xl">
-        <Ionicons name="arrow-forward" size={16} color="white" />
-      </View>
-    </View>
-  </TouchableOpacity>
-));
+    </TouchableOpacity>
+  ),
+);
 
 export default function TeacherDashboard() {
   const { userInfo } = useAuthStore();
