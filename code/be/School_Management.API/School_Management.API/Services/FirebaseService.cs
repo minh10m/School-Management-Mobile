@@ -93,7 +93,9 @@ namespace School_Management.API.Services
                 { "senderId", message.SenderId.ToString()},
                 { "content", message.Content},
                 { "senderName", senderName},
-                { "conversationId", message.ConversationId.ToString()}
+                { "conversationId", message.ConversationId.ToString()},
+                { "status", message.Status },
+                { "createdAt", message.CreatedAt.ToString("o")}
             }
 
             }
@@ -110,7 +112,9 @@ namespace School_Management.API.Services
                 { "senderId", message.SenderId.ToString()},
                 { "content", message.Content},
                 { "senderName", senderName},
-                { "conversationId", message.ConversationId.ToString()}
+                { "conversationId", message.ConversationId.ToString()},
+                { "status", message.Status },
+                { "createdAt", message.CreatedAt.ToString("o")}
             }
 
             }
