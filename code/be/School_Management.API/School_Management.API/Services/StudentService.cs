@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Exceptions;
@@ -14,12 +16,14 @@ namespace School_Management.API.Services
         private readonly IStudentRepository studentRepository;
         private readonly UserManager<AppUser> userManager;
         private readonly ApplicationDbContext context;
+        private readonly Cloudinary cloudinary;
 
-        public StudentService(IStudentRepository studentRepository, UserManager<AppUser> userManager, ApplicationDbContext context)
+        public StudentService(IStudentRepository studentRepository, UserManager<AppUser> userManager, ApplicationDbContext context, Cloudinary cloudinary)
         {
             this.studentRepository = studentRepository;
             this.userManager = userManager;
             this.context = context;
+            this.cloudinary = cloudinary;
         }
 
         public async Task<StudentInfoResponse> ChangeClassForStudent(ChangeClassRequest changeClassRequest, Guid studentId)
@@ -51,6 +55,7 @@ namespace School_Management.API.Services
                 PhoneNumber = user.PhoneNumber,
                 StudentId = studentId,
                 UserId = user.Id,
+                AvatarUrl = user.AvatarUrl,
                 ClassYearSub = await context.StudentClassYear
                                          .Where(x => x.StudentId == studentId)
                                          .OrderByDescending(x => x.ClassYear.SchoolYear)
@@ -87,6 +92,42 @@ namespace School_Management.API.Services
             var user = await userManager.FindByIdAsync(userId.ToString());
             if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
+            string? avatarUrl = user.AvatarUrl;
+            string? publicId = user.PublicId;
+
+            if (updateUserRequest.Avatar != null && updateUserRequest.Avatar.Length > 0)
+            {
+                if (updateUserRequest.Avatar.Length > 2 * 1024 * 1024)
+                    throw new BadRequestException("Ảnh không được quá 2MB");
+
+                if (!string.IsNullOrEmpty(user.PublicId))
+                {
+                    var deletionParams = new DeletionParams(user.PublicId)
+                    {
+                        ResourceType = ResourceType.Image // Đảm bảo xóa đúng loại ảnh
+                    };
+                    var deletionResult = await cloudinary.DestroyAsync(deletionParams);
+                }
+
+                // --- BƯỚC 2: UPLOAD ẢNH MỚI ---
+                using var stream = updateUserRequest.Avatar.OpenReadStream();
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(updateUserRequest.Avatar.FileName, stream),
+                    Folder = "avatars",
+                    PublicId = Guid.NewGuid().ToString(),
+                    Transformation = new Transformation().Width(500).Height(500).Crop("fill") // Tip: Nén ảnh luôn
+                };
+
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                if (uploadResult.Error != null)
+                    throw new Exception("Lỗi khi upload ảnh lên Cloudinary");
+
+                avatarUrl = uploadResult.SecureUrl.ToString();
+                publicId = uploadResult.PublicId;
+            }
+
             if (updateUserRequest.Email != null)
             {
                 var eResult = await userManager.SetEmailAsync(user, updateUserRequest.Email);
@@ -99,6 +140,8 @@ namespace School_Management.API.Services
             user.FullName = updateUserRequest.FullName ?? user.FullName;
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
             user.Address = updateUserRequest.Address ?? user.Address;
+            user.AvatarUrl = avatarUrl;
+            user.PublicId = publicId;
             if (updateUserRequest.Birthday != null)
             {
                 if (DateTimeOffset.TryParse(updateUserRequest.Birthday, out var date))
@@ -117,6 +160,7 @@ namespace School_Management.API.Services
                 Birthday = user.Birthday,
                 Email = user.Email,
                 FullName = user.FullName,
+                AvatarUrl = user.AvatarUrl,
                 PhoneNumber = user.PhoneNumber,
                 StudentId = studentId,
                 UserId = user.Id,
@@ -139,7 +183,43 @@ namespace School_Management.API.Services
 
             var user = await userManager.FindByIdAsync(userId.ToString());
 
-            if(currentUser.IsInRole("Teacher"))
+            string? avatarUrl = user.AvatarUrl;
+            string? publicId = user.PublicId;
+
+            if (updateUserRequest.Avatar != null && updateUserRequest.Avatar.Length > 0)
+            {
+                if (updateUserRequest.Avatar.Length > 2 * 1024 * 1024)
+                    throw new BadRequestException("Ảnh không được quá 2MB");
+
+                if (!string.IsNullOrEmpty(user.PublicId))
+                {
+                    var deletionParams = new DeletionParams(user.PublicId)
+                    {
+                        ResourceType = ResourceType.Image // Đảm bảo xóa đúng loại ảnh
+                    };
+                    var deletionResult = await cloudinary.DestroyAsync(deletionParams);
+                }
+
+                // --- BƯỚC 2: UPLOAD ẢNH MỚI ---
+                using var stream = updateUserRequest.Avatar.OpenReadStream();
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(updateUserRequest.Avatar.FileName, stream),
+                    Folder = "avatars",
+                    PublicId = Guid.NewGuid().ToString(),
+                    Transformation = new Transformation().Width(500).Height(500).Crop("fill") // Tip: Nén ảnh luôn
+                };
+
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                if (uploadResult.Error != null)
+                    throw new Exception("Lỗi khi upload ảnh lên Cloudinary");
+
+                avatarUrl = uploadResult.SecureUrl.ToString();
+                publicId = uploadResult.PublicId;
+            }
+
+            if (currentUser.IsInRole("Teacher"))
             {
                 var userOfTeacherId = Guid.Parse(currentUser.FindFirstValue(ClaimTypes.NameIdentifier));
                 var teacherId = await studentRepository.GetTeacherIdByUserId(userOfTeacherId);
@@ -159,6 +239,9 @@ namespace School_Management.API.Services
             user.FullName = updateUserRequest.FullName ?? user.FullName;
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
             user.Address = updateUserRequest.Address ?? user.Address;
+            user.AvatarUrl = avatarUrl;
+            user.PublicId = publicId;
+
             if(updateUserRequest.Birthday != null)
             {
                 if (DateTimeOffset.TryParse(updateUserRequest.Birthday, out var date))
@@ -175,6 +258,7 @@ namespace School_Management.API.Services
                 Email = user.Email,
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
+                AvatarUrl = user.AvatarUrl,
                 StudentId = studentId,
                 UserId = user.Id,
                 ClassYearSub = await context.StudentClassYear

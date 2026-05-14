@@ -8,6 +8,7 @@
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
+        public string? AvatarUrl { get; set; }
         public DateTimeOffset? Birthday { get; set; }
         public List<ClassYearSub>? ClassYearSub { get; set; }
     }

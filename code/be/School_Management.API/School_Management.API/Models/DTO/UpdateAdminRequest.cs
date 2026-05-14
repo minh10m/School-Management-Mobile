@@ -23,6 +23,7 @@ namespace School_Management.API.Models.DTO
 
         [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Ngày sinh nhật cần có định dạng YYYY-MM-DD")]
         public string? Birthday { get; set; }
+        public IFormFile? Avatar { get; set; }
 
     }
 }

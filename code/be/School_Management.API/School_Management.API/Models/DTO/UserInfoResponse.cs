@@ -10,6 +10,7 @@ namespace School_Management.API.Models.DTO
         public string? PhoneNumber { get; set; }
         public string? FullName { get; set; }
         public string? Address { get; set; }
+        public string? AvatarUrl { get; set; }
         public DateTimeOffset Birthday { get; set; }
         public string? Role { get; set; }
         public DateTimeOffset? LockoutEnd { get; set; }

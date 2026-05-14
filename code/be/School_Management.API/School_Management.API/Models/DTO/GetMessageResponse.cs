@@ -14,6 +14,7 @@ namespace School_Management.API.Models.DTO
         public Guid SenderId { get; set; }
         public string SenderName { get; set; } = null!;
         public Guid ConversationId { get; set; }
+        public string Type { get; set; } = null!;
         public string Content { get; set; } = null!;
         public string Status { get; set; } = null!;
         public DateTimeOffset CreatedAt { get; set; }
@@ -23,6 +24,7 @@ namespace School_Management.API.Models.DTO
     {
         public Guid UserId { get; set; }
         public string FullName { get; set; } = null!;
+        public string? AvatarUrl { get; set; }
     }
 
     public class CreateGroupRequest
@@ -32,6 +34,8 @@ namespace School_Management.API.Models.DTO
         [Required(ErrorMessage = "Phải có thành viên trong nhóm")]
         [MinLength(2, ErrorMessage = "Nhóm cần ít nhất 2 thành viên ngoài bạn")]
         public List<Guid> MemberIds { get; set; } = new();
+
+        public IFormFile? Avatar { get; set; }
     }
 
     public class AddMembersRequest

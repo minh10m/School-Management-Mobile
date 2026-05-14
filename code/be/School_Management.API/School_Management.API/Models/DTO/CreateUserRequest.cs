@@ -49,7 +49,7 @@ namespace School_Management.API.Models.DTO
         [Required(ErrorMessage = "Vai trò là bắt buộc")]
         [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Vai trò không được để trống")]
         public string? Role { get; set; }
-
+        public IFormFile? Avatar { get; set; }
         public Guid? ClassYearId { get; set; }
         public List<Guid>? SubjectId { get; set; }
     }

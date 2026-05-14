@@ -82,5 +82,18 @@ namespace School_Management.API.Services
                 _ => throw new Exception("Lỗi không xác định")
             };
         }
+
+        public async Task<ConversationResponse?> UpdateConversation(UpdateGroupRequest request, Guid conversationId, Guid senderId)
+        {
+            var (result, message) = await conversationRepository.UpdateConversation(request, conversationId, senderId);
+            return message switch
+            {
+                "NOT_FOUND_CONVERSATION" => throw new NotFoundException("Không tìm thấy cuộc trò chuyện"),
+                "BIGGER_THAN_2MB" => throw new BadRequestException("Ảnh đại diện phải có kích thước nhỏ hơn 2MB"),
+                "UPLOAD_TO_CLOUDINARY_FAILED" => throw new Exception("Upload ảnh đại diện thất bại"),
+                "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
     }
 }

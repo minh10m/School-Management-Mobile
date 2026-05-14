@@ -1,10 +1,14 @@
+using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using School_Management.API.Data;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
+using FirebaseAdmin.Messaging;
 
 namespace School_Management.API.Repositories
 {
@@ -14,13 +18,15 @@ namespace School_Management.API.Repositories
         private readonly IFirebaseService firebaseService;
         private readonly UserManager<AppUser> userManager;
         private readonly ILogger<ConversationRepository> logger;
+        private readonly Cloudinary cloudinary;
 
-        public ConversationRepository(ApplicationDbContext context, IFirebaseService firebaseService, UserManager<AppUser> userManager, ILogger<ConversationRepository> logger)
+        public ConversationRepository(ApplicationDbContext context, IFirebaseService firebaseService, UserManager<AppUser> userManager, ILogger<ConversationRepository> logger, Cloudinary cloudinary)
         {
             this.context = context;
             this.firebaseService = firebaseService;
             this.userManager = userManager;
             this.logger = logger;
+            this.cloudinary = cloudinary;
         }
 
         public async Task<(bool result, string message)> AddMembersToGroup(AddMembersRequest request, Guid userId)
@@ -129,11 +135,45 @@ namespace School_Management.API.Repositories
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
+                string? avatarUrl = null;
+                string? publicId = null;
+                if (request.Avatar != null)
+                {
+                    var maxSize = 2 * 1024 * 1024;
+
+                    if (request.Avatar.Length > maxSize)
+                        throw new BadRequestException("Ảnh đại diện không được quá 2MB");
+
+                    if (request.Avatar.Length > 0)
+                    {
+                        using var stream = request.Avatar.OpenReadStream();
+
+                        var uploadParams = new ImageUploadParams
+                        {
+                            File = new FileDescription(request.Avatar.FileName, stream),
+                            Folder = "avatars",
+                            PublicId = Guid.NewGuid().ToString(),
+                            Type = "upload",
+                            Transformation = new Transformation().Width(400).Height(400).Crop("fill").Gravity("face"),
+                            AccessMode = "public"
+                        };
+
+                        var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                        if (uploadResult.Error != null)
+                            throw new Exception("Lỗi hệ thống");
+
+                        avatarUrl = uploadResult.SecureUrl.ToString();
+                        publicId = uploadResult.PublicId;
+                    }
+                }
                 var group = new Conversation
                 {
                     Id = Guid.NewGuid(),
                     ConversationName = request.GroupName,
                     IsGroup = true,
+                    ConversationAvatarUrl = avatarUrl,
+                    PublicId = publicId,
                     CreatedAt = DateTimeOffset.UtcNow,
                     LastUpdatedAt = DateTimeOffset.UtcNow
                 };
@@ -200,6 +240,7 @@ namespace School_Management.API.Repositories
                     SenderName = x.User.FullName,
                     Content = x.Content,
                     Status = x.Status,
+                    Type = x.Type,
                     CreatedAt = x.CreatedAt
                 }).ToListAsync();
 
@@ -209,7 +250,8 @@ namespace School_Management.API.Repositories
                 .Select(x => new MemberInfo
                 {
                     UserId = x.UserId,
-                    FullName = x.User.FullName
+                    FullName = x.User.FullName,
+                    AvatarUrl = x.User.AvatarUrl
                 }).ToListAsync();
 
             return (new GetMessageResponse
@@ -250,6 +292,7 @@ namespace School_Management.API.Repositories
                                             IsGroup = g.IsGroup,
                                             DisplayName = g.IsGroup ? g.ConversationName : g.UserConversations.Where(uc => uc.UserId != userId).Select(y => y.User.FullName).FirstOrDefault(),
                                             LastUpdatedAt = g.LastUpdatedAt,
+                                            AvatarUrl = g.IsGroup ? g.ConversationAvatarUrl : g.UserConversations.Where(uc => uc.UserId != userId).Select(y => y.User.AvatarUrl).FirstOrDefault(),
                                             UnReadCount = g.UserConversations.Where(uc => uc.UserId == userId).Select(y => y.UnReadCount).FirstOrDefault(),
                                             LastMessage = g.Messages.OrderByDescending(m => m.CreatedAt).Select(m => m.Content).FirstOrDefault()
                                         }).ToListAsync();
@@ -266,7 +309,7 @@ namespace School_Management.API.Repositories
         public async Task<(Guid? conversationId, string message)> SendMessage(SendMessageRequest request, Guid senderId)
         {
             var finalConversationId = request.ConversationId ?? Guid.NewGuid();
-            Message message = null;
+            Models.Domain.Message message = null;
             List<Guid> receiverIds = new List<Guid>();
             var sender = await userManager.FindByIdAsync(senderId.ToString());
             string senderName = sender?.FullName ?? "Người dùng";
@@ -281,10 +324,11 @@ namespace School_Management.API.Repositories
                         .Select(x => x.UserId)
                         .ToListAsync();
 
-                    message = new Message
+                    message = new Models.Domain.Message
                     {
                         Id = Guid.NewGuid(),
                         SenderId = senderId,
+                        Type = "user",
                         Status = "Đã gửi",
                         Content = request.Content,
                         ConversationId = request.ConversationId.Value,
@@ -321,11 +365,12 @@ namespace School_Management.API.Repositories
                 new() { Id = Guid.NewGuid(), ConversationId = finalConversationId, UserId = request.ReceiverId.Value, UnReadCount = 1 }
             };
 
-                    message = new Message
+                    message = new Models.Domain.Message
                     {
                         Id = Guid.NewGuid(),
                         SenderId = senderId,
                         Status = "Đã gửi",
+                        Type = "user",
                         Content = request.Content,
                         ConversationId = finalConversationId,
                         CreatedAt = DateTimeOffset.UtcNow,
@@ -359,6 +404,103 @@ namespace School_Management.API.Repositories
             }
 
             return (finalConversationId, "SUCCESS");
+        }
+
+        public async Task<(ConversationResponse? result, string message)> UpdateConversation(UpdateGroupRequest request, Guid conversationId, Guid senderId)
+        {
+            var conversation = await context.Conversation.FirstOrDefaultAsync(x => x.Id == conversationId);
+            if (conversation == null) return (null, "NOT_FOUND_CONVERSATION");
+            var conversationInfo = string.Empty;
+            bool isChangeAvatar = false;
+            bool isChangeConversationName = false;
+
+            var sender = await userManager.FindByIdAsync(senderId.ToString());
+            string senderName = sender?.FullName ?? "Người dùng";
+
+            var receiverIds = await context.UserConversation.AsNoTracking().Where(x => x.UserId != senderId && x.ConversationId == conversationId).Select(g => g.UserId).ToListAsync();
+
+            string? avatarUrl = conversation.ConversationAvatarUrl;
+            string? publicId = conversation.PublicId;
+
+            if (request.Avatar != null && request.Avatar.Length > 0)
+            {
+                if (request.Avatar.Length > 2 * 1024 * 1024)
+                    return (null, "BIGGER_THAN_2MB");
+
+
+                if (!string.IsNullOrEmpty(conversation.PublicId))
+                {
+                    var deletionParams = new DeletionParams(conversation.PublicId)
+                    {
+                        ResourceType = ResourceType.Image // Đảm bảo xóa đúng loại ảnh
+                    };
+                    var deletionResult = await cloudinary.DestroyAsync(deletionParams);
+                }
+
+                // --- BƯỚC 2: UPLOAD ẢNH MỚI ---
+                using var stream = request.Avatar.OpenReadStream();
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(request.Avatar.FileName, stream),
+                    Folder = "avatars",
+                    PublicId = Guid.NewGuid().ToString(),
+                    Transformation = new Transformation().Width(500).Height(500).Crop("fill") // Tip: Nén ảnh luôn
+                };
+
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                if (uploadResult.Error != null)
+                    return (null, "UPLOAD_TO_CLOUDINARY_FAILED");
+
+                avatarUrl = uploadResult.SecureUrl.ToString();
+                publicId = uploadResult.PublicId;
+                isChangeAvatar = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.ConversationName) && conversation.ConversationName != request.ConversationName)
+            {
+                conversation.ConversationName = request.ConversationName;
+                isChangeConversationName = true;
+            }
+
+            conversation.ConversationAvatarUrl = avatarUrl;
+            conversation.PublicId = publicId;
+
+            if (isChangeAvatar && isChangeConversationName) conversationInfo = $"{senderName} đã thay đổi tên nhóm và ảnh đại diện";
+            else if (isChangeAvatar && !isChangeConversationName) conversationInfo = $"{senderName} đã thay đổi ảnh đại diện";
+            else if (!isChangeAvatar && isChangeConversationName) conversationInfo = $"{senderName} đã thay đổi tên nhóm";
+            else conversationInfo = "không có gì thay đổi";
+
+            var message = new Models.Domain.Message
+            {
+                SenderId = senderId,
+                Content = conversationInfo,
+                ConversationId = conversationId,
+                Status = "Đã gửi",
+                CreatedAt = DateTimeOffset.UtcNow,
+                Id = Guid.NewGuid(),
+                Type = "system"
+            };
+
+            context.Message.Add(message);
+            await context.SaveChangesAsync();
+
+            try
+            {
+                await firebaseService.UpdateConversation(conversationId, receiverIds, message, senderName);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "SQL lưu thành công nhưng Firebase Signal thất bại");
+            }
+
+            return (new ConversationResponse
+            {
+                AvatarUrl = conversation.ConversationAvatarUrl,
+                DisplayName = conversation.ConversationName,
+                ConversationId = conversation.Id
+            }, "SUCCESS");
+
         }
     }
 }

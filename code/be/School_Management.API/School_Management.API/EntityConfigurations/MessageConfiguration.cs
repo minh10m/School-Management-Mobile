@@ -13,6 +13,7 @@ namespace School_Management.API.EntityConfigurations
             builder.Property(x => x.Content).IsRequired().HasMaxLength(1000);
             builder.Property(x => x.ConversationId).IsRequired();
             builder.Property(x => x.CreatedAt).IsRequired();
+            builder.Property(x => x.Type).HasMaxLength(20).IsRequired();
 
             builder.HasOne(x => x.User)
                .WithMany(u => u.Messages)

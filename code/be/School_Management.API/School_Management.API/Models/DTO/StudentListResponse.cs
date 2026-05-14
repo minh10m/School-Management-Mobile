@@ -6,6 +6,7 @@
         public Guid UserId { get; set; }
         public string? FullName { get; set; }
         public string? ClassName { get; set; }
+        public string? AvatarUrl { get; set; }
         public int Grade { get; set; }
     }
 }

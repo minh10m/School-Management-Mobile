@@ -7,6 +7,7 @@ namespace School_Management.API.Models.DTO
         public int UnReadCount { get; set; }
         public DateTimeOffset LastUpdatedAt { get; set; }
         public bool IsGroup { get; set; }
+        public string? AvatarUrl { get; set; }
         public string? LastMessage { get; set; }
     }
 }

@@ -76,7 +76,8 @@ namespace School_Management.API.Controllers
         [HttpPost("group")]
         [Authorize]
         [ValidateModel]
-        public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateGroup([FromForm] CreateGroupRequest request)
         {
             var result = await conversationService.CreateGroup(request, GetCurrentUserId());
             return Ok(new
@@ -110,6 +111,22 @@ namespace School_Management.API.Controllers
             {
                 success = result,
                 message = "Rời nhóm thành công"
+            });
+        }
+
+        [HttpPatch("{conversationId}")]
+        [Authorize]
+        [ValidateModel]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateConversation([FromRoute] Guid conversationId, [FromForm] UpdateGroupRequest request)
+        {
+
+            var result = await conversationService.UpdateConversation(request, conversationId, GetCurrentUserId());
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật thông tin thành công",
+                data = result
             });
         }
     }
