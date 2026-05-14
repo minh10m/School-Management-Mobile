@@ -1,19 +1,69 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
-import { useState } from "react";
-import { Alert,
+import { useEffect, useState } from "react";
+import {
+  Alert,
   ScrollView,
   Switch,
   Text,
   TouchableOpacity,
-  View } from "react-native";
+  View,
+  Linking
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { authService } from "../services/auth.service";
 import { useAuthStore } from "../store/authStore";
 
 export default function SettingsScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const { } = useAuthStore();
+  const { userInfo } = useAuthStore();
+
+  // Load notification setting on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const value = await AsyncStorage.getItem("notifications_enabled");
+        if (value !== null) {
+          setNotificationsEnabled(value === "true");
+        }
+      } catch (e) {
+        console.error("Error loading notification settings", e);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const toggleNotifications = async (value: boolean) => {
+    Alert.alert(
+      "Xác nhận",
+      `Bạn có chắc chắn muốn ${value ? "bật" : "tắt"} nhận thông báo không?`,
+      [
+        {
+          text: "Hủy",
+          style: "cancel",
+        },
+        {
+          text: "Đồng ý",
+          onPress: async () => {
+            try {
+              setNotificationsEnabled(value);
+              await AsyncStorage.setItem(
+                "notifications_enabled",
+                value ? "true" : "false"
+              );
+            } catch (e) {
+              console.error("Error saving notification settings", e);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleSupport = () => {
+    Linking.openURL("mailto:23520946@gm.uit.edu.vn?subject=Hỗ trợ ứng dụng School Management&body=Chào bạn, tôi cần hỗ trợ về...");
+  };
 
   const SettingItem = ({ icon, label, onPress, value, type = "link" }: any) => (
     <TouchableOpacity
@@ -25,7 +75,10 @@ export default function SettingsScreen() {
         <View className="w-10 h-10 rounded-full bg-gray-50 items-center justify-center">
           <Ionicons name={icon} size={20} color="#6B7280" />
         </View>
-        <Text className="text-black text-base" style={{ fontFamily: 'Poppins-Medium' }}>
+        <Text
+          className="text-black text-base"
+          style={{ fontFamily: "Poppins-Medium" }}
+        >
           {label}
         </Text>
       </View>
@@ -56,7 +109,12 @@ export default function SettingsScreen() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <Text className="text-black text-lg" style={{ fontFamily: 'Poppins-Bold' }}>Cài đặt</Text>
+          <Text
+            className="text-black text-lg"
+            style={{ fontFamily: "Poppins-Bold" }}
+          >
+            Cài đặt
+          </Text>
         </View>
         <View className="w-10" />
       </View>
@@ -65,7 +123,10 @@ export default function SettingsScreen() {
         className="flex-1 px-6 pt-4"
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-gray-500 text-sm mb-2 mt-4" style={{ fontFamily: 'Poppins-Medium' }}>
+        <Text
+          className="text-gray-500 text-sm mb-2 mt-4"
+          style={{ fontFamily: "Poppins-Medium" }}
+        >
           Chung
         </Text>
         <View className="bg-white">
@@ -74,16 +135,14 @@ export default function SettingsScreen() {
             label="Thông báo"
             type="switch"
             value={notificationsEnabled}
-            onPress={() => setNotificationsEnabled(!notificationsEnabled)}
-          />
-          <SettingItem
-            icon="globe-outline"
-            label="Ngôn ngữ"
-            onPress={() => {}}
+            onPress={toggleNotifications}
           />
         </View>
 
-        <Text className="text-gray-500 text-sm mb-2 mt-8" style={{ fontFamily: 'Poppins-Medium' }}>
+        <Text
+          className="text-gray-500 text-sm mb-2 mt-8"
+          style={{ fontFamily: "Poppins-Medium" }}
+        >
           Bảo mật
         </Text>
         <View className="bg-white">
@@ -94,28 +153,19 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <Text className="text-gray-500 text-sm mb-2 mt-8" style={{ fontFamily: 'Poppins-Medium' }}>
+        <Text
+          className="text-gray-500 text-sm mb-2 mt-8"
+          style={{ fontFamily: "Poppins-Medium" }}
+        >
           Hỗ trợ
         </Text>
         <View className="bg-white">
           <SettingItem
             icon="help-circle-outline"
             label="Trợ giúp & Hỗ trợ"
-            onPress={() => {}}
-          />
-          <SettingItem
-            icon="document-text-outline"
-            label="Chính sách bảo mật"
-            onPress={() => {}}
-          />
-          <SettingItem
-            icon="information-circle-outline"
-            label="Điều khoản dịch vụ"
-            onPress={() => {}}
+            onPress={handleSupport}
           />
         </View>
-
-
       </ScrollView>
     </SafeAreaView>
   );

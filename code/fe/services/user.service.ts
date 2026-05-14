@@ -105,15 +105,27 @@ export const userService = {
    * PATCH /users/me
    * AuthN(login) + AuthZ(Admin)
    */
-  updateMe: async (payload: Omit<UpdateUserPayload, "roleId">): Promise<UserResponse> => {
-    const backendPayload: any = {
-      email: payload.email,
-      phoneNumber: payload.phone,
-      fullName: payload.fullName,
-      address: payload.address,
-      birthday: payload.birthday,
-    };
-    const response = await apiClient.patch<UserResponse>("/users/me", backendPayload);
+  updateMe: async (payload: Omit<UpdateUserPayload, "roleId"> | FormData): Promise<UserResponse> => {
+    let requestData: any = payload;
+    let config = {};
+
+    if (!(payload instanceof FormData)) {
+      requestData = {
+        email: payload.email,
+        phoneNumber: payload.phone,
+        fullName: payload.fullName,
+        address: payload.address,
+        birthday: payload.birthday,
+      };
+    } else {
+      config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+    }
+
+    const response = await apiClient.patch<UserResponse>("/users/me", requestData, config);
     return response.data;
   },
 

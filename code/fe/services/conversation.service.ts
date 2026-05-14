@@ -8,6 +8,7 @@ import {
   GetMessageResponseDto,
   MessageResponse,
   SendMessageRequest,
+  UpdateGroupRequest,
 } from "../types/conversation";
 import apiClient from "./apiClient";
 
@@ -78,6 +79,23 @@ export const conversationService = {
    */
   leaveGroup: async (conversationId: string): Promise<ApiResponse<boolean>> => {
     const response = await apiClient.delete<ApiResponse<boolean>>(`/conversations/group/${conversationId}/leave`);
+    return response.data;
+  },
+  // ─── UPDATE GROUP ─────────────────────────────────────────────────────────────
+  /**
+   * Cập nhật thông tin nhóm (Tên và Avatar)
+   * PATCH /conversations/{conversationId}
+   */
+  updateGroup: async (conversationId: string, payload: FormData): Promise<ApiResponse<ConversationResponse>> => {
+    const response = await apiClient.patch<ApiResponse<ConversationResponse>>(
+      `/conversations/${conversationId}`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     return response.data;
   },
 };

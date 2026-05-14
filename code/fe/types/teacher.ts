@@ -5,6 +5,7 @@ export interface TeacherListItem {
   userId: string;
   fullName: string;
   subjectNames: string[];
+  avatarUrl?: string | null;
 }
 
 export interface TeacherListResponse {
@@ -23,6 +24,7 @@ export interface TeacherResponse {
   birthday: string; // ISO date string
   address: string;
   subjectNames: string[];
+  avatarUrl?: string | null;
 }
 
 export interface TeacherSubject {

@@ -9,6 +9,7 @@ export interface ClassAttendanceItem {
   attendanceId: string | null; // null nếu chưa điểm danh
   status: AttendanceStatus | null;
   note: string | null;
+  avatarUrl?: string | null;
 }
 
 /** Response sau khi gọi POST điểm danh */
@@ -57,6 +58,7 @@ export interface WeeklyAttendanceResponse {
   totalLate: number;
   totalAbsent: number;
   details: StudentAttendanceRecord[];
+  avatarUrl?: string | null;
 }
 
 // ─── Request Payloads ─────────────────────────────────────────────────────────

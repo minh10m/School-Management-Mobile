@@ -18,6 +18,7 @@ interface AuthState {
   ) => void;
   clearAuth: () => void;
   loadAuthFromStorage: () => Promise<void>;
+  updateUserInfo: (newInfo: Partial<UserInfo>) => Promise<void>;
 }
 
 const SECURE_STORE_ACCESS_TOKEN_KEY = "ACCESS_TOKEN";
@@ -25,7 +26,7 @@ const SECURE_STORE_REFRESH_TOKEN_KEY = "REFRESH_TOKEN";
 const SECURE_STORE_FIREBASE_TOKEN_KEY = "FIREBASE_TOKEN";
 const SECURE_STORE_USER_INFO_KEY = "USER_INFO";
 
-export const useAuthStore = create<AuthState>((set: any) => ({
+export const useAuthStore = create<AuthState>((set: any, get: any) => ({
   accessToken: null,
   refreshToken: null,
   firebaseToken: null,
@@ -106,6 +107,22 @@ export const useAuthStore = create<AuthState>((set: any) => ({
       await SecureStore.deleteItemAsync(SECURE_STORE_USER_INFO_KEY);
     } catch (error) {
       console.log("Error clearing auth from SecureStore:", error);
+    }
+  },
+
+  updateUserInfo: async (newInfo: Partial<UserInfo>) => {
+    const { userInfo } = get();
+    if (userInfo) {
+      const updatedInfo = { ...userInfo, ...newInfo };
+      set({ userInfo: updatedInfo });
+      try {
+        await SecureStore.setItemAsync(
+          SECURE_STORE_USER_INFO_KEY,
+          JSON.stringify(updatedInfo),
+        );
+      } catch (error) {
+        console.log("Error saving updated userInfo to SecureStore:", error);
+      }
     }
   },
 

@@ -9,12 +9,14 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { conversationService } from "../../services/conversation.service";
 import { ConversationResponse } from "../../types/conversation";
 import { useConversationsListener } from "../../hooks/useConversationsListener";
+import { useAuthStore } from "../../store/authStore";
 import { userService } from "../../services/user.service";
 import { UserListItem as UserType } from "../../types/user";
 
@@ -49,8 +51,15 @@ const ConversationItem = memo(({ item, onPress, fbConvo }: { item: ConversationR
         isUnread ? "bg-indigo-50/30" : "bg-white"
       } active:bg-gray-50`}
     >
-      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${getAvatarColor(item.displayName)} shadow-sm`}>
-        {item.isGroup ? (
+      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${!item.avatarUrl ? getAvatarColor(item.displayName) : 'bg-transparent'} shadow-sm overflow-hidden`}>
+        {item.avatarUrl ? (
+          <Image 
+            source={{ uri: item.avatarUrl }} 
+            style={{ width: 48, height: 48 }}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : item.isGroup ? (
           <Ionicons name="people" size={24} color="white" />
         ) : (
           <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-lg">
@@ -77,8 +86,14 @@ const ConversationItem = memo(({ item, onPress, fbConvo }: { item: ConversationR
         </View>
         <View className="flex-row justify-between items-center">
           <Text
-            style={{ fontFamily: isUnread ? "Poppins-SemiBold" : "Poppins-Regular" }}
-            className={`text-[13px] flex-1 mr-4 ${isUnread ? "text-indigo-600" : "text-gray-500"}`}
+            style={{ 
+              fontFamily: isUnread ? "Poppins-SemiBold" : "Poppins-Regular",
+              fontStyle: fbConvo?.lastMessageObj?.type === "System" ? "italic" : "normal"
+            }}
+            className={`text-[13px] flex-1 mr-4 ${
+              isUnread ? "text-indigo-600" : 
+              fbConvo?.lastMessageObj?.type === "System" ? "text-gray-400" : "text-gray-500"
+            }`}
             numberOfLines={1}
           >
             {lastMessageText}
@@ -111,10 +126,19 @@ const UserItem = memo(({ user, onSelect }: { user: UserType; onSelect: () => voi
       onPress={onSelect}
       className="flex-row items-center p-4 border-b border-gray-100 bg-white active:bg-gray-50"
     >
-      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${getAvatarColor(user.fullName)} shadow-sm`}>
+      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${!user.avatarUrl ? getAvatarColor(user.fullName) : 'bg-transparent'} shadow-sm overflow-hidden`}>
+        {user.avatarUrl ? (
+          <Image 
+            source={{ uri: user.avatarUrl }} 
+            style={{ width: 48, height: 48 }}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : (
         <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-lg">
           {user.fullName.charAt(0).toUpperCase()}
         </Text>
+        )}
       </View>
       <View className="flex-1">
         <Text style={{ fontFamily: "Poppins-Medium" }} className="text-[15px] text-gray-900 mb-0.5">
@@ -142,6 +166,7 @@ interface ChatListScreenProps {
 
 export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
   const router = useRouter();
+  const { userInfo } = useAuthStore();
   const { conversations: fbConversations } = useConversationsListener();
   const [activeTab, setActiveTab] = useState<"chats" | "users">("chats");
   const [conversations, setConversations] = useState<ConversationResponse[]>([]);
@@ -163,10 +188,13 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
     try {
       setLoadingUsers(true);
       const res = await userService.getUsers({
+        FullName: debouncedSearch || undefined,
         PageNumber: 1,
         PageSize: 50,
       });
-      setAllUsers(res.items);
+      // Filter out self
+      const filtered = res.items.filter(u => u.userId !== userInfo?.id);
+      setAllUsers(filtered);
     } catch (err) {
       console.log(err);
     } finally {
@@ -178,7 +206,7 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
     if (activeTab === "users") {
       fetchAllUsers();
     }
-  }, [activeTab]);
+  }, [activeTab, debouncedSearch]);
 
   const fetchConversations = async () => {
     try {
@@ -194,7 +222,9 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
           PageSize: 5,
         });
         const existingUserIds = new Set(fbConversations.flatMap((c) => c.members));
-        const filteredUsers = userRes.items.filter((u) => !existingUserIds.has(u.userId));
+        const filteredUsers = userRes.items.filter((u) => 
+          !existingUserIds.has(u.userId) && u.userId !== userInfo?.id
+        );
         setUsers(filteredUsers);
       } else {
         setUsers([]);
@@ -217,13 +247,22 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
       if (res && res.data && res.data.conversationId) {
         router.push({
           pathname: `/${rolePrefix}/chat/${res.data.conversationId}` as any,
-          params: { name: user.fullName, isGroup: "false" },
+          params: { 
+            name: user.fullName, 
+            isGroup: "false",
+            avatarUrl: user.avatarUrl || "" 
+          },
         });
       } else {
         // No existing conversation, navigate with receiverId and isNew flag
         router.push({
           pathname: `/${rolePrefix}/chat/${user.userId}` as any,
-          params: { isNew: "true", name: user.fullName, isGroup: "false" },
+          params: { 
+            isNew: "true", 
+            name: user.fullName, 
+            isGroup: "false",
+            avatarUrl: user.avatarUrl || ""
+          },
         });
       }
     } catch (err) {
@@ -314,7 +353,11 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
                 onPress={() =>
                   router.push({
                     pathname: `/${rolePrefix}/chat/${item.conversationId}` as any,
-                    params: { name: item.displayName, isGroup: item.isGroup ? "true" : "false" },
+                    params: { 
+                      name: item.displayName, 
+                      isGroup: item.isGroup ? "true" : "false",
+                      avatarUrl: item.avatarUrl || ""
+                    },
                   })
                 }
               />

@@ -7,6 +7,7 @@ export interface StudentListItem {
   fullName: string;
   className: string;
   grade: string;
+  avatarUrl?: string | null;
 }
 
 export interface StudentListResponse {
@@ -33,6 +34,7 @@ export interface StudentResponse {
   address: string;
   birthday: string; // ISO date string
   classYearSub: ClassYearSub[];
+  avatarUrl?: string | null;
 }
 
 // ─── Query Params ──────────────────────────────────────────────────────────────

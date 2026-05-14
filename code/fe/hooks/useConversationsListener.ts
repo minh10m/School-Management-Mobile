@@ -3,12 +3,17 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
 import { useAuthStore } from "../store/authStore";
 
+import { MessageResponse } from "../types/conversation";
+
 export interface RealtimeConversation {
   id: string;
   lastMessageAt: Date | null;
   lastMessage: string | null;
+  lastMessageObj: MessageResponse | null;
   members: string[];
   unreadCounts: Record<string, number>;
+  avatarUrl?: string | null;
+  displayName?: string | null;
 }
 
 export const useConversationsListener = () => {
@@ -46,8 +51,11 @@ export const useConversationsListener = () => {
             id: doc.id,
             lastMessageAt: data.lastMessageAt ? data.lastMessageAt.toDate() : null,
             lastMessage: lastMsg,
+            lastMessageObj: typeof data.lastMessage === "object" ? data.lastMessage : null,
             members: data.members || [],
             unreadCounts: data.unreadCounts || {},
+            avatarUrl: data.avatarUrl || null,
+            displayName: data.displayName || null,
           };
 
           convos.push(convo);

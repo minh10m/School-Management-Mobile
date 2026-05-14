@@ -10,6 +10,7 @@ export interface UserResponse {
   birthday: string; // ISO date string
   role: string;
   lockoutEnd?: string | null; // ISO datetime string or null
+  avatarUrl?: string | null;
 }
 
 export interface UserListItem {
@@ -19,6 +20,7 @@ export interface UserListItem {
   role: string;
   createdAt: string;
   lockoutEnd: string | null; // null = không bị khóa
+  avatarUrl?: string | null;
 }
 
 export interface UserListResponse {
