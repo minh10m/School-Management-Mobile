@@ -13,6 +13,8 @@ namespace School_Management.API.Repositories
         {
             this.context = context;
         }
+
+        //done
         public async Task<PagedResponse<TeacherListResponse>> GetAllTeacher(TeacherFilterRequest request)
         {
             var query = context.Teacher.AsQueryable();
@@ -45,6 +47,7 @@ namespace School_Management.API.Repositories
                 TeacherId = x.Id,
                 FullName = x.User.FullName,
                 UserId = x.User.Id,
+                AvatarUrl = x.User.AvatarUrl,
                 SubjectNames = x.TeacherSubjects
                                .Select(x => x.Subject.SubjectName)
                                .ToList()
@@ -60,6 +63,7 @@ namespace School_Management.API.Repositories
             };
         }
 
+        //done
         public async Task<TeacherInfoResponse> GetMyProfileForTeacher(Guid userId)
         {
             var result = await context.Teacher
@@ -72,6 +76,7 @@ namespace School_Management.API.Repositories
                                     Birthday = x.User.Birthday,
                                     Email = x.User.Email,
                                     PhoneNumber = x.User.PhoneNumber,
+                                    AvatarUrl = x.User.AvatarUrl,
                                     TeacherId = x.Id,
                                     UserId = x.User.Id,
                                     SubjectNames = x.TeacherSubjects
@@ -81,6 +86,7 @@ namespace School_Management.API.Repositories
             return result;
         }
 
+        //done
         public async Task<TeacherInfoResponse> GetTeacherById(Guid teacherId)
         {
             var result = await context.Teacher
@@ -94,6 +100,7 @@ namespace School_Management.API.Repositories
                                     Email = x.User.Email,
                                     FullName = x.User.FullName,
                                     PhoneNumber = x.User.PhoneNumber,
+                                    AvatarUrl = x.User.AvatarUrl,
                                     TeacherId = x.Id,
                                     SubjectNames = x.TeacherSubjects
                                                    .Select(ts => ts.Subject.SubjectName)
@@ -127,6 +134,7 @@ namespace School_Management.API.Repositories
                 Email = user.Email,
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
+                AvatarUrl = user.AvatarUrl,
                 TeacherId = teacherId,
                 UserId = user.Id,
                 SubjectNames =  await context.TeacherSubject

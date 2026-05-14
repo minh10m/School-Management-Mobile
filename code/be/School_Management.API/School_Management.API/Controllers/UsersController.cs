@@ -54,7 +54,8 @@ namespace School_Management.API.Controllers
         [Route("{userId}")]
         [ValidateModel]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserRequest updateUserRequest, [FromRoute] Guid userId)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateUser([FromForm] UpdateUserRequest updateUserRequest, [FromRoute] Guid userId)
         {
             var result = await userService.UpdateUser(updateUserRequest, userId.ToString());
             return Ok(result);
@@ -80,7 +81,8 @@ namespace School_Management.API.Controllers
         [Route("me")]
         [ValidateModel]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateMyProfileForAdmin([FromBody] UpdateAdminRequest updateAdminRequest)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateMyProfileForAdmin([FromForm] UpdateAdminRequest updateAdminRequest)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized(new
@@ -123,7 +125,8 @@ namespace School_Management.API.Controllers
         [HttpPost]
         [ValidateModel]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest createUserRequest)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateUser([FromForm] CreateUserRequest createUserRequest)
         {
             var result = await userService.CreateUser(createUserRequest);
             return StatusCode(201, new

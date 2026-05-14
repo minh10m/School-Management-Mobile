@@ -1,25 +1,24 @@
-import React, { useEffect, useState, useRef } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  Keyboard,
-  Modal,
-  Alert,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter, useSegments } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { conversationService } from "../../services/conversation.service";
-import { MessageResponse, MemberInfo } from "../../types/conversation";
-import { useAuthStore } from "../../store/authStore";
 import { useConversationsListener } from "../../hooks/useConversationsListener";
+import { conversationService } from "../../services/conversation.service";
 import { userService } from "../../services/user.service";
+import { useAuthStore } from "../../store/authStore";
+import { MemberInfo, MessageResponse } from "../../types/conversation";
 import { UserResponse } from "../../types/user";
 
 export default function ChatRoomScreen() {

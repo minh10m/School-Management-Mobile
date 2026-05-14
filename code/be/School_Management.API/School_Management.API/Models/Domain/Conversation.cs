@@ -8,7 +8,9 @@ namespace School_Management.API.Models.Domain
         [Key]
         public Guid Id { get; set; }
         public string? ConversationName { get; set; }
+        public string? ConversationAvatarUrl { get; set; }
         public bool IsGroup { get; set; }
+        public string? PublicId { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset LastUpdatedAt { get; set; }
         //Navigation properties

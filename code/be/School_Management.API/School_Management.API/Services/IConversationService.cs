@@ -11,6 +11,7 @@ namespace School_Management.API.Services
         public Task<Guid?> CreateGroup(CreateGroupRequest request, Guid creatorId);
         public Task<bool> AddMembersToGroup(AddMembersRequest request, Guid userId);
         public Task<bool> LeaveGroup(Guid conversationId, Guid userId);
+        public Task<ConversationResponse?> UpdateConversation(UpdateGroupRequest request, Guid conversationId, Guid senderId);
 
 
     }

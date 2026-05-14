@@ -63,7 +63,8 @@ namespace School_Management.API.Controllers
         [Route("{studentId}")]
         [ValidateModel]
         [Authorize(Roles = "Admin,Teacher")]
-        public async Task<IActionResult> UpdateStudentByAdminOrTeacher([FromRoute] Guid studentId, UpdateUserRequest updateUserRequest)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateStudentByAdminOrTeacher([FromRoute] Guid studentId,[FromForm] UpdateUserRequest updateUserRequest)
         {
             var result = await studentService.UpdateStudentByAdminOrTeacher(updateUserRequest, studentId, User);
             return Ok(result);
@@ -72,8 +73,9 @@ namespace School_Management.API.Controllers
         [HttpPatch]
         [Route("me")]
         [Authorize(Roles = "Student")]
+        [Consumes("multipart/form-data")]
 
-        public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserRequest request)
+        public async Task<IActionResult> UpdateMyProfile([FromForm] UpdateUserRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized(new

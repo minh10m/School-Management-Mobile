@@ -7,6 +7,8 @@ namespace School_Management.API.Models.Domain
         public string? FullName { get; set; }
         public string? Address { get; set; }
         public DateTimeOffset Birthday { get; set; }
+        public string AvatarUrl { get; set; } = string.Empty;
+        public string PublicId { get; set; } = string.Empty;
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
 

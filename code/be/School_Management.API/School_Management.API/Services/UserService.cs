@@ -1,3 +1,5 @@
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
@@ -12,11 +14,13 @@ namespace School_Management.API.Services
     {
         private readonly UserManager<AppUser> userManager;
         private readonly ApplicationDbContext context;
+        private readonly Cloudinary cloudinary;
 
-        public UserService(UserManager<AppUser> userManager, ApplicationDbContext context)
+        public UserService(UserManager<AppUser> userManager, ApplicationDbContext context, Cloudinary cloudinary)
         {
             this.userManager = userManager;
             this.context = context;
+            this.cloudinary = cloudinary;
         }
 
         public async Task<UserStatusResponse> ChangeStatusOfAccount(string userId)
@@ -51,6 +55,7 @@ namespace School_Management.API.Services
 
         }
 
+        //done
         public async Task<UserInfoResponse> GetMyProfileForAdmin(string userId)
         {
             var user = await userManager.FindByIdAsync(userId);
@@ -60,6 +65,7 @@ namespace School_Management.API.Services
             return ReturnData(user, role.FirstOrDefault());
         }
 
+        //done
         public async Task<UserInfoResponse> GetUserById(string UserId)
         {
             var user = await userManager.FindByIdAsync(UserId);
@@ -93,7 +99,43 @@ namespace School_Management.API.Services
             var user = await userManager.FindByIdAsync(userId);
             if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
-            if(updateAdminRequest.Email != null)
+            string? avatarUrl = user.AvatarUrl;
+            string? publicId = user.PublicId;
+
+            if (updateAdminRequest.Avatar != null && updateAdminRequest.Avatar.Length > 0)
+            {
+                if (updateAdminRequest.Avatar.Length > 2 * 1024 * 1024)
+                    throw new BadRequestException("Ảnh không được quá 2MB");
+
+                if (!string.IsNullOrEmpty(user.PublicId))
+                {
+                    var deletionParams = new DeletionParams(user.PublicId)
+                    {
+                        ResourceType = ResourceType.Image // Đảm bảo xóa đúng loại ảnh
+                    };
+                    var deletionResult = await cloudinary.DestroyAsync(deletionParams);
+                }
+
+                // --- BƯỚC 2: UPLOAD ẢNH MỚI ---
+                using var stream = updateAdminRequest.Avatar.OpenReadStream();
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(updateAdminRequest.Avatar.FileName, stream),
+                    Folder = "avatars",
+                    PublicId = Guid.NewGuid().ToString(),
+                    Transformation = new Transformation().Width(500).Height(500).Crop("fill") // Tip: Nén ảnh luôn
+                };
+
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                if (uploadResult.Error != null)
+                    throw new Exception("Lỗi khi upload ảnh lên Cloudinary");
+
+                avatarUrl = uploadResult.SecureUrl.ToString();
+                publicId = uploadResult.PublicId;
+            }
+
+            if (updateAdminRequest.Email != null)
             {
                 var eResult = await userManager.SetEmailAsync(user, updateAdminRequest.Email);
                 if (!eResult.Succeeded) throw new BadRequestException("Cập nhật email thất bại");
@@ -101,6 +143,8 @@ namespace School_Management.API.Services
 
             user.PhoneNumber = updateAdminRequest.PhoneNumber ?? user.PhoneNumber;
             user.FullName = updateAdminRequest.FullName ?? user.FullName;
+            user.AvatarUrl = avatarUrl;
+            user.PublicId = publicId;
             
             if(updateAdminRequest.Birthday != null)
             {
@@ -145,7 +189,43 @@ namespace School_Management.API.Services
             var user = await userManager.FindByIdAsync(userId);
             if (user == null) throw new NotFoundException("Người dùng không tồn tại");
 
-            if(updateUserRequest.Email != null)
+            string? avatarUrl = user.AvatarUrl; 
+            string? publicId = user.PublicId;
+
+            if (updateUserRequest.Avatar != null && updateUserRequest.Avatar.Length > 0)
+            {
+                if (updateUserRequest.Avatar.Length > 2 * 1024 * 1024)
+                    throw new BadRequestException("Ảnh không được quá 2MB");
+
+                if (!string.IsNullOrEmpty(user.PublicId))
+                {
+                    var deletionParams = new DeletionParams(user.PublicId)
+                    {
+                        ResourceType = ResourceType.Image // Đảm bảo xóa đúng loại ảnh
+                    };
+                    var deletionResult = await cloudinary.DestroyAsync(deletionParams);
+                }
+
+                // --- BƯỚC 2: UPLOAD ẢNH MỚI ---
+                using var stream = updateUserRequest.Avatar.OpenReadStream();
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(updateUserRequest.Avatar.FileName, stream),
+                    Folder = "avatars",
+                    PublicId = Guid.NewGuid().ToString(),
+                    Transformation = new Transformation().Width(500).Height(500).Crop("fill") // Tip: Nén ảnh luôn
+                };
+
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                if (uploadResult.Error != null)
+                    throw new Exception("Lỗi khi upload ảnh lên Cloudinary");
+
+                avatarUrl = uploadResult.SecureUrl.ToString();
+                publicId = uploadResult.PublicId;
+            }
+
+            if (updateUserRequest.Email != null)
             {
                 var eResult = await userManager.SetEmailAsync(user, updateUserRequest.Email);
                 if (!eResult.Succeeded) throw new BadRequestException("Cập nhật email thất bại");
@@ -153,6 +233,8 @@ namespace School_Management.API.Services
 
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
             user.Address = updateUserRequest.Address ?? user.Address;
+            user.AvatarUrl = avatarUrl;
+            user.PublicId = publicId;
             if(updateUserRequest.Birthday != null)
             {
                 if (DateTimeOffset.TryParse(updateUserRequest.Birthday, out var date))
@@ -179,6 +261,7 @@ namespace School_Management.API.Services
                 Email = user.Email,
                 FullName = user.FullName,
                 LockoutEnd = user.LockoutEnd,
+                AvatarUrl = user.AvatarUrl,
                 PhoneNumber = user.PhoneNumber,
                 Role = role
             };
@@ -193,11 +276,13 @@ namespace School_Management.API.Services
                 UserName = user.UserName,
                 FullName = user.FullName,
                 LockoutEnd = user.LockoutEnd,
+                AvatarUrl = user.AvatarUrl,
                 Role = role,
                 CreatedAt = user.CreatedAt
             };
         }
 
+        //done
         public async Task<PagedResponse<UserListResponse>> GetAllUser(UserFilterRequest request)
         {
             // 1. Khởi tạo query kết hợp bảng ngay từ đầu để lấy Role
@@ -262,6 +347,7 @@ namespace School_Management.API.Services
                     UserName = x.user.UserName,
                     FullName = x.user.FullName,
                     LockoutEnd = x.user.LockoutEnd,
+                    AvatarUrl = x.user.AvatarUrl,
                     Role = x.roleName,
                     CreatedAt = x.user.CreatedAt
                 })
@@ -281,6 +367,38 @@ namespace School_Management.API.Services
             try
             {
                 DateTimeOffset.TryParse(createUserRequest.Birthday, out var birthday);
+                string? avatarUrl = null;
+                string? publicId = null;
+                if (createUserRequest.Avatar != null)
+                {
+                    var maxSize = 2 * 1024 * 1024;
+
+                    if (createUserRequest.Avatar.Length > maxSize)
+                        throw new BadRequestException("Ảnh đại diện không được quá 2MB");
+
+                    if (createUserRequest.Avatar.Length > 0)
+                    {
+                        using var stream = createUserRequest.Avatar.OpenReadStream();
+
+                        var uploadParams = new ImageUploadParams
+                        {
+                            File = new FileDescription(createUserRequest.Avatar.FileName, stream),
+                            Folder = "avatars",
+                            PublicId = Guid.NewGuid().ToString(),
+                            Type = "upload",
+                            Transformation = new Transformation().Width(400).Height(400).Crop("fill").Gravity("face"),
+                            AccessMode = "public"
+                        };
+
+                        var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                        if (uploadResult.Error != null)
+                            throw new Exception("Lỗi hệ thống");
+
+                        avatarUrl = uploadResult.SecureUrl.ToString();
+                        publicId = uploadResult.PublicId;
+                    }
+                }
                 //User
                 var user = new AppUser
                 {
@@ -290,6 +408,8 @@ namespace School_Management.API.Services
                     Birthday = birthday.ToUniversalTime(),
                     FullName = createUserRequest.FullName,
                     Email = createUserRequest.Email,
+                    AvatarUrl = avatarUrl ?? "",
+                    PublicId = publicId ?? "",
                     EmailConfirmed = true
                 };
                 var cResult = await userManager.CreateAsync(user, createUserRequest.Password);
@@ -358,6 +478,8 @@ namespace School_Management.API.Services
                     }
                     
                 }
+
+
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();

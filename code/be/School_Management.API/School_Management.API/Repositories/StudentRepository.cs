@@ -13,6 +13,8 @@ namespace School_Management.API.Repositories
         {
             this.context = context;
         }
+
+        //done
         public async Task<PagedResponse<StudentListResponse>> GetAllStudent(StudentFilterRequest request)
         {
             var query = context.Student.AsQueryable();
@@ -94,6 +96,7 @@ namespace School_Management.API.Repositories
                 StudentId = x.Id,
                 UserId = x.User.Id,
                 FullName = x.User.FullName,
+                AvatarUrl = x.User.AvatarUrl,
                 ClassName = x.StudentClassYears
                              .OrderByDescending(x => x.ClassYear.SchoolYear)
                              .Select(x => x.ClassYear.ClassName)
@@ -132,6 +135,7 @@ namespace School_Management.API.Repositories
                                         .FirstOrDefaultAsync();
         }
 
+        //done
         public async Task<StudentInfoResponse> GetMyProfileForStudent(Guid userId)
         {
             var result = await context.Student
@@ -144,6 +148,7 @@ namespace School_Management.API.Repositories
                     Email = x.User.Email,
                     Address = x.User.Address,
                     FullName = x.User.FullName,
+                    AvatarUrl = x.User.AvatarUrl,
                     PhoneNumber = x.User.PhoneNumber,
                     ClassYearSub = x.StudentClassYears
                                     .OrderByDescending(scy => scy.ClassYear.SchoolYear)
@@ -160,6 +165,7 @@ namespace School_Management.API.Repositories
             return result;
         }
 
+        //done
         public async Task<StudentInfoResponse> GetStudentById(Guid studentId)
         {
             var result = await context.Student
@@ -173,6 +179,7 @@ namespace School_Management.API.Repositories
                     FullName = x.User.FullName,
                     Address = x.User.Address,
                     PhoneNumber = x.User.PhoneNumber,
+                    AvatarUrl = x.User.AvatarUrl,
                     ClassYearSub = x.StudentClassYears
                                     .OrderByDescending(scy => scy.ClassYear.SchoolYear)
                                     .Select(scy => new ClassYearSub
