@@ -5,6 +5,7 @@ export interface TeacherListItem {
   userId: string;
   fullName: string;
   subjectNames: string[];
+  avatarUrl?: string | null;
 }
 
 export interface TeacherListResponse {

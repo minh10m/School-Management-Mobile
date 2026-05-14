@@ -11,8 +11,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Image,
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { userService } from "../../services/user.service";
@@ -143,7 +143,12 @@ export default function AdminProfileScreen() {
           <View className="bg-white items-center py-10 border-b border-gray-50">
             <View className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
               {profile?.avatarUrl ? (
-                <Image source={{ uri: profile.avatarUrl }} className="w-24 h-24" />
+                <Image 
+                  source={{ uri: profile.avatarUrl }} 
+                  style={{ width: 96, height: 96 }}
+                  contentFit="cover"
+                  transition={200}
+                />
               ) : (
               <Text
                 style={{
@@ -250,7 +255,12 @@ export default function AdminProfileScreen() {
             <View className="items-center mb-6">
               <TouchableOpacity onPress={pickImage} className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center border-4 border-white shadow-sm overflow-hidden">
                 {editForm.avatarUri ? (
-                  <Image source={{ uri: editForm.avatarUri }} className="w-24 h-24" />
+                  <Image 
+                    source={{ uri: editForm.avatarUri }} 
+                    style={{ width: 96, height: 96 }}
+                    contentFit="cover"
+                    transition={200}
+                  />
                 ) : (
                   <Ionicons name="camera-outline" size={32} color="#136ADA" />
                 )}

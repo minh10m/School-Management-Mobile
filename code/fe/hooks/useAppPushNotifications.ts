@@ -84,6 +84,8 @@ export const useAppPushNotifications = () => {
               }
             }
           });
+        }, (error) => {
+          console.log("Firestore (Messages) snapshot error:", error);
         });
 
         // 2. Listen for system notifications
@@ -112,6 +114,8 @@ export const useAppPushNotifications = () => {
               previousNotiId.current = lastNoti.id;
             }
           }
+        }, (error) => {
+          console.log("Firestore (SystemNotis) snapshot error:", error);
         });
       } else {
         // User is signed out, clean up listeners

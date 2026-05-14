@@ -8,14 +8,15 @@ import {
   TextInput,
   ScrollView,
   Platform,
-  Image
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { conversationService } from "../../services/conversation.service";
 import { ConversationResponse } from "../../types/conversation";
 import { useConversationsListener } from "../../hooks/useConversationsListener";
+import { useAuthStore } from "../../store/authStore";
 import { userService } from "../../services/user.service";
 import { UserListItem as UserType } from "../../types/user";
 
@@ -50,9 +51,14 @@ const ConversationItem = memo(({ item, onPress, fbConvo }: { item: ConversationR
         isUnread ? "bg-indigo-50/30" : "bg-white"
       } active:bg-gray-50`}
     >
-      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${!item.avatarUrl ? getAvatarColor(item.displayName) : 'bg-transparent'} shadow-sm`}>
+      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${!item.avatarUrl ? getAvatarColor(item.displayName) : 'bg-transparent'} shadow-sm overflow-hidden`}>
         {item.avatarUrl ? (
-          <Image source={{ uri: item.avatarUrl }} className="w-12 h-12 rounded-full" />
+          <Image 
+            source={{ uri: item.avatarUrl }} 
+            style={{ width: 48, height: 48 }}
+            contentFit="cover"
+            transition={200}
+          />
         ) : item.isGroup ? (
           <Ionicons name="people" size={24} color="white" />
         ) : (
@@ -120,9 +126,14 @@ const UserItem = memo(({ user, onSelect }: { user: UserType; onSelect: () => voi
       onPress={onSelect}
       className="flex-row items-center p-4 border-b border-gray-100 bg-white active:bg-gray-50"
     >
-      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${!user.avatarUrl ? getAvatarColor(user.fullName) : 'bg-transparent'} shadow-sm`}>
+      <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${!user.avatarUrl ? getAvatarColor(user.fullName) : 'bg-transparent'} shadow-sm overflow-hidden`}>
         {user.avatarUrl ? (
-          <Image source={{ uri: user.avatarUrl }} className="w-12 h-12 rounded-full" />
+          <Image 
+            source={{ uri: user.avatarUrl }} 
+            style={{ width: 48, height: 48 }}
+            contentFit="cover"
+            transition={200}
+          />
         ) : (
         <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-lg">
           {user.fullName.charAt(0).toUpperCase()}
@@ -155,6 +166,7 @@ interface ChatListScreenProps {
 
 export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
   const router = useRouter();
+  const { userInfo } = useAuthStore();
   const { conversations: fbConversations } = useConversationsListener();
   const [activeTab, setActiveTab] = useState<"chats" | "users">("chats");
   const [conversations, setConversations] = useState<ConversationResponse[]>([]);
@@ -176,10 +188,13 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
     try {
       setLoadingUsers(true);
       const res = await userService.getUsers({
+        FullName: debouncedSearch || undefined,
         PageNumber: 1,
         PageSize: 50,
       });
-      setAllUsers(res.items);
+      // Filter out self
+      const filtered = res.items.filter(u => u.userId !== userInfo?.id);
+      setAllUsers(filtered);
     } catch (err) {
       console.log(err);
     } finally {
@@ -191,7 +206,7 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
     if (activeTab === "users") {
       fetchAllUsers();
     }
-  }, [activeTab]);
+  }, [activeTab, debouncedSearch]);
 
   const fetchConversations = async () => {
     try {
@@ -207,7 +222,9 @@ export default function ChatListScreen({ rolePrefix }: ChatListScreenProps) {
           PageSize: 5,
         });
         const existingUserIds = new Set(fbConversations.flatMap((c) => c.members));
-        const filteredUsers = userRes.items.filter((u) => !existingUserIds.has(u.userId));
+        const filteredUsers = userRes.items.filter((u) => 
+          !existingUserIds.has(u.userId) && u.userId !== userInfo?.id
+        );
         setUsers(filteredUsers);
       } else {
         setUsers([]);

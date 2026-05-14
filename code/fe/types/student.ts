@@ -7,6 +7,7 @@ export interface StudentListItem {
   fullName: string;
   className: string;
   grade: string;
+  avatarUrl?: string | null;
 }
 
 export interface StudentListResponse {

@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -87,13 +88,22 @@ export default function TeacherStudentListScreen() {
       onPress={() => router.push(`/teacher/students/${item.studentId}`)}
       className="bg-white p-4 rounded-2xl mb-3 flex-row items-center border border-gray-100 shadow-sm"
     >
-      <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center mr-4">
-        <Text
-          style={{ fontFamily: "Poppins-Bold" }}
-          className="text-bright-blue text-lg"
-        >
-          {item.fullName.charAt(0)}
-        </Text>
+      <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center mr-4 overflow-hidden">
+        {item.avatarUrl ? (
+          <Image 
+            source={{ uri: item.avatarUrl }} 
+            style={{ width: 48, height: 48 }}
+            contentFit="cover"
+            transition={200}
+          />
+        ) : (
+          <Text
+            style={{ fontFamily: "Poppins-Bold" }}
+            className="text-bright-blue text-lg"
+          >
+            {item.fullName.charAt(0)}
+          </Text>
+        )}
       </View>
       <View className="flex-1">
         <Text

@@ -9,8 +9,8 @@ import {
   Alert,
   TextInput,
   ActivityIndicator,
-  Image,
 } from "react-native";
+import { Image } from "expo-image";
 import Animated, {
   SlideInLeft,
   SlideOutLeft,
@@ -153,7 +153,9 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                 {userInfo?.avatarUrl ? (
                   <Image
                     source={{ uri: userInfo.avatarUrl }}
-                    className="w-16 h-16"
+                    style={{ width: 64, height: 64 }}
+                    contentFit="cover"
+                    transition={200}
                   />
                 ) : (
                   <Text

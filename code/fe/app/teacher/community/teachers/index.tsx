@@ -1,4 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, FlatList } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -48,10 +49,19 @@ export default function TeacherListScreen() {
         onPress={() => router.push(`/teacher/community/teachers/${item.teacherId}`)}
         className="bg-white p-4 rounded-2xl mb-3 flex-row items-center border border-gray-100 shadow-sm"
       >
-        <View className="w-12 h-12 rounded-full bg-purple-50 items-center justify-center mr-4">
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-purple-600 text-lg">
-            {item.fullName.charAt(0)}
-          </Text>
+        <View className="w-12 h-12 rounded-full bg-purple-50 items-center justify-center mr-4 overflow-hidden">
+          {item.avatarUrl ? (
+            <Image 
+              source={{ uri: item.avatarUrl }} 
+              style={{ width: 48, height: 48 }}
+              contentFit="cover"
+              transition={200}
+            />
+          ) : (
+            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-purple-600 text-lg">
+              {item.fullName.charAt(0)}
+            </Text>
+          )}
         </View>
         <View className="flex-1">
           <Text style={{ fontFamily: 'Poppins-SemiBold' }} className="text-black text-base">{item.fullName}</Text>

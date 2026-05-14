@@ -10,6 +10,7 @@ import {
   Modal,
   ScrollView,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
@@ -220,13 +221,22 @@ export default function AdminStudentsScreen() {
               }
               className="bg-white rounded-[32px] p-5 shadow-sm border border-gray-100 flex-row items-center"
             >
-              <View className="w-14 h-14 rounded-full bg-blue-50 items-center justify-center border border-blue-100">
-                <Text
-                  style={{ fontFamily: "Poppins-Bold" }}
-                  className="text-[#136ADA] text-xl"
-                >
-                  {item.fullName.charAt(0).toUpperCase()}
-                </Text>
+              <View className="w-14 h-14 rounded-full bg-blue-50 items-center justify-center border border-blue-100 overflow-hidden">
+                {item.avatarUrl ? (
+                  <Image 
+                    source={{ uri: item.avatarUrl }} 
+                    style={{ width: 56, height: 56 }}
+                    contentFit="cover"
+                    transition={200}
+                  />
+                ) : (
+                  <Text
+                    style={{ fontFamily: "Poppins-Bold" }}
+                    className="text-[#136ADA] text-xl"
+                  >
+                    {item.fullName.charAt(0).toUpperCase()}
+                  </Text>
+                )}
               </View>
               <View className="flex-1 ml-4">
                 <Text

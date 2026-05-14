@@ -9,6 +9,7 @@ import {
   Modal,
   FlatList,
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -232,16 +233,25 @@ export default function AdminTeacherDetailScreen() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Profile Card */}
         <View className="bg-white items-center py-8 border-b border-gray-100">
-          <View className="w-24 h-24 rounded-full bg-purple-100 items-center justify-center mb-4 border-4 border-white shadow-sm">
-            <Text
-              style={{
-                fontFamily: "Poppins-Bold",
-                color: "#A855F7",
-                fontSize: 36,
-              }}
-            >
-              {teacher.fullName.charAt(0)}
-            </Text>
+          <View className="w-24 h-24 rounded-full bg-purple-100 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
+            {teacher.avatarUrl ? (
+              <Image 
+                source={{ uri: teacher.avatarUrl }} 
+                style={{ width: 96, height: 96 }}
+                contentFit="cover"
+                transition={200}
+              />
+            ) : (
+              <Text
+                style={{
+                  fontFamily: "Poppins-Bold",
+                  color: "#A855F7",
+                  fontSize: 36,
+                }}
+              >
+                {teacher.fullName.charAt(0)}
+              </Text>
+            )}
           </View>
           <Text
             style={{ fontFamily: "Poppins-Bold" }}

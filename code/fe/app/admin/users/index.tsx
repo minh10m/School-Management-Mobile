@@ -10,6 +10,7 @@ import {
   Modal,
   ScrollView,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
@@ -239,16 +240,25 @@ export default function AdminUsersScreen() {
               onPress={() => router.push(`/admin/users/${item.userId}` as any)}
             >
               {/* Avatar Section */}
-              <View className="w-16 h-16 rounded-[24px] bg-blue-50 items-center justify-center border border-blue-100">
-                <Text
-                  style={{
-                    fontFamily: "Poppins-Bold",
-                    color: "#136ADA",
-                    fontSize: 22,
-                  }}
-                >
-                  {item.fullName.charAt(0)}
-                </Text>
+              <View className="w-16 h-16 rounded-[24px] bg-blue-50 items-center justify-center border border-blue-100 overflow-hidden">
+                {item.avatarUrl ? (
+                  <Image 
+                    source={{ uri: item.avatarUrl }} 
+                    style={{ width: 64, height: 64 }}
+                    contentFit="cover"
+                    transition={200}
+                  />
+                ) : (
+                  <Text
+                    style={{
+                      fontFamily: "Poppins-Bold",
+                      color: "#136ADA",
+                      fontSize: 22,
+                    }}
+                  >
+                    {item.fullName.charAt(0)}
+                  </Text>
+                )}
               </View>
 
               <View className="flex-1 ml-4">

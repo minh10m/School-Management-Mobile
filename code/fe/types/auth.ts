@@ -15,6 +15,7 @@ export interface AuthResponse {
   fullName: string;
   email: string;
   role: string;
+  avatarUrl?: string | null;
 }
 
 export interface LoginPayload {

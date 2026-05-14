@@ -5,9 +5,10 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Modal,
   TextInput,
+  Modal,
 } from "react-native";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -232,16 +233,25 @@ export default function AdminUserDetailScreen() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Profile Card */}
         <View className="bg-white mx-4 mt-4 rounded-3xl p-5 border border-gray-100 items-center">
-          <View className="w-20 h-20 rounded-full bg-blue-100 items-center justify-center mb-3">
-            <Text
-              style={{
-                fontFamily: "Poppins-Bold",
-                color: "#136ADA",
-                fontSize: 30,
-              }}
-            >
-              {user.fullName ? user.fullName.charAt(0) : "?"}
-            </Text>
+          <View className="w-20 h-20 rounded-full bg-blue-100 items-center justify-center mb-3 overflow-hidden">
+            {user.avatarUrl ? (
+              <Image 
+                source={{ uri: user.avatarUrl }} 
+                style={{ width: 80, height: 80 }}
+                contentFit="cover"
+                transition={200}
+              />
+            ) : (
+              <Text
+                style={{
+                  fontFamily: "Poppins-Bold",
+                  color: "#136ADA",
+                  fontSize: 30,
+                }}
+              >
+                {user.fullName ? user.fullName.charAt(0) : "?"}
+              </Text>
+            )}
           </View>
           <Text
             style={{ fontFamily: "Poppins-Bold" }}
