@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter, useSegments } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import * as ImagePicker from "expo-image-picker";
 import {
   ActivityIndicator,
   Alert,
@@ -11,7 +12,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  Image
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useConversationsListener } from "../../hooks/useConversationsListener";
@@ -27,11 +29,13 @@ export default function ChatRoomScreen() {
     isNew,
     name,
     isGroup: isGroupParam,
+    avatarUrl: avatarUrlParam,
   } = useLocalSearchParams<{
     id: string;
     isNew?: string;
     name?: string;
     isGroup?: string;
+    avatarUrl?: string;
   }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -62,6 +66,69 @@ export default function ChatRoomScreen() {
   const [sending, setSending] = useState(false);
   const [inputText, setInputText] = useState("");
   const flatListRef = useRef<FlatList>(null);
+
+  // Group editing state
+  const [editingGroup, setEditingGroup] = useState(false);
+  const [editGroupName, setEditGroupName] = useState("");
+  const [editGroupAvatar, setEditGroupAvatar] = useState<{
+    uri: string;
+    file: any;
+  } | null>(null);
+  const [updatingGroup, setUpdatingGroup] = useState(false);
+
+  useEffect(() => {
+    if (showInfoModal && isGroup && !viewingMember) {
+      setEditGroupName(name || "");
+      setEditGroupAvatar(null);
+      setEditingGroup(false);
+    }
+  }, [showInfoModal, viewingMember]);
+
+  const handlePickGroupAvatar = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      setEditGroupAvatar({
+        uri: asset.uri,
+        file: {
+          uri: asset.uri,
+          type: asset.mimeType || "image/jpeg",
+          name: asset.fileName || "group_avatar.jpg",
+        },
+      });
+    }
+  };
+
+  const handleUpdateGroup = async () => {
+    if (!editGroupName.trim() || !realConversationId) return;
+    try {
+      setUpdatingGroup(true);
+      const formData = new FormData();
+      formData.append("ConversationName", editGroupName.trim());
+      if (editGroupAvatar?.file) {
+        formData.append("Avatar", editGroupAvatar.file as any);
+      }
+
+      await conversationService.updateGroup(realConversationId, formData);
+      setEditingGroup(false);
+      router.back();
+      // Hiện thông báo sau khi đã quay lại list chat
+      setTimeout(() => {
+        Alert.alert("Thành công", "Cập nhật thông tin nhóm thành công");
+      }, 300);
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Lỗi", "Không thể cập nhật thông tin nhóm");
+    } finally {
+      setUpdatingGroup(false);
+    }
+  };
 
   // Tìm thông tin cuộc trò chuyện hiện tại từ Firebase
   const currentConversation = fbConversations.find(
@@ -152,6 +219,7 @@ export default function ChatRoomScreen() {
       senderId: userInfo?.id || "",
       senderName: userInfo?.fullName || "Bạn",
       conversationId: realConversationId || "",
+      type: "Text",
       content: textToSend,
       status: "Đang gửi", // Sending...
       createdAt: new Date().toISOString(),
@@ -235,16 +303,23 @@ export default function ChatRoomScreen() {
     index: number;
   }) => {
     const isMe = item.senderId === userInfo?.id;
-    const prevItem = messages[index + 1]; // Previous in time (below in inverted list)
-    const nextItem = messages[index - 1]; // Next in time (above in inverted list)
     
-    const isSameSenderAsPrev = prevItem && prevItem.senderId === item.senderId;
-    const isSameSenderAsNext = nextItem && nextItem.senderId === item.senderId;
-
-    // Date separator logic
+    // Tìm tin nhắn gần nhất phía trên (cũ hơn) mà không phải System để gộp nhóm avatar
+    const prevRealItem = messages.slice(index + 1).find(m => m.type?.toLowerCase() !== "system");
+    // Tìm tin nhắn gần nhất phía dưới (mới hơn) mà không phải System để gộp nhóm avatar
+    const nextRealItem = messages.slice(0, index).reverse().find(m => m.type?.toLowerCase() !== "system");
+    
+    const isSameSenderAsPrev = prevRealItem && prevRealItem.senderId === item.senderId;
+    
+    // Date separator logic - Dùng tin nhắn ngay sát phía trên (bất kể loại nào)
+    const absolutePrevItem = messages[index + 1];
     const itemDate = new Date(item.createdAt);
-    const prevItemDate = prevItem ? new Date(prevItem.createdAt) : null;
+    const prevItemDate = absolutePrevItem ? new Date(absolutePrevItem.createdAt) : null;
     const showDateSeparator = !prevItemDate || itemDate.toDateString() !== prevItemDate.toDateString();
+
+    // Kiểm tra xem tin nhắn tiếp theo có khác ngày không (dùng nextRealItem để gộp avatar)
+    const isNextDay = nextRealItem && new Date(nextRealItem.createdAt).toDateString() !== itemDate.toDateString();
+    const isSameSenderAsNext = nextRealItem && nextRealItem.senderId === item.senderId && !isNextDay;
 
     // Determine seen status for 1-on-1 chats
     let displayStatus = item.status;
@@ -272,6 +347,9 @@ export default function ChatRoomScreen() {
     // Detect if content is only emojis
     const emojiRegex = /^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]+$/u;
     const isEmojiOnly = emojiRegex.test(item.content.replace(/\s/g, ""));
+    
+    const sender = membersInfo.find(m => m.userId === item.senderId);
+    const avatarUrl = sender?.avatarUrl;
 
     return (
       <View>
@@ -287,6 +365,19 @@ export default function ChatRoomScreen() {
             </View>
           </View>
         )}
+        
+        {item.type?.toLowerCase() === "system" ? (
+          <View className="items-center my-4 px-10">
+            <View className="bg-gray-100/80 px-4 py-1.5 rounded-full">
+              <Text
+                style={{ fontFamily: "Poppins-Medium" }}
+                className="text-[11px] text-gray-500 text-center leading-4"
+              >
+                {item.content}
+              </Text>
+            </View>
+          </View>
+        ) : (
         <View
           className={`flex-row px-4 ${isMe ? "justify-end" : "justify-start"} ${
             !isSameSenderAsPrev || showDateSeparator ? "mt-4" : "mt-1"
@@ -295,11 +386,15 @@ export default function ChatRoomScreen() {
         {!isMe && (
           <View className="w-9 mr-1 items-center justify-end pb-1">
             {!isSameSenderAsNext && (
+              avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} className="w-8 h-8 rounded-full shadow-sm" />
+              ) : (
               <View className="w-8 h-8 rounded-full bg-rose-500 items-center justify-center shadow-sm">
                 <Text style={{ fontFamily: "Poppins-Bold" }} className="text-white text-[10px]">
                   {item.senderName.charAt(0).toUpperCase()}
                 </Text>
               </View>
+              )
             )}
           </View>
         )}
@@ -362,8 +457,9 @@ export default function ChatRoomScreen() {
             </View>
           )}
         </View>
+        </View>
+        )}
       </View>
-    </View>
     );
   };
 
@@ -439,19 +535,25 @@ export default function ChatRoomScreen() {
           <TouchableOpacity onPress={() => router.back()} className="mr-3 p-1">
             <Ionicons name="arrow-back" size={24} color="#1F2937" />
           </TouchableOpacity>
-          <View className="w-10 h-10 rounded-full bg-indigo-50 items-center justify-center mr-3">
-            <Ionicons
-              name={isGroup ? "people" : "person"}
-              size={20}
-              color="#6366F1"
-            />
+          <View className="w-10 h-10 rounded-full bg-indigo-50 items-center justify-center mr-3 overflow-hidden">
+            {isGroup ? (
+              (currentConversation?.avatarUrl || avatarUrlParam) ? (
+                <Image source={{ uri: currentConversation?.avatarUrl || avatarUrlParam || "" }} className="w-10 h-10" />
+              ) : (
+                <Ionicons name="people" size={20} color="#6366F1" />
+              )
+            ) : (otherMember?.avatarUrl || avatarUrlParam) ? (
+              <Image source={{ uri: otherMember?.avatarUrl || avatarUrlParam }} className="w-10 h-10" />
+            ) : (
+              <Ionicons name="person" size={20} color="#6366F1" />
+            )}
           </View>
           <TouchableOpacity onPress={() => handleShowInfo()}>
             <Text
               style={{ fontFamily: "Poppins-Bold" }}
               className="text-base text-gray-900"
             >
-              {name || "Chi tiết trò chuyện"}
+              {isGroup ? (currentConversation?.displayName || name) : (name || "Chi tiết trò chuyện")}
             </Text>
 
             {!currentConversation && isNew === "true" && (
@@ -491,12 +593,14 @@ export default function ChatRoomScreen() {
           showsVerticalScrollIndicator={false}
           ListFooterComponent={() => (
             <View className="items-center py-10 px-6">
-              <View className="w-16 h-16 bg-indigo-50 rounded-full items-center justify-center mb-4">
-                <Ionicons
-                  name={isGroup ? "people" : "person"}
-                  size={32}
-                  color="#6366F1"
-                />
+              <View className="w-16 h-16 bg-indigo-50 rounded-full items-center justify-center mb-4 overflow-hidden">
+                {isGroup ? (
+                  <Ionicons name="people" size={32} color="#6366F1" />
+                ) : (otherMember?.avatarUrl || avatarUrlParam) ? (
+                  <Image source={{ uri: otherMember?.avatarUrl || avatarUrlParam }} className="w-16 h-16" />
+                ) : (
+                  <Ionicons name="person" size={32} color="#6366F1" />
+                )}
               </View>
               <Text
                 style={{ fontFamily: "Poppins-Bold" }}
@@ -510,7 +614,7 @@ export default function ChatRoomScreen() {
                 style={{ fontFamily: "Poppins-SemiBold" }}
                 className="text-indigo-600 text-center mb-2"
               >
-                {name}
+                {isGroup ? (currentConversation?.displayName || name) : name}
               </Text>
               <View className="bg-gray-100 px-4 py-2 rounded-xl">
                 <Text
@@ -573,31 +677,47 @@ export default function ChatRoomScreen() {
               >
                 {viewingMember
                   ? "Trang cá nhân"
-                  : isGroup
-                    ? `Danh sách thành viên (${membersInfo.length})`
-                    : "Trang cá nhân"}
+                  : editingGroup
+                    ? "Chỉnh sửa nhóm"
+                    : isGroup
+                      ? `Thông tin nhóm`
+                      : "Trang cá nhân"}
               </Text>
-              <TouchableOpacity
-                onPress={handleCloseModal}
-                className="p-2 bg-gray-100 rounded-full"
-              >
-                <Ionicons
-                  name={isGroup && viewingMember ? "arrow-back" : "close"}
-                  size={20}
-                  color="black"
-                />
-              </TouchableOpacity>
+              <View className="flex-row items-center gap-2">
+                {isGroup && !viewingMember && !editingGroup && (
+                  <TouchableOpacity
+                    onPress={() => setEditingGroup(true)}
+                    className="p-2 bg-indigo-50 rounded-full"
+                  >
+                    <Ionicons name="create-outline" size={20} color="#6366F1" />
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  onPress={handleCloseModal}
+                  className="p-2 bg-gray-100 rounded-full"
+                >
+                  <Ionicons
+                    name={isGroup && viewingMember ? "arrow-back" : "close"}
+                    size={20}
+                    color="black"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             {viewingMember ? (
               <View className="items-center py-6">
-                <View className="w-24 h-24 bg-indigo-100 rounded-full items-center justify-center mb-4">
+                <View className="w-24 h-24 bg-indigo-100 rounded-full items-center justify-center mb-4 overflow-hidden">
+                  {(otherUserProfile?.avatarUrl || viewingMember.avatarUrl) ? (
+                    <Image source={{ uri: otherUserProfile?.avatarUrl || viewingMember.avatarUrl || '' }} className="w-24 h-24" />
+                  ) : (
                   <Text
                     style={{ fontFamily: "Poppins-Bold" }}
                     className="text-4xl text-indigo-600"
                   >
                     {viewingMember.fullName.charAt(0).toUpperCase()}
                   </Text>
+                  )}
                 </View>
 
                 {loadingProfile ? (
@@ -671,6 +791,82 @@ export default function ChatRoomScreen() {
                   </TouchableOpacity>
                 </View>
               </View>
+            ) : editingGroup ? (
+              <View className="py-4">
+                <View className="items-center mb-6">
+                  <TouchableOpacity
+                    onPress={handlePickGroupAvatar}
+                    className="w-24 h-24 rounded-full bg-indigo-50 items-center justify-center border-4 border-white shadow-sm overflow-hidden"
+                  >
+                    {editGroupAvatar?.uri ? (
+                      <Image
+                        source={{ uri: editGroupAvatar.uri }}
+                        className="w-24 h-24"
+                      />
+                    ) : (currentConversation?.avatarUrl || avatarUrlParam) ? (
+                      <Image
+                        source={{ uri: currentConversation?.avatarUrl || avatarUrlParam || "" }}
+                        className="w-24 h-24"
+                      />
+                    ) : (
+                      <Ionicons name="camera-outline" size={32} color="#6366F1" />
+                    )}
+                  </TouchableOpacity>
+                  <Text
+                    style={{ fontFamily: "Poppins-Medium" }}
+                    className="text-indigo-600 mt-2 text-xs"
+                  >
+                    Thay đổi ảnh nhóm
+                  </Text>
+                </View>
+
+                <View className="gap-1 mb-6">
+                  <Text
+                    style={{ fontFamily: "Poppins-Medium" }}
+                    className="text-gray-500 text-xs ml-1"
+                  >
+                    Tên nhóm
+                  </Text>
+                  <TextInput
+                    value={editGroupName}
+                    onChangeText={setEditGroupName}
+                    placeholder="Nhập tên nhóm mới..."
+                    className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-black text-sm"
+                    style={{ fontFamily: "Poppins-Regular" }}
+                  />
+                </View>
+
+                <View className="flex-row gap-3">
+                  <TouchableOpacity
+                    className="flex-1 bg-gray-100 py-4 rounded-2xl items-center"
+                    onPress={() => setEditingGroup(false)}
+                    disabled={updatingGroup}
+                  >
+                    <Text
+                      style={{ fontFamily: "Poppins-SemiBold" }}
+                      className="text-gray-600"
+                    >
+                      Hủy
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="flex-1 bg-indigo-600 py-4 rounded-2xl items-center shadow-lg shadow-indigo-200"
+                    onPress={handleUpdateGroup}
+                    disabled={updatingGroup}
+                  >
+                    {updatingGroup ? (
+                      <ActivityIndicator size="small" color="white" />
+                    ) : (
+                      <Text
+                        style={{ fontFamily: "Poppins-SemiBold" }}
+                        className="text-white"
+                      >
+                        Lưu thay đổi
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
             ) : (
               <View>
                 <FlatList
@@ -683,13 +879,17 @@ export default function ChatRoomScreen() {
                       onPress={() => handleShowInfo(item)}
                       disabled={item.userId === userInfo?.id}
                     >
-                      <View className="w-12 h-12 bg-indigo-100 rounded-full items-center justify-center mr-4">
+                      <View className="w-12 h-12 bg-indigo-100 rounded-full items-center justify-center mr-4 overflow-hidden">
+                        {item.avatarUrl ? (
+                          <Image source={{ uri: item.avatarUrl }} className="w-12 h-12" />
+                        ) : (
                         <Text
                           style={{ fontFamily: "Poppins-Bold" }}
                           className="text-indigo-600 text-lg"
                         >
                           {item.fullName.charAt(0).toUpperCase()}
                         </Text>
+                        )}
                       </View>
                       <View className="flex-1">
                         <Text

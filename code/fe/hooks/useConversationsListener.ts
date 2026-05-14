@@ -12,6 +12,8 @@ export interface RealtimeConversation {
   lastMessageObj: MessageResponse | null;
   members: string[];
   unreadCounts: Record<string, number>;
+  avatarUrl?: string | null;
+  displayName?: string | null;
 }
 
 export const useConversationsListener = () => {
@@ -52,6 +54,8 @@ export const useConversationsListener = () => {
             lastMessageObj: typeof data.lastMessage === "object" ? data.lastMessage : null,
             members: data.members || [],
             unreadCounts: data.unreadCounts || {},
+            avatarUrl: data.avatarUrl || null,
+            displayName: data.displayName || null,
           };
 
           convos.push(convo);
