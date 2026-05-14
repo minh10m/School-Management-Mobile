@@ -33,7 +33,7 @@ export default function StudentCourseDetail() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState<PaymentResponse | null>(null);
-  const [hubEnabled, setHubEnabled] = useState(false); // ✅ state riêng cho hub
+  const [hubEnabled, setHubEnabled] = useState(false);
 
   const insets = useSafeAreaInsets();
 
@@ -52,7 +52,7 @@ export default function StudentCourseDetail() {
     } else {
       Alert.alert("Thanh toán thất bại", status.message);
     }
-  }, hubEnabled); // ✅ dùng hubEnabled thay vì showQR
+  }, hubEnabled);
 
   const fetchCourseDetail = useCallback(async () => {
     if (!id || id === "lessons" || id === "create") return;
@@ -92,8 +92,8 @@ export default function StudentCourseDetail() {
         courseId: id as string,
       });
       setPaymentInfo(response);
-      setHubEnabled(true); // ✅ bật hub trước
-      setShowQR(true); // ✅ show QR sau
+      setHubEnabled(true);
+      setShowQR(true);
     } catch (err: any) {
       if (err.response?.data?.message === "YOU_BUY_THIS_COURSE") {
         setIsEnrolled(true);
