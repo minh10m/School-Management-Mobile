@@ -10,15 +10,17 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
 import { teacherService } from "../../services/teacher.service";
 import { useAuthStore } from "../../store/authStore";
 import { TeacherResponse } from "../../types/teacher";
 import { getErrorMessage } from "../../utils/error";
 
 export default function TeacherProfileScreen() {
-  const { clearAuth } = useAuthStore();
+  const { clearAuth, updateUserInfo } = useAuthStore();
   const [profile, setProfile] = useState<TeacherResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [editVisible, setEditVisible] = useState(false);
@@ -31,6 +33,8 @@ export default function TeacherProfileScreen() {
     phoneNumber: "",
     address: "",
     birthday: "",
+    avatarUri: "",
+    avatarFile: null as any,
   });
 
   useEffect(() => {
@@ -59,8 +63,32 @@ export default function TeacherProfileScreen() {
       phoneNumber: profile.phoneNumber || "",
       address: profile.address || "",
       birthday: profile.birthday ? profile.birthday.split("T")[0] : "",
+      avatarUri: profile.avatarUrl || "",
+      avatarFile: null,
     });
     setEditVisible(true);
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      setEditForm((prev) => ({
+        ...prev,
+        avatarUri: asset.uri,
+        avatarFile: {
+          uri: asset.uri,
+          type: asset.mimeType || "image/jpeg",
+          name: asset.fileName || "avatar.jpg",
+        },
+      }));
+    }
   };
 
   const handleSave = async () => {
@@ -71,14 +99,25 @@ export default function TeacherProfileScreen() {
     
     try {
       setSaving(true);
-      const updated = await teacherService.updateMe({
-        fullName: editForm.fullName,
-        email: editForm.email,
-        phoneNumber: editForm.phoneNumber,
-        address: editForm.address,
-        birthday: editForm.birthday || undefined,
-      });
+      const formData = new FormData();
+      formData.append("FullName", editForm.fullName);
+      formData.append("Email", editForm.email);
+      if (editForm.phoneNumber) formData.append("PhoneNumber", editForm.phoneNumber);
+      if (editForm.address) formData.append("Address", editForm.address);
+      if (editForm.birthday) formData.append("Birthday", editForm.birthday);
+      if (editForm.avatarFile) {
+        formData.append("Avatar", editForm.avatarFile as any);
+      }
+
+      const updated = await teacherService.updateMe(formData as any);
       setProfile(updated);
+      
+      // Update global auth store to reflect changes in SideMenu/Headers
+      updateUserInfo({
+        fullName: updated.fullName,
+        avatarUrl: updated.avatarUrl
+      });
+      
       setEditVisible(false);
       Alert.alert("Thành công", "Cập nhật hồ sơ thành công!");
     } catch (error: any) {
@@ -114,10 +153,14 @@ export default function TeacherProfileScreen() {
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
           {/* Summary Card */}
           <View className="bg-white items-center py-10 border-b border-gray-50">
-            <View className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center mb-4 border-4 border-white shadow-sm">
+            <View className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
+              {profile?.avatarUrl ? (
+                <Image source={{ uri: profile.avatarUrl }} className="w-24 h-24" />
+              ) : (
               <Text style={{ fontFamily: "Poppins-Bold", fontSize: 36, color: "#136ADA" }}>
                 {profile?.fullName?.charAt(0) || "T"}
               </Text>
+              )}
             </View>
             <Text className="text-black text-xl mb-1" style={{ fontFamily: "Poppins-Bold" }}>
               {profile?.fullName || "Giáo viên"}
@@ -173,11 +216,22 @@ export default function TeacherProfileScreen() {
             <View className="bg-blue-50 rounded-xl px-4 py-3 mb-5 flex-row gap-2">
               <Ionicons name="information-circle-outline" size={18} color="#136ADA" />
               <Text style={{ fontFamily: "Poppins-Regular" }} className="text-bright-blue text-xs flex-1">
-                Bạn chỉ có thể thay đổi Họ tên, Email, SĐT, Địa chỉ và Ngày sinh. Các môn học do Admin quản lý.
+                Bạn chỉ có thể thay đổi Ảnh đại diện, Họ tên, Email, SĐT, Địa chỉ và Ngày sinh. Các môn học do Admin quản lý.
               </Text>
             </View>
 
-            <View className="gap-5">
+            <View className="items-center mb-6">
+              <TouchableOpacity onPress={pickImage} className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center border-4 border-white shadow-sm overflow-hidden">
+                {editForm.avatarUri ? (
+                  <Image source={{ uri: editForm.avatarUri }} className="w-24 h-24" />
+                ) : (
+                  <Ionicons name="camera-outline" size={32} color="#136ADA" />
+                )}
+              </TouchableOpacity>
+              <Text className="text-blue-600 mt-2 text-xs" style={{ fontFamily: "Poppins-Medium" }}>Thay đổi ảnh đại diện</Text>
+            </View>
+
+            <View className="gap-5 pb-20">
               <EditInput label="Họ và tên" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
               <EditInput label="Email" value={editForm.email} onChangeText={(v: string) => setEditForm({ ...editForm, email: v })} keyboardType="email-address" />
               <EditInput label="Số điện thoại" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
