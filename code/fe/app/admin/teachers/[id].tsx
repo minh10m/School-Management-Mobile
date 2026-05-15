@@ -190,30 +190,6 @@ export default function AdminTeacherDetailScreen() {
     </View>
   );
 
-  const EditField = ({
-    label,
-    value,
-    onChangeText,
-    keyboardType = "default",
-  }: any) => (
-    <View className="mb-4">
-      <Text
-        style={{ fontFamily: "Poppins-Medium" }}
-        className="text-gray-500 text-xs mb-1 ml-1"
-      >
-        {label}
-      </Text>
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        keyboardType={keyboardType as any}
-        className="bg-white border border-gray-200 rounded-2xl px-4 py-3 text-black text-sm"
-        style={{ fontFamily: "Poppins-Regular" }}
-        placeholderTextColor="#9CA3AF"
-      />
-    </View>
-  );
-
   return (
     <AdminPageWrapper
       title="Chi tiết Giáo viên"
@@ -476,3 +452,27 @@ export default function AdminTeacherDetailScreen() {
     </AdminPageWrapper>
   );
 }
+
+const EditField = ({
+  label,
+  value,
+  onChangeText,
+  keyboardType = "default",
+}: any) => (
+  <View className="mb-4">
+    <Text
+      style={{ fontFamily: "Poppins-Medium" }}
+      className="text-gray-500 text-xs mb-1 ml-1"
+    >
+      {label}
+    </Text>
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      keyboardType={keyboardType as any}
+      className="bg-white border border-gray-200 rounded-2xl px-4 py-3 text-black text-sm"
+      style={{ fontFamily: "Poppins-Regular" }}
+      placeholderTextColor="#9CA3AF"
+    />
+  </View>
+);

@@ -69,9 +69,7 @@ export default function AdminStudentDetailScreen() {
         email: form.email,
         phone: form.phone,
         address: form.address,
-        birthday: form.birthday
-          ? new Date(form.birthday).toISOString()
-          : undefined,
+        birthday: form.birthday || undefined,
       });
       setStudent(updated);
       setIsEditing(false);
@@ -121,30 +119,6 @@ export default function AdminStudentDetailScreen() {
           {value || "Chưa cập nhật"}
         </Text>
       </View>
-    </View>
-  );
-
-  const EditField = ({
-    label,
-    value,
-    onChangeText,
-    keyboardType = "default",
-  }: any) => (
-    <View className="mb-4">
-      <Text
-        style={{ fontFamily: "Poppins-Medium" }}
-        className="text-gray-500 text-xs mb-1 ml-1"
-      >
-        {label}
-      </Text>
-      <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        keyboardType={keyboardType as any}
-        className="bg-white border border-gray-200 rounded-2xl px-4 py-3 text-black text-sm"
-        style={{ fontFamily: "Poppins-Regular" }}
-        placeholderTextColor="#9CA3AF"
-      />
     </View>
   );
 
@@ -270,3 +244,27 @@ export default function AdminStudentDetailScreen() {
       </AdminPageWrapper>
     );
 }
+
+const EditField = ({
+  label,
+  value,
+  onChangeText,
+  keyboardType = "default",
+}: any) => (
+  <View className="mb-4">
+    <Text
+      style={{ fontFamily: "Poppins-Medium" }}
+      className="text-gray-500 text-xs mb-1 ml-1"
+    >
+      {label}
+    </Text>
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      keyboardType={keyboardType as any}
+      className="bg-white border border-gray-200 rounded-2xl px-4 py-3 text-black text-sm"
+      style={{ fontFamily: "Poppins-Regular" }}
+      placeholderTextColor="#9CA3AF"
+    />
+  </View>
+);
