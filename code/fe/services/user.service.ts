@@ -56,27 +56,27 @@ export const userService = {
    * 409: username hoặc email đã tồn tại
    */
   createUser: async (payload: CreateUserPayload): Promise<UserResponse> => {
-    const role = payload.roleId;
+    const formData = new FormData();
+    formData.append("Username", payload.username?.trim());
+    formData.append("Password", payload.password); // Mật khẩu không nên trim
+    formData.append("Email", payload.email?.trim());
+    formData.append("PhoneNumber", payload.phone?.trim());
+    formData.append("FullName", payload.fullName?.trim());
+    formData.append("Address", payload.address?.trim());
+    formData.append("Birthday", payload.birthday?.trim());
+    formData.append("Role", payload.roleId);
 
-    // Map Frontend Payload to Backend CreateUserRequest
-    const backendPayload: any = {
-      username: payload.username?.trim(),
-      password: payload.password, // Don't trim password
-      email: payload.email?.trim(),
-      phoneNumber: payload.phone?.trim(),
-      fullName: payload.fullName?.trim(),
-      address: payload.address?.trim(),
-      birthday: payload.birthday?.trim(),
-      role: role,
-    };
-
-    if (role.toLowerCase() === 'student') {
-      backendPayload.classYearId = payload.classYearId;
-    } else if (role.toLowerCase() === 'teacher') {
-      backendPayload.subjectId = payload.subjectId || [];
+    if (payload.roleId.toLowerCase() === "student" && payload.classYearId) {
+      formData.append("ClassYearId", payload.classYearId);
+    } else if (payload.roleId.toLowerCase() === "teacher" && payload.subjectId) {
+      payload.subjectId.forEach((id) => formData.append("SubjectId", id));
     }
 
-    const response = await apiClient.post<UserResponse>("/users", backendPayload);
+    const response = await apiClient.post<UserResponse>("/users", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   },
 
@@ -88,14 +88,18 @@ export const userService = {
    * 400: sai format | 404: not found | 409: email lặp lại
    */
   updateUser: async (userId: string, payload: UpdateUserPayload): Promise<UserResponse> => {
-    const backendPayload: any = {
-      email: payload.email,
-      phoneNumber: payload.phone,
-      fullName: payload.fullName,
-      address: payload.address,
-      birthday: payload.birthday,
-    };
-    const response = await apiClient.patch<UserResponse>(`/users/${userId}`, backendPayload);
+    const formData = new FormData();
+    if (payload.email) formData.append("Email", payload.email);
+    if (payload.phone) formData.append("PhoneNumber", payload.phone);
+    if (payload.fullName) formData.append("FullName", payload.fullName);
+    if (payload.address) formData.append("Address", payload.address);
+    if (payload.birthday) formData.append("Birthday", payload.birthday);
+
+    const response = await apiClient.patch<UserResponse>(`/users/${userId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   },
 

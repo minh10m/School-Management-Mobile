@@ -57,9 +57,21 @@ export const studentService = {
     studentId: string,
     payload: UpdateStudentPayload
   ): Promise<StudentResponse> => {
+    const formData = new FormData();
+    if (payload.email) formData.append("Email", payload.email);
+    if (payload.phone) formData.append("PhoneNumber", payload.phone);
+    if (payload.fullName) formData.append("FullName", payload.fullName);
+    if (payload.address) formData.append("Address", payload.address);
+    if (payload.birthday) formData.append("Birthday", payload.birthday);
+
     const response = await apiClient.patch<StudentResponse>(
       `/students/${studentId}`,
-      payload
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
     );
     return response.data;
   },

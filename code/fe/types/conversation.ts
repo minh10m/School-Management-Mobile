@@ -41,6 +41,7 @@ export interface SendMessageRequest {
 export interface CreateGroupRequest {
   groupName: string;
   memberIds: string[];
+  avatar?: any;
 }
 
 export interface AddMembersRequest {
