@@ -421,21 +421,12 @@ namespace School_Management.API.Repositories
 
             string? avatarUrl = conversation.ConversationAvatarUrl;
             string? publicId = conversation.PublicId;
+            string? oldPublicId = conversation.PublicId;
 
             if (request.Avatar != null && request.Avatar.Length > 0)
             {
                 if (request.Avatar.Length > 2 * 1024 * 1024)
                     return (null, "BIGGER_THAN_2MB");
-
-
-                if (!string.IsNullOrEmpty(conversation.PublicId))
-                {
-                    var deletionParams = new DeletionParams(conversation.PublicId)
-                    {
-                        ResourceType = ResourceType.Image // Đảm bảo xóa đúng loại ảnh
-                    };
-                    var deletionResult = await cloudinary.DestroyAsync(deletionParams);
-                }
 
                 // --- BƯỚC 2: UPLOAD ẢNH MỚI ---
                 using var stream = request.Avatar.OpenReadStream();
@@ -455,6 +446,20 @@ namespace School_Management.API.Repositories
                 avatarUrl = uploadResult.SecureUrl.ToString();
                 publicId = uploadResult.PublicId;
                 isChangeAvatar = true;
+
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var deletionParams = new DeletionParams(oldPublicId) { ResourceType = ResourceType.Image };
+                        await cloudinary.DestroyAsync(deletionParams);
+                        logger.LogInformation("Xóa ảnh thành công");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Không thể xóa ảnh cũ trên Cloudinary");
+                    }
+                });
             }
 
             if (!string.IsNullOrWhiteSpace(request.ConversationName) && conversation.ConversationName != request.ConversationName)
