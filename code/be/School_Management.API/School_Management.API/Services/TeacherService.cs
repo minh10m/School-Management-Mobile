@@ -16,13 +16,15 @@ namespace School_Management.API.Services
         private readonly UserManager<AppUser> userManager;
         private readonly ApplicationDbContext context;
         private readonly Cloudinary cloudinary;
+        private readonly ILogger<TeacherService> logger;
 
-        public TeacherService(ITeacherRepository teacherRepository, UserManager<AppUser> userManager, ApplicationDbContext context, Cloudinary cloudinary)
+        public TeacherService(ITeacherRepository teacherRepository, UserManager<AppUser> userManager, ApplicationDbContext context, Cloudinary cloudinary, ILogger<TeacherService> logger)
         {
             this.teacherRepository = teacherRepository;
             this.userManager = userManager;
             this.context = context;
             this.cloudinary = cloudinary;
+            this.logger = logger;
         }
         public async Task<PagedResponse<TeacherListResponse>> GetAllTeacher(TeacherFilterRequest request)
         {
@@ -50,20 +52,12 @@ namespace School_Management.API.Services
 
             string? avatarUrl = user.AvatarUrl;
             string? publicId = user.PublicId;
+            string? oldPublicId = user.PublicId;
 
             if (updateUserRequest.Avatar != null && updateUserRequest.Avatar.Length > 0)
             {
                 if (updateUserRequest.Avatar.Length > 2 * 1024 * 1024)
                     throw new BadRequestException("Ảnh không được quá 2MB");
-
-                if (!string.IsNullOrEmpty(user.PublicId))
-                {
-                    var deletionParams = new DeletionParams(user.PublicId)
-                    {
-                        ResourceType = ResourceType.Image // Đảm bảo xóa đúng loại ảnh
-                    };
-                    var deletionResult = await cloudinary.DestroyAsync(deletionParams);
-                }
 
                 // --- BƯỚC 2: UPLOAD ẢNH MỚI ---
                 using var stream = updateUserRequest.Avatar.OpenReadStream();
@@ -82,6 +76,24 @@ namespace School_Management.API.Services
 
                 avatarUrl = uploadResult.SecureUrl.ToString();
                 publicId = uploadResult.PublicId;
+
+                if (!string.IsNullOrEmpty(oldPublicId))
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var deletionParams = new DeletionParams(oldPublicId) { ResourceType = ResourceType.Image };
+                            await cloudinary.DestroyAsync(deletionParams);
+                            logger.LogInformation("Xóa ảnh thành công");
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogError(ex, "Không thể xóa ảnh cũ trên Cloudinary");
+                        }
+                    });
+                }
+
             }
 
             if (updateUserRequest.Email != null)
@@ -115,20 +127,12 @@ namespace School_Management.API.Services
 
             string? avatarUrl = user.AvatarUrl;
             string? publicId = user.PublicId;
+            string? oldPublicId = user.PublicId;
 
             if (updateUserRequest.Avatar != null && updateUserRequest.Avatar.Length > 0)
             {
                 if (updateUserRequest.Avatar.Length > 2 * 1024 * 1024)
                     throw new BadRequestException("Ảnh không được quá 2MB");
-
-                if (!string.IsNullOrEmpty(user.PublicId))
-                {
-                    var deletionParams = new DeletionParams(user.PublicId)
-                    {
-                        ResourceType = ResourceType.Image // Đảm bảo xóa đúng loại ảnh
-                    };
-                    var deletionResult = await cloudinary.DestroyAsync(deletionParams);
-                }
 
                 // --- BƯỚC 2: UPLOAD ẢNH MỚI ---
                 using var stream = updateUserRequest.Avatar.OpenReadStream();
@@ -147,6 +151,24 @@ namespace School_Management.API.Services
 
                 avatarUrl = uploadResult.SecureUrl.ToString();
                 publicId = uploadResult.PublicId;
+
+                if (!string.IsNullOrEmpty(oldPublicId))
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var deletionParams = new DeletionParams(oldPublicId) { ResourceType = ResourceType.Image };
+                            await cloudinary.DestroyAsync(deletionParams);
+                            logger.LogInformation("Xóa ảnh thành công");
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.LogError(ex, "Không thể xóa ảnh cũ trên Cloudinary");
+                        }
+                    });
+                }
+
             }
 
             if (updateUserRequest.Email != null)
