@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { userService } from "../../services/user.service";
 import { conversationService } from "../../services/conversation.service";
+import { useAuthStore } from "../../store/authStore";
 import { UserListItem } from "../../types/user";
 
 interface AddMembersScreenProps {
@@ -31,6 +32,7 @@ export default function AddMembersScreen({ rolePrefix: rolePrefixProp }: AddMemb
     rolePrefix?: string;
   }>();
   const rolePrefix = rolePrefixProp || paramRolePrefix || "student";
+  const { userInfo } = useAuthStore();
 
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState<UserListItem[]>([]);
@@ -56,7 +58,8 @@ export default function AddMembersScreen({ rolePrefix: rolePrefixProp }: AddMemb
           FullName: debouncedSearch,
           PageSize: 20,
         });
-        setUsers(res.items || []);
+        const filteredUsers = (res.items || []).filter(u => u.userId !== userInfo?.id);
+        setUsers(filteredUsers);
       } catch (err) {
         console.log("Fetch users error:", err);
       } finally {

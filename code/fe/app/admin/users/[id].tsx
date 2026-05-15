@@ -84,9 +84,7 @@ export default function AdminUserDetailScreen() {
         email: editForm.email,
         phone: editForm.phoneNumber,
         address: editForm.address,
-        birthday: editForm.birthday
-          ? new Date(editForm.birthday).toISOString()
-          : undefined,
+        birthday: editForm.birthday || undefined,
       });
       setUser(updated);
       setEditVisible(false);

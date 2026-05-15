@@ -610,7 +610,16 @@ export default function ChatRoomScreen() {
             <View className="items-center py-10 px-6">
               <View className="w-16 h-16 bg-indigo-50 rounded-full items-center justify-center mb-4 overflow-hidden">
                 {isGroup ? (
-                  <Ionicons name="people" size={32} color="#6366F1" />
+                  (currentConversation?.avatarUrl || avatarUrlParam) ? (
+                    <Image 
+                      source={{ uri: currentConversation?.avatarUrl || avatarUrlParam || "" }} 
+                      style={{ width: 64, height: 64 }}
+                      contentFit="cover"
+                      transition={200}
+                    />
+                  ) : (
+                    <Ionicons name="people" size={32} color="#6366F1" />
+                  )
                 ) : (otherMember?.avatarUrl || avatarUrlParam) ? (
                   <Image 
                     source={{ uri: otherMember?.avatarUrl || avatarUrlParam }} 
@@ -656,10 +665,10 @@ export default function ChatRoomScreen() {
         className="flex-row items-center px-4 py-3 bg-white border-t border-gray-100"
         style={{ paddingBottom: insets.bottom || 12 }}
       >
-        <View className="flex-1 flex-row items-center bg-gray-100 rounded-full px-4 py-1 min-h-[44px]">
+        <View className="flex-1 flex-row items-center bg-gray-100 rounded-full px-4 py-1.5 min-h-[48px]">
           <TextInput
-            className="flex-1 text-sm text-gray-800 py-2"
-            style={{ fontFamily: "Poppins-Regular" }}
+            className="flex-1 text-gray-800 py-2.5"
+            style={{ fontFamily: "Poppins-Regular", fontSize: 15, lineHeight: 22 }}
             placeholder="Nhập tin nhắn..."
             placeholderTextColor="#9CA3AF"
             value={inputText}
