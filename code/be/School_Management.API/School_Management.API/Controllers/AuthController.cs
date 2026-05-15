@@ -25,6 +25,22 @@ namespace School_Management.API.Controllers
         [ValidateModel]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
+            if (string.IsNullOrEmpty(loginRequest.PassWord))
+                return BadRequest(new { ErrorMessage = "Mật khẩu không được để trống" });
+
+            if (loginRequest.PassWord.Length < 8)
+                return BadRequest(new { ErroMessage = "Mật khẩu phải có ít nhất 8 kí tự" });
+
+            if (!loginRequest.PassWord.Any(char.IsUpper))
+                return BadRequest(new { ErrorMessage = "Mật khẩu phải có ít nhất một chữ hoa" });
+
+            if (!loginRequest.PassWord.Any(char.IsLower))
+                return BadRequest(new { ErrorMessage = "Mật khẩu phải có ít nhất một chữ thường" });
+
+            string specialChrs = @"%!@#$%^&*()_+";
+            if (!loginRequest.PassWord.Any(ch => specialChrs.Contains(ch)))
+                return BadRequest(new { ErrorMessage = "Mật khẩu phải có ít nhất một kí tự đặc biệt" });
+
             var result = await authService.LoginAsync(loginRequest);
             return Ok(result);
         }
