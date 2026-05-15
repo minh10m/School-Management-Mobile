@@ -13,8 +13,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
 import { userService } from "../../services/user.service";
 import { conversationService } from "../../services/conversation.service";
+import { useAuthStore } from "../../store/authStore";
 import { UserListItem } from "../../types/user";
 
 interface NewGroupScreenProps {
@@ -29,6 +32,7 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
   const router = useRouter();
   const params = useLocalSearchParams<{ rolePrefix?: string }>();
   const rolePrefix = rolePrefixProp || params.rolePrefix || "student";
+  const { userInfo } = useAuthStore();
 
   // States
   const [groupName, setGroupName] = useState("");
@@ -38,6 +42,28 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [groupAvatar, setGroupAvatar] = useState<{ uri: string; file: any } | null>(null);
+
+  const handlePickAvatar = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      setGroupAvatar({
+        uri: asset.uri,
+        file: {
+          uri: asset.uri,
+          type: asset.mimeType || "image/jpeg",
+          name: asset.fileName || "group_avatar.jpg",
+        },
+      });
+    }
+  };
 
   // Debounce search
   useEffect(() => {
@@ -56,7 +82,8 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
           FullName: debouncedSearch,
           PageSize: 20,
         });
-        setUsers(res.items || []);
+        const filteredUsers = (res.items || []).filter(u => u.userId !== userInfo?.id);
+        setUsers(filteredUsers);
       } catch (err) {
         console.log("Fetch users error:", err);
       } finally {
@@ -95,12 +122,17 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
       const res = await conversationService.createGroup({
         groupName: groupName.trim(),
         memberIds: selectedUsers.map(u => u.userId),
+        avatar: groupAvatar?.file,
       });
 
       if (res.data) {
         router.replace({
           pathname: `/${rolePrefix}/chat/${res.data}` as any,
-          params: { name: groupName.trim(), isGroup: "true" }
+          params: { 
+            name: groupName.trim(), 
+            isGroup: "true",
+            avatarUrl: groupAvatar?.uri
+          }
         });
       }
     } catch (err) {
@@ -155,6 +187,42 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
         </View>
 
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+          {/* 0. Avatar Picker */}
+          <View style={{ alignItems: "center", paddingTop: 24 }}>
+            <TouchableOpacity 
+              onPress={handlePickAvatar}
+              style={{ 
+                width: 90, 
+                height: 90, 
+                borderRadius: 45, 
+                backgroundColor: "#F9FAFB", 
+                alignItems: "center", 
+                justifyContent: "center",
+                borderWidth: 1,
+                borderColor: "#F3F4F6",
+                overflow: "hidden",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2
+              }}
+            >
+              {groupAvatar ? (
+                <Image 
+                  source={{ uri: groupAvatar.uri }} 
+                  style={{ width: 90, height: 90 }}
+                  contentFit="cover"
+                />
+              ) : (
+                <View style={{ alignItems: "center" }}>
+                  <Ionicons name="camera" size={28} color={PRIMARY_COLOR} />
+                  <Text style={{ fontSize: 10, color: "#9CA3AF", marginTop: 4, fontWeight: "500" }}>ẢNH NHÓM</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+
           {/* 1. Group Name Input */}
           <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
             <Text style={{ fontSize: 13, fontWeight: "600", color: PRIMARY_COLOR, textTransform: "uppercase", marginBottom: 12, letterSpacing: 1 }}>Tên nhóm</Text>

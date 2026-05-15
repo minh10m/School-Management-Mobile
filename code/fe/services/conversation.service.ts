@@ -58,8 +58,22 @@ export const conversationService = {
    * Tạo nhóm trò chuyện mới
    * POST /conversations/group
    */
-  createGroup: async (payload: CreateGroupRequest): Promise<ApiResponse<ConversationResponse>> => {
-    const response = await apiClient.post<ApiResponse<ConversationResponse>>("/conversations/group", payload);
+  createGroup: async (payload: CreateGroupRequest | FormData): Promise<ApiResponse<string>> => {
+    let data = payload;
+    if (!(payload instanceof FormData)) {
+      data = new FormData();
+      (data as FormData).append("GroupName", payload.groupName);
+      payload.memberIds.forEach((id) => (data as FormData).append("MemberIds", id));
+      if (payload.avatar) {
+        (data as FormData).append("Avatar", payload.avatar);
+      }
+    }
+
+    const response = await apiClient.post<ApiResponse<string>>("/conversations/group", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   },
 
@@ -68,8 +82,8 @@ export const conversationService = {
    * Thêm thành viên vào nhóm trò chuyện
    * POST /conversations/group/members
    */
-  addMembersToGroup: async (payload: AddMembersRequest): Promise<ApiResponse<ConversationResponse>> => {
-    const response = await apiClient.post<ApiResponse<ConversationResponse>>("/conversations/group/members", payload);
+  addMembersToGroup: async (payload: AddMembersRequest): Promise<ApiResponse<boolean>> => {
+    const response = await apiClient.post<ApiResponse<boolean>>("/conversations/group/members", payload);
     return response.data;
   },
   // ─── LEAVE GROUP ──────────────────────────────────────────────────────────────

@@ -105,8 +105,8 @@ export default function NewChatScreen({ rolePrefix }: NewChatScreenProps) {
           <Ionicons name="search" size={18} color="#9CA3AF" />
           <TextInput
             placeholder="Tìm theo tên hoặc email..."
-            className="flex-1 ml-2 text-sm text-gray-800"
-            style={{ fontFamily: "Poppins-Regular" }}
+            className="flex-1 ml-2 text-gray-800"
+            style={{ fontFamily: "Poppins-Regular", fontSize: 15 }}
             value={search}
             onChangeText={setSearch}
             autoFocus
