@@ -14,4 +14,15 @@ export const notificationService = {
       throw error;
     }
   },
+
+  createNotification: async (payload: { userId: string[]; title: string; content: string; type: string }): Promise<any> => {
+    try {
+      const response = await apiClient.post<ApiResponse<any>>('/notifications', payload);
+      return response.data;
+    } catch (error) {
+      console.log('Error creating notification:', error);
+      throw error;
+    }
+  },
 };
+
