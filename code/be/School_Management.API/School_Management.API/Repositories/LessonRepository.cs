@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 
@@ -32,6 +33,7 @@ namespace School_Management.API.Repositories
                 await context.Lesson.Where(x => x.CourseId == request.CourseId && x.OrderIndex >= request.OrderIndex)
                                     .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
 
+                if (!string.IsNullOrWhiteSpace(request.LessonName)) throw new BadRequestException("Tên bài h?c không ???c phép ch?a kho?ng tr?ng");
                 var newLesson = new Lesson
                 {
                     Id = Guid.NewGuid(),
@@ -148,7 +150,7 @@ namespace School_Management.API.Repositories
                     await context.Lesson.Where(x => x.CourseId == lesson.CourseId && x.OrderIndex < lesson.OrderIndex && x.OrderIndex >= request.OrderIndex)
                                         .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
                 }
-
+                if (!string.IsNullOrWhiteSpace(request.LessonName)) throw new BadRequestException("Tên bài h?c không ???c ?? tr?ng");
                 lesson.LessonName = request.LessonName;
                 lesson.OrderIndex = request.OrderIndex;
 

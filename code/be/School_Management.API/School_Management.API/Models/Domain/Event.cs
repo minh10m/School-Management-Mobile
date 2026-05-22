@@ -2,7 +2,7 @@
 
 namespace School_Management.API.Models.Domain
 {
-    public class Event
+    public class Event : BaseEntity
     {
         [Key]
         public Guid Id { get; set; }

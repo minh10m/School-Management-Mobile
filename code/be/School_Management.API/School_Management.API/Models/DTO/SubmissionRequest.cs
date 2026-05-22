@@ -11,7 +11,6 @@ namespace School_Management.API.Models.DTO
         public IFormFile File { get; set; } = null!;
 
         [Required(ErrorMessage = "Tiêu đề file bài nộp là bắt buộc")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Tên hiển thị file không được chỉ chứa khoảng trắng")]
         public string FileTitle { get; set; } = string.Empty;
     }
 }

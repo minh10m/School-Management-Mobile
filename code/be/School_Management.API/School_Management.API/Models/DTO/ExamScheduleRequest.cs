@@ -7,13 +7,11 @@ namespace School_Management.API.Models.DTO
         [Required(ErrorMessage = "Loại lịch thi là bắt buộc")]
         [MaxLength(500, ErrorMessage = "Độ dài kí tự của loại lịch tối đa là 500")]
         [MinLength(2, ErrorMessage = "Độ dài kí tự tối thiểu của loại lịch là 2")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Loại lịch thi không được chỉ chứa khoảng trắng")]
         public string Type { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Tên lịch thi là bắt buộc")]
         [MaxLength(150, ErrorMessage = "Độ dài kí tự tối đa của tên lịch thi là 150")]
         [MinLength(2, ErrorMessage = "Độ dài kí tự tối đa của tên lịch thi là 2")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Tên lịch thi không được chỉ chứa khoảng trắng")]
         public string Title { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Học kì là bắt buộc")]

@@ -1,6 +1,7 @@
 using ExcelDataReader;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
@@ -118,7 +119,8 @@ namespace School_Management.API.Repositories
                 var schoolYearInfo = await schoolYearInfoService.GetSchoolYearInfo();
                 var schoolYear = schoolYearInfo?.SchoolYear;
                 var userIds = await context.StudentClassYear.AsNoTracking().Where(x => x.ClassYear.SchoolYear == schoolYear && x.ClassYear.Grade == request.Grade).Select(g => g.Student.UserId).Distinct().ToListAsync();
-
+                if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tên lịch thi không được phép bỏ trống");
+                if (!string.IsNullOrWhiteSpace(request.Type)) throw new BadRequestException("Loại lịch thi không được phép bỏ trống");
                 var examschedule = new ExamSchedule
                 {
                     Id = Guid.NewGuid(),
@@ -395,6 +397,7 @@ namespace School_Management.API.Repositories
                 if (userId == null) return (null, "NOT_FOUND_USER");
                 var teacherId = await context.Teacher.AsNoTracking().Where(x => x.UserId == Guid.Parse(userId)).Select(g => g.Id).FirstOrDefaultAsync();
                 if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
+                if (!string.IsNullOrWhiteSpace(request.Type)) throw new BadRequestException("Loại lịch thi không được phép chứa khoảng trắng");
 
                 var listResult = await context.ExamScheduleDetail.AsNoTracking()
                                                                  .Where(x => x.ExamSchedule.Type == request.Type && x.ExamSchedule.Term == request.Term

@@ -7,6 +7,7 @@ using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using System.Data;
+using System.Globalization;
 
 namespace School_Management.API.Services
 {
@@ -163,6 +164,7 @@ namespace School_Management.API.Services
                 if (DateTimeOffset.TryParse(updateAdminRequest.Birthday, out var date))
                     user.Birthday = date.ToUniversalTime();
             }
+            if (!string.IsNullOrWhiteSpace(updateAdminRequest.Address)) throw new BadRequestException("Địa chỉ không được bỏ trống");
             user.Address = updateAdminRequest.Address ?? user.Address;
 
             var result = await userManager.UpdateAsync(user);
@@ -252,6 +254,8 @@ namespace School_Management.API.Services
                 var eResult = await userManager.SetEmailAsync(user, updateUserRequest.Email);
                 if (!eResult.Succeeded) throw new BadRequestException("Cập nhật email thất bại");
             }
+            if (!string.IsNullOrWhiteSpace(updateUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép bỏ trống");
+
 
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
             user.Address = updateUserRequest.Address ?? user.Address;
@@ -421,14 +425,22 @@ namespace School_Management.API.Services
                         publicId = uploadResult.PublicId;
                     }
                 }
+
+                if (!string.IsNullOrWhiteSpace(createUserRequest.Username)) throw new BadRequestException("Tên đăng nhập không được phép để trống");
+                if (!string.IsNullOrWhiteSpace(createUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép chỉ là khoảng trắng");
+                if (!DateTime.TryParseExact(createUserRequest.Birthday, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var birthday1))
+                {
+                    throw new Exception("Ngày sinh không hợp lệ");
+                }
+                if (!string.IsNullOrWhiteSpace(createUserRequest.FullName)) throw new BadRequestException("Tên người dùng không được bỏ trống");
                 //User
                 var user = new AppUser
                 {
-                    UserName = createUserRequest.Username,
-                    Address = createUserRequest.Address,
+                    UserName = createUserRequest.Username?.Trim(),
+                    Address = createUserRequest.Address?.Trim(),
                     PhoneNumber = createUserRequest.PhoneNumber,
-                    Birthday = birthday.ToUniversalTime(),
-                    FullName = createUserRequest.FullName,
+                    Birthday = birthday1,
+                    FullName = createUserRequest.FullName?.Trim(),
                     Email = createUserRequest.Email,
                     AvatarUrl = avatarUrl ?? "",
                     PublicId = publicId ?? "",

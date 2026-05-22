@@ -6,7 +6,7 @@ namespace School_Management.API.Models.DTO
     {
         [Required(ErrorMessage = "Tên môn học là bắt buộc")]
         [MaxLength(100, ErrorMessage = "Tên môn học quá dài")]
-        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 ]+$", ErrorMessage = "Tên môn học không được chứa kí tự đặc biệt hoặc là khoảng trắng")]
+        [RegularExpression(@"^[\p{L}0-9 ]+$", ErrorMessage = "Tên môn học không được chứa kí tự đặc biệt hoặc là khoảng trắng")]
         public string? SubjectName { get; set; }
 
         [Required(ErrorMessage = "Số tiết tối đa là bắt buộc")]

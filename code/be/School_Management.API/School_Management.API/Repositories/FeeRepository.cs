@@ -1,6 +1,7 @@
 ﻿using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
@@ -41,7 +42,7 @@ namespace School_Management.API.Repositories
                                                                .ToListAsync();
 
                 var userIds = await context.Student.Where(x => studentIds.Contains(x.Id)).Select(g => g.UserId).ToListAsync();
-
+                if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề phí không được phép để trống");
                 var fee = new Fee
                 {
                     Id = Guid.NewGuid(),
@@ -190,7 +191,7 @@ namespace School_Management.API.Repositories
                 if (request.Title != fee.Title)
                     await context.FeeDetail.Where(x => x.FeeId == fee.Id)
                                            .ExecuteUpdateAsync(g => g.SetProperty(l => l.Reason, l => request.Title));
-
+                if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề phí không được bỏ trống");
                 fee.Title = request.Title;
                 fee.DueDate = request.DueDate.ToUniversalTime();
 

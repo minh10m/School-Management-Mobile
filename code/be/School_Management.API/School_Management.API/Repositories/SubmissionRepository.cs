@@ -6,6 +6,7 @@ using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
 using Xceed.Document.NET;
+using School_Management.API.Exceptions;
 
 namespace School_Management.API.Repositories
 {
@@ -60,13 +61,13 @@ namespace School_Management.API.Repositories
                 fileUrl = uploadResult.SecureUrl.ToString();
                 publicId = uploadResult.PublicId ?? "";
             }
-
+            if (!string.IsNullOrWhiteSpace(request.FileTitle)) throw new BadRequestException("Tên file không được phép bỏ trống");
             var submission = new Submission
             {
                 Id = Guid.NewGuid(),
                 Score = null,
                 FileUrl = fileUrl,
-                FileTitle = request.FileTitle,
+                FileTitle = request.FileTitle.Trim(),
                 AssignmentId = request.AssignmentId,
                 TimeSubmit = timeSubmit,
                 StudentId = student.Id,

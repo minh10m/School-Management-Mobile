@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace School_Management.API.Models.Domain
 {
     [Table("LessonAssignment")]
-    public class LessonAssignment
+    public class LessonAssignment : BaseEntity
     {
         [Key]
         public Guid Id { get; set; }

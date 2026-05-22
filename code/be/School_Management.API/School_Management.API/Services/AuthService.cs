@@ -42,7 +42,7 @@ namespace School_Management.API.Services
         public async Task<AuthResponse> LoginAsync(LoginRequest loginRequest)
         {
             // Check username
-            var user = await userManager.FindByNameAsync(loginRequest.UserName);
+            var user = await userManager.FindByNameAsync(loginRequest.UserName.Trim());
             if (user == null) throw new UnauthorizedException("Tên đăng nhập hoặc mật khẩu không chính xác");
 
             // Check lock out

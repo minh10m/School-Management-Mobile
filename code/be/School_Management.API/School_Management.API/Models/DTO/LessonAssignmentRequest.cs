@@ -5,15 +5,12 @@ namespace School_Management.API.Models.DTO
     public class LessonAssignmentRequest
     {
         [Required(ErrorMessage = "Tiêu đề bài tập là bắt buộc")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Tiêu đề không được phép chứa khoảng trắng")]
         public string Title { get; set; } = string.Empty;
 
         public IFormFile? File { get; set; }
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Tên hiển thị file không được chỉ chứa khoảng trắng")]
         public string? FileTitle { get; set; }
 
         [Required(ErrorMessage = "Mô tả bài tập là bắt buộc")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Mô tả bài tập không được phép chứa khoảng trắng")]
         public string Description { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Thông tin bài học là bắt buộc")]

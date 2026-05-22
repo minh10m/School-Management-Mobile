@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace School_Management.API.Models.Domain
 {
-    public class AIChatHistory
+    public class AIChatHistory : BaseEntity
     {
         [Key]
         public Guid Id { get; set; }

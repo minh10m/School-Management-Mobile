@@ -23,6 +23,8 @@ namespace School_Management.API.Services
                 "NOT_FOUND_TEACHERSUBJECTID" => throw new NotFoundException("Bạn chưa được phân công dạy môn nào"),
                 "DUPLICATED_COURSENAME" => throw new ConflictException("Tên khóa học bạn tạo đã tồn tại trong danh sách khóa học của bạn"),
                 "UNCORRECT_PRICE" => throw new BadRequestException("Giá tiền không được bé hơn 0"),
+                "COURSENAME_IS_WHITESPACE" => throw new BadRequestException("Tên khóa học không được phép để khoảng trắng"),
+                "DESCRIPTION_IS_WHITESPACE" => throw new BadRequestException("Mô tả khóa học không được phép để khoảng trắng"),
                 "SUCCESS" => result!,
                 _ => throw new Exception("Lỗi không xác định")
             };

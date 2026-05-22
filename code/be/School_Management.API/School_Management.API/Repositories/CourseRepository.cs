@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using School_Management.API.Data;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
@@ -37,6 +38,8 @@ namespace School_Management.API.Repositories
             if (isExisted) return (null, "DUPLICATED_COURSENAME");
 
             if (request.Price < 0) return (null, "UNCORRECT_PRICE");
+            if (!string.IsNullOrWhiteSpace(request.CourseName)) return (null, "COURSENAME_IS_WHITESPACE");
+            if (!string.IsNullOrWhiteSpace(request.Description)) return (null, "DESCRIPTION_IS_WHITESPACE");
 
             var course = new Course
             {
@@ -307,6 +310,7 @@ namespace School_Management.API.Repositories
                 .FirstOrDefaultAsync(x => x.Id == courseId);
 
             if (course == null) return (null, "NOT_FOUND_COURSE");
+            if (!string.IsNullOrWhiteSpace(request.Status)) throw new BadRequestException("Trạng thái khóa học không được bỏ trống");
 
             course.Status = request.Status;
 

@@ -3,6 +3,7 @@ using CloudinaryDotNet.Actions;
 using FirebaseAdmin.Messaging;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
@@ -115,6 +116,10 @@ namespace School_Management.API.Repositories
                             fileTitle = request.File.FileName;
                     }
                 }
+
+                if (!string.IsNullOrWhiteSpace(request.Description)) throw new BadRequestException("Mô tả bài tập không được phép bỏ trống");
+                if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề bài tập không được phép bỏ trống");
+                if (!string.IsNullOrWhiteSpace(request.FileTitle)) throw new BadRequestException("Tiêu đề file không đuoẹc phép bỏ trống");
 
                 var assignment = new Assignment
                 {
@@ -372,6 +377,9 @@ namespace School_Management.API.Repositories
                 if (string.IsNullOrEmpty(fileTitle)) fileTitle = request.File.FileName;
 
             }
+            if (!string.IsNullOrWhiteSpace(request.Description)) throw new BadRequestException("Mô tả bài tập không được phép bỏ trống");
+            if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề bài tập không được phép bỏ trống");
+            if (!string.IsNullOrWhiteSpace(request.FileTitle)) throw new BadRequestException("Tiêu đề file không đuoẹc phép bỏ trống");
 
             assignment.Title = request.Title;
             assignment.StartTime = officialStartTime.ToUniversalTime();

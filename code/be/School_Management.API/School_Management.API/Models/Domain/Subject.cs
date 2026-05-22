@@ -2,7 +2,7 @@
 
 namespace School_Management.API.Models.Domain
 {
-    public class Subject
+    public class Subject : BaseEntity
     {
         [Key]
         public Guid Id { get; set; }
