@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
@@ -29,11 +30,13 @@ namespace School_Management.API.Repositories
                                                      && x.EventDate == request.EventDate
                                                      && x.Title.ToLower() == titleName);
             if (isExisted) return (null, "DUPLICATE_TITLE");
+            if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề sự kiện không được bỏ trống");
+            if (!string.IsNullOrWhiteSpace(request.Body)) throw new BadRequestException("Nội dung sự kiện không được phép bỏ trống");
 
             var newEvent = new Event
             {
                 Id = Guid.NewGuid(),
-                Body = request.Body,
+                Body = request.Body?.Trim(),
                 Title = request.Title.Trim(),
                 FinishTime = request.FinishTime,
                 SchoolYear = request.SchoolYear,
@@ -178,14 +181,16 @@ namespace School_Management.API.Repositories
                                                      && x.Title.ToLower() == titleName
                                                      && x.Id != eventId);
             if (isExisted) return (null, "DUPLICATE_TITLE");
+            if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề sự kiện không được bỏ trống");
+            if (!string.IsNullOrWhiteSpace(request.Body)) throw new BadRequestException("Nội dung sự kiện không được phép bỏ trống");
 
             myEvent.SchoolYear = request.SchoolYear;
             myEvent.Term = request.Term;
             myEvent.StartTime = request.StartTime;
             myEvent.FinishTime = request.FinishTime;
-            myEvent.Title = request.Title;
+            myEvent.Title = request.Title.Trim();
             myEvent.EventDate = request.EventDate;
-            myEvent.Body = request.Body;
+            myEvent.Body = request.Body?.Trim();
 
             context.Event.Update(myEvent);
             await context.SaveChangesAsync();

@@ -323,6 +323,7 @@ namespace School_Management.API.Repositories
                         .Where(x => x.ConversationId == request.ConversationId && x.UserId != senderId)
                         .Select(x => x.UserId)
                         .ToListAsync();
+                    if (!string.IsNullOrWhiteSpace(request.Content)) throw new BadRequestException("Nội dung tin nhắn không được phép bỏ trống");
 
                     message = new Models.Domain.Message
                     {

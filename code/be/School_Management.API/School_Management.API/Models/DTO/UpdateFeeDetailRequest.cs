@@ -11,7 +11,6 @@ namespace School_Management.API.Models.DTO
         public int SchoolYear { get; set; }
 
         [Required(ErrorMessage = "Tiêu đề phí là bắt buộc")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Tiêu đề phí không được phép chứa khoảng trắng")]
         public string Reason { get; set; } = string.Empty;
     }
 }

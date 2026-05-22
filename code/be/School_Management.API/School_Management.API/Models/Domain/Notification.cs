@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace School_Management.API.Models.Domain
 {
-    public class Notification
+    public class Notification : BaseEntity
     {
         [Key]
         public Guid Id { get; set; }

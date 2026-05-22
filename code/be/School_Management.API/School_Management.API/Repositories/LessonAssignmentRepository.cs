@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
+using School_Management.API.Exceptions;
 
 namespace School_Management.API.Repositories
 {
@@ -17,6 +18,7 @@ namespace School_Management.API.Repositories
             this.context = context;
             this.cloudinary = cloudinary;
         }
+
         public async Task<(LessonAssignmentResponse? data, string message)> CreateLessonAssignment(LessonAssignmentRequest request)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
@@ -65,6 +67,10 @@ namespace School_Management.API.Repositories
                     publicId = uploadResult.PublicId;
 
                 }
+
+                if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề không được phép bỏ trống");
+                if (!string.IsNullOrWhiteSpace(request.FileTitle)) throw new BadRequestException("Tên hiển thị file không được phép chứa khoảng trắng");
+                if (!string.IsNullOrWhiteSpace(request.Description)) throw new BadRequestException("Mô tả bài tập không được phép chứa khoảng trắng");
 
                 var lessonAssignment = new LessonAssignment
                 {
@@ -178,6 +184,9 @@ namespace School_Management.API.Repositories
                     await context.LessonAssignment.Where(x => x.LessonId == lessonAssignment.LessonId && x.OrderIndex < lessonAssignment.OrderIndex
                                                            && x.OrderIndex >= request.OrderIndex)
                                                   .ExecuteUpdateAsync(g => g.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
+                if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề bài tập không được bỏ trống");
+                if (!string.IsNullOrWhiteSpace(request.FileTitle)) throw new BadRequestException("Tiêu đề file không được bỏ trống");
+                if (!string.IsNullOrWhiteSpace(request.Description)) throw new BadRequestException("Mô tả bài tập không được phép bỏ trống");
 
                 lessonAssignment.FileTitle = request.FileTitle ?? "Không có dữ liệu";
                 lessonAssignment.FileUrl = request.FileUrl ?? "Không có dữ liệu";

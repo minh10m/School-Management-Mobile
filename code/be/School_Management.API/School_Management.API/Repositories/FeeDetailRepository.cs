@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 
@@ -21,6 +22,8 @@ namespace School_Management.API.Repositories
 
             var studentInfo = await context.Student.AsNoTracking().Where(x => x.Id == request.StudentId).Select(g => new { g.User.FullName, g.Id }).FirstOrDefaultAsync();
             if (studentInfo == null) return (null, "NOT_FOUND_STUDENT");
+
+            if (!string.IsNullOrWhiteSpace(request.Reason)) throw new BadRequestException("Tiêu đề phí không được phép chứa khoảng trắng");
 
             var feeDetail = new FeeDetail
             {

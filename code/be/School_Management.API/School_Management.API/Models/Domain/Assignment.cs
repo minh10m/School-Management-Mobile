@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace School_Management.API.Models.Domain
 {
-    public class Assignment
+    public class Assignment : BaseEntity
     {
         [Key]
         public Guid Id { get; set; }

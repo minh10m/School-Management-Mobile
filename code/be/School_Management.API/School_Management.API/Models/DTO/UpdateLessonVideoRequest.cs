@@ -12,7 +12,6 @@ namespace School_Management.API.Models.DTO
         public bool IsPreview { get; set; }
 
         [Required(ErrorMessage = "Tên video là bắt buộc")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Tên video không được chỉ chứa khoảng trắng")]
         public string Name { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Thời lượng video là bắt buộc")]

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 
@@ -32,14 +33,14 @@ namespace School_Management.API.Repositories
                 await context.LessonVideo.Where(x => x.LessonId == request.LessonId && x.OrderIndex >= request.OrderIndex)
                                          .ExecuteUpdateAsync(g => g.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
 
-
+                if (!string.IsNullOrWhiteSpace(request.Name)) throw new BadRequestException("Tên video không được phép chứa khoảng trắng");
                 var lessonVideo = new LessonVideo
                 {
                     Id = Guid.NewGuid(),
                     Duration = request.Duration,
                     IsPreview = request.IsPreview,
                     LessonId = request.LessonId,
-                    Name = request.Name,
+                    Name = request.Name.Trim(),
                     OrderIndex = request.OrderIndex,
                     Url = request.Url
                 };
@@ -140,6 +141,8 @@ namespace School_Management.API.Repositories
                     await context.LessonVideo.Where(x => x.LessonId == lessonVideo.LessonId && x.OrderIndex < lessonVideo.OrderIndex && x.OrderIndex >= request.OrderIndex)
                                         .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
                 }
+
+                if (!string.IsNullOrWhiteSpace(request.Name)) throw new BadRequestException("Tên video không được để trống");   
 
                 lessonVideo.Duration = request.Duration;
                 lessonVideo.IsPreview = request.IsPreview;

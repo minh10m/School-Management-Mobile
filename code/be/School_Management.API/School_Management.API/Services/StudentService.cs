@@ -149,6 +149,8 @@ namespace School_Management.API.Services
                 }
             }
 
+            if (!string.IsNullOrWhiteSpace(updateUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép bỏ trống");
+
             user.FullName = updateUserRequest.FullName ?? user.FullName;
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
             user.Address = updateUserRequest.Address ?? user.Address;
@@ -257,6 +259,8 @@ namespace School_Management.API.Services
                     throw new BadRequestException("Cập nhật email thất bại");
                 }
             }
+
+            if (!string.IsNullOrWhiteSpace(updateUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép bỏ trống");
 
             user.FullName = updateUserRequest.FullName ?? user.FullName;
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;

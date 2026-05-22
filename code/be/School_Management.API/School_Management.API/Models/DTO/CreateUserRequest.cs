@@ -7,7 +7,6 @@ namespace School_Management.API.Models.DTO
     {
         //Username
         [Required(ErrorMessage = "Tên đăng nhập là bắt buộc")]
-        [MinLength(4, ErrorMessage = "Tên đăng nhập không được phép là khoảng trắng")]
         public string? Username { get; set; }
 
         //Password
@@ -31,13 +30,11 @@ namespace School_Management.API.Models.DTO
         //FullName
         [MaxLength(100, ErrorMessage = "Tên quá dài")]
         [Required(ErrorMessage = "Tên đầy đủ là bắt buộc")]
-        [RegularExpression(@"^(?!\s*$)[\p{L}0-9 ]+$", ErrorMessage = "Tên không được chứa kí tự đặc biệt hoặc là khoảng trắng")]
+        [RegularExpression(@"^[\p{L}0-9 ]+$", ErrorMessage = "Tên không được chứa kí tự đặc biệt")]
         public string? FullName { get; set; }
 
         //Address
-        [MinLength(5, ErrorMessage = "Địa chỉ quá dài")]
         [Required(ErrorMessage = "Địa chỉ là bắt buộc")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Địa chỉ không được phép là khoảng trắng")]
         public string? Address { get; set; }
 
         //Birthday

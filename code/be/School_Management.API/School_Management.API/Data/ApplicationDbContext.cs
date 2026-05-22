@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Models.Domain;
+using System.Linq.Expressions;
 using System.Reflection.Emit;
 
 namespace School_Management.API.Data
@@ -87,7 +88,22 @@ namespace School_Management.API.Data
             };
 
             builder.Entity<IdentityRole<Guid>>().HasData(roles);
-            
+
+            foreach (var entityType in builder.Model.GetEntityTypes())
+            {
+                // Kiểm tra xem thực thể có triển khai ISoftDelete hay không
+                if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
+                {
+                    var param = Expression.Parameter(entityType.ClrType, "e");
+                    var prop = Expression.Property(param, nameof(ISoftDelete.IsDeleted));
+                    var falseConstant = Expression.Constant(false);
+                    var comparison = Expression.Equal(prop, falseConstant);
+                    var lambda = Expression.Lambda(comparison, param);
+
+                    builder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                }
+            }
+
 
             // Configure datetime datatype with timestamp without time zone
             foreach (var entityType in builder.Model.GetEntityTypes())
@@ -102,6 +118,20 @@ namespace School_Management.API.Data
             }
 
             builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            // Quét qua các thực thể đang có trạng thái chuẩn bị bị xóa và có dán nhãn ISoftDelete
+            foreach (var entry in ChangeTracker.Entries<ISoftDelete>())
+            {
+                if (entry.State == EntityState.Deleted)
+                {
+                    entry.State = EntityState.Modified; // Chuyển sang trạng thái chỉnh sửa
+                    entry.Entity.IsDeleted = true;      // Đánh dấu xóa mềm
+                }
+            }
+            return base.SaveChangesAsync(cancellationToken);
         }
     }
 }

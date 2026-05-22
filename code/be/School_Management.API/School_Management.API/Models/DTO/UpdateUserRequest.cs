@@ -18,7 +18,6 @@ namespace School_Management.API.Models.DTO
         public string? FullName { get; set; }
 
         [MinLength(5, ErrorMessage = "Địa chỉ quá dài")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Địa chỉ không được phép là khoảng trắng")]
         public string? Address { get; set; }
 
         [RegularExpression(@"^\d{4}-\d{2}-\d{2}$", ErrorMessage = "Ngày sinh nhật cần có định dạng YYYY-MM-DD")]

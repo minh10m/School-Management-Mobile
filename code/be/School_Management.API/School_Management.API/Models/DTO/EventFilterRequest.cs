@@ -5,15 +5,13 @@ namespace School_Management.API.Models.DTO
     public class EventFilterRequest : BaseRequest
     {
         [MaxLength(200, ErrorMessage = "Tiêu đề không được vượt quá 200 ký tự")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Tiêu đề không được để trống hoặc chỉ chứa khoảng trắng")]
         [MinLength(10, ErrorMessage = "Tiêu đề phải có ít nhất 10 ký tự")]
         public string? Title { get; set; }
 
         [MaxLength(3000, ErrorMessage = "Nội dung không được vượt quá 3000 ký tự")]
-        [RegularExpression(@"^(?!\s*$).+", ErrorMessage = "Nội dung không được để trống hoặc chỉ chứa khoảng trắng")]
         [MinLength(10, ErrorMessage = "Nội dung phải có ít nhất 10 ký tự")]
         public string? Body { get; set; }
-
+            
         public TimeSpan? StartTime { get; set; }
 
         public DateOnly? EventDate { get; set; }
