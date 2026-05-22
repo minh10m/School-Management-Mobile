@@ -117,10 +117,6 @@ namespace School_Management.API.Repositories
                     }
                 }
 
-                if (!string.IsNullOrWhiteSpace(request.Description)) throw new BadRequestException("Mô tả bài tập không được phép bỏ trống");
-                if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề bài tập không được phép bỏ trống");
-                if (!string.IsNullOrWhiteSpace(request.FileTitle)) throw new BadRequestException("Tiêu đề file không đuoẹc phép bỏ trống");
-
                 var assignment = new Assignment
                 {
                     Id = Guid.NewGuid(),
@@ -377,10 +373,6 @@ namespace School_Management.API.Repositories
                 if (string.IsNullOrEmpty(fileTitle)) fileTitle = request.File.FileName;
 
             }
-            if (!string.IsNullOrWhiteSpace(request.Description)) throw new BadRequestException("Mô tả bài tập không được phép bỏ trống");
-            if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề bài tập không được phép bỏ trống");
-            if (!string.IsNullOrWhiteSpace(request.FileTitle)) throw new BadRequestException("Tiêu đề file không đuoẹc phép bỏ trống");
-
             assignment.Title = request.Title;
             assignment.StartTime = officialStartTime.ToUniversalTime();
             assignment.FinishTime = officialFinishTime.ToUniversalTime();

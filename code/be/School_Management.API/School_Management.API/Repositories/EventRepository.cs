@@ -30,8 +30,6 @@ namespace School_Management.API.Repositories
                                                      && x.EventDate == request.EventDate
                                                      && x.Title.ToLower() == titleName);
             if (isExisted) return (null, "DUPLICATE_TITLE");
-            if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề sự kiện không được bỏ trống");
-            if (!string.IsNullOrWhiteSpace(request.Body)) throw new BadRequestException("Nội dung sự kiện không được phép bỏ trống");
 
             var newEvent = new Event
             {
@@ -181,8 +179,6 @@ namespace School_Management.API.Repositories
                                                      && x.Title.ToLower() == titleName
                                                      && x.Id != eventId);
             if (isExisted) return (null, "DUPLICATE_TITLE");
-            if (!string.IsNullOrWhiteSpace(request.Title)) throw new BadRequestException("Tiêu đề sự kiện không được bỏ trống");
-            if (!string.IsNullOrWhiteSpace(request.Body)) throw new BadRequestException("Nội dung sự kiện không được phép bỏ trống");
 
             myEvent.SchoolYear = request.SchoolYear;
             myEvent.Term = request.Term;

@@ -426,13 +426,11 @@ namespace School_Management.API.Services
                     }
                 }
 
-                if (!string.IsNullOrWhiteSpace(createUserRequest.Username)) throw new BadRequestException("Tên đăng nhập không được phép để trống");
-                if (!string.IsNullOrWhiteSpace(createUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép chỉ là khoảng trắng");
+         
                 if (!DateTime.TryParseExact(createUserRequest.Birthday, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var birthday1))
                 {
                     throw new Exception("Ngày sinh không hợp lệ");
                 }
-                if (!string.IsNullOrWhiteSpace(createUserRequest.FullName)) throw new BadRequestException("Tên người dùng không được bỏ trống");
                 //User
                 var user = new AppUser
                 {
