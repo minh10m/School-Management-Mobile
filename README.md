@@ -22,7 +22,6 @@ A scalable mobile application for managing students, courses, enrollments, and a
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="https://github.com/user-attachments/assets/24c0038e-473c-43c8-a6d3-4291c588f96b" width="30%"/>
 
-
 ### AI chatbot screen
 <p align="left">
 <img src="https://github.com/user-attachments/assets/bb9d0171-1add-42f6-8fc1-10efabbe9404" width="30%" />
@@ -59,103 +58,131 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ## 📱 Project Overview
 
-- **Comprehensive Management:** Handles students, courses, enrollments, and scheduling  
-- **Real-time Communication:** Chat and notifications powered by a hybrid architecture (PostgreSQL + Firebase)  
-- **AI Integration:** Context-aware chatbot using Google Gemini API and Semantic Kernel with Retrieval-Augmented Generation (RAG)  
-- **Payment Integration:** SePay gateway with webhook verification for tuition payments  
-- **Security:** JWT authentication, Role-Based Access Control (RBAC), and Cloudflare WAF  
+- **Comprehensive Management:** Handles complex academic logic including students, courses, enrollments, tuition fees, timetables, and exam schedules.
+- **Real-time Communication:** Chat and notifications powered by a hybrid architecture (PostgreSQL for persistence + Firebase Firestore for real-time delivery).
+- **AI Integration:** Context-aware chatbot using Google Gemini API and Semantic Kernel with Retrieval-Augmented Generation (RAG) to query system data.
+- **Payment Integration:** SePay gateway with automated webhook verification for tuition payments.
+- **Media Management:** Integrated Cloudinary for optimized image storage and processing.
+- **Security & DevOps:** JWT authentication, RBAC, Cloudflare WAF, and automated CI/CD via GitHub Actions deployed on Azure.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Backend (Core System)
-- **Language/Framework:** C#, ASP.NET Core  
-- **Data Access:** Entity Framework Core
-- **Databases:** PostgreSQL (relational), Firebase Firestore (real-time), Redis (caching)  
-- **Security:** JWT, RBAC, Cloudflare WAF  
+- **Language/Framework:** C# (.NET 8), ASP.NET Core
+- **Data Access:** Entity Framework Core (EF Core)
+- **Databases:** PostgreSQL (Relational), Firebase Firestore (Real-time), Redis (Caching)
+- **Media:** Cloudinary API (Image hosting & optimization)
+- **Security:** JWT, Role-Based Access Control (RBAC), Cloudflare WAF (Rate limiting, DDoS protection)
 
 ### AI & Integrations
-- **AI:** Google Gemini API, Semantic Kernel (RAG)  
-- **Payment:** SePay  
-- **Infrastructure:** Azure, GitHub Actions (CI/CD)  
+- **AI Engine:** Google Gemini API, Semantic Kernel (RAG Architecture)
+- **Payment Gateway:** SePay (QR Code & Webhook integration)
+- **Infrastructure:** Microsoft Azure, GitHub Actions (CI/CD)
 
 ### Mobile
-- **Framework:** React Native, TypeScript  
+- **Framework:** React Native, TypeScript, Expo
+- **State Management:** Zustand
 
 ---
 
 ## ✨ Key Features
 
-### 1. RESTful API System
-- Developed 100+ RESTful APIs covering core modules  
-- Designed and optimized database schema with 30+ tables  
+### 1. Academic Workflow & RESTful API
+- **Complex Logic:** Developed 100+ APIs managing intricate school workflows: Timetables, Exam schedules, Tuition debt, and Attendance.
+- **Database Design:** Optimized schema with 30+ tables in PostgreSQL.
 
-### 2. Hybrid Real-time Chat
-- Messages stored in PostgreSQL for persistence  
-- Synced with Firebase Firestore for real-time delivery  
-- Backend-controlled flow to ensure consistency  
+### 2. Hybrid Real-time Chat & Notifications
+- **Consistency:** Messages stored in PostgreSQL for permanent records.
+- **Speed:** Synchronized with Firebase Firestore for instant real-time messaging.
+- **Push Notifications:** Automated system alerts for academic updates via Firebase.
 
-### 3. AI Assistant (RAG)
-- Implemented Retrieval-Augmented Generation (RAG)  
-- Enables context-aware responses based on system data  
+### 3. AI Assistant (RAG Implementation)
+- **Context-aware:** Uses Retrieval-Augmented Generation (RAG) to provide answers based on real-time school data (schedules, grades, regulations).
 
-### 4. CI/CD & Deployment
-- Automated deployment using GitHub Actions  
-- Deployed on Azure  
-- API protected by Cloudflare WAF (rate limiting, basic attack mitigation)  
+### 4. Financial & Media Integration
+- **Automated Billing:** Real-time tuition payment processing via SePay Webhooks.
+- **Optimized Media:** Profile pictures and documents managed via Cloudinary with on-the-fly resizing.
 
 ---
 
 ## 🏗️ System Architecture
+- **Mobile Client:** React Native app with real-time listeners.
+- **Security Layer:** Cloudflare WAF protection.
+- **Backend API (.NET):** Business logic, RAG processing, and 3rd-party integrations.
+- **Storage Layer:** PostgreSQL (Primary), Redis (Cache), Cloudinary (Images).
+- **Realtime Layer:** Firebase Firestore sync.
 
-- **Mobile Client:** Handles UI and real-time listeners
-- **WAF(Web Application Firewall)**  
-- **Backend API (.NET):** Processes business logic and integrations  
-- **Database Layer:** PostgreSQL (primary), Redis (caching)  
-- **Realtime Layer:** Firebase Firestore  
-- **AI Layer:** Semantic Kernel + Gemini API
-<img width="1000" height="731" alt="diagram-export-23_45_14-11-5-2026" src="https://github.com/user-attachments/assets/e18116d9-2913-4a67-ab4f-e4f983a985f2" />
+<img width="1000" height="731" alt="diagram-export" src="https://github.com/user-attachments/assets/e18116d9-2913-4a67-ab4f-e4f983a985f2" />
+
+---
 
 ---
 
 ## ⚙️ Setup & Run
 
+
 ### 1. Backend
-The backend is already deployed and managed via CI/CD (GitHub Actions).  
+The backend system is fully automated and deployed on **Azure App Service** via **GitHub Actions (CI/CD)**. No manual setup is required for the production environment.
+
 
 ### 2. Mobile (Frontend)
-Follow these steps to run the mobile application locally:
+Follow these steps to run the mobile application on your local machine:
 
-Environment Setup:
 
-Create a .env file in the root of the mobile project.
+#### **Prerequisites**
+- **Node.js** (LTS version recommended)
+- **Expo Go** app installed on your physical device (iOS/Android)
+- **Git** installed on your machine
 
-Add the following configurations (Contact the administrator for actual keys):
+
+#### **Environment Setup**
+1. Create a `.env` file in the root directory: `code/fe/.env`
+2. Configure the following environment variables (Contact the administrator for the actual keys):
+
+
 ```bash
-API_URL=https://api.tuan-minh-dev-soc.io.vn/api
+# Backend API URL
+API_URL=[https://api.tuan-minh-dev-soc.io.vn/api](https://api.tuan-minh-dev-soc.io.vn/api)
 
+# Payment Integration
 SEPAY_API_KEY=YOUR_SEPAY_API_KEY_HERE
+
+# Firebase Configuration (Real-time Chat & Notifications)
+EXPO_PUBLIC_FIREBASE_API_KEY=YOUR_API_KEY
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=YOUR_AUTH_DOMAIN
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=YOUR_PROJECT_ID
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=YOUR_STORAGE_BUCKET
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=YOUR_SENDER_ID
+EXPO_PUBLIC_FIREBASE_APP_ID=YOUR_APP_ID
 ```
-Prerequisites:
 
-Install Expo Go app on your physical device (iOS/Android).
 
-Node.js installed on your machine.
+#### **Installation & Execution**
+- Clone the repository
+git clone [https://github.com/minh10m/School-Management-Mobile.git](https://github.com/minh10m/School-Management-Mobile.git)
 
-Steps:
-```bash
-# Clone the project
-git clone https://github.com/minh10m/School-Management-Mobile.git
-cd School-Management-Mobile/code/fe
+- Navigate to the frontend directory
+`cd School-Management-Mobile/code/fe`
 
-# Install dependencies
-npm install
+- Install dependencies
+`npm install`
 
-# Start the Expo server
-npx expo start
-```
-After running the start command, scan the QR code with your phone's camera (iOS) or Expo Go app (Android) to view the application.
+- Start the Expo server
+`npx expo start`
+
+
+#### **How to View the App**
+- Once the Metro Bundler starts, a QR Code will appear in your terminal.
+
+- iOS: Open the default Camera app and scan the QR code.
+
+- Android: Open the Expo Go app and select "Scan QR Code".
+
+- Ensure your mobile device and computer are connected to the same Wi-Fi network (or use --tunnel if needed).
+
+
 ## 👥 Team & Roles
 - Le Anh Tuan (Backend Developer) 
 - Nguyen Xuan Nhat Minh (Frontend Developer)

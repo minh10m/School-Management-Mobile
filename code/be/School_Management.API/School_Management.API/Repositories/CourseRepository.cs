@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using School_Management.API.Data;
 using School_Management.API.Exceptions;
@@ -389,6 +389,10 @@ namespace School_Management.API.Repositories
             course.Description = request.Description;
             course.TeacherSubjectId = teacherSubjectInfo.TeacherSubjectId;
 
+            if (course.Status != null && course.Status.Equals("Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                course.Status = "Pending";
+            }
 
             await context.SaveChangesAsync();
             var query = from user in context.Users
