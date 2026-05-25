@@ -310,9 +310,9 @@ export default function AIChatScreen({ role }: Props) {
       return (
         <View style={styles.aiBubbleWrap}>
           <View style={styles.aiAvatar}>
-            <Image
+            <Image className="rounded-full"
               source={AI_AVATAR}
-              style={{ width: "100%", height: "100%", borderRadius: 15 }}
+              style={{ width: "100%", height: "100%", borderRadius: 9999 }}
               contentFit="cover"
             />
           </View>
@@ -337,7 +337,7 @@ export default function AIChatScreen({ role }: Props) {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <View style={styles.headerAvatar}>
-            <Image
+            <Image className="rounded-full"
               source={AI_AVATAR}
               style={{ width: "100%", height: "100%" }}
               contentFit="cover"
@@ -398,9 +398,9 @@ export default function AIChatScreen({ role }: Props) {
             ListEmptyComponent={
               <View style={styles.emptyState}>
                 <View style={styles.emptyIcon}>
-                  <Image
+                  <Image className="rounded-full"
                     source={AI_AVATAR}
-                    style={{ width: "100%", height: "100%", borderRadius: 36 }}
+                    style={{ width: "100%", height: "100%", borderRadius: 9999 }}
                     contentFit="cover"
                   />
                 </View>
@@ -433,12 +433,12 @@ export default function AIChatScreen({ role }: Props) {
               isLoading ? (
                 <View style={styles.aiBubbleWrap}>
                   <View style={styles.aiAvatar}>
-                    <Image
+                    <Image className="rounded-full"
                       source={AI_AVATAR}
                       style={{
                         width: "100%",
                         height: "100%",
-                        borderRadius: 15,
+                        borderRadius: 9999,
                       }}
                       contentFit="cover"
                     />

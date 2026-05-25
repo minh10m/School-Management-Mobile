@@ -90,9 +90,9 @@ export default function TeacherStudentListScreen() {
     >
       <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center mr-4 overflow-hidden">
         {item.avatarUrl ? (
-          <Image 
+          <Image className="rounded-full" 
             source={{ uri: item.avatarUrl }} 
-            style={{ width: 48, height: 48, borderRadius: 24 }}
+            style={{ width: 48, height: 48, borderRadius: 9999 }}
             contentFit="cover"
             transition={200}
           />

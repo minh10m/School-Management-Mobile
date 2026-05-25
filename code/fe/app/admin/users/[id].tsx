@@ -233,9 +233,9 @@ export default function AdminUserDetailScreen() {
         <View className="bg-white mx-4 mt-4 rounded-3xl p-5 border border-gray-100 items-center">
           <View className="w-20 h-20 rounded-full bg-blue-100 items-center justify-center mb-3 overflow-hidden">
             {user.avatarUrl ? (
-              <Image 
+              <Image className="rounded-full" 
                 source={{ uri: user.avatarUrl }} 
-                style={{ width: 80, height: 80, borderRadius: 40 }}
+                style={{ width: 80, height: 80, borderRadius: 9999 }}
                 contentFit="cover"
                 transition={200}
               />
