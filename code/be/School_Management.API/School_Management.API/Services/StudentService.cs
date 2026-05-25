@@ -1,4 +1,4 @@
-﻿using CloudinaryDotNet.Actions;
+using CloudinaryDotNet.Actions;
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -149,7 +149,7 @@ namespace School_Management.API.Services
                 }
             }
 
-            if (!string.IsNullOrWhiteSpace(updateUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép bỏ trống");
+            if (updateUserRequest.Address != null && string.IsNullOrWhiteSpace(updateUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép bỏ trống");
 
             user.FullName = updateUserRequest.FullName ?? user.FullName;
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
@@ -260,7 +260,7 @@ namespace School_Management.API.Services
                 }
             }
 
-            if (!string.IsNullOrWhiteSpace(updateUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép bỏ trống");
+            if (updateUserRequest.Address != null && string.IsNullOrWhiteSpace(updateUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép bỏ trống");
 
             user.FullName = updateUserRequest.FullName ?? user.FullName;
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
