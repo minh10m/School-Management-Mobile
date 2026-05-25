@@ -8,6 +8,8 @@ export const eventService = {
       Title: params?.Title || undefined,
       SchoolYear: Number(params?.SchoolYear || 2026),
       Term: Number(params?.Term || 1),
+      SortBy: "EventDate",
+      IsAscending: false,
     };
     
     const response = await apiClient.get<EventListResponse>("/events", { params: backendParams });

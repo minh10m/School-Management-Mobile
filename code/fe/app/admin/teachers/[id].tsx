@@ -8,6 +8,8 @@ import {
   Alert,
   Modal,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -206,7 +208,11 @@ export default function AdminTeacherDetailScreen() {
         </TouchableOpacity>
       }
     >
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }} 
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Profile Card */}
         <View className="bg-white items-center py-8 border-b border-gray-100">
           <View className="w-24 h-24 rounded-full bg-purple-100 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
@@ -449,6 +455,7 @@ export default function AdminTeacherDetailScreen() {
           loading={saving}
         />
       )}
+      </KeyboardAvoidingView>
     </AdminPageWrapper>
   );
 }
