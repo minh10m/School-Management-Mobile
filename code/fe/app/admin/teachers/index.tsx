@@ -244,7 +244,7 @@ export default function AdminTeachersScreen() {
                 {item.avatarUrl ? (
                   <Image 
                     source={{ uri: item.avatarUrl }} 
-                    style={{ width: 56, height: 56 }}
+                    style={{ width: 56, height: 56, borderRadius: 28 }}
                     contentFit="cover"
                     transition={200}
                   />

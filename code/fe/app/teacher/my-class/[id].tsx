@@ -197,7 +197,7 @@ function StudentRow({ item, index }: { item: StudentListItem; index: number }) {
         {item.avatarUrl ? (
           <Image 
             source={{ uri: item.avatarUrl }} 
-            style={{ width: 45, height: 45 }}
+            style={{ width: 45, height: 45, borderRadius: 22.5 }}
             contentFit="cover"
             transition={200}
           />

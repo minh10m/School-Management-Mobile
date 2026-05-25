@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
@@ -384,13 +385,21 @@ export default function AdminClassDetailScreen() {
                     }
                     className="flex-row items-center p-6 bg-white border border-gray-100 rounded-[36px] shadow-sm active:opacity-70"
                   >
-                    <View className="w-14 h-14 rounded-[22px] bg-blue-50 items-center justify-center mr-5 border border-blue-100/50">
-                      <Text
-                        style={{ fontFamily: "Poppins-Bold" }}
-                        className="text-[#136ADA] text-2xl"
-                      >
-                        {s.fullName.charAt(0)}
-                      </Text>
+                    <View className="w-14 h-14 rounded-full bg-blue-50 items-center justify-center mr-5 border border-blue-100/50 overflow-hidden">
+                      {s.avatarUrl ? (
+                        <Image 
+                          source={{ uri: s.avatarUrl }} 
+                          style={{ width: 56, height: 56, borderRadius: 28 }}
+                          contentFit="cover"
+                        />
+                      ) : (
+                        <Text
+                          style={{ fontFamily: "Poppins-Bold" }}
+                          className="text-[#136ADA] text-2xl"
+                        >
+                          {s.fullName.charAt(0).toUpperCase()}
+                        </Text>
+                      )}
                     </View>
                     <View className="flex-1">
                       <Text

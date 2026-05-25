@@ -153,7 +153,7 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
                 {userInfo?.avatarUrl ? (
                   <Image
                     source={{ uri: userInfo.avatarUrl }}
-                    style={{ width: 64, height: 64 }}
+                    style={{ width: 64, height: 64, borderRadius: 32 }}
                     contentFit="cover"
                     transition={200}
                   />

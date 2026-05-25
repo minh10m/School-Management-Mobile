@@ -53,7 +53,7 @@ export default function TeacherListScreen() {
           {item.avatarUrl ? (
             <Image 
               source={{ uri: item.avatarUrl }} 
-              style={{ width: 48, height: 48 }}
+              style={{ width: 48, height: 48, borderRadius: 24 }}
               contentFit="cover"
               transition={200}
             />

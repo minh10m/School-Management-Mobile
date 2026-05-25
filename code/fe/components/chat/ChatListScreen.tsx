@@ -55,7 +55,7 @@ const ConversationItem = memo(({ item, onPress, fbConvo }: { item: ConversationR
         {item.avatarUrl ? (
           <Image 
             source={{ uri: item.avatarUrl }} 
-            style={{ width: 48, height: 48 }}
+            style={{ width: 48, height: 48, borderRadius: 24 }}
             contentFit="cover"
             transition={200}
           />
@@ -130,7 +130,7 @@ const UserItem = memo(({ user, onSelect }: { user: UserType; onSelect: () => voi
         {user.avatarUrl ? (
           <Image 
             source={{ uri: user.avatarUrl }} 
-            style={{ width: 48, height: 48 }}
+            style={{ width: 48, height: 48, borderRadius: 24 }}
             contentFit="cover"
             transition={200}
           />

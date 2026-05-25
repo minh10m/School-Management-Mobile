@@ -339,7 +339,7 @@ export default function StudentAssignmentDetailScreen() {
                   Nhấn để xem chi tiết đính kèm
                 </Text>
               </View>
-              <View className="w-10 h-10 items-center justify-center">
+              <View className="w-10 h-10 items-center justify-center rounded-full">
                 <Ionicons name="download-outline" size={22} color="#94A3B8" />
               </View>
             </TouchableOpacity>
