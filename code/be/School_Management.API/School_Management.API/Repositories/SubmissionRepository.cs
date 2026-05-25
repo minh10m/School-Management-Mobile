@@ -1,4 +1,4 @@
-﻿using CloudinaryDotNet.Actions;
+using CloudinaryDotNet.Actions;
 using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
@@ -61,7 +61,7 @@ namespace School_Management.API.Repositories
                 fileUrl = uploadResult.SecureUrl.ToString();
                 publicId = uploadResult.PublicId ?? "";
             }
-            if (!string.IsNullOrWhiteSpace(request.FileTitle)) throw new BadRequestException("Tên file không được phép bỏ trống");
+            if (string.IsNullOrWhiteSpace(request.FileTitle)) throw new BadRequestException("Tên file không được phép bỏ trống");
             var submission = new Submission
             {
                 Id = Guid.NewGuid(),

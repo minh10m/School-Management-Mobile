@@ -58,11 +58,11 @@ export const studentService = {
     payload: UpdateStudentPayload
   ): Promise<StudentResponse> => {
     const formData = new FormData();
-    if (payload.email) formData.append("Email", payload.email);
-    if (payload.phone) formData.append("PhoneNumber", payload.phone);
-    if (payload.fullName) formData.append("FullName", payload.fullName);
-    if (payload.address) formData.append("Address", payload.address);
-    if (payload.birthday) formData.append("Birthday", payload.birthday);
+    if (payload.email !== undefined) formData.append("Email", payload.email);
+    if (payload.phone !== undefined) formData.append("PhoneNumber", payload.phone);
+    if (payload.fullName !== undefined) formData.append("FullName", payload.fullName);
+    if (payload.address !== undefined) formData.append("Address", payload.address);
+    if (payload.birthday !== undefined) formData.append("Birthday", payload.birthday);
 
     const response = await apiClient.patch<StudentResponse>(
       `/students/${studentId}`,
