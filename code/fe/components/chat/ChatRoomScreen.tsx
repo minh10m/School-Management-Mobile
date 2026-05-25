@@ -30,12 +30,14 @@ export default function ChatRoomScreen() {
     name,
     isGroup: isGroupParam,
     avatarUrl: avatarUrlParam,
+    t,
   } = useLocalSearchParams<{
     id: string;
     isNew?: string;
     name?: string;
     isGroup?: string;
     avatarUrl?: string;
+    t?: string;
   }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -67,68 +69,7 @@ export default function ChatRoomScreen() {
   const [inputText, setInputText] = useState("");
   const flatListRef = useRef<FlatList>(null);
 
-  // Group editing state
-  const [editingGroup, setEditingGroup] = useState(false);
-  const [editGroupName, setEditGroupName] = useState("");
-  const [editGroupAvatar, setEditGroupAvatar] = useState<{
-    uri: string;
-    file: any;
-  } | null>(null);
-  const [updatingGroup, setUpdatingGroup] = useState(false);
-
-  useEffect(() => {
-    if (showInfoModal && isGroup && !viewingMember) {
-      setEditGroupName(name || "");
-      setEditGroupAvatar(null);
-      setEditingGroup(false);
-    }
-  }, [showInfoModal, viewingMember]);
-
-  const handlePickGroupAvatar = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      const asset = result.assets[0];
-      setEditGroupAvatar({
-        uri: asset.uri,
-        file: {
-          uri: asset.uri,
-          type: asset.mimeType || "image/jpeg",
-          name: asset.fileName || "group_avatar.jpg",
-        },
-      });
-    }
-  };
-
-  const handleUpdateGroup = async () => {
-    if (!editGroupName.trim() || !realConversationId) return;
-    try {
-      setUpdatingGroup(true);
-      const formData = new FormData();
-      formData.append("ConversationName", editGroupName.trim());
-      if (editGroupAvatar?.file) {
-        formData.append("Avatar", editGroupAvatar.file as any);
-      }
-
-      await conversationService.updateGroup(realConversationId, formData);
-      setEditingGroup(false);
-      router.back();
-      // Hiện thông báo sau khi đã quay lại list chat
-      setTimeout(() => {
-        Alert.alert("Thành công", "Cập nhật thông tin nhóm thành công");
-      }, 300);
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Lỗi", "Không thể cập nhật thông tin nhóm");
-    } finally {
-      setUpdatingGroup(false);
-    }
-  };
+  // Removed local editing group state since it is moved to a separate screen
 
   // Tìm thông tin cuộc trò chuyện hiện tại từ Firebase
   const currentConversation = fbConversations.find(
@@ -166,7 +107,7 @@ export default function ChatRoomScreen() {
 
   useEffect(() => {
     fetchMessages();
-  }, [realConversationId]); // Only fetch on initial load or ID change
+  }, [realConversationId, t]); // Only fetch on initial load, ID change, or explicit refresh (t)
 
   // Listen to realtime new messages
   useEffect(() => {
@@ -706,16 +647,24 @@ export default function ChatRoomScreen() {
               >
                 {viewingMember
                   ? "Trang cá nhân"
-                  : editingGroup
-                    ? "Chỉnh sửa nhóm"
-                    : isGroup
-                      ? `Thông tin nhóm`
-                      : "Trang cá nhân"}
+                  : isGroup
+                    ? `Thông tin nhóm`
+                    : "Trang cá nhân"}
               </Text>
               <View className="flex-row items-center gap-2">
-                {isGroup && !viewingMember && !editingGroup && (
+                {isGroup && !viewingMember && (
                   <TouchableOpacity
-                    onPress={() => setEditingGroup(true)}
+                    onPress={() => {
+                      setShowInfoModal(false);
+                      router.push({
+                        pathname: `/${rolePrefix}/chat/edit-group` as any,
+                        params: { 
+                          conversationId: realConversationId,
+                          currentName: currentConversation?.displayName || name,
+                          currentAvatarUrl: currentConversation?.avatarUrl || avatarUrlParam || ""
+                        }
+                      });
+                    }}
                     className="p-2 bg-indigo-50 rounded-full"
                   >
                     <Ionicons name="create-outline" size={20} color="#6366F1" />
@@ -822,86 +771,6 @@ export default function ChatRoomScreen() {
                     >
                       {isGroup ? "Quay lại" : "Đóng"}
                     </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ) : editingGroup ? (
-              <View className="py-4">
-                <View className="items-center mb-6">
-                  <TouchableOpacity
-                    onPress={handlePickGroupAvatar}
-                    className="w-24 h-24 rounded-full bg-indigo-50 items-center justify-center border-4 border-white shadow-sm overflow-hidden"
-                  >
-                    {editGroupAvatar?.uri ? (
-                      <Image
-                        source={{ uri: editGroupAvatar.uri }}
-                        style={{ width: 96, height: 96, borderRadius: 48 }}
-                        contentFit="cover"
-                        transition={200}
-                      />
-                    ) : (currentConversation?.avatarUrl || avatarUrlParam) ? (
-                      <Image
-                        source={{ uri: currentConversation?.avatarUrl || avatarUrlParam || "" }}
-                        style={{ width: 96, height: 96, borderRadius: 48 }}
-                        contentFit="cover"
-                        transition={200}
-                      />
-                    ) : (
-                      <Ionicons name="camera-outline" size={32} color="#6366F1" />
-                    )}
-                  </TouchableOpacity>
-                  <Text
-                    style={{ fontFamily: "Poppins-Medium" }}
-                    className="text-indigo-600 mt-2 text-xs"
-                  >
-                    Thay đổi ảnh nhóm
-                  </Text>
-                </View>
-
-                <View className="gap-1 mb-6">
-                  <Text
-                    style={{ fontFamily: "Poppins-Medium" }}
-                    className="text-gray-500 text-xs ml-1"
-                  >
-                    Tên nhóm
-                  </Text>
-                  <TextInput
-                    value={editGroupName}
-                    onChangeText={setEditGroupName}
-                    placeholder="Nhập tên nhóm mới..."
-                    className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-4 text-black text-sm"
-                    style={{ fontFamily: "Poppins-Regular" }}
-                  />
-                </View>
-
-                <View className="flex-row gap-3">
-                  <TouchableOpacity
-                    className="flex-1 bg-gray-100 py-4 rounded-2xl items-center"
-                    onPress={() => setEditingGroup(false)}
-                    disabled={updatingGroup}
-                  >
-                    <Text
-                      style={{ fontFamily: "Poppins-SemiBold" }}
-                      className="text-gray-600"
-                    >
-                      Hủy
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    className="flex-1 bg-indigo-600 py-4 rounded-2xl items-center shadow-lg shadow-indigo-200"
-                    onPress={handleUpdateGroup}
-                    disabled={updatingGroup}
-                  >
-                    {updatingGroup ? (
-                      <ActivityIndicator size="small" color="white" />
-                    ) : (
-                      <Text
-                        style={{ fontFamily: "Poppins-SemiBold" }}
-                        className="text-white"
-                      >
-                        Lưu thay đổi
-                      </Text>
-                    )}
                   </TouchableOpacity>
                 </View>
               </View>
