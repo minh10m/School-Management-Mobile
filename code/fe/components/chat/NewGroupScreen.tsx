@@ -251,8 +251,12 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
                     onPress={() => toggleUserSelection(u)}
                     style={{ flexDirection: "row", alignItems: "center", backgroundColor: PRIMARY_LIGHT, paddingLeft: 6, paddingRight: 10, paddingVertical: 6, borderRadius: 100, marginRight: 8, borderWidth: 1, borderColor: "#DBE9FE" }}
                   >
-                    <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: getAvatarColor(u.fullName), alignItems: "center", justifyContent: "center", marginRight: 8 }}>
-                      <Text style={{ color: "#FFFFFF", fontSize: 10, fontWeight: "bold" }}>{u.fullName.charAt(0).toUpperCase()}</Text>
+                    <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: getAvatarColor(u.fullName), alignItems: "center", justifyContent: "center", marginRight: 8, overflow: "hidden" }}>
+                      {u.avatarUrl ? (
+                        <Image source={{ uri: u.avatarUrl }} style={{ width: 24, height: 24, borderRadius: 12 }} contentFit="cover" />
+                      ) : (
+                        <Text style={{ color: "#FFFFFF", fontSize: 10, fontWeight: "bold" }}>{u.fullName.charAt(0).toUpperCase()}</Text>
+                      )}
                     </View>
                     <Text style={{ color: PRIMARY_COLOR, fontSize: 13, fontWeight: "500", marginRight: 4 }}>{u.fullName.split(" ").pop()}</Text>
                     <Ionicons name="close-circle" size={16} color={PRIMARY_COLOR} />
@@ -303,8 +307,12 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
                       {isSelected && <Ionicons name="checkmark" size={14} color="#FFFFFF" />}
                     </View>
                     
-                    <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: getAvatarColor(item.fullName), alignItems: "center", justifyContent: "center", marginRight: 16 }}>
-                      <Text style={{ color: "#FFFFFF", fontSize: 18, fontWeight: "bold" }}>{item.fullName.charAt(0).toUpperCase()}</Text>
+                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: getAvatarColor(item.fullName), alignItems: "center", justifyContent: "center", marginRight: 16, overflow: "hidden" }}>
+                      {item.avatarUrl ? (
+                        <Image source={{ uri: item.avatarUrl }} style={{ width: 44, height: 44, borderRadius: 22 }} contentFit="cover" />
+                      ) : (
+                        <Text style={{ color: "#FFFFFF", fontSize: 18, fontWeight: "bold" }}>{item.fullName.charAt(0).toUpperCase()}</Text>
+                      )}
                     </View>
 
                     <View style={{ flex: 1 }}>
