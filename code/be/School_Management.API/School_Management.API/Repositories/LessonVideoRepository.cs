@@ -33,10 +33,7 @@ namespace School_Management.API.Repositories
                 await context.LessonVideo.Where(x => x.LessonId == request.LessonId && x.OrderIndex >= request.OrderIndex)
                                          .ExecuteUpdateAsync(g => g.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
 
-<<<<<<< HEAD
                 if (string.IsNullOrWhiteSpace(request.Name)) throw new BadRequestException("Tên video không được để trống");
-=======
->>>>>>> c61e4ab (fix be)
                 var lessonVideo = new LessonVideo
                 {
                     Id = Guid.NewGuid(),
@@ -145,11 +142,8 @@ namespace School_Management.API.Repositories
                                         .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
                 }
 
-<<<<<<< HEAD
                 if (string.IsNullOrWhiteSpace(request.Name)) throw new BadRequestException("Tên video không được để trống");   
 
-=======
->>>>>>> c61e4ab (fix be)
                 lessonVideo.Duration = request.Duration;
                 lessonVideo.IsPreview = request.IsPreview;
                 lessonVideo.Name = request.Name;

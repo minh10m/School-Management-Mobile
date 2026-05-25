@@ -164,10 +164,7 @@ namespace School_Management.API.Services
                 if (DateTimeOffset.TryParse(updateAdminRequest.Birthday, out var date))
                     user.Birthday = date.ToUniversalTime();
             }
-<<<<<<< HEAD
             if (updateAdminRequest.Address != null && string.IsNullOrWhiteSpace(updateAdminRequest.Address)) throw new BadRequestException("Địa chỉ không được bỏ trống");
-=======
->>>>>>> c61e4ab (fix be)
             user.Address = updateAdminRequest.Address ?? user.Address;
 
             var result = await userManager.UpdateAsync(user);
@@ -257,11 +254,8 @@ namespace School_Management.API.Services
                 var eResult = await userManager.SetEmailAsync(user, updateUserRequest.Email);
                 if (!eResult.Succeeded) throw new BadRequestException("Cập nhật email thất bại");
             }
-<<<<<<< HEAD
             if (updateUserRequest.Address != null && string.IsNullOrWhiteSpace(updateUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép bỏ trống");
 
-=======
->>>>>>> c61e4ab (fix be)
 
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
             user.Address = updateUserRequest.Address ?? user.Address;
