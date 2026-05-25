@@ -209,9 +209,9 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
               }}
             >
               {groupAvatar ? (
-                <Image 
+                <Image className="rounded-full" 
                   source={{ uri: groupAvatar.uri }} 
-                  style={{ width: 90, height: 90, borderRadius: 45 }}
+                  style={{ width: 90, height: 90, borderRadius: 9999 }}
                   contentFit="cover"
                 />
               ) : (
@@ -253,7 +253,7 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
                   >
                     <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: getAvatarColor(u.fullName), alignItems: "center", justifyContent: "center", marginRight: 8, overflow: "hidden" }}>
                       {u.avatarUrl ? (
-                        <Image source={{ uri: u.avatarUrl }} style={{ width: 24, height: 24, borderRadius: 12 }} contentFit="cover" />
+                        <Image className="rounded-full" source={{ uri: u.avatarUrl }} style={{ width: 24, height: 24, borderRadius: 9999 }} contentFit="cover" />
                       ) : (
                         <Text style={{ color: "#FFFFFF", fontSize: 10, fontWeight: "bold" }}>{u.fullName.charAt(0).toUpperCase()}</Text>
                       )}
@@ -309,7 +309,7 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
                     
                     <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: getAvatarColor(item.fullName), alignItems: "center", justifyContent: "center", marginRight: 16, overflow: "hidden" }}>
                       {item.avatarUrl ? (
-                        <Image source={{ uri: item.avatarUrl }} style={{ width: 44, height: 44, borderRadius: 22 }} contentFit="cover" />
+                        <Image className="rounded-full" source={{ uri: item.avatarUrl }} style={{ width: 44, height: 44, borderRadius: 9999 }} contentFit="cover" />
                       ) : (
                         <Text style={{ color: "#FFFFFF", fontSize: 18, fontWeight: "bold" }}>{item.fullName.charAt(0).toUpperCase()}</Text>
                       )}

@@ -328,9 +328,9 @@ export default function ChatRoomScreen() {
           <View className="w-9 mr-1 items-center justify-end pb-1">
             {!isSameSenderAsNext && (
               avatarUrl ? (
-                <Image 
+                <Image className="rounded-full" 
                   source={{ uri: avatarUrl }} 
-                  style={{ width: 32, height: 32, borderRadius: 16 }}
+                  style={{ width: 32, height: 32, borderRadius: 9999 }}
                   contentFit="cover"
                   transition={200}
                 />
@@ -484,9 +484,9 @@ export default function ChatRoomScreen() {
           <View className="w-10 h-10 rounded-full bg-indigo-50 items-center justify-center mr-3 overflow-hidden">
             {isGroup ? (
               (currentConversation?.avatarUrl || avatarUrlParam) ? (
-                <Image 
+                <Image className="rounded-full" 
                   source={{ uri: currentConversation?.avatarUrl || avatarUrlParam || "" }} 
-                  style={{ width: 40, height: 40, borderRadius: 20 }}
+                  style={{ width: 40, height: 40, borderRadius: 9999 }}
                   contentFit="cover"
                   transition={200}
                 />
@@ -494,9 +494,9 @@ export default function ChatRoomScreen() {
                 <Ionicons name="people" size={20} color="#6366F1" />
               )
             ) : (otherMember?.avatarUrl || avatarUrlParam) ? (
-              <Image 
+              <Image className="rounded-full" 
                 source={{ uri: otherMember?.avatarUrl || avatarUrlParam }} 
-                style={{ width: 40, height: 40, borderRadius: 20 }}
+                style={{ width: 40, height: 40, borderRadius: 9999 }}
                 contentFit="cover"
                 transition={200}
               />
@@ -552,9 +552,9 @@ export default function ChatRoomScreen() {
               <View className="w-16 h-16 bg-indigo-50 rounded-full items-center justify-center mb-4 overflow-hidden">
                 {isGroup ? (
                   (currentConversation?.avatarUrl || avatarUrlParam) ? (
-                    <Image 
+                    <Image className="rounded-full" 
                       source={{ uri: currentConversation?.avatarUrl || avatarUrlParam || "" }} 
-                      style={{ width: 64, height: 64, borderRadius: 32 }}
+                      style={{ width: 64, height: 64, borderRadius: 9999 }}
                       contentFit="cover"
                       transition={200}
                     />
@@ -562,9 +562,9 @@ export default function ChatRoomScreen() {
                     <Ionicons name="people" size={32} color="#6366F1" />
                   )
                 ) : (otherMember?.avatarUrl || avatarUrlParam) ? (
-                  <Image 
+                  <Image className="rounded-full" 
                     source={{ uri: otherMember?.avatarUrl || avatarUrlParam }} 
-                    style={{ width: 64, height: 64, borderRadius: 32 }}
+                    style={{ width: 64, height: 64, borderRadius: 9999 }}
                     contentFit="cover"
                     transition={200}
                   />
@@ -687,9 +687,9 @@ export default function ChatRoomScreen() {
               <View className="items-center py-6">
                 <View className="w-24 h-24 bg-indigo-100 rounded-full items-center justify-center mb-4 overflow-hidden">
                   {(otherUserProfile?.avatarUrl || viewingMember.avatarUrl) ? (
-                    <Image 
+                    <Image className="rounded-full" 
                       source={{ uri: otherUserProfile?.avatarUrl || viewingMember.avatarUrl || '' }} 
-                      style={{ width: 96, height: 96, borderRadius: 48 }}
+                      style={{ width: 96, height: 96, borderRadius: 9999 }}
                       contentFit="cover"
                       transition={200}
                     />
@@ -788,9 +788,9 @@ export default function ChatRoomScreen() {
                     >
                       <View className="w-12 h-12 bg-indigo-100 rounded-full items-center justify-center mr-4 overflow-hidden">
                         {item.avatarUrl ? (
-                          <Image 
+                          <Image className="rounded-full" 
                             source={{ uri: item.avatarUrl }} 
-                            style={{ width: 48, height: 48, borderRadius: 24 }}
+                            style={{ width: 48, height: 48, borderRadius: 9999 }}
                             contentFit="cover"
                             transition={200}
                           />

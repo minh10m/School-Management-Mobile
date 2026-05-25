@@ -154,9 +154,9 @@ export default function StudentProfileScreen() {
           <View className="bg-white items-center py-10 border-b border-gray-50">
             <View className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
               {profile?.avatarUrl ? (
-                <Image 
+                <Image className="rounded-full" 
                   source={{ uri: profile.avatarUrl }} 
-                  style={{ width: 96, height: 96, borderRadius: 48 }}
+                  style={{ width: 96, height: 96, borderRadius: 9999 }}
                   contentFit="cover"
                   transition={200}
                 />
@@ -219,9 +219,9 @@ export default function StudentProfileScreen() {
             <View className="items-center mb-6">
               <TouchableOpacity onPress={pickImage} className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center border-4 border-white shadow-sm overflow-hidden">
                 {editForm.avatarUri ? (
-                  <Image 
+                  <Image className="rounded-full" 
                     source={{ uri: editForm.avatarUri }} 
-                    style={{ width: 96, height: 96, borderRadius: 48 }}
+                    style={{ width: 96, height: 96, borderRadius: 9999 }}
                     contentFit="cover"
                     transition={200}
                   />

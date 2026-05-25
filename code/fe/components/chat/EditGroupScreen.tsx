@@ -136,16 +136,16 @@ export default function EditGroupScreen({ rolePrefix: rolePrefixProp }: EditGrou
               }}
             >
               {editGroupAvatar?.uri ? (
-                <Image
+                <Image className="rounded-full"
                   source={{ uri: editGroupAvatar.uri }}
-                  style={{ width: 120, height: 120, borderRadius: 60 }}
+                  style={{ width: 120, height: 120, borderRadius: 9999 }}
                   contentFit="cover"
                   transition={200}
                 />
               ) : params.currentAvatarUrl ? (
-                <Image
+                <Image className="rounded-full"
                   source={{ uri: params.currentAvatarUrl }}
-                  style={{ width: 120, height: 120, borderRadius: 60 }}
+                  style={{ width: 120, height: 120, borderRadius: 9999 }}
                   contentFit="cover"
                   transition={200}
                 />

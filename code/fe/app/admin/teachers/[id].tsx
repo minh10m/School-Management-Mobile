@@ -217,9 +217,9 @@ export default function AdminTeacherDetailScreen() {
         <View className="bg-white items-center py-8 border-b border-gray-100">
           <View className="w-24 h-24 rounded-full bg-purple-100 items-center justify-center mb-4 border-4 border-white shadow-sm overflow-hidden">
             {teacher.avatarUrl ? (
-              <Image 
+              <Image className="rounded-full" 
                 source={{ uri: teacher.avatarUrl }} 
-                style={{ width: 96, height: 96, borderRadius: 48 }}
+                style={{ width: 96, height: 96, borderRadius: 9999 }}
                 contentFit="cover"
                 transition={200}
               />

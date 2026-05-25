@@ -53,9 +53,9 @@ const ConversationItem = memo(({ item, onPress, fbConvo }: { item: ConversationR
     >
       <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${!item.avatarUrl ? getAvatarColor(item.displayName) : 'bg-transparent'} shadow-sm overflow-hidden`}>
         {item.avatarUrl ? (
-          <Image 
+          <Image className="rounded-full" 
             source={{ uri: item.avatarUrl }} 
-            style={{ width: 48, height: 48, borderRadius: 24 }}
+            style={{ width: 48, height: 48, borderRadius: 9999 }}
             contentFit="cover"
             transition={200}
           />
@@ -128,9 +128,9 @@ const UserItem = memo(({ user, onSelect }: { user: UserType; onSelect: () => voi
     >
       <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${!user.avatarUrl ? getAvatarColor(user.fullName) : 'bg-transparent'} shadow-sm overflow-hidden`}>
         {user.avatarUrl ? (
-          <Image 
+          <Image className="rounded-full" 
             source={{ uri: user.avatarUrl }} 
-            style={{ width: 48, height: 48, borderRadius: 24 }}
+            style={{ width: 48, height: 48, borderRadius: 9999 }}
             contentFit="cover"
             transition={200}
           />

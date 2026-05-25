@@ -486,9 +486,9 @@ export default function AdminNotificationScreen() {
                                   <View className="flex-row items-center flex-1">
                                     <View className="w-8 h-8 rounded-full bg-blue-50 items-center justify-center mr-3 overflow-hidden">
                                       {item.avatarUrl ? (
-                                        <Image
+                                        <Image className="rounded-full"
                                           source={{ uri: item.avatarUrl }}
-                                          style={{ width: 32, height: 32, borderRadius: 16 }}
+                                          style={{ width: 32, height: 32, borderRadius: 9999 }}
                                           contentFit="cover"
                                         />
                                       ) : (

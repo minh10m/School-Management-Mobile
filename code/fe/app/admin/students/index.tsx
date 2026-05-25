@@ -223,9 +223,9 @@ export default function AdminStudentsScreen() {
             >
               <View className="w-14 h-14 rounded-full bg-blue-50 items-center justify-center border border-blue-100 overflow-hidden">
                 {item.avatarUrl ? (
-                  <Image 
+                  <Image className="rounded-full" 
                     source={{ uri: item.avatarUrl }} 
-                    style={{ width: 56, height: 56, borderRadius: 28 }}
+                    style={{ width: 56, height: 56, borderRadius: 9999 }}
                     contentFit="cover"
                     transition={200}
                   />

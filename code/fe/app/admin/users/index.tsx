@@ -242,9 +242,9 @@ export default function AdminUsersScreen() {
               {/* Avatar Section */}
               <View className="w-16 h-16 rounded-[24px] bg-blue-50 items-center justify-center border border-blue-100 overflow-hidden">
                 {item.avatarUrl ? (
-                  <Image 
+                  <Image className="rounded-full" 
                     source={{ uri: item.avatarUrl }} 
-                    style={{ width: 64, height: 64, borderRadius: 32 }}
+                    style={{ width: 64, height: 64, borderRadius: 9999 }}
                     contentFit="cover"
                     transition={200}
                   />
