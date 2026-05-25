@@ -488,7 +488,7 @@ export default function AdminNotificationScreen() {
                                       {item.avatarUrl ? (
                                         <Image
                                           source={{ uri: item.avatarUrl }}
-                                          style={{ width: 32, height: 32 }}
+                                          style={{ width: 32, height: 32, borderRadius: 16 }}
                                           contentFit="cover"
                                         />
                                       ) : (

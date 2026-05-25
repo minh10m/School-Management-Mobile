@@ -211,7 +211,7 @@ export default function NewGroupScreen({ rolePrefix: rolePrefixProp }: NewGroupS
               {groupAvatar ? (
                 <Image 
                   source={{ uri: groupAvatar.uri }} 
-                  style={{ width: 90, height: 90 }}
+                  style={{ width: 90, height: 90, borderRadius: 45 }}
                   contentFit="cover"
                 />
               ) : (
