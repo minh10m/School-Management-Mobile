@@ -149,8 +149,11 @@ namespace School_Management.API.Services
                 }
             }
 
+<<<<<<< HEAD
             if (updateUserRequest.Address != null && string.IsNullOrWhiteSpace(updateUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép bỏ trống");
 
+=======
+>>>>>>> c61e4ab (fix be)
             user.FullName = updateUserRequest.FullName ?? user.FullName;
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
             user.Address = updateUserRequest.Address ?? user.Address;
@@ -260,8 +263,11 @@ namespace School_Management.API.Services
                 }
             }
 
+<<<<<<< HEAD
             if (updateUserRequest.Address != null && string.IsNullOrWhiteSpace(updateUserRequest.Address)) throw new BadRequestException("Địa chỉ không được phép bỏ trống");
 
+=======
+>>>>>>> c61e4ab (fix be)
             user.FullName = updateUserRequest.FullName ?? user.FullName;
             user.PhoneNumber = updateUserRequest.PhoneNumber ?? user.PhoneNumber;
             user.Address = updateUserRequest.Address ?? user.Address;

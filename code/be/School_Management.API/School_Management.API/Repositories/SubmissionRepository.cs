@@ -61,7 +61,10 @@ namespace School_Management.API.Repositories
                 fileUrl = uploadResult.SecureUrl.ToString();
                 publicId = uploadResult.PublicId ?? "";
             }
+<<<<<<< HEAD
             if (string.IsNullOrWhiteSpace(request.FileTitle)) throw new BadRequestException("Tên file không được phép bỏ trống");
+=======
+>>>>>>> c61e4ab (fix be)
             var submission = new Submission
             {
                 Id = Guid.NewGuid(),
