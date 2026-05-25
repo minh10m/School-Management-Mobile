@@ -145,7 +145,7 @@ export default function AdminProfileScreen() {
               {profile?.avatarUrl ? (
                 <Image 
                   source={{ uri: profile.avatarUrl }} 
-                  style={{ width: 96, height: 96 }}
+                  style={{ width: 96, height: 96, borderRadius: 48 }}
                   contentFit="cover"
                   transition={200}
                 />
@@ -257,7 +257,7 @@ export default function AdminProfileScreen() {
                 {editForm.avatarUri ? (
                   <Image 
                     source={{ uri: editForm.avatarUri }} 
-                    style={{ width: 96, height: 96 }}
+                    style={{ width: 96, height: 96, borderRadius: 48 }}
                     contentFit="cover"
                     transition={200}
                   />

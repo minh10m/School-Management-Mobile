@@ -136,7 +136,7 @@ export default function StudentDetailScreen() {
             {student?.avatarUrl ? (
               <Image 
                 source={{ uri: student.avatarUrl }} 
-                style={{ width: 80, height: 80 }}
+                style={{ width: 80, height: 80, borderRadius: 40 }}
                 contentFit="cover"
                 transition={200}
               />

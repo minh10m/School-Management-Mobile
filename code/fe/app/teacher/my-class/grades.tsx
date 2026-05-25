@@ -191,7 +191,7 @@ export default function ClassGrades() {
         <View className="px-6 py-4">
           <View className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm shadow-blue-50/50 flex-row items-center">
             {/* Pie Chart using WebView SVG */}
-            <View className="w-32 h-32 mr-6">
+            <View className="w-32 h-32 mr-6 rounded-full">
               <WebView
                 originWhitelist={['*']}
                 scrollEnabled={false}

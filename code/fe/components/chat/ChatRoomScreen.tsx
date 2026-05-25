@@ -545,7 +545,7 @@ export default function ChatRoomScreen() {
               (currentConversation?.avatarUrl || avatarUrlParam) ? (
                 <Image 
                   source={{ uri: currentConversation?.avatarUrl || avatarUrlParam || "" }} 
-                  style={{ width: 40, height: 40 }}
+                  style={{ width: 40, height: 40, borderRadius: 20 }}
                   contentFit="cover"
                   transition={200}
                 />
@@ -555,7 +555,7 @@ export default function ChatRoomScreen() {
             ) : (otherMember?.avatarUrl || avatarUrlParam) ? (
               <Image 
                 source={{ uri: otherMember?.avatarUrl || avatarUrlParam }} 
-                style={{ width: 40, height: 40 }}
+                style={{ width: 40, height: 40, borderRadius: 20 }}
                 contentFit="cover"
                 transition={200}
               />
@@ -613,7 +613,7 @@ export default function ChatRoomScreen() {
                   (currentConversation?.avatarUrl || avatarUrlParam) ? (
                     <Image 
                       source={{ uri: currentConversation?.avatarUrl || avatarUrlParam || "" }} 
-                      style={{ width: 64, height: 64 }}
+                      style={{ width: 64, height: 64, borderRadius: 32 }}
                       contentFit="cover"
                       transition={200}
                     />
@@ -623,7 +623,7 @@ export default function ChatRoomScreen() {
                 ) : (otherMember?.avatarUrl || avatarUrlParam) ? (
                   <Image 
                     source={{ uri: otherMember?.avatarUrl || avatarUrlParam }} 
-                    style={{ width: 64, height: 64 }}
+                    style={{ width: 64, height: 64, borderRadius: 32 }}
                     contentFit="cover"
                     transition={200}
                   />
@@ -740,7 +740,7 @@ export default function ChatRoomScreen() {
                   {(otherUserProfile?.avatarUrl || viewingMember.avatarUrl) ? (
                     <Image 
                       source={{ uri: otherUserProfile?.avatarUrl || viewingMember.avatarUrl || '' }} 
-                      style={{ width: 96, height: 96 }}
+                      style={{ width: 96, height: 96, borderRadius: 48 }}
                       contentFit="cover"
                       transition={200}
                     />
@@ -835,14 +835,14 @@ export default function ChatRoomScreen() {
                     {editGroupAvatar?.uri ? (
                       <Image
                         source={{ uri: editGroupAvatar.uri }}
-                        style={{ width: 96, height: 96 }}
+                        style={{ width: 96, height: 96, borderRadius: 48 }}
                         contentFit="cover"
                         transition={200}
                       />
                     ) : (currentConversation?.avatarUrl || avatarUrlParam) ? (
                       <Image
                         source={{ uri: currentConversation?.avatarUrl || avatarUrlParam || "" }}
-                        style={{ width: 96, height: 96 }}
+                        style={{ width: 96, height: 96, borderRadius: 48 }}
                         contentFit="cover"
                         transition={200}
                       />
@@ -921,7 +921,7 @@ export default function ChatRoomScreen() {
                         {item.avatarUrl ? (
                           <Image 
                             source={{ uri: item.avatarUrl }} 
-                            style={{ width: 48, height: 48 }}
+                            style={{ width: 48, height: 48, borderRadius: 24 }}
                             contentFit="cover"
                             transition={200}
                           />
