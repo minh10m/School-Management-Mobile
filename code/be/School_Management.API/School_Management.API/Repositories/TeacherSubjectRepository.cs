@@ -113,31 +113,15 @@ namespace School_Management.API.Repositories
                 }).ToListAsync();
         }
 
-        public async Task<bool> DeleteTeacherSubject(Guid teacherSubjectId)
+        public async Task<(bool result, string message)> DeactivateTeacherSubject(Guid teacherSubjectId)
         {
-            var teacherSubject = await context.TeacherSubject.Include(x => x.Teacher).Include(x => x.Subject).FirstOrDefaultAsync(x => x.TeacherSubjectId == teacherSubjectId);
-            if (teacherSubject == null) return false;
+            var teacherSubject = await context.TeacherSubject.FirstOrDefaultAsync(x => x.TeacherSubjectId == teacherSubjectId);
+            if (teacherSubject == null) return (false, "NOT_FOUND_TEACHERSUBJECT");
 
-            context.TeacherSubject.Remove(teacherSubject);
+            teacherSubject.IsActive = false;
             await context.SaveChangesAsync();
-
-            var userIds = new List<Guid> { teacherSubject.Teacher.UserId };
-
-            try
-            {
-                await notificationService.CreateNotification(new CreateNotificationRequest
-                {
-                    Content = $"Admin đã xóa môn {teacherSubject.Subject.SubjectName} ra khỏi danh sách môn dạy của bạn",
-                    Title = "Xóa môn dạy",
-                    Type = "Xóa môn dạy",
-                    UserId = userIds
-                });
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Push notification failed");
-            }
-            return true;
+            
+            return (true, "SUCCESS");
         }
     }
 }

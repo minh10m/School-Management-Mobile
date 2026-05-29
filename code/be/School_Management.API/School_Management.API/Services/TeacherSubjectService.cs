@@ -41,9 +41,15 @@ namespace School_Management.API.Services
             return await teacherSubjectRepository.GetTeacherSubjects(teacherId);
         }
 
-        public async Task<bool> DeleteTeacherSubject(Guid teacherSubjectId)
+        public async Task<bool> DeactivateTeacherSubject(Guid teacherSubjectId)
         {
-            return await teacherSubjectRepository.DeleteTeacherSubject(teacherSubjectId);
+            var (result, message) = await teacherSubjectRepository.DeactivateTeacherSubject(teacherSubjectId);
+            return message switch
+            {
+                "NOT_FOUND_TEACHERSUBJECT" => throw new NotFoundException("Không tìm thấy gán môn này để xóa"),
+                "SUCCESS" => true, 
+                _ => throw new Exception("Lỗi không xác định")
+            };
         }
     }
 }

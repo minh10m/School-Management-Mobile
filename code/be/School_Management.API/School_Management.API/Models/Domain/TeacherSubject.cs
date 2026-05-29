@@ -3,12 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace School_Management.API.Models.Domain
 {
-    public class TeacherSubject : BaseEntity
+    public class TeacherSubject 
     {
         [Key]
         public Guid TeacherSubjectId { get; set; }
         public Guid TeacherId { get; set; }
         public Guid SubjectId { get; set; }
+        public bool IsActive { get; set; } = true;
 
         // Navigation properties
         [ForeignKey("TeacherId")]
