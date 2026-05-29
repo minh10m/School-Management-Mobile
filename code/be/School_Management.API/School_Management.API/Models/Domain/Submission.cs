@@ -4,7 +4,7 @@ using System.Security.Principal;
 
 namespace School_Management.API.Models.Domain
 {
-    public class Submission : BaseEntity
+    public class Submission
     {
         [Key]
         public Guid Id { get; set; }

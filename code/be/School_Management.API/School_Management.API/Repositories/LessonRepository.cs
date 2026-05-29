@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
@@ -129,6 +129,27 @@ namespace School_Management.API.Repositories
 
             return (result, "SUCCESS");
 
+        }
+
+        public async Task<(bool result, string message)> HardDeleteLesson(Guid lessonId, Guid userId)
+        {
+            var teacher = await context.Teacher.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId);
+            if (teacher == null) return (false, "NOT_FOUND_TEACHER");
+
+            var lesson = await context.Lesson
+                .Include(l => l.Course)
+                    .ThenInclude(c => c.TeacherSubject)
+                .FirstOrDefaultAsync(l => l.Id == lessonId);
+
+            if (lesson == null) return (false, "NOT_FOUND_LESSON");
+
+            if (lesson.Course.TeacherSubject == null || lesson.Course.TeacherSubject.TeacherId != teacher.Id)
+                return (false, "NOT_IS_TEACHER_OF_COURSE");
+
+            context.Lesson.Remove(lesson);
+
+            await context.SaveChangesAsync();
+            return (true, "SUCCESS");
         }
 
         public async Task<(LessonResponse? data, string? message)> UpdateLesson(UpdateLessonRequest request, Guid lessonId)

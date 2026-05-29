@@ -27,6 +27,18 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<bool> DeleteSubmissionById(Guid submissionId)
+        {
+            var (result, message) = await submissionRepository.DeleteSubmissionById(submissionId);
+            return message switch
+            {
+                "NOT_FOUND_SUBMISSION" => throw new NotFoundException("Không tìm thấy bài nộp để xóa"),
+                "CAN_NOT_DELETE_SUBMISSION" => throw new BadRequestException("Bài nộp này đã được chấm điểm, không thể xóa"),
+                "SUCCESS" => true,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<PagedResponse<SubmissionResponse>> GetAllSubmissionOfAssignmentForTeacher(SubmissionFilterRequest request, Guid userId)
         {
             var (result, message) = await submissionRepository.GetAllSubmissionOfAssignmentForTeacher(request, userId);

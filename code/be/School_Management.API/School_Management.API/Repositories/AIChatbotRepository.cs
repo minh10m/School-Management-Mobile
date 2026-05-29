@@ -248,5 +248,11 @@ namespace School_Management.API.Repositories
                 TotalCount = totalCount
             };
         }
+
+        public async Task<bool> DeleteChatHistory(Guid userId)
+        {
+            await context.AIChatHistory.Where(x => x.UserId == userId).ExecuteDeleteAsync();
+            return true;
+        }
     }
 }

@@ -43,6 +43,18 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<bool> DeleteMessageById(Guid messageId, Guid userId)
+        {
+            var (result, message) = await conversationRepository.DeleteMessageById(messageId, userId);
+            return message switch
+            {
+                "NOT_FOUND_MESSAGE" => throw new NotFoundException("Không tìm thấy tin nhắn để xóa"),
+                "FORBIDDEN" => throw new ForbiddenException("Bạn không thể gỡ tin nhắn không phải của mình"),
+                "SUCCESS" => true,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<GetMessageResponse> GetMessage(BaseRequestSecond request, Guid conversationId, Guid userId)
         {
             var (result, message) = await conversationRepository.GetMessage(request, conversationId, userId);

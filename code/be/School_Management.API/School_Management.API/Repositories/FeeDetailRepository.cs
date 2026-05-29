@@ -57,6 +57,19 @@ namespace School_Management.API.Repositories
             return (result, "SUCCESS");
         }
 
+        public async Task<(bool result, string message)> DeleteFeeDetailById(Guid feeDetailId)
+        {
+            var feeDetail = await context.FeeDetail.FindAsync(feeDetailId);
+            if (feeDetail == null) return (false, "NOT_FOUND_FEEDETAIL");
+
+            if (feeDetail.Status == "Đã đóng" || feeDetail.AmountPaid > 0)
+                return (false, "CAN_NOT_DELETE_FEEDETAIL");
+
+            context.FeeDetail.Remove(feeDetail);
+            await context.SaveChangesAsync();
+            return (true, "SUCCESS");
+        }
+
         public async Task<(PagedResponse<FeeDetailResponse>? data, string message)> GetAllMyFeeForStudent(MyFeeDetailFilterRequest request, Guid userId)
         {
             var studentInfo = await context.Student.AsNoTracking().Where(x => x.UserId == userId).Select(g => new { g.Id, g.User.FullName }).FirstOrDefaultAsync();

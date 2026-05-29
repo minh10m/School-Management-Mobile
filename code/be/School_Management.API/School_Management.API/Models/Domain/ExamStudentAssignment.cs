@@ -2,7 +2,7 @@
 
 namespace School_Management.API.Models.Domain
 {
-    public class ExamStudentAssignment : BaseEntity
+    public class ExamStudentAssignment
     {
         public Guid Id { get; set; }
         public Guid ExamScheduleDetailId { get; set; }

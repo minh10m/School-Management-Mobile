@@ -27,6 +27,20 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<bool> DeleteAssignmentById(Guid assignmentId, Guid userId)
+        {
+            var (result, message) = await assignmentRepository.DeleteAssignmentById(assignmentId, userId);
+            return message switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không là một giáo viên"),
+                "NOT_FOUND_ASSIGNMENT" => throw new NotFoundException("Không tìm thấy bài tập này"),
+                "NOT_IS_TEACHER_OF_ASSIGNMENT" => throw new ForbiddenException("Bạn không là giáo viên của bài tập này"),
+                "SUCCESS" => true,
+                "EXCEPTION_ERROR" => throw new Exception("Lỗi xảy ra khi xóa bài tập"),
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request, Guid userId)
         {
             return await assignmentRepository.GetAllAssignment(request, userId);

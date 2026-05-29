@@ -21,6 +21,11 @@ namespace School_Management.API.EntityConfigurations
                 x.HasCheckConstraint("CK_Amount_Fee", "\"Amount\" > 0");
                 x.HasCheckConstraint("CK_SchoolYear_Fee", "\"SchoolYear\" > 2000");
             });
+
+            builder.HasMany(x => x.FeeDetails)
+                   .WithOne(x => x.Fee)
+                   .HasForeignKey(x => x.FeeId)
+                   .OnDelete(DeleteBehavior.Cascade); 
         }
     }
 }

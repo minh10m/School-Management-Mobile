@@ -85,6 +85,17 @@ namespace School_Management.API.Repositories
 
             return (true, "SUCCESS");
         }
+
+        public async Task<(bool result, string message)> DeleteNotificationById(Guid notificationId)
+        {
+            var notification = await context.Notification.FindAsync(notificationId);
+            if (notification == null) return (false, "NOT_FOUND_NOTIFICATION");
+
+            context.Notification.Remove(notification);
+            await context.SaveChangesAsync();
+            return (true, "SUCCESS");
+        }
+
         public async Task<(PagedResponse<NotificationResponse>? result, string message)> GetAllNotifications(Guid userId, BaseRequestSecond request)
         {
             var result = await schoolYearInfoRepository.GetSchoolYearInfo();
@@ -119,5 +130,7 @@ namespace School_Management.API.Repositories
                 TotalCount = totalCount
             }, "SUCCESS");
         }
+
+
     }
 }

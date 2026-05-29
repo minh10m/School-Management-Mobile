@@ -10,6 +10,7 @@ namespace School_Management.API.Services
         public Task UpdateGroupMembers(Guid conversationId, List<Guid> allMemberIds);
         public Task CreateNotification(Guid userId, int unReadQuantity, Notification request);
         public Task ResetUnreadCountNoti(Guid userId);
+        public Task RecallMessage(Guid conversationId, Guid messageId, bool isLastMessage);
         
     }
 }

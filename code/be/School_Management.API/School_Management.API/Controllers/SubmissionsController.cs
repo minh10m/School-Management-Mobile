@@ -121,5 +121,18 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+        [HttpDelete]
+        [Route("{submissionId}")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> DeleteSubmission([FromRoute] Guid submissionId)
+        {
+            var result = await submissionService.DeleteSubmissionById(submissionId);
+            return Ok(new
+            {
+                success = true,
+                message = "Xóa bài nộp thành công"
+            });
+        }
+
     }
 }

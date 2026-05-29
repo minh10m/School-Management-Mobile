@@ -34,7 +34,7 @@ namespace School_Management.API.Repositories
                                                                               .FirstOrDefaultAsync();
             if (teacherSubjectInfo == null) return (null, "NOT_FOUND_TEACHERSUBJECTID");
 
-            var isExisted = await context.Course.AnyAsync(x => x.CourseName.Trim().ToLower() == request.CourseName.Trim().ToLower() && x.TeacherSubject.TeacherId == teacherId);
+            var isExisted = await context.Course.IgnoreQueryFilters().AnyAsync(x => x.CourseName.Trim().ToLower() == request.CourseName.Trim().ToLower() && x.TeacherSubject.TeacherId == teacherId);
             if (isExisted) return (null, "DUPLICATED_COURSENAME");
 
             if (request.Price < 0) return (null, "UNCORRECT_PRICE");
@@ -88,6 +88,21 @@ namespace School_Management.API.Repositories
                 SubjectId = teacherSubjectInfo.SubjectId,
                 TeacherName = teacherSubjectInfo.TeacherName
             }, "SUCCESS");
+        }
+
+        public async Task<(bool result, string message)> DeleteCourseById(Guid courseId, Guid userId)
+        {
+            var teacher = await context.Teacher.FirstOrDefaultAsync(x => x.UserId == userId);
+            if (teacher == null) return (false, "NOT_FOUND_TEACHER");
+
+            var course = await context.Course.Include(x => x.TeacherSubject).FirstOrDefaultAsync(x => x.Id == courseId);
+            if (course == null) return (false, "NOT_FOUND_COURSE");
+
+            if (course.TeacherSubject.TeacherId != teacher.Id) return (false, "NOT_IS_TEACHER_OF_COURSE");
+
+            context.Remove(course);
+            await context.SaveChangesAsync();
+            return (true, "SUCCESS");
         }
 
         public async Task<PagedResponse<CourseResponse>> GetAllCourseForAdmin(CourseFilterRequestAdmin request)
@@ -220,7 +235,7 @@ namespace School_Management.API.Repositories
             var studentId = await context.Student.AsNoTracking().Where(x => x.UserId == userId).Select(g => g.Id).FirstOrDefaultAsync();
             if (studentId == Guid.Empty) return (null, "NOT_FOUND_STUDENT");
 
-            var query = context.Course.AsNoTracking().Where(x => x.EnrollCourses.Any(g => g.StudentId == studentId));
+            var query = context.Course.IgnoreQueryFilters().AsNoTracking().Where(x => x.EnrollCourses.Any(g => g.StudentId == studentId));
 
             if(!string.IsNullOrWhiteSpace(request.CourseName))
             {

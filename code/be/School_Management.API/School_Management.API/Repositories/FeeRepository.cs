@@ -5,6 +5,7 @@ using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
+using System.Net.WebSockets;
 
 namespace School_Management.API.Repositories
 {
@@ -107,6 +108,28 @@ namespace School_Management.API.Repositories
             {
                 await transaction.RollbackAsync();
                 throw;
+            }
+        }
+
+        public async Task<(bool result, string message)> DeleteFeeById(Guid feeId)
+        {
+            var fee = await context.Fee.FirstOrDefaultAsync(x => x.Id == feeId);
+            if (fee == null) return (false, "NOT_FOUND_FEE");
+
+            var hasAnyPayment = await context.FeeDetail.AnyAsync(x => x.FeeId == feeId && (x.Status == "Đã đóng" || x.AmountPaid > 0));
+            if (hasAnyPayment) return (false, "CAN_NOT_DELETE_FEE");
+
+            try
+            {
+                context.Fee.Remove(fee);
+
+                await context.SaveChangesAsync();
+                return (true, "SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Lỗi hệ thống xảy ra trong quá trình XÓA CỨNG FeeId {FeeId}", feeId);
+                return (false, "EXCEPTION_ERROR");
             }
         }
 

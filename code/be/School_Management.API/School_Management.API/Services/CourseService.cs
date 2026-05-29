@@ -30,6 +30,19 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<bool> DeleteCourseById(Guid courseId, Guid userId)
+        {
+            var (result, message) = await courseRepository.DeleteCourseById(courseId, userId);
+            return message switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không phải là một giáo viên"),
+                "NOT_FOUND_COURSE" => throw new NotFoundException("Không tìm thấy khóa học để xóa"),
+                "NOT_IS_TEACHER_OF_COURSE" => throw new ForbiddenException("Bạn không phải là giáo viên của khóa học này"),
+                "SUCCESS" => result,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<PagedResponse<CourseResponse>> GetAllCourseForAdmin(CourseFilterRequestAdmin request)
         {
             return await courseRepository.GetAllCourseForAdmin(request);

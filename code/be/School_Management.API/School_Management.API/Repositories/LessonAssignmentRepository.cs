@@ -12,11 +12,13 @@ namespace School_Management.API.Repositories
     {
         private readonly ApplicationDbContext context;
         private readonly Cloudinary cloudinary;
+        private readonly ILogger<LessonAssignmentRepository> logger;
 
-        public LessonAssignmentRepository(ApplicationDbContext context, Cloudinary cloudinary)
+        public LessonAssignmentRepository(ApplicationDbContext context, Cloudinary cloudinary, ILogger<LessonAssignmentRepository> logger)
         {
             this.context = context;
             this.cloudinary = cloudinary;
+            this.logger = logger;
         }
 
         public async Task<(LessonAssignmentResponse? data, string message)> CreateLessonAssignment(LessonAssignmentRequest request)
@@ -157,6 +159,36 @@ namespace School_Management.API.Repositories
             };
 
             return (result, "SUCCESS");
+        }
+
+        public async Task<(bool result, string message)> HardDeleteLessonAssignment(Guid assignmentId, Guid userId)
+        {
+            var teacher = await context.Teacher.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId);
+            if (teacher == null) return (false, "NOT_FOUND_TEACHER");
+
+            var assignment = await context.LessonAssignment
+                .Include(a => a.Lesson)
+                .ThenInclude(l => l.Course)
+                .ThenInclude(c => c.TeacherSubject)
+                .FirstOrDefaultAsync(a => a.Id == assignmentId);
+
+            if (assignment == null) return (false, "NOT_FOUND_ASSIGNMENT");
+
+            if (assignment.Lesson.Course.TeacherSubject == null || assignment.Lesson.Course.TeacherSubject.TeacherId != teacher.Id)
+                return (false, "NOT_IS_TEACHER_OF_COURSE");
+
+            try
+            {
+                context.LessonAssignment.Remove(assignment);
+                await context.SaveChangesAsync();
+
+                return (true, "SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Lỗi xảy ra khi xóa Assignment {AssignmentId} trong database", assignmentId);
+                return (false, "EXCEPTION_ERROR");
+            }
         }
 
         public async Task<(LessonAssignmentResponse? data, string mesaage)> UpdateLessonAssignment(UpdateLessonAssignmentRequest request, Guid lessonAssignmentId)

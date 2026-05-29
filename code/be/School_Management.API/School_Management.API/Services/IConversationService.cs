@@ -12,7 +12,7 @@ namespace School_Management.API.Services
         public Task<bool> AddMembersToGroup(AddMembersRequest request, Guid userId);
         public Task<bool> LeaveGroup(Guid conversationId, Guid userId);
         public Task<ConversationResponse?> UpdateConversation(UpdateGroupRequest request, Guid conversationId, Guid senderId);
-
+        public Task<bool> DeleteMessageById(Guid messageId, Guid userId);
 
     }
 }

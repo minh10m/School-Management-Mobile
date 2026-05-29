@@ -8,6 +8,6 @@ namespace School_Management.API.Repositories
         public Task<(LessonVideoResponse? data, string message)> UpdateLessonVideo(UpdateLessonVideoRequest request, Guid lessonVideoId);
         public Task<(PagedResponse<LessonVideoResponse>? data, string message)> GetAllLessonVideoOfLesson(LessonVideoFilterRequest request);
         public Task<(LessonVideoResponse? data, string message)> GetLessonVideoById(Guid lessonVideoId);
-
+        public Task<(bool result, string message)> HardDeleteLessonVideo(Guid videoId, Guid userId);
     }
 }

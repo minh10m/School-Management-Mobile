@@ -212,20 +212,22 @@ namespace School_Management.API.Repositories
             var conversation = await context.Conversation.FirstOrDefaultAsync(x => x.Id == conversationId);
             if (conversation == null) return (null, "NOT_FOUND_CONVERSATION");
 
-            // Set unread = 0
-            userConversation.UnReadCount = 0;
 
             // Set Seen cho các message chưa seen của người khác
             await context.Message
+                .IgnoreQueryFilters()
                 .Where(x => x.ConversationId == conversationId &&
                             x.SenderId != userId &&
                             x.Status == "Đã gửi")
                 .ExecuteUpdateAsync(y => y.SetProperty(m => m.Status, "Đã xem"));
 
+            // Set unread = 0
+            userConversation.UnReadCount = 0;
             await context.SaveChangesAsync();
             await firebaseService.ResetUnreadCount(conversationId, userId);
 
             var query = context.Message.AsNoTracking()
+                .IgnoreQueryFilters()
                 .Where(x => x.ConversationId == conversationId)
                 .OrderByDescending(x => x.CreatedAt);
 
@@ -238,9 +240,10 @@ namespace School_Management.API.Repositories
                     Id = x.Id,
                     SenderId = x.SenderId,
                     SenderName = x.User.FullName,
-                    Content = x.Content,
+                    Content = x.IsDeleted ? "Tin nhắn đã được thu hồi" : x.Content,
                     Status = x.Status,
                     Type = x.Type,
+                    IsDeleted = x.IsDeleted,
                     CreatedAt = x.CreatedAt
                 }).ToListAsync();
 
@@ -294,7 +297,7 @@ namespace School_Management.API.Repositories
                                             LastUpdatedAt = g.LastUpdatedAt,
                                             AvatarUrl = g.IsGroup ? g.ConversationAvatarUrl : g.UserConversations.Where(uc => uc.UserId != userId).Select(y => y.User.AvatarUrl).FirstOrDefault(),
                                             UnReadCount = g.UserConversations.Where(uc => uc.UserId == userId).Select(y => y.UnReadCount).FirstOrDefault(),
-                                            LastMessage = g.Messages.OrderByDescending(m => m.CreatedAt).Select(m => m.Content).FirstOrDefault()
+                                            LastMessage = g.Messages.OrderByDescending(m => m.CreatedAt).Select(m => m.IsDeleted ? "Tin nhắn đã được thu hồi" : m.Content).FirstOrDefault()
                                         }).ToListAsync();
             return new PagedResponse<ConversationResponse>
             {
@@ -509,6 +512,32 @@ namespace School_Management.API.Repositories
                 ConversationId = conversation.Id
             }, "SUCCESS");
 
+        }
+
+        public async Task<(bool result, string message)> DeleteMessageById(Guid messageId, Guid userId)
+        {
+            var message = await context.Message.FirstOrDefaultAsync(x => x.Id == messageId);
+
+            if (message == null) return (false, "NOT_FOUND_MESSAGE");
+            if (message.SenderId != userId) return (false, "FORBIDDEN"); 
+
+            var isLastMessage = !await context.Message
+                .AnyAsync(x => x.ConversationId == message.ConversationId
+                            && x.CreatedAt > message.CreatedAt);
+
+            message.IsDeleted = true;
+            await context.SaveChangesAsync();
+
+            try
+            {
+                await firebaseService.RecallMessage(message.ConversationId, messageId, isLastMessage);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "SQL thu hồi thành công nhưng Firebase Signal thất bại");
+            }
+
+            return (true, "SUCCESS");
         }
     }
 }

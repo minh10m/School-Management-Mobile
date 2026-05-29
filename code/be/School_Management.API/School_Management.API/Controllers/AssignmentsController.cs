@@ -100,5 +100,24 @@ namespace School_Management.API.Controllers
             var result = await assignmentService.GetMyAssignmentsForStudent(request, Guid.Parse(userId));
             return Ok(result);
         }
+
+        [HttpDelete]
+        [Route("{assignmentId}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> DeleteAssignmentById([FromRoute] Guid assignmentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+            var result = await assignmentService.DeleteAssignmentById(assignmentId, Guid.Parse(userId));
+            return Ok(new
+            {
+                success = true,  
+                message = "Xóa bài tập thành công"
+            });
+        }
     }
 }

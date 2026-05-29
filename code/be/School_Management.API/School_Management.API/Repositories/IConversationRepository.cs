@@ -12,5 +12,7 @@ namespace School_Management.API.Repositories
         public Task<(bool result, string message)> AddMembersToGroup(AddMembersRequest request, Guid userId);
         public Task<(bool result, string message)> LeaveGroup(Guid conversationId, Guid userId);
         public Task<(ConversationResponse? result, string message)> UpdateConversation(UpdateGroupRequest request, Guid conversationId, Guid senderId);
+        public Task<(bool result, string message)> DeleteMessageById(Guid messageId, Guid userId);
+
     }
 }

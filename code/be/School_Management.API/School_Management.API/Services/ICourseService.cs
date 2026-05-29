@@ -14,5 +14,6 @@ namespace School_Management.API.Services
         public Task<CourseResponse> ReviseCourseForAdmin(Guid courseId, UpdateStatusCourseRequest request);
         public Task<PagedResponse<CourseResponse>> GetAllCourseForAdmin(CourseFilterRequestAdmin request);
         public Task<PagedResponse<CourseResponse>> GetAllCourseForTeacherAndStudent(CourseFilterRequestTeacherAndStudent request);
+        public Task<bool> DeleteCourseById(Guid courseId, Guid userId);
     }
 }

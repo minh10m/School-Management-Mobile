@@ -24,6 +24,18 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<bool> DeleteFeeDetailById(Guid feeDetailId)
+        {
+            var (result, message) = await feeDetailRepository.DeleteFeeDetailById(feeDetailId);
+            return message switch
+            {
+                "NOT_FOUND_FEEDETAIL" => throw new NotFoundException("Không tìm thấy khoản phí này"),
+                "CAN_NOT_DELETE_FEEDETAIL" => throw new BadRequestException("Khoản phí này đã được đóng, không thể xóa"),
+                "SUCCESS" => true,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<PagedResponse<FeeDetailResponse>> GetAllMyFeeForStudent(MyFeeDetailFilterRequest request, Guid userId)
         {
             var (result, message) = await feeDetailRepository.GetAllMyFeeForStudent(request, userId);
