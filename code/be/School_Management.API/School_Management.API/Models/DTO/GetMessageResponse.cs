@@ -16,6 +16,7 @@ namespace School_Management.API.Models.DTO
         public Guid ConversationId { get; set; }
         public string Type { get; set; } = null!;
         public string Content { get; set; } = null!;
+        public bool IsDeleted { get; set; }
         public string Status { get; set; } = null!;
         public DateTimeOffset CreatedAt { get; set; }
     }

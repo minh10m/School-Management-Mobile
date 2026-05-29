@@ -47,7 +47,7 @@ namespace School_Management.API.Repositories
 
             var normalizedName = request.Title?.Trim().ToLower();
 
-            var isExistedName = await context.Assignment.AnyAsync(x =>
+            var isExistedName = await context.Assignment.IgnoreQueryFilters().AnyAsync(x =>
                 x.Title != null &&
                 x.Title.Trim().ToLower() == normalizedName &&
                 x.TeacherSubject.SubjectId == request.SubjectId &&
@@ -204,6 +204,31 @@ namespace School_Management.API.Repositories
                 return (null, "CREATE_ASSIGNMENT_FAILED");
             }
         }
+
+        public async Task<(bool result, string message)> DeleteAssignmentById(Guid assignmentId, Guid userId)
+        {
+            var teacher = await context.Teacher.Where(x => x.UserId == userId).FirstOrDefaultAsync();
+            if (teacher == null) return (false, "NOT_FOUND_TEACHER");
+
+            var assignment = await context.Assignment.Include(x => x.TeacherSubject).FirstOrDefaultAsync(x => x.Id == assignmentId);
+            if (assignment == null) return (false, "NOT_FOUND_ASSIGNMENT");
+
+            if (assignment.TeacherSubject?.TeacherId != teacher.Id) return (false, "NOT_IS_TEACHER_OF_ASSIGNMENT");
+
+            try
+            {
+                context.Assignment.Remove(assignment);
+                await context.SaveChangesAsync();
+                return (true, "SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Lỗi xảy ra khi xóa bài tập");
+                return (false, "EXCEPTION_ERROR");
+            }
+            
+        }
+
         public async Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request, Guid userId)
         {
             var teacher = await context.Teacher.FirstOrDefaultAsync(x => x.UserId == userId);
@@ -339,7 +364,7 @@ namespace School_Management.API.Repositories
             if(assignment.TeacherSubject.TeacherId != teacherSubject.TeacherId) return (null, "FORBIDDEN_TEACHER_SUBJECT");
 
             var normalizedName = request.Title.Trim().ToLower();
-            var isExistedName = await context.Assignment.AnyAsync(x => x.ClassYearId == request.ClassYearId
+            var isExistedName = await context.Assignment.IgnoreQueryFilters().AnyAsync(x => x.ClassYearId == request.ClassYearId
                                                                  && x.TeacherSubject.SubjectId == request.SubjectId
                                                                  && x.Title.Trim().ToLower() == normalizedName
                                                                  && x.Id != assignmentId);

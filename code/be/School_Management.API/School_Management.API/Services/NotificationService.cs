@@ -1,4 +1,5 @@
-﻿using School_Management.API.Exceptions;
+﻿using Microsoft.Extensions.Logging;
+using School_Management.API.Exceptions;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
 
@@ -21,6 +22,17 @@ namespace School_Management.API.Services
                 "NOT_FOUND_SCHOOLYEAR" => throw new NotFoundException("Không tìm thấy năm học hiện tại"),
                 "DATABASE_ERROR" => throw new Exception("Lỗi hệ thống, vui lòng thử lại hoặc liên hệ admin"),
                 "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
+        public async Task<bool> DeleteNotificationById(Guid notificationId)
+        {
+            var (result, message) = await notificationRepository.DeleteNotificationById(notificationId);
+            return message switch
+            {
+                "NOT_FOUND_EVENT" => throw new NotFoundException("Không tìm thấy thông báo cần xóa"),
+                "SUCCESS" => true,
                 _ => throw new Exception("Lỗi không xác định")
             };
         }

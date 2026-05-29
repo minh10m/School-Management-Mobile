@@ -163,5 +163,25 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpDelete]
+        [Authorize(Roles = "Teacher")]
+        [Route("{courseId}")]
+        public async Task<IActionResult> DeleteCourseById([FromRoute] Guid courseId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+
+            var result = await courseService.DeleteCourseById(courseId, Guid.Parse(userId));
+            return Ok(new
+            {
+                success = true,
+                message = "Xóa khóa học thành công"
+            });
+        }
     }
 }

@@ -124,6 +124,28 @@ namespace School_Management.API.Repositories
             return (result, "SUCCESS");
         }
 
+        public async Task<(bool result, string message)> HardDeleteLessonVideo(Guid videoId, Guid userId)
+        {
+            var teacher = await context.Teacher.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId);
+            if (teacher == null) return (false, "NOT_FOUND_TEACHER");
+
+            var video = await context.LessonVideo
+                .Include(v => v.Lesson)
+                    .ThenInclude(l => l.Course)
+                        .ThenInclude(c => c.TeacherSubject)
+                .FirstOrDefaultAsync(v => v.Id == videoId);
+
+            if (video == null) return (false, "NOT_FOUND_VIDEO");
+
+            if (video.Lesson.Course.TeacherSubject == null || video.Lesson.Course.TeacherSubject.TeacherId != teacher.Id)
+                return (false, "NOT_IS_TEACHER_OF_COURSE");
+
+            context.LessonVideo.Remove(video);
+
+            await context.SaveChangesAsync();
+            return (true, "SUCCESS");
+        }
+
         public async Task<(LessonVideoResponse? data, string message)> UpdateLessonVideo(UpdateLessonVideoRequest request, Guid lessonVideoId)
         {
             using var transaction = await context.Database.BeginTransactionAsync();

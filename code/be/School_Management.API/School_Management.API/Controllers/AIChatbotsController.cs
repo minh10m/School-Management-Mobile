@@ -93,5 +93,24 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpDelete]
+        [Authorize]
+        public async Task<IActionResult> DeleteAIChatHistories()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new
+            {
+                success = false,
+                message = "Phiên đăng nhập không hợp lệ hoặc đã hết hạn"
+            });
+
+            var result = await aIChatbotService.DeleteChatHistory(Guid.Parse(userId));
+            return Ok(new
+            {
+                success = true,
+                message = "Xóa lịch sử chat với AI thành công"
+            });
+        }
     }
 }

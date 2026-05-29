@@ -17,6 +17,11 @@ namespace School_Management.API.Services
             return result;
         }
 
+        public async Task<bool> DeleteChatHistory(Guid userId)
+        {
+            return await aIChatbotRepository.DeleteChatHistory(userId);
+        }
+
         public async Task<PagedResponse<UserAIHistoryChatResponse>> GetUserAIHistoryChatResponses(BaseRequestSecond baseRequest, Guid userId)
         {
             return await aIChatbotRepository.GetUserAIHistoryChatResponses(baseRequest, userId);

@@ -77,5 +77,18 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpDelete]
+        [Route("{feeId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteFeeById([FromRoute] Guid feeId)
+        {
+            var result = await feeService.DeleteFeeById(feeId);
+            return Ok(new
+            {
+                success = true,
+                message = "Xóa học phí thành công"
+            });
+        }
     }
 }

@@ -13,6 +13,7 @@ namespace School_Management.API.Repositories
         public Task<PagedResponse<CourseResponse>> GetAllCourseForAdmin(CourseFilterRequestAdmin request);
         public Task<PagedResponse<CourseResponse>> GetAllCourseForTeacherAndStudent(CourseFilterRequestTeacherAndStudent request);
         public Task<(PagedResponse<CourseResponse>? data, string message)> GetMyCourseForStudent(MyCourseFilterRequest request, Guid userId);
+        public Task<(bool result, string message)> DeleteCourseById(Guid courseId, Guid userId);
 
     }
 }

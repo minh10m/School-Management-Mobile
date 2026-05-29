@@ -1,4 +1,5 @@
 ﻿using School_Management.API.Exceptions;
+using School_Management.API.Models.Domain;
 using School_Management.API.Models.DTO;
 using School_Management.API.Repositories;
 
@@ -41,6 +42,19 @@ namespace School_Management.API.Services
             {
                 "NOT_FOUND_LESSONVIDEO" => throw new NotFoundException("Không tìm thấy video bài học"),
                 "SUCCESS" => result!,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
+        public async Task<bool> HardDeleteLessonVideo(Guid videoId, Guid userId)
+        {
+            var (result, message) = await lessonVideoRepository.HardDeleteLessonVideo(videoId, userId);
+            return message switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Bạn không phải là giáo viên"),
+                "NOT_FOUND_VIDEO" => throw new NotFoundException("Không tìm thấy video để xóa"),
+                "NOT_IS_TEACHER_OF_COURSE" => throw new ForbiddenException("Bạn không là giáo viên của khóa học này"),
+                "SUCCESS" => true,
                 _ => throw new Exception("Lỗi không xác định")
             };
         }

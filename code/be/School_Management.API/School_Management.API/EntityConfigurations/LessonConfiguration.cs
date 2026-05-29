@@ -14,6 +14,16 @@ namespace School_Management.API.EntityConfigurations
             builder.Property(x => x.OrderIndex).IsRequired();
 
             builder.ToTable(x => x.HasCheckConstraint("CK_OrderIndex_Lesson", "\"OrderIndex\" > 0"));
+
+            builder.HasMany(x => x.LessonVideos)
+                   .WithOne(x => x.Lesson)
+                   .HasForeignKey(x => x.LessonId)
+                   .OnDelete(DeleteBehavior.Cascade); 
+
+            builder.HasMany(x => x.LessonAssignments)
+                   .WithOne(x => x.Lesson)
+                   .HasForeignKey(x => x.LessonId)
+                   .OnDelete(DeleteBehavior.Cascade); 
         }
     }
 }

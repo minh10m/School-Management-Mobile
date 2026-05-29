@@ -88,6 +88,16 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
+        public async Task<(bool result, string message)> DeleteEventById(Guid eventId)
+        {
+            var myEvent = await context.Event.FindAsync(eventId);
+            if (myEvent == null) return (false, "NOT_FOUND_EVENT");
+
+            context.Event.Remove(myEvent);
+            await context.SaveChangesAsync();
+            return (true, "SUCCESS");
+        }
+
         public async Task<PagedResponse<EventResponse>> GetAllEvent(EventFilterRequest request)
         {
             var query = context.Event.AsNoTracking()

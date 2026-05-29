@@ -8,5 +8,6 @@ namespace School_Management.API.Services
         public Task<EventResponse> UpdateEvent(PostOrUpdateEventRequest request, Guid eventId);
         public Task<PagedResponse<EventResponse>> GetAllEvent(EventFilterRequest request);
         public Task<EventResponse> GetEventById(Guid eventId);
+        public Task<bool> DeleteEventById(Guid eventId);
     }
 }

@@ -109,6 +109,26 @@ namespace School_Management.API.Repositories
             }, "SUCCESS");
         }
 
+        public async Task<(bool result, string message)> DeleteSubmissionById(Guid submissionId)
+        {
+            var submission = await context.Submission.FirstOrDefaultAsync(x => x.Id == submissionId);
+            if (submission == null) return (false, "NOT_FOUND_SUBMISSION");
+
+            if (submission.Status == "Đã chấm") return (false, "CAN_NOT_DELETE_SUBMISSION");
+            try
+            {
+                context.Submission.Remove(submission);
+                await context.SaveChangesAsync();
+                return (true, "SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Lỗi xảy ra khi xóa bài nộp SubmissionId {SubmissionId} trong database", submissionId);
+                return (false, "EXCEPTION_ERROR");
+            }
+            
+        }
+
         public async Task<(PagedResponse<SubmissionResponse>? data, string? message)> GetAllSubmissionOfAssignmentForTeacher(SubmissionFilterRequest request, Guid userId)
         {
             var teacherId = await context.Teacher.Where(x => x.UserId == userId).Select(g => g.Id).FirstOrDefaultAsync();

@@ -9,6 +9,7 @@ namespace School_Management.API.Repositories
         public Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request, Guid userId);
         public Task<(AssignmentResponse? data, string? message)> GetAssignmentById(Guid assignmentId);
         public Task<(PagedResponse<AssignmentResponseForStudent>? data, string? message)> GetMyAssignmentsForStudent(AssignmentForStudentRequest request, Guid userId);
+        public Task<(bool result, string message)> DeleteAssignmentById(Guid assignmentId, Guid userId);
 
     }
 }

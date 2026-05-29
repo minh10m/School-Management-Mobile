@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using School_Management.API.CustomActionFilter;
 using School_Management.API.Models.DTO;
 using School_Management.API.Services;
+using System.Security.Claims;
 
 namespace School_Management.API.Controllers
 {
@@ -73,6 +74,22 @@ namespace School_Management.API.Controllers
             {
                 success = true,
                 data = result
+            });
+        }
+
+        [HttpDelete]
+        [Route("{lessonVideoId}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<IActionResult> DeleteLessonVideoById([FromRoute] Guid lessonVideoId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized(new { message = "Phiên đăng nhập không hợp lệ hoặc hết hạn" });
+
+            var result = await lessonVideoService.HardDeleteLessonVideo(lessonVideoId, Guid.Parse(userId));
+            return Ok(new
+            {
+                success = true, 
+                message = "Xóa video bài học thành công"
             });
         }
     }

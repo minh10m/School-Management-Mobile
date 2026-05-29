@@ -49,6 +49,21 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<bool> HardDeleteLessonAssignment(Guid assignmentId, Guid userId)
+        {
+            var (result, message) = await lessonAssignmentRepository.HardDeleteLessonAssignment(assignmentId, userId);
+
+            return message switch
+            {
+                "NOT_FOUND_TEACHER" => throw new NotFoundException("Tài khoản của bạn không phải là một giáo viên hợp lệ"),
+                "NOT_FOUND_ASSIGNMENT" => throw new NotFoundException("Không tìm thấy bài tập (Assignment) này trong hệ thống"),
+                "NOT_IS_TEACHER_OF_COURSE" => throw new ForbiddenException("Bạn không có quyền xóa bài tập này vì bạn không phải là giáo viên của khóa học"),
+                "EXCEPTION_ERROR" => throw new Exception("Đã xảy ra lỗi nghiêm trọng trong cơ sở dữ liệu khi thực hiện xóa"),
+                "SUCCESS" => result,
+                _ => throw new Exception($"Lỗi không xác định xảy ra tại tầng xử lý dịch vụ: {message}")
+            };
+        }
+
         public async Task<LessonAssignmentResponse> UpdateLessonAssignment(UpdateLessonAssignmentRequest request, Guid lessonAssignmentId)
         {
             var (result, message) = await lessonAssignmentRepository.UpdateLessonAssignment(request, lessonAssignmentId);

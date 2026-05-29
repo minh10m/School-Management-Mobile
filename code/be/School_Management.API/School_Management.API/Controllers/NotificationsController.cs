@@ -48,5 +48,17 @@ namespace School_Management.API.Controllers
             });
         }
 
+        [HttpDelete]
+        [Authorize]
+        [Route("{notificationId}")]
+        public async Task<IActionResult> DeleteNotificationById([FromRoute] Guid notificationId)
+        {
+            var result = await notificationService.DeleteNotificationById(notificationId);
+            return Ok(new
+            {
+                success = true,
+                message = "Xóa thông báo thành công"
+            });
+        }
     }
 }

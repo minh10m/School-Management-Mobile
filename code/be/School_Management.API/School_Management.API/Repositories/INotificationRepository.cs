@@ -6,5 +6,6 @@ namespace School_Management.API.Repositories
     {
         public Task<(bool result, string message)> CreateNotification(CreateNotificationRequest request);
         public Task<(PagedResponse<NotificationResponse>? result, string message)> GetAllNotifications(Guid userId, BaseRequestSecond request);
+        public Task<(bool result, string message)> DeleteNotificationById(Guid notificationId);
     }
 }

@@ -8,6 +8,7 @@ namespace School_Management.API.Repositories
         public Task<PagedResponse<FeeResponse>> GetAllFee(FeeFilterRequest request);
         public Task<PagedResponse<FeeDetailResponse>> GetAllFeeDetailOfFee(FeeDetailFilterRequest request);
         public Task<(FeeResponse? data, string message)> UpdateFee(UpdateFeeRequest request, Guid feeId);
+        public Task<(bool result, string message)> DeleteFeeById(Guid feeId);
 
     }
 }

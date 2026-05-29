@@ -24,6 +24,17 @@ namespace School_Management.API.Services
             };
         }
 
+        public async Task<bool> DeleteEventById(Guid eventId)
+        {
+            var (result, message) = await eventRepository.DeleteEventById(eventId);
+            return message switch
+            {
+                "NOT_FOUND_EVENT" => throw new NotFoundException("Không tìm thấy sự kiện cần xóa"),
+                "SUCCESS" => true,
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
+
         public async Task<PagedResponse<EventResponse>> GetAllEvent(EventFilterRequest request)
         {
             return await eventRepository.GetAllEvent(request);

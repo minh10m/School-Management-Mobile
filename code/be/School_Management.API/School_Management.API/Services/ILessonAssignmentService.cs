@@ -8,5 +8,6 @@ namespace School_Management.API.Services
         public Task<LessonAssignmentResponse> UpdateLessonAssignment(UpdateLessonAssignmentRequest request, Guid lessonAssignmentId);
         public Task<PagedResponse<LessonAssignmentResponse>> GetAllLessonAssignment(LessonAssignmentFilterRequest request);
         public Task<LessonAssignmentResponse> GetLessonAssignmentById(Guid lessonAssignmentId);
+        public Task<bool> HardDeleteLessonAssignment(Guid assignmentId, Guid userId);
     }
 }

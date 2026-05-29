@@ -10,6 +10,7 @@ namespace School_Management.API.Repositories
 
         public Task<PagedResponse<EventResponse>> GetAllEvent(EventFilterRequest request);
         public Task<(EventResponse? data, string? errorCode)> GetEventById(Guid eventId);
+        public Task<(bool result, string message)> DeleteEventById(Guid eventId);
 
     }
 }

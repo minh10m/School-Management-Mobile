@@ -62,5 +62,18 @@ namespace School_Management.API.Controllers
             var result = await eventService.GetEventById(eventId);
             return Ok(result);
         }
+
+        [HttpDelete]
+        [Authorize(Roles = "Admin")]
+        [Route("{eventId}")]
+        public async Task<IActionResult> DeleteEventById([FromRoute] Guid eventId)
+        {
+            var result = await eventService.DeleteEventById(eventId);
+            return Ok(new
+            {
+                success = true,
+                message = "Xóa sự kiện thành công"
+            });
+        }
     }
 }

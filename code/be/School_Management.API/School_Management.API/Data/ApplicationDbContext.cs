@@ -49,7 +49,7 @@ namespace School_Management.API.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-
+            builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
             builder.Entity<AppUser>().ToTable("User");
             builder.Entity<IdentityRole<Guid>>().ToTable("Role");
             builder.Entity<IdentityUserRole<Guid>>().ToTable("UserRole");
@@ -117,7 +117,6 @@ namespace School_Management.API.Data
                 }
             }
 
-            builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

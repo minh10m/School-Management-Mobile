@@ -8,5 +8,6 @@ namespace School_Management.API.Services
         public Task<FeeDetailResponse> UpdateFeeDetailForStudent(UpdateFeeDetailRequest request, Guid feeDetailId);
         public Task<PagedResponse<FeeDetailResponse>> GetAllMyFeeForStudent(MyFeeDetailFilterRequest request, Guid userId);
         public Task<FeeDetailResponse> GetFeeDetailById(Guid feeDetailId);
+        public Task<bool> DeleteFeeDetailById(Guid feeDetailId);
     }
 }

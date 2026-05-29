@@ -104,7 +104,7 @@ namespace School_Management.API.Controllers
 
         [HttpDelete("group/{conversationId}/leave")]
         [Authorize]
-        public async Task<IActionResult> LeaveGroup([FromRoute]Guid conversationId)
+        public async Task<IActionResult> LeaveGroup([FromRoute] Guid conversationId)
         {
             var result = await conversationService.LeaveGroup(conversationId, GetCurrentUserId());
             return Ok(new
@@ -127,6 +127,19 @@ namespace School_Management.API.Controllers
                 success = true,
                 message = "Cập nhật thông tin thành công",
                 data = result
+            });
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("{messageId}")]
+        public async Task<IActionResult> DeleteMessageById([FromRoute] Guid messageId)
+        {
+            var result = await conversationService.DeleteMessageById(messageId, GetCurrentUserId());
+            return Ok(new
+            {
+                success = true,
+                message = "Gỡ tin nhắn thành công"
             });
         }
     }

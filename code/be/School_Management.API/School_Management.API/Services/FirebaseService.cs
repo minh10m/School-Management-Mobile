@@ -179,5 +179,27 @@ namespace School_Management.API.Services
                 {"unReadCounts" , 0 }
             }, SetOptions.MergeAll);
         }
+
+        public async Task RecallMessage(Guid conversationId, Guid messageId, bool isLastMessage)
+        {
+            var docRef = _db.Collection("conversations").Document(conversationId.ToString());
+
+            var updates = new Dictionary<string, object>
+    {
+        { "lastRecalledMessage", new Dictionary<string, object>
+            {
+                { "messageId", messageId.ToString() },
+                { "recalledAt", Timestamp.GetCurrentTimestamp() }
+            }
+        }
+    };
+
+            if (isLastMessage)
+            {
+                updates["lastMessage.content"] = "Tin nhắn đã được thu hồi";
+            }
+
+            await docRef.UpdateAsync(updates);
+        }
     }
 }

@@ -9,5 +9,6 @@ namespace School_Management.API.Services
         public Task<PagedResponse<AssignmentListResponse>> GetAllAssignment(AssignmentFilterRequest request, Guid userId);
         public Task<AssignmentResponse> GetAssignmentById(Guid assignmentId);
         public Task<PagedResponse<AssignmentResponseForStudent>> GetMyAssignmentsForStudent(AssignmentForStudentRequest request, Guid userId);
+        public Task<bool> DeleteAssignmentById(Guid assignmentId, Guid userId);
     }
 }

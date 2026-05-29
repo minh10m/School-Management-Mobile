@@ -4,7 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace School_Management.API.Models.Domain
 {
-    public class FeeDetail : BaseEntity
+    public class FeeDetail 
     {
         [Key]
         public Guid Id { get; set; }
