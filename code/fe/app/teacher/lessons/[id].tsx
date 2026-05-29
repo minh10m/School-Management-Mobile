@@ -164,6 +164,60 @@ export default function LessonDetailScreen() {
     }
   };
 
+  const handleDeleteVideo = async (videoId: string) => {
+    Alert.alert(
+      "Xóa video bài học",
+      "Bạn có chắc chắn muốn xóa video này không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await lessonVideoService.deleteLessonVideo(videoId);
+              Alert.alert("Thành công", "Đã xóa video thành công!");
+              fetchLessonDetails();
+            } catch (err) {
+              console.log(err);
+              Alert.alert("Lỗi", "Không thể xóa video.");
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleDeleteAssignment = async (assignmentId: string) => {
+    Alert.alert(
+      "Xóa bài tập",
+      "Bạn có chắc chắn muốn xóa bài tập này không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await lessonAssignmentService.deleteLessonAssignment(assignmentId);
+              Alert.alert("Thành công", "Đã xóa bài tập thành công!");
+              fetchLessonDetails();
+            } catch (err) {
+              console.log(err);
+              Alert.alert("Lỗi", "Không thể xóa bài tập.");
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar hidden />
@@ -281,37 +335,44 @@ export default function LessonDetailScreen() {
               </View>
             ) : (
               videos.map((video) => (
-                <TouchableOpacity
-                  key={video.id}
-                  onPress={() => setActiveVideoUrl(video.url)}
-                  activeOpacity={0.7}
-                  className={`bg-white p-4 rounded-2xl border ${activeVideoUrl === video.url ? "border-[#136ADA] shadow-md shadow-blue-100" : "border-gray-100 shadow-sm"} flex-row items-center mb-4`}
-                >
-                  <View
-                    className={`w-12 h-12 ${activeVideoUrl === video.url ? "bg-blue-50" : "bg-gray-50"} rounded-xl items-center justify-center mr-4`}
+                <View key={video.id} className="flex-row items-center gap-2 mb-4">
+                  <TouchableOpacity
+                    onPress={() => setActiveVideoUrl(video.url)}
+                    activeOpacity={0.7}
+                    className={`bg-white p-4 rounded-2xl border ${activeVideoUrl === video.url ? "border-[#136ADA] shadow-md shadow-blue-100" : "border-gray-100 shadow-sm"} flex-1 flex-row items-center`}
                   >
-                    <Ionicons
-                      name={activeVideoUrl === video.url ? "pause" : "play"}
-                      size={24}
-                      color={activeVideoUrl === video.url ? "#136ADA" : "#9ca3af"}
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text
-                      style={{ fontFamily: "Poppins-Bold" }}
-                      className="text-gray-800 text-sm"
-                      numberOfLines={1}
+                    <View
+                      className={`w-12 h-12 ${activeVideoUrl === video.url ? "bg-blue-50" : "bg-gray-50"} rounded-xl items-center justify-center mr-4`}
                     >
-                      {video.name}
-                    </Text>
-                    <Text
-                      style={{ fontFamily: "Poppins-Medium" }}
-                      className="text-gray-400 text-[10px]"
-                    >
-                      Thời lượng: {(video.duration / 60).toFixed(1)} phút
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+                      <Ionicons
+                        name={activeVideoUrl === video.url ? "pause" : "play"}
+                        size={24}
+                        color={activeVideoUrl === video.url ? "#136ADA" : "#9ca3af"}
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text
+                        style={{ fontFamily: "Poppins-Bold" }}
+                        className="text-gray-800 text-sm"
+                        numberOfLines={1}
+                      >
+                        {video.name}
+                      </Text>
+                      <Text
+                        style={{ fontFamily: "Poppins-Medium" }}
+                        className="text-gray-400 text-[10px]"
+                      >
+                        Thời lượng: {(video.duration / 60).toFixed(1)} phút
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDeleteVideo(video.id)}
+                    className="bg-red-50 border border-red-100 w-12 h-12 rounded-2xl items-center justify-center shadow-sm"
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                  </TouchableOpacity>
+                </View>
               ))
             )}
           </View>
@@ -359,35 +420,42 @@ export default function LessonDetailScreen() {
               </View>
             ) : (
               assignments.map((assignment) => (
-                <TouchableOpacity
-                  key={assignment.id}
-                  onPress={() => {
-                    router.push(`/teacher/lesson-assignments/${assignment.id}` as any);
-                  }}
-                  activeOpacity={0.7}
-                  className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex-row items-center mb-4"
-                >
-                  <View className="w-12 h-12 bg-green-50 rounded-xl items-center justify-center mr-4">
-                    <Ionicons name="reader" size={24} color="#22C55E" />
-                  </View>
-                  <View className="flex-1">
-                    <Text
-                      style={{ fontFamily: "Poppins-Bold" }}
-                      className="text-gray-800 text-sm"
-                      numberOfLines={1}
-                    >
-                      {assignment.title}
-                    </Text>
-                    <Text
-                      style={{ fontFamily: "Poppins-Medium" }}
-                      className="text-gray-400 text-[10px]"
-                      numberOfLines={1}
-                    >
-                      {assignment.fileTitle || "Tài liệu hệ thống"}
-                    </Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
-                </TouchableOpacity>
+                <View key={assignment.id} className="flex-row items-center gap-2 mb-4">
+                  <TouchableOpacity
+                    onPress={() => {
+                      router.push(`/teacher/lesson-assignments/${assignment.id}` as any);
+                    }}
+                    activeOpacity={0.7}
+                    className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex-1 flex-row items-center"
+                  >
+                    <View className="w-12 h-12 bg-green-50 rounded-xl items-center justify-center mr-4">
+                      <Ionicons name="reader" size={24} color="#22C55E" />
+                    </View>
+                    <View className="flex-1">
+                      <Text
+                        style={{ fontFamily: "Poppins-Bold" }}
+                        className="text-gray-800 text-sm"
+                        numberOfLines={1}
+                      >
+                        {assignment.title}
+                      </Text>
+                      <Text
+                        style={{ fontFamily: "Poppins-Medium" }}
+                        className="text-gray-400 text-[10px]"
+                        numberOfLines={1}
+                      >
+                        {assignment.fileTitle || "Tài liệu hệ thống"}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDeleteAssignment(assignment.id)}
+                    className="bg-red-50 border border-red-100 w-12 h-12 rounded-2xl items-center justify-center shadow-sm"
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                  </TouchableOpacity>
+                </View>
               ))
             )}
           </View>

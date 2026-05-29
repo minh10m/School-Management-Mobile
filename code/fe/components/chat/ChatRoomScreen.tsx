@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter, useSegments } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
+import * as Haptics from "expo-haptics";
 import {
   ActivityIndicator,
   Alert,
@@ -13,6 +14,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Animated,
 } from "react-native";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,6 +24,92 @@ import { userService } from "../../services/user.service";
 import { useAuthStore } from "../../store/authStore";
 import { MemberInfo, MessageResponse } from "../../types/conversation";
 import { UserResponse } from "../../types/user";
+
+const MessageBubble = ({
+  item,
+  isMe,
+  isEmojiOnly,
+  selectedMessageId,
+  setSelectedMessageId,
+  handleRecallMessage,
+}: {
+  item: MessageResponse;
+  isMe: boolean;
+  isEmojiOnly: boolean;
+  selectedMessageId: string | null;
+  setSelectedMessageId: (id: string | null) => void;
+  handleRecallMessage: (id: string) => void;
+}) => {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const onPressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.94,
+      useNativeDriver: true,
+      tension: 100,
+      friction: 6,
+    }).start();
+  };
+
+  const onPressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 100,
+      friction: 6,
+    }).start();
+  };
+
+  const handleLongPress = () => {
+    if (isMe && !item.isDeleted && !item.id.startsWith("temp-")) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      handleRecallMessage(item.id);
+    }
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <TouchableOpacity
+        activeOpacity={item.isDeleted ? 1 : 0.8}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        onPress={() => {
+          if (item.isDeleted) return;
+          setSelectedMessageId(selectedMessageId === item.id ? null : item.id);
+        }}
+        onLongPress={handleLongPress}
+        delayLongPress={250}
+        className={`px-3.5 py-2 ${
+          item.isDeleted
+            ? "bg-gray-100/50 border border-gray-200/50"
+            : isMe
+            ? "bg-indigo-600"
+            : isEmojiOnly ? "bg-transparent" : "bg-gray-100 border border-gray-200/50"
+        }`}
+        style={{
+          borderRadius: 20,
+          shadowColor: isMe && !item.isDeleted ? "#4F46E5" : "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: isMe && !item.isDeleted ? 0.2 : 0.05,
+          shadowRadius: 2,
+          elevation: 1,
+        }}
+      >
+        <Text
+          style={{ 
+            fontFamily: "Poppins-Regular",
+            fontSize: item.isDeleted ? 14 : (isEmojiOnly ? 32 : 15),
+            lineHeight: item.isDeleted ? 20 : (isEmojiOnly ? 40 : 22),
+            fontStyle: item.isDeleted ? "italic" : "normal"
+          }}
+          className={`${item.isDeleted ? "text-gray-400" : (isMe ? "text-white" : "text-gray-800")}`}
+        >
+          {item.isDeleted ? "Tin nhắn đã được thu hồi" : item.content}
+        </Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
 
 export default function ChatRoomScreen() {
   const {
@@ -114,11 +202,15 @@ export default function ChatRoomScreen() {
     if (currentConversation?.lastMessageObj) {
       const newMsg = currentConversation.lastMessageObj as MessageResponse;
       setMessages((prev) => {
-        // Prevent duplicate appending by real ID, but update if changed (like status)
+        // Prevent duplicate appending by real ID, but update if changed (like status, content or isDeleted)
         const existingIndex = prev.findIndex((msg) => msg.id === newMsg.id);
         if (existingIndex !== -1) {
           // Update the message if there's any change
-          if (prev[existingIndex].status !== newMsg.status || prev[existingIndex].content !== newMsg.content) {
+          if (
+            prev[existingIndex].status !== newMsg.status ||
+            prev[existingIndex].content !== newMsg.content ||
+            prev[existingIndex].isDeleted !== newMsg.isDeleted
+          ) {
             const newArray = [...prev];
             newArray[existingIndex] = newMsg;
             return newArray;
@@ -147,6 +239,26 @@ export default function ChatRoomScreen() {
       });
     }
   }, [currentConversation?.lastMessageObj]);
+
+  // Listen to recalled messages in realtime
+  useEffect(() => {
+    if (currentConversation?.lastRecalledMessage) {
+      const recalledId = currentConversation.lastRecalledMessage.messageId;
+      setMessages((prev) => {
+        const msgIndex = prev.findIndex((m) => m.id === recalledId);
+        if (msgIndex !== -1 && !prev[msgIndex].isDeleted) {
+          const newArray = [...prev];
+          newArray[msgIndex] = {
+            ...prev[msgIndex],
+            isDeleted: true,
+            content: "Tin nhắn đã được thu hồi",
+          };
+          return newArray;
+        }
+        return prev;
+      });
+    }
+  }, [currentConversation?.lastRecalledMessage]);
 
   const handleSend = async () => {
     if (!inputText.trim() || sending || !id) return;
@@ -211,6 +323,35 @@ export default function ChatRoomScreen() {
     } finally {
       setSending(false);
     }
+  };
+
+  const handleRecallMessage = async (messageId: string) => {
+    Alert.alert(
+      "Thu hồi tin nhắn",
+      "Bạn có chắc chắn muốn thu hồi tin nhắn này không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Thu hồi",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await conversationService.deleteMessage(messageId);
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === messageId
+                    ? { ...msg, isDeleted: true, content: "Tin nhắn đã được thu hồi" }
+                    : msg
+                )
+              );
+            } catch (err) {
+              console.log(err);
+              Alert.alert("Lỗi", "Không thể thu hồi tin nhắn. Vui lòng thử lại sau.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const isGroup =
@@ -355,34 +496,14 @@ export default function ChatRoomScreen() {
             </Text>
           )}
           
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setSelectedMessageId(selectedMessageId === item.id ? null : item.id)}
-            className={`px-3.5 py-2 ${
-              isMe
-                ? "bg-indigo-600"
-                : isEmojiOnly ? "bg-transparent" : "bg-gray-100 border border-gray-200/50"
-            }`}
-            style={{
-              borderRadius: 20,
-              shadowColor: isMe ? "#4F46E5" : "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: isMe ? 0.2 : 0.05,
-              shadowRadius: 2,
-              elevation: 1,
-            }}
-          >
-            <Text
-              style={{ 
-                fontFamily: "Poppins-Regular",
-                fontSize: isEmojiOnly ? 32 : 15,
-                lineHeight: isEmojiOnly ? 40 : 22
-              }}
-              className={`${isMe ? "text-white" : "text-gray-800"}`}
-            >
-              {item.content}
-            </Text>
-          </TouchableOpacity>
+          <MessageBubble
+            item={item}
+            isMe={isMe}
+            isEmojiOnly={isEmojiOnly}
+            selectedMessageId={selectedMessageId}
+            setSelectedMessageId={setSelectedMessageId}
+            handleRecallMessage={handleRecallMessage}
+          />
 
           {(selectedMessageId === item.id || (!isSameSenderAsNext && index === 0)) && (
             <View className={`flex-row items-center mt-1 ${isMe ? "justify-end" : "justify-start"} px-1`}>

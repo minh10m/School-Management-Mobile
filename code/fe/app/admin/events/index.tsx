@@ -9,6 +9,7 @@ import {
   Modal,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
@@ -63,6 +64,30 @@ export default function AdminEventsScreen() {
     setRefreshing(true);
     await fetchEvents();
     setRefreshing(false);
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    Alert.alert(
+      "Xóa sự kiện",
+      "Bạn có chắc chắn muốn xóa sự kiện này không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await eventService.deleteEvent(eventId);
+              Alert.alert("Thành công", "Xóa sự kiện thành công!");
+              fetchEvents();
+            } catch (err) {
+              console.log("Error deleting event:", err);
+              Alert.alert("Lỗi", "Không thể xóa sự kiện.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const openFilter = () => {
@@ -301,7 +326,18 @@ export default function AdminEventsScreen() {
                       {item.startTime.slice(0, 5)} - {item.finishTime.slice(0, 5)}
                     </Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+                  <View className="flex-row items-center gap-3">
+                    <TouchableOpacity
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleDeleteEvent(item.eventId!);
+                      }}
+                      className="p-1"
+                    >
+                      <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                    </TouchableOpacity>
+                    <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+                  </View>
                 </View>
               </TouchableOpacity>
             );
