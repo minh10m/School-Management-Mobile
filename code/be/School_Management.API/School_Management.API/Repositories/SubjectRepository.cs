@@ -77,7 +77,8 @@ namespace School_Management.API.Repositories
             var isSubjectExisted = await context.Subject.AnyAsync(x => x.Id == subjectId);
             if (!isSubjectExisted) return null;
 
-            var query = context.Teacher.AsNoTracking().Where(x => x.TeacherSubjects.Any(ts => ts.SubjectId == subjectId));
+            var query = context.Teacher.AsNoTracking()
+                .Where(x => x.TeacherSubjects.Any(ts => ts.SubjectId == subjectId && ts.IsActive == true));
 
             //Filtering
             if(!string.IsNullOrWhiteSpace(request.FullName))
@@ -113,7 +114,8 @@ namespace School_Management.API.Repositories
                             .Take(request.PageSize)
                             .Select(g => new TeacherOfSubjectResponse
             {
-                TeacherSubjectId = g.TeacherSubjects.Where(ts => ts.SubjectId == subjectId).Select(ts => ts.TeacherSubjectId).FirstOrDefault(),
+                TeacherSubjectId = g.TeacherSubjects.Where(ts => ts.SubjectId == subjectId && ts.IsActive == true)
+                    .Select(ts => ts.TeacherSubjectId).FirstOrDefault(),
                 Email = g.User.Email,
                 FullName = g.User.FullName,
                 PhoneNumber = g.User.PhoneNumber,
