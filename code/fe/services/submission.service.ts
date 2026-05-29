@@ -49,5 +49,14 @@ export const submissionService = {
   getMySubmission: async (params: SubmissionStudentRequest): Promise<SubmissionResponse | null> => {
     const response = await apiClient.get<{ success: boolean; data: SubmissionResponse }>("/submissions/mySubmission", { params });
     return response.data.data;
-  }
+  },
+
+  /**
+   * Students delete their own submission.
+   * DELETE /submissions/{id}
+   */
+  deleteSubmission: async (submissionId: string): Promise<any> => {
+    const response = await apiClient.delete(`/submissions/${submissionId}`);
+    return response.data;
+  },
 };

@@ -129,6 +129,14 @@ export const examScheduleService = {
     return response.data.data;
   },
   /**
+   * Xóa toàn bộ chi tiết môn thi trong một lịch thi
+   * DELETE /exam-schedules/{id}/details
+   */
+  clearScheduleDetails: async (id: string): Promise<boolean> => {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/exam-schedules/${id}/details`);
+    return response.data.data;
+  },
+  /**
    * Lấy lịch thi cá nhân (Dành cho Giáo viên gác thi hoặc Học sinh đi thi)
    * GET /api/exam-schedules
    */

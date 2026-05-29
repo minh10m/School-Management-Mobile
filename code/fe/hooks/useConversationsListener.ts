@@ -14,6 +14,10 @@ export interface RealtimeConversation {
   unreadCounts: Record<string, number>;
   avatarUrl?: string | null;
   displayName?: string | null;
+  lastRecalledMessage?: {
+    messageId: string;
+    recalledAt: any;
+  } | null;
 }
 
 export const useConversationsListener = () => {
@@ -56,6 +60,7 @@ export const useConversationsListener = () => {
             unreadCounts: data.unreadCounts || {},
             avatarUrl: data.avatarUrl || null,
             displayName: data.displayName || null,
+            lastRecalledMessage: data.lastRecalledMessage || null,
           };
 
           convos.push(convo);
