@@ -208,26 +208,29 @@ namespace School_Management.API.Repositories
 
         public async Task<(CourseResponse? data, string? message)> GetCourseById(Guid courseId)
         {
-            var course = await context.Course.IgnoreQueryFilters().AsNoTracking()
-                                             .Include(x => x.TeacherSubject).ThenInclude(x => x.Teacher).ThenInclude(x => x.User)
-                                             .Include(x => x.TeacherSubject).ThenInclude(x => x.Subject)
-                                             .FirstOrDefaultAsync(x => x.Id == courseId);
+            var course = await context.Course
+                .IgnoreQueryFilters()  // ignore filter của Course
+                .AsNoTracking()
+                .Where(x => x.Id == courseId)
+                .Select(g => new CourseResponse
+                {
+                    Id = g.Id,
+                    Description = g.Description,
+                    CourseName = g.CourseName,
+                    CreatedAt = g.CreatedAt,
+                    Price = g.Price,
+                    PublishedAt = g.PublishedAt,
+                    Status = g.Status,
+                    TeacherSubjectId = g.TeacherSubjectId,
+                    SubjectId = g.TeacherSubject.SubjectId,
+                    TeacherName = g.TeacherSubject.Teacher.User.FullName,
+                    SubjectName = g.TeacherSubject.Subject.SubjectName
+                })
+                .FirstOrDefaultAsync();
+
             if (course == null) return (null, "NOT_FOUND_COURSE");
 
-            return (new CourseResponse
-            {
-                Id = course.Id,
-                Description = course.Description,
-                CourseName = course.CourseName,
-                CreatedAt = course.CreatedAt,
-                Price = course.Price,
-                PublishedAt = course.PublishedAt,
-                Status = course.Status,
-                TeacherSubjectId = course.TeacherSubjectId,
-                SubjectId = course.TeacherSubject.SubjectId,
-                TeacherName = course.TeacherSubject.Teacher.User.FullName,
-                SubjectName = course.TeacherSubject.Subject.SubjectName
-            }, "SUCCESS");
+            return (course, "SUCCESS");
         }
 
         public async Task<(PagedResponse<CourseResponse>? data, string message)> GetMyCourseForStudent(MyCourseFilterRequest request, Guid userId)
