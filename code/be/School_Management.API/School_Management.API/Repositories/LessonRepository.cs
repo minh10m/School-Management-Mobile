@@ -14,12 +14,14 @@ namespace School_Management.API.Repositories
         {
             this.context = context;
         }
+
         public async Task<(LessonResponse? data, string? message)> CreateLesson(LessonRequest request)
         {
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var course = await context.Course.FirstOrDefaultAsync(x => x.Id == request.CourseId);
+                // IgnoreQueryFilters để tìm được course dù bị soft delete
+                var course = await context.Course.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == request.CourseId);
                 if (course == null) return (null, "NOT_FOUND_COURSE");
 
                 var maxOrder = await context.Lesson
@@ -30,8 +32,10 @@ namespace School_Management.API.Repositories
                 {
                     request.OrderIndex = maxOrder + 1;
                 }
-                await context.Lesson.Where(x => x.CourseId == request.CourseId && x.OrderIndex >= request.OrderIndex)
-                                    .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
+
+                await context.Lesson
+                    .Where(x => x.CourseId == request.CourseId && x.OrderIndex >= request.OrderIndex)
+                    .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
 
                 var newLesson = new Lesson
                 {
@@ -65,33 +69,42 @@ namespace School_Management.API.Repositories
         {
             var course = await context.Course.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == request.CourseId);
             if (course == null) return (null, "NOT_FOUND_COURSE");
-            var query = context.Lesson.AsNoTracking().Include(x => x.Course).Include(x => x.LessonVideos).AsQueryable();
-            query = query.Where(x => x.CourseId == request.CourseId);
 
-            query = query.OrderBy(x => x.OrderIndex);
+            // IgnoreQueryFilters + dùng projection (.Select) thay vì .Include
+            // để tránh global query filter của Course chặn navigation property
+            var query = context.Lesson
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(x => x.CourseId == request.CourseId)
+                .OrderBy(x => x.OrderIndex);
 
             var totalCount = await query.CountAsync();
             var skipsResult = (request.PageNumber - 1) * request.PageSize;
-            var listResult = await query.Skip(skipsResult).Take(request.PageSize)
-                                        .Select(lesson => new LessonResponse
-                                        {
-                                            Id = lesson.Id,
-                                            CourseId = lesson.CourseId,
-                                            CourseName = lesson.Course.CourseName,
-                                            LessonName = lesson.LessonName,
-                                            OrderIndex = lesson.OrderIndex,
-                                            LessonVideos = lesson.LessonVideos.Select(v => new LessonVideoResponse
-                                            {
-                                                Id = v.Id,
-                                                LessonId = v.LessonId,
-                                                LessonName = lesson.LessonName,
-                                                Url = v.Url,
-                                                Name = v.Name,
-                                                Duration = v.Duration,
-                                                OrderIndex = v.OrderIndex,
-                                                IsPreview = v.IsPreview
-                                            }).ToList()
-                                        }).ToListAsync();
+
+            var listResult = await query
+                .Skip(skipsResult)
+                .Take(request.PageSize)
+                .Select(lesson => new LessonResponse
+                {
+                    Id = lesson.Id,
+                    CourseId = lesson.CourseId,
+                    CourseName = lesson.Course.CourseName,
+                    LessonName = lesson.LessonName,
+                    OrderIndex = lesson.OrderIndex,
+                    LessonVideos = lesson.LessonVideos
+                        .OrderBy(v => v.OrderIndex)
+                        .Select(v => new LessonVideoResponse
+                        {
+                            Id = v.Id,
+                            LessonId = v.LessonId,
+                            LessonName = lesson.LessonName,
+                            Url = v.Url,
+                            Name = v.Name,
+                            Duration = v.Duration,
+                            OrderIndex = v.OrderIndex,
+                            IsPreview = v.IsPreview
+                        }).ToList()
+                }).ToListAsync();
 
             return (new PagedResponse<LessonResponse>
             {
@@ -104,79 +117,73 @@ namespace School_Management.API.Repositories
 
         public async Task<(LessonResponse? data, string message)> GetLessonById(Guid lessonId)
         {
-            var lesson = await context.Lesson.Include(x => x.Course).Include(x => x.LessonVideos).FirstOrDefaultAsync(x => x.Id == lessonId);
-            if (lesson == null) return (null, "NOT_FOUND_LESSON");
-
-            var result = new LessonResponse
-            {
-                Id = lesson.Id,
-                CourseId = lesson.CourseId,
-                CourseName = lesson.Course.CourseName,
-                LessonName = lesson.LessonName,
-                OrderIndex = lesson.OrderIndex,
-                LessonVideos = lesson.LessonVideos.Select(v => new LessonVideoResponse
+            // Dùng projection thay .Include để tránh bị filter của Course chặn
+            var result = await context.Lesson
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Where(x => x.Id == lessonId)
+                .Select(lesson => new LessonResponse
                 {
-                    Id = v.Id,
-                    LessonId = v.LessonId,
+                    Id = lesson.Id,
+                    CourseId = lesson.CourseId,
+                    CourseName = lesson.Course.CourseName,
                     LessonName = lesson.LessonName,
-                    Url = v.Url,
-                    Name = v.Name,
-                    Duration = v.Duration,
-                    OrderIndex = v.OrderIndex,
-                    IsPreview = v.IsPreview
-                }).ToList()
-            };
+                    OrderIndex = lesson.OrderIndex,
+                    LessonVideos = lesson.LessonVideos
+                        .OrderBy(v => v.OrderIndex)
+                        .Select(v => new LessonVideoResponse
+                        {
+                            Id = v.Id,
+                            LessonId = v.LessonId,
+                            LessonName = lesson.LessonName,
+                            Url = v.Url,
+                            Name = v.Name,
+                            Duration = v.Duration,
+                            OrderIndex = v.OrderIndex,
+                            IsPreview = v.IsPreview
+                        }).ToList()
+                })
+                .FirstOrDefaultAsync();
 
+            if (result == null) return (null, "NOT_FOUND_LESSON");
             return (result, "SUCCESS");
-
         }
 
         public async Task<(bool result, string message)> HardDeleteLesson(Guid lessonId, Guid userId)
         {
-            // 1. Kiểm tra quyền Giáo viên
             var teacher = await context.Teacher.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId);
             if (teacher == null) return (false, "NOT_FOUND_TEACHER");
 
-            // 2. Tìm bài học cần xóa
             var lesson = await context.Lesson
+                .IgnoreQueryFilters()
                 .Include(l => l.Course)
                     .ThenInclude(c => c.TeacherSubject)
                 .FirstOrDefaultAsync(l => l.Id == lessonId);
 
             if (lesson == null) return (false, "NOT_FOUND_LESSON");
 
-            // 3. Xác thực quyền sở hữu khóa học
             if (lesson.Course.TeacherSubject == null || lesson.Course.TeacherSubject.TeacherId != teacher.Id)
                 return (false, "NOT_IS_TEACHER_OF_COURSE");
 
-            // Lưu lại thông tin cần thiết trước khi thực hiện thay đổi cấu trúc dữ liệu
             var targetCourseId = lesson.CourseId;
             var deletedOrderIndex = lesson.OrderIndex;
 
-            // 4. Khởi động Transaction để bảo vệ chuỗi thao tác liên hoàn
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                // Bước A: Thực hiện xóa cứng bản ghi bài học mục tiêu
                 context.Lesson.Remove(lesson);
                 await context.SaveChangesAsync();
 
-                // Bước B: Dồn dịch chỉ số - Giảm toàn bộ OrderIndex của các bài phía sau đi 1 đơn vị
-                // Sử dụng ExecuteUpdateAsync để cập nhật trực tiếp dưới Database mà không cần nạp dữ liệu lên RAM
                 await context.Lesson
                     .Where(x => x.CourseId == targetCourseId && x.OrderIndex > deletedOrderIndex)
                     .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex - 1));
 
-                // Xác nhận hoàn tất thành công
                 await transaction.CommitAsync();
                 return (true, "SUCCESS");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Quay xe nếu một trong hai bước trên gặp sự cố sập nguồn/lỗi DB
                 await transaction.RollbackAsync();
-                // Giả định bạn có biến logger được khai báo ở tầng class
-                // logger.LogError(ex, "Lỗi xảy ra khi dồn chỉ số lúc xóa Lesson {Id}", lessonId);
                 return (false, "EXCEPTION_ERROR");
             }
         }
@@ -186,47 +193,61 @@ namespace School_Management.API.Repositories
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
-                var lesson = await context.Lesson.Include(x => x.Course).Include(x => x.LessonVideos).FirstOrDefaultAsync(x => x.Id == lessonId);
+                var lesson = await context.Lesson
+                    .IgnoreQueryFilters()
+                    .Include(x => x.LessonVideos)
+                    .FirstOrDefaultAsync(x => x.Id == lessonId);
+
                 if (lesson == null) return (null, "NOT_FOUND_LESSON");
 
                 if (request.OrderIndex > lesson.OrderIndex)
                 {
-                    await context.Lesson.Where(x => x.CourseId == lesson.CourseId && x.OrderIndex > lesson.OrderIndex && x.OrderIndex <= request.OrderIndex)
-                                        .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex - 1));
+                    await context.Lesson
+                        .Where(x => x.CourseId == lesson.CourseId && x.OrderIndex > lesson.OrderIndex && x.OrderIndex <= request.OrderIndex)
+                        .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex - 1));
                 }
                 else if (request.OrderIndex < lesson.OrderIndex)
                 {
-                    await context.Lesson.Where(x => x.CourseId == lesson.CourseId && x.OrderIndex < lesson.OrderIndex && x.OrderIndex >= request.OrderIndex)
-                                        .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
+                    await context.Lesson
+                        .Where(x => x.CourseId == lesson.CourseId && x.OrderIndex < lesson.OrderIndex && x.OrderIndex >= request.OrderIndex)
+                        .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
                 }
+
                 lesson.LessonName = request.LessonName;
                 lesson.OrderIndex = request.OrderIndex;
 
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                var result = new LessonResponse
+                // Dùng projection để lấy CourseName tránh bị filter Course chặn
+                var courseName = await context.Course
+                    .IgnoreQueryFilters()
+                    .AsNoTracking()
+                    .Where(x => x.Id == lesson.CourseId)
+                    .Select(x => x.CourseName)
+                    .FirstOrDefaultAsync();
+
+                return (new LessonResponse
                 {
                     Id = lesson.Id,
                     CourseId = lesson.CourseId,
-                    CourseName = lesson.Course.CourseName,
-                    LessonName= lesson.LessonName,
+                    CourseName = courseName ?? string.Empty,
+                    LessonName = lesson.LessonName,
                     OrderIndex = lesson.OrderIndex,
-                    LessonVideos = lesson.LessonVideos.Select(v => new LessonVideoResponse
-                    {
-                        Id = v.Id,
-                        LessonId = v.LessonId,
-                        LessonName = lesson.LessonName,
-                        Url = v.Url,
-                        Name = v.Name,
-                        Duration = v.Duration,
-                        OrderIndex = v.OrderIndex,
-                        IsPreview = v.IsPreview
-                    }).ToList()
-                };
-
-                return (result, "SUCCESS");
-
+                    LessonVideos = lesson.LessonVideos
+                        .OrderBy(v => v.OrderIndex)
+                        .Select(v => new LessonVideoResponse
+                        {
+                            Id = v.Id,
+                            LessonId = v.LessonId,
+                            LessonName = lesson.LessonName,
+                            Url = v.Url,
+                            Name = v.Name,
+                            Duration = v.Duration,
+                            OrderIndex = v.OrderIndex,
+                            IsPreview = v.IsPreview
+                        }).ToList()
+                }, "SUCCESS");
             }
             catch (Exception)
             {
