@@ -49,12 +49,11 @@ namespace School_Management.API.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{teacherSubjectId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteTeacherSubject([FromRoute] Guid id)
+        public async Task<IActionResult> DeactivateTeacherSubject([FromRoute] Guid teacherSubjectId)
         {
-            var result = await teacherSubjectService.DeleteTeacherSubject(id);
-            if (!result) return NotFound(new { success = false, message = "Không tìm thấy gán môn này" });
+            var result = await teacherSubjectService.DeactivateTeacherSubject(teacherSubjectId);
             return Ok(new { success = true, message = "Xóa gán môn thành công" });
         }
     }
