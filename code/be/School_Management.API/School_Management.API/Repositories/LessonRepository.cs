@@ -63,7 +63,7 @@ namespace School_Management.API.Repositories
 
         public async Task<(PagedResponse<LessonResponse>? data, string? message)> GetAllLessonOfCourse(LessonFilterRequest request)
         {
-            var course = await context.Course.FirstOrDefaultAsync(x => x.Id == request.CourseId);
+            var course = await context.Course.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == request.CourseId);
             if (course == null) return (null, "NOT_FOUND_COURSE");
             var query = context.Lesson.AsNoTracking().Include(x => x.Course).Include(x => x.LessonVideos).AsQueryable();
             query = query.Where(x => x.CourseId == request.CourseId);
