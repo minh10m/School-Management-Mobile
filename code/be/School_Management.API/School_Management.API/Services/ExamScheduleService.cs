@@ -116,5 +116,17 @@ namespace School_Management.API.Services
                 _ => throw new Exception(message ?? "Lỗi không xác định")
             };
         }
+
+        public async Task<bool> ClearAllDetailsOfExamSchedule(Guid examScheduleId)
+        {
+            var (result, message) = await examScheduleRepository.ClearAllDetailsOfExamSchedule(examScheduleId);
+            return message switch
+            {
+                "NOT_FOUND_EXAM_SCHEDULE" => throw new NotFoundException("Không tìm thấy lịch thi tương ứng để dọn dẹp"),
+                "EXCEPTION_ERROR" => throw new Exception("Gặp sự cố lỗi DB khi thực hiện xóa hàng loạt"),
+                "SUCCESS" => result,
+                _ => throw new Exception($"Lỗi không xác định: {message}")
+            };
+        }
     }
 }

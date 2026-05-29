@@ -609,5 +609,34 @@ namespace School_Management.API.Repositories
                 return (false, ex.Message);
             }
         }
+
+        public async Task<(bool result, string message)> ClearAllDetailsOfExamSchedule(Guid examScheduleId)
+        {
+            var exam = await context.ExamSchedule.FirstOrDefaultAsync(x => x.Id == examScheduleId);
+            if (exam == null) return (false, "NOT_FOUND_EXAM_SCHEDULE");
+
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var details = await context.ExamScheduleDetail
+                                            .Where(x => x.ExamScheduleId == examScheduleId)
+                                            .ToListAsync();
+
+                if (details.Any())
+                {
+                    context.ExamScheduleDetail.RemoveRange(details);
+                    await context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+                return (true, "SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                logger.LogError(ex, "Lỗi khi xóa sạch cụm chi tiết lịch thi của ExamSchedule {Id}", examScheduleId);
+                return (false, "EXCEPTION_ERROR");
+            }
+        }
     }
 }

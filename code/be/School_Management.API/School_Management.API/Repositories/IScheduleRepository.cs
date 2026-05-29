@@ -14,6 +14,6 @@ namespace School_Management.API.Repositories
         public Task<PagedResponse<ScheduleResponse>> GetAllScheduleForAdmin(ScheduleFilterRequest request);
         public Task<List<ScheduleDetailResponse>> GetScheduleDetailByScheduleId(Guid scheduleId);
         public Task<List<ScheduleDetailResponse>> GetActiveScheduleByClassYearId(Guid classYearId, int term, int schoolYear);
-
+        public Task<(bool result, string message)> DeleteScheduleDetailById(Guid scheduleDetailId);
     }
 }

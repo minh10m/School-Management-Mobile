@@ -168,5 +168,19 @@ namespace School_Management.API.Controllers
                 data = result
             });
         }
+
+        [HttpDelete]
+        [Authorize(Roles = "Admin")]
+        [Route("{examScheduleId}/details")]
+        public async Task<IActionResult> DeleteExamScheduleDetail([FromRoute] Guid examScheduleId)
+        {
+            var result = await examScheduleService.ClearAllDetailsOfExamSchedule(examScheduleId);
+            return Ok(new
+            {
+                success = true, 
+                message = "Xóa chi tiết lịch thành công"
+            });
+        }
+
     }
 }

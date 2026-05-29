@@ -120,5 +120,18 @@ namespace School_Management.API.Controllers
             var result = await scheduleService.GetActiveScheduleByClassYearId(classYearId, term, schoolYear);
             return Ok(result ?? new List<ScheduleDetailResponse>());
         }
+
+        [HttpDelete]
+        [Route("details/{scheduleDetailId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteScheduleDetail([FromRoute] Guid scheduleDetailId)
+        {
+            var result = await scheduleService.DeleteScheduleDetailById(scheduleDetailId);
+            return Ok(new
+            {
+                success = true,
+                message = "Xóa chi tiết lịch thành công"
+            });
+        }
     }
 }
