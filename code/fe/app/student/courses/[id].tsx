@@ -406,7 +406,7 @@ export default function StudentCourseDetail() {
                 <View className="p-4 bg-white border-2 border-blue-600 rounded-[32px] shadow-2xl shadow-blue-200">
                   <Image
                     source={{ uri: paymentInfo.qrCodeUrl }}
-                    style={{ width: 240, height: 240, borderRadius: 120 }}
+                    style={{ width: 240, height: 240, borderRadius: 9999 }}
                     resizeMode="contain"
                   />
                 </View>

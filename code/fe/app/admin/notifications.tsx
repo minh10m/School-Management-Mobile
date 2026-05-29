@@ -104,6 +104,30 @@ export default function AdminNotificationScreen() {
     }
   };
 
+  const handleDeleteNotification = async (notificationId: string) => {
+    Alert.alert(
+      "Xóa thông báo",
+      "Bạn có chắc chắn muốn xóa thông báo này không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await notificationService.deleteNotification(notificationId);
+              Alert.alert("Thành công", "Xóa thông báo thành công!");
+              fetchNotifications();
+            } catch (error) {
+              console.log("Error deleting notification", error);
+              Alert.alert("Lỗi", "Không thể xóa thông báo.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
   // Load custom users based on search query
   const loadUsers = async (search = "") => {
     try {
@@ -259,7 +283,7 @@ export default function AdminNotificationScreen() {
                 </View>
 
                 {/* Content */}
-                <View className="flex-1">
+                <View className="flex-1 pr-2">
                   <View className="flex-row justify-between items-start">
                     <Text className="text-black text-sm flex-1 pr-2" style={{ fontFamily: "Poppins-Bold" }} numberOfLines={1}>
                       {item.title}
@@ -272,6 +296,14 @@ export default function AdminNotificationScreen() {
                     {item.content}
                   </Text>
                 </View>
+
+                {/* Delete Button */}
+                <TouchableOpacity
+                  onPress={() => handleDeleteNotification(item.id)}
+                  className="p-2"
+                >
+                  <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                </TouchableOpacity>
               </View>
             )}
             renderSectionHeader={({ section: { title } }) => (
@@ -486,9 +518,9 @@ export default function AdminNotificationScreen() {
                                   <View className="flex-row items-center flex-1">
                                     <View className="w-8 h-8 rounded-full bg-blue-50 items-center justify-center mr-3 overflow-hidden">
                                       {item.avatarUrl ? (
-                                        <Image
+                                        <Image className="rounded-full"
                                           source={{ uri: item.avatarUrl }}
-                                          style={{ width: 32, height: 32, borderRadius: 16 }}
+                                          style={{ width: 32, height: 32, borderRadius: 9999 }}
                                           contentFit="cover"
                                         />
                                       ) : (

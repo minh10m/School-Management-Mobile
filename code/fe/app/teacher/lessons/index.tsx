@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   FlatList,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -48,6 +49,33 @@ export default function TeacherLessons() {
     setRefreshing(true);
     fetchLessons();
   }, [fetchLessons]);
+
+  const handleDeleteLesson = async (lessonId: string) => {
+    Alert.alert(
+      "Xóa bài học",
+      "Bạn có chắc chắn muốn xóa bài học này không? Tất cả tài liệu video và bài tập liên quan cũng sẽ bị xóa.",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await lessonService.deleteLesson(lessonId);
+              Alert.alert("Thành công", "Đã xóa bài học thành công!");
+              fetchLessons();
+            } catch (err) {
+              console.log(err);
+              Alert.alert("Lỗi", "Không thể xóa bài học.");
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -133,8 +161,19 @@ export default function TeacherLessons() {
                   Thứ tự hiển thị: {item.orderIndex}
                 </Text>
               </View>
-              <View className="bg-gray-50 w-8 h-8 rounded-xl items-center justify-center">
-                <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+              <View className="flex-row items-center gap-2">
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleDeleteLesson(item.id);
+                  }}
+                  className="p-2"
+                >
+                  <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                </TouchableOpacity>
+                <View className="bg-gray-50 w-8 h-8 rounded-xl items-center justify-center">
+                  <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
+                </View>
               </View>
             </View>
           </TouchableOpacity>

@@ -134,9 +134,9 @@ export default function StudentDetailScreen() {
         <View className="items-center mb-6">
           <View className="w-20 h-20 rounded-full bg-blue-100 items-center justify-center mb-2 overflow-hidden">
             {student?.avatarUrl ? (
-              <Image 
+              <Image className="rounded-full" 
                 source={{ uri: student.avatarUrl }} 
-                style={{ width: 80, height: 80, borderRadius: 40 }}
+                style={{ width: 80, height: 80, borderRadius: 9999 }}
                 contentFit="cover"
                 transition={200}
               />

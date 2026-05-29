@@ -19,6 +19,7 @@ export interface MessageResponse {
   content: string;
   status: string;
   createdAt: string;
+  isDeleted?: boolean;
 }
 
 export interface MemberInfo {

@@ -47,4 +47,13 @@ export const aiChatService = {
     });
     return res.data.success;
   },
+
+  /**
+   * Xóa lịch sử chat với AI
+   * DELETE /ai-chatbots
+   */
+  deleteChatHistory: async (): Promise<boolean> => {
+    const res = await apiClient.delete("/ai-chatbots");
+    return res.data.success;
+  },
 };

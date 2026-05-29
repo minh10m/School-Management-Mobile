@@ -277,11 +277,20 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 var app = builder.Build();
 
-
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//}
+// Tự động chạy Migration khi khởi chạy ứng dụng để đồng bộ database
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync();
+        Console.WriteLine("[DATABASE] Migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[DATABASE ERROR] Failed to apply migrations: {ex.Message}");
+    }
+}
 app.UseSwagger();
 app.UseSwaggerUI();
 

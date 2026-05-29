@@ -127,14 +127,38 @@ export default function StudentAssignmentDetailScreen() {
 
       Alert.alert("Thành công", "Nộp bài tập thành công!");
       fetchData(); // Refresh to show submission status
-    } catch (error: any) {
-      console.log("Error submitting assignment:", error);
-      const errMsg =
-        error.response?.data?.message || "Nộp bài thất bại. Vui lòng thử lại.";
-      Alert.alert("Lỗi", errMsg);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDeleteSubmission = async () => {
+    if (!submission) return;
+    Alert.alert(
+      "Hủy nộp bài tập",
+      "Bạn có chắc chắn muốn hủy nộp bài tập này không? Bạn có thể nộp lại sau khi hủy.",
+      [
+        { text: "Không", style: "cancel" },
+        {
+          text: "Hủy nộp",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setSubmitting(true);
+              await submissionService.deleteSubmission(submission.submissionId);
+              Alert.alert("Thành công", "Đã hủy nộp bài tập thành công!");
+              setSubmission(null);
+              fetchData();
+            } catch (err) {
+              console.log(err);
+              Alert.alert("Lỗi", "Không thể hủy nộp bài tập.");
+            } finally {
+              setSubmitting(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const formatDate = (dateStr?: string) => {
@@ -393,7 +417,7 @@ export default function StudentAssignmentDetailScreen() {
                 </View>
               </View>
 
-              {submission.score !== null && (
+              {submission.score !== null ? (
                 <View className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
                   <View className="flex-row justify-between items-center">
                     <Text
@@ -409,6 +433,19 @@ export default function StudentAssignmentDetailScreen() {
                     </View>
                   </View>
                 </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={handleDeleteSubmission}
+                  className="mt-2 bg-rose-50 border border-rose-100 py-3 rounded-xl flex-row items-center justify-center gap-2"
+                >
+                  <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                  <Text
+                    style={{ fontFamily: "Poppins-Bold" }}
+                    className="text-rose-600 text-xs uppercase"
+                  >
+                    Hủy nộp bài (Thu hồi)
+                  </Text>
+                </TouchableOpacity>
               )}
             </View>
           ) : (

@@ -1,4 +1,5 @@
 import { CreateEventPayload, EventItem, EventListResponse, GetEventsParams } from "../types/event";
+import { ApiResponse } from "../types/common";
 import apiClient from "./apiClient";
 
 export const eventService = {
@@ -43,5 +44,14 @@ export const eventService = {
 
     const response = await apiClient.put<EventItem>(`/events/${id}`, backendPayload);
     return response.data;
+  },
+
+  /**
+   * Admin xóa sự kiện theo ID
+   * DELETE /events/{id}
+   */
+  deleteEvent: async (id: string): Promise<boolean> => {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/events/${id}`);
+    return response.data.success;
   },
 };

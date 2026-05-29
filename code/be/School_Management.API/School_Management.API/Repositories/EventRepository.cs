@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
@@ -129,6 +129,10 @@ namespace School_Management.API.Repositories
                             ? query.OrderBy(x => x.EventDate).ThenBy(x => x.StartTime)
                             : query.OrderByDescending(x => x.EventDate).ThenByDescending(x => x.StartTime);
                 }
+            }
+            else
+            {
+                query = query.OrderByDescending(x => x.EventDate).ThenByDescending(x => x.StartTime);
             }
 
             var totalCount = await query.CountAsync();

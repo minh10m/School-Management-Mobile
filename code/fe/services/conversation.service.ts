@@ -112,4 +112,14 @@ export const conversationService = {
     );
     return response.data;
   },
+
+  // ─── RECALL/DELETE MESSAGE ───────────────────────────────────────────────────
+  /**
+   * Thu hồi/Xóa tin nhắn theo ID
+   * DELETE /conversations/{messageId}
+   */
+  deleteMessage: async (messageId: string): Promise<ApiResponse<boolean>> => {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/conversations/${messageId}`);
+    return response.data;
+  },
 };

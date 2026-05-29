@@ -286,6 +286,33 @@ export default function AIChatScreen({ role }: Props) {
     }
   };
 
+  const handleDeleteHistory = async () => {
+    Alert.alert(
+      "Xóa lịch sử trò chuyện",
+      "Bạn có chắc chắn muốn xóa toàn bộ lịch sử trò chuyện với AI không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setIsLoadingHistory(true);
+              await aiChatService.deleteChatHistory();
+              Alert.alert("Thành công", "Đã xóa lịch sử trò chuyện!");
+              setMessages([]);
+            } catch (err) {
+              console.log(err);
+              Alert.alert("Lỗi", "Không thể xóa lịch sử trò chuyện.");
+            } finally {
+              setIsLoadingHistory(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const timeStr = (iso: string) =>
     new Date(iso).toLocaleTimeString("vi-VN", {
       hour: "2-digit",
@@ -310,9 +337,9 @@ export default function AIChatScreen({ role }: Props) {
       return (
         <View style={styles.aiBubbleWrap}>
           <View style={styles.aiAvatar}>
-            <Image
+            <Image className="rounded-full"
               source={AI_AVATAR}
-              style={{ width: "100%", height: "100%", borderRadius: 15 }}
+              style={{ width: "100%", height: "100%", borderRadius: 9999 }}
               contentFit="cover"
             />
           </View>
@@ -337,7 +364,7 @@ export default function AIChatScreen({ role }: Props) {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <View style={styles.headerAvatar}>
-            <Image
+            <Image className="rounded-full"
               source={AI_AVATAR}
               style={{ width: "100%", height: "100%" }}
               contentFit="cover"
@@ -351,6 +378,16 @@ export default function AIChatScreen({ role }: Props) {
             </View>
           </View>
         </View>
+        
+        {messages.length > 0 && (
+          <TouchableOpacity
+            onPress={handleDeleteHistory}
+            style={{ padding: 8, marginRight: 4 }}
+          >
+            <Ionicons name="trash-outline" size={22} color="#EF4444" />
+          </TouchableOpacity>
+        )}
+
         {role === "Admin" && (
           <TouchableOpacity
             onPress={handleUpload}
@@ -398,9 +435,9 @@ export default function AIChatScreen({ role }: Props) {
             ListEmptyComponent={
               <View style={styles.emptyState}>
                 <View style={styles.emptyIcon}>
-                  <Image
+                  <Image className="rounded-full"
                     source={AI_AVATAR}
-                    style={{ width: "100%", height: "100%", borderRadius: 36 }}
+                    style={{ width: "100%", height: "100%", borderRadius: 9999 }}
                     contentFit="cover"
                   />
                 </View>
@@ -433,12 +470,12 @@ export default function AIChatScreen({ role }: Props) {
               isLoading ? (
                 <View style={styles.aiBubbleWrap}>
                   <View style={styles.aiAvatar}>
-                    <Image
+                    <Image className="rounded-full"
                       source={AI_AVATAR}
                       style={{
                         width: "100%",
                         height: "100%",
-                        borderRadius: 15,
+                        borderRadius: 9999,
                       }}
                       contentFit="cover"
                     />

@@ -151,9 +151,9 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
             <View className="flex-row items-center gap-4">
               <View className="w-16 h-16 rounded-full bg-blue-50 items-center justify-center border-2 border-bright-blue overflow-hidden">
                 {userInfo?.avatarUrl ? (
-                  <Image
+                  <Image className="rounded-full"
                     source={{ uri: userInfo.avatarUrl }}
-                    style={{ width: 64, height: 64, borderRadius: 32 }}
+                    style={{ width: 64, height: 64, borderRadius: 9999 }}
                     contentFit="cover"
                     transition={200}
                   />

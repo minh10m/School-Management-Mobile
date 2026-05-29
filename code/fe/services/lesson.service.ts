@@ -55,6 +55,15 @@ export const lessonService = {
     const response = await apiClient.patch<ApiResponse<LessonResponse>>(`/lessons/${lessonId}`, payload);
     return response.data.data;
   },
+
+  /**
+   * Giáo viên xóa lesson
+   * DELETE /lessons/{id}
+   */
+  deleteLesson: async (lessonId: string): Promise<boolean> => {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/lessons/${lessonId}`);
+    return response.data.success;
+  },
 };
 
 // ─── LESSON VIDEOS ────────────────────────────────────────────────────────────
@@ -102,6 +111,15 @@ export const lessonVideoService = {
       payload
     );
     return response.data.data;
+  },
+
+  /**
+   * Giáo viên xóa video bài học
+   * DELETE /lesson-videos/{id}
+   */
+  deleteLessonVideo: async (videoId: string): Promise<boolean> => {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/lesson-videos/${videoId}`);
+    return response.data.success;
   },
 };
 
@@ -188,6 +206,15 @@ export const lessonAssignmentService = {
       payload
     );
     return response.data.data;
+  },
+
+  /**
+   * Giáo viên xóa bài tập lesson
+   * DELETE /lesson-assignments/{id}
+   */
+  deleteLessonAssignment: async (assignmentId: string): Promise<boolean> => {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/lesson-assignments/${assignmentId}`);
+    return response.data.success;
   },
 };
 
