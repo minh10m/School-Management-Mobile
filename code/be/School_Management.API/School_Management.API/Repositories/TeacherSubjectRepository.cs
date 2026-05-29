@@ -22,49 +22,118 @@ namespace School_Management.API.Repositories
 
         public async Task<(TeacherSubjectResponse? data, string? errorCode)> AssignSubjectForTeacher(TeacherSubjectRequest request)
         {
-            var isExisted = await context.TeacherSubject.AnyAsync(x => x.TeacherId == request.TeacherId
-                                                                    && x.SubjectId == request.SubjectId);
+            var isExisted = await context.TeacherSubject
+                .AnyAsync(x =>
+                    x.TeacherId == request.TeacherId &&
+                    x.SubjectId == request.SubjectId &&
+                    x.IsActive);
 
-            if (isExisted) return (null, "DUPLICATE_SUBJECT");
+            if (isExisted)
+                return (null, "DUPLICATE_SUBJECT");
 
-            var teacherSubject = new TeacherSubject {
-                TeacherSubjectId = Guid.NewGuid(),
-                TeacherId = (Guid)request.TeacherId,
-                SubjectId = (Guid)request.SubjectId
-            };
-            context.TeacherSubject.Add(teacherSubject);
-            await context.SaveChangesAsync();
-            var teacherSubjectInfo = await context.TeacherSubject.Where(x => x.TeacherSubjectId == teacherSubject.TeacherSubjectId)
-                                                                 .Select(g => new
-                                                                 {
-                                                                    TeacherName = g.Teacher.User.FullName,
-                                                                     SubjectNamee = g.Subject.SubjectName,
-                                                                     UserOfTeacherId = g.Teacher.UserId
-                                                                 }).FirstOrDefaultAsync();
-            var userIds = new List<Guid> { teacherSubjectInfo.UserOfTeacherId };
-            try
+            var teacherSubjectExisted = await context.TeacherSubject
+                .FirstOrDefaultAsync(x =>
+                    x.TeacherId == request.TeacherId &&
+                    x.SubjectId == request.SubjectId &&
+                    !x.IsActive);
+
+            // ─── Reactivate old assignment ─────────────────────────────
+            if (teacherSubjectExisted != null)
             {
-                await notificationService.CreateNotification(new CreateNotificationRequest
+                teacherSubjectExisted.IsActive = true;
+
+                // QUAN TRỌNG: phải SaveChanges
+                await context.SaveChangesAsync();
+
+                var teacherSubjectInfo = await context.TeacherSubject
+                    .Where(x => x.TeacherSubjectId == teacherSubjectExisted.TeacherSubjectId)
+                    .Select(g => new
+                    {
+                        TeacherName = g.Teacher.User.FullName,
+                        SubjectName = g.Subject.SubjectName,
+                        UserOfTeacherId = g.Teacher.UserId
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (teacherSubjectInfo != null)
                 {
-                    Content = $"Bạn đã được admin thêm môn {teacherSubjectInfo.SubjectNamee} vào danh sách môn mình dạy",
-                    Title = "Gán môn dạy mới",
-                    Type = "Gán môn dạy",
-                    UserId = userIds
-                });
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Push notification failed");
+                    try
+                    {
+                        await notificationService.CreateNotification(new CreateNotificationRequest
+                        {
+                            Content = $"Bạn đã được admin thêm môn {teacherSubjectInfo.SubjectName} vào danh sách môn mình dạy",
+                            Title = "Gán môn dạy mới",
+                            Type = "Gán môn dạy",
+                            UserId = new List<Guid> { teacherSubjectInfo.UserOfTeacherId }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Push notification failed");
+                    }
+
+                    return (new TeacherSubjectResponse
+                    {
+                        TeacherSubjectId = teacherSubjectExisted.TeacherSubjectId,
+                        TeacherId = teacherSubjectExisted.TeacherId,
+                        SubjectId = teacherSubjectExisted.SubjectId,
+                        TeacherName = teacherSubjectInfo.TeacherName,
+                        SubjectName = teacherSubjectInfo.SubjectName
+                    }, "SUCCESS");
+                }
             }
 
-            return (new TeacherSubjectResponse
+            // ─── Create new assignment ────────────────────────────────
+            var teacherSubject = new TeacherSubject
             {
-                TeacherSubjectId = teacherSubject.TeacherSubjectId,
-                TeacherId = teacherSubject.TeacherId,
-                SubjectId = teacherSubject.SubjectId,
-                TeacherName = teacherSubjectInfo.TeacherName,
-                SubjectName = teacherSubjectInfo.SubjectNamee
-            }, "SUCCESS");
+                TeacherSubjectId = Guid.NewGuid(),
+                TeacherId = request.TeacherId!.Value,
+                SubjectId = request.SubjectId!.Value,
+                IsActive = true
+            };
+
+            context.TeacherSubject.Add(teacherSubject);
+
+            await context.SaveChangesAsync();
+
+            var newTeacherSubjectInfo = await context.TeacherSubject
+                .Where(x => x.TeacherSubjectId == teacherSubject.TeacherSubjectId)
+                .Select(g => new
+                {
+                    TeacherName = g.Teacher.User.FullName,
+                    SubjectName = g.Subject.SubjectName,
+                    UserOfTeacherId = g.Teacher.UserId
+                })
+                .FirstOrDefaultAsync();
+
+            if (newTeacherSubjectInfo != null)
+            {
+                try
+                {
+                    await notificationService.CreateNotification(new CreateNotificationRequest
+                    {
+                        Content = $"Bạn đã được admin thêm môn {newTeacherSubjectInfo.SubjectName} vào danh sách môn mình dạy",
+                        Title = "Gán môn dạy mới",
+                        Type = "Gán môn dạy",
+                        UserId = new List<Guid> { newTeacherSubjectInfo.UserOfTeacherId }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Push notification failed");
+                }
+
+                return (new TeacherSubjectResponse
+                {
+                    TeacherSubjectId = teacherSubject.TeacherSubjectId,
+                    TeacherId = teacherSubject.TeacherId,
+                    SubjectId = teacherSubject.SubjectId,
+                    TeacherName = newTeacherSubjectInfo.TeacherName,
+                    SubjectName = newTeacherSubjectInfo.SubjectName
+                }, "SUCCESS");
+            }
+
+            return (null, "UNKNOWN_ERROR");
         }
 
         public async Task<(TeacherSubjectResponse? data, string? errorCode)> UpdateSubjectAfterAssignForTeacher(UpdateTeacherSubjectRequest request)
@@ -102,7 +171,7 @@ namespace School_Management.API.Repositories
         public async Task<List<TeacherSubjectResponse>> GetTeacherSubjects(Guid teacherId)
         {
             return await context.TeacherSubject
-                .Where(x => x.TeacherId == teacherId)
+                .Where(x => x.TeacherId == teacherId && x.IsActive == true)
                 .Select(x => new TeacherSubjectResponse
                 {
                     TeacherSubjectId = x.TeacherSubjectId,
@@ -115,12 +184,20 @@ namespace School_Management.API.Repositories
 
         public async Task<(bool result, string message)> DeactivateTeacherSubject(Guid teacherSubjectId)
         {
-            var teacherSubject = await context.TeacherSubject.FirstOrDefaultAsync(x => x.TeacherSubjectId == teacherSubjectId);
+            var teacherSubject = await context.TeacherSubject
+                .Include(x => x.ScheduleDetails)
+                .FirstOrDefaultAsync(x => x.TeacherSubjectId == teacherSubjectId);
+
             if (teacherSubject == null) return (false, "NOT_FOUND_TEACHERSUBJECT");
+
+            if (teacherSubject.ScheduleDetails.Any())
+            {
+                context.ScheduleDetail.RemoveRange(teacherSubject.ScheduleDetails);
+            }
 
             teacherSubject.IsActive = false;
             await context.SaveChangesAsync();
-            
+
             return (true, "SUCCESS");
         }
     }

@@ -138,7 +138,8 @@ namespace School_Management.API.Repositories
                                                   && x.Schedule.ClassYear.ClassName == studentClassInfo.ClassName
                                                   && x.Schedule.Term == request.Term
                                                   && x.Schedule.SchoolYear == request.SchoolYear
-                                                  && x.Schedule.IsActive == true)
+                                                  && x.Schedule.IsActive == true
+                                                  && x.TeacherSubject.IsActive == true)
                                                   .Select(g => new ScheduleDetailResponse
                                                   {
                                                      ScheduleDetailId = g.Id,
@@ -240,7 +241,8 @@ namespace School_Management.API.Repositories
                                                   .Where(x => x.Schedule.IsActive == true
                                                   && x.Schedule.SchoolYear == request.SchoolYear
                                                   && x.Schedule.Term == request.Term
-                                                  && x.TeacherSubject.TeacherId == teacherId)
+                                                  && x.TeacherSubject.TeacherId == teacherId
+                                                  && x.TeacherSubject.IsActive == true)
                                                   .Select(g => new TeacherScheduleDetailResponse
                                                   {
                                                       DayOfWeek = g.DayOfWeek,
@@ -323,7 +325,7 @@ namespace School_Management.API.Repositories
             if (isExisted == false) return null; 
             var scheduleDetailList = await context.ScheduleDetail
                                                   .AsNoTracking()
-                                                  .Where(x => x.ScheduleId == scheduleId)
+                                                  .Where(x => x.ScheduleId == scheduleId && x.TeacherSubject.IsActive == true)
                                                   .Select(g => new ScheduleDetailResponse
                                                   {
                                                       ScheduleDetailId = g.Id,
