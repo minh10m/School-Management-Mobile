@@ -208,7 +208,7 @@ namespace School_Management.API.Repositories
 
         public async Task<(CourseResponse? data, string? message)> GetCourseById(Guid courseId)
         {
-            var course = await context.Course.AsNoTracking()
+            var course = await context.Course.IgnoreQueryFilters().AsNoTracking()
                                              .Include(x => x.TeacherSubject).ThenInclude(x => x.Teacher).ThenInclude(x => x.User)
                                              .Include(x => x.TeacherSubject).ThenInclude(x => x.Subject)
                                              .FirstOrDefaultAsync(x => x.Id == courseId);

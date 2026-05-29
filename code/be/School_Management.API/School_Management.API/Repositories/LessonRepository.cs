@@ -133,9 +133,11 @@ namespace School_Management.API.Repositories
 
         public async Task<(bool result, string message)> HardDeleteLesson(Guid lessonId, Guid userId)
         {
+            // 1. Kiểm tra quyền Giáo viên
             var teacher = await context.Teacher.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId);
             if (teacher == null) return (false, "NOT_FOUND_TEACHER");
 
+            // 2. Tìm bài học cần xóa
             var lesson = await context.Lesson
                 .Include(l => l.Course)
                     .ThenInclude(c => c.TeacherSubject)
@@ -143,13 +145,40 @@ namespace School_Management.API.Repositories
 
             if (lesson == null) return (false, "NOT_FOUND_LESSON");
 
+            // 3. Xác thực quyền sở hữu khóa học
             if (lesson.Course.TeacherSubject == null || lesson.Course.TeacherSubject.TeacherId != teacher.Id)
                 return (false, "NOT_IS_TEACHER_OF_COURSE");
 
-            context.Lesson.Remove(lesson);
+            // Lưu lại thông tin cần thiết trước khi thực hiện thay đổi cấu trúc dữ liệu
+            var targetCourseId = lesson.CourseId;
+            var deletedOrderIndex = lesson.OrderIndex;
 
-            await context.SaveChangesAsync();
-            return (true, "SUCCESS");
+            // 4. Khởi động Transaction để bảo vệ chuỗi thao tác liên hoàn
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                // Bước A: Thực hiện xóa cứng bản ghi bài học mục tiêu
+                context.Lesson.Remove(lesson);
+                await context.SaveChangesAsync();
+
+                // Bước B: Dồn dịch chỉ số - Giảm toàn bộ OrderIndex của các bài phía sau đi 1 đơn vị
+                // Sử dụng ExecuteUpdateAsync để cập nhật trực tiếp dưới Database mà không cần nạp dữ liệu lên RAM
+                await context.Lesson
+                    .Where(x => x.CourseId == targetCourseId && x.OrderIndex > deletedOrderIndex)
+                    .ExecuteUpdateAsync(s => s.SetProperty(l => l.OrderIndex, l => l.OrderIndex - 1));
+
+                // Xác nhận hoàn tất thành công
+                await transaction.CommitAsync();
+                return (true, "SUCCESS");
+            }
+            catch (Exception ex)
+            {
+                // Quay xe nếu một trong hai bước trên gặp sự cố sập nguồn/lỗi DB
+                await transaction.RollbackAsync();
+                // Giả định bạn có biến logger được khai báo ở tầng class
+                // logger.LogError(ex, "Lỗi xảy ra khi dồn chỉ số lúc xóa Lesson {Id}", lessonId);
+                return (false, "EXCEPTION_ERROR");
+            }
         }
 
         public async Task<(LessonResponse? data, string? message)> UpdateLesson(UpdateLessonRequest request, Guid lessonId)
