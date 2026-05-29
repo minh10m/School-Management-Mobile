@@ -59,6 +59,15 @@ export const feeService = {
     const response = await apiClient.patch<ApiResponse<FeeResponse>>(`/fees/${feeId}`, payload);
     return response.data.data;
   },
+
+  /**
+   * Admin xóa học phí theo ID
+   * DELETE /fees/{id}
+   */
+  deleteFee: async (feeId: string): Promise<boolean> => {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/fees/${feeId}`);
+    return response.data.success;
+  },
 };
 
 // ─── FEE DETAIL SERVICE ────────────────────────────────────────────────────────

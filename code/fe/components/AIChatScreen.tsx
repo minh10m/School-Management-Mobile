@@ -286,6 +286,33 @@ export default function AIChatScreen({ role }: Props) {
     }
   };
 
+  const handleDeleteHistory = async () => {
+    Alert.alert(
+      "Xóa lịch sử trò chuyện",
+      "Bạn có chắc chắn muốn xóa toàn bộ lịch sử trò chuyện với AI không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setIsLoadingHistory(true);
+              await aiChatService.deleteChatHistory();
+              Alert.alert("Thành công", "Đã xóa lịch sử trò chuyện!");
+              setMessages([]);
+            } catch (err) {
+              console.log(err);
+              Alert.alert("Lỗi", "Không thể xóa lịch sử trò chuyện.");
+            } finally {
+              setIsLoadingHistory(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const timeStr = (iso: string) =>
     new Date(iso).toLocaleTimeString("vi-VN", {
       hour: "2-digit",
@@ -351,6 +378,16 @@ export default function AIChatScreen({ role }: Props) {
             </View>
           </View>
         </View>
+        
+        {messages.length > 0 && (
+          <TouchableOpacity
+            onPress={handleDeleteHistory}
+            style={{ padding: 8, marginRight: 4 }}
+          >
+            <Ionicons name="trash-outline" size={22} color="#EF4444" />
+          </TouchableOpacity>
+        )}
+
         {role === "Admin" && (
           <TouchableOpacity
             onPress={handleUpload}

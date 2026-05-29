@@ -95,5 +95,14 @@ export const courseService = {
     );
     return response.data.data;
   },
+
+  /**
+   * Giáo viên xóa khóa học
+   * DELETE /courses/{id}
+   */
+  deleteCourse: async (courseId: string): Promise<boolean> => {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/courses/${courseId}`);
+    return response.data.success;
+  },
 };
 

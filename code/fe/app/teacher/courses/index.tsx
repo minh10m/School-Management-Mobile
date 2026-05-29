@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   FlatList,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -47,6 +48,33 @@ export default function TeacherCourses() {
     setRefreshing(true);
     fetchCourses();
   }, [fetchCourses]);
+
+  const handleDeleteCourse = async (courseId: string) => {
+    Alert.alert(
+      "Xóa khóa học",
+      "Bạn có chắc chắn muốn xóa khóa học này không? Hành động này không thể hoàn tác.",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await courseService.deleteCourse(courseId);
+              Alert.alert("Thành công", "Đã xóa khóa học thành công!");
+              fetchCourses();
+            } catch (err) {
+              console.log(err);
+              Alert.alert("Lỗi", "Không thể xóa khóa học.");
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -170,8 +198,15 @@ export default function TeacherCourses() {
                   style={{ fontFamily: "Poppins-Bold" }}
                   className="text-[#4F46E5] text-xs"
                 >
-                  Chỉnh sửa
+                  Sửa
                 </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleDeleteCourse(item.id)}
+                className="bg-red-50 border border-red-100 h-14 w-14 rounded-2xl items-center justify-center shadow-sm"
+              >
+                <Ionicons name="trash-outline" size={20} color="#EF4444" />
               </TouchableOpacity>
             </View>
           </View>

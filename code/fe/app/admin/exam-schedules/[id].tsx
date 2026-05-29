@@ -136,6 +136,8 @@ const ExamScheduleDetail = () => {
     </TouchableOpacity>
   );
 
+  const hasData = (data?.totalCount || 0) > 0;
+
   return (
     <AdminPageWrapper
       title={title || "Chi tiết Lịch thi"}
@@ -179,8 +181,9 @@ const ExamScheduleDetail = () => {
       >
         <TouchableOpacity
           activeOpacity={0.8}
-          className="flex-1 bg-[#10B981] h-14 rounded-2xl flex-row items-center justify-center shadow-lg shadow-green-100"
+          className={`flex-1 h-14 rounded-2xl flex-row items-center justify-center ${hasData ? 'bg-gray-300' : 'bg-[#10B981] shadow-lg shadow-green-100'}`}
           onPress={handleImportExcel}
+          disabled={hasData}
         >
           <Ionicons name="cloud-upload" size={22} color="white" />
           <Text

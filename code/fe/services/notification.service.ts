@@ -24,5 +24,19 @@ export const notificationService = {
       throw error;
     }
   },
+
+  /**
+   * Xóa thông báo theo ID
+   * DELETE /notifications/{id}
+   */
+  deleteNotification: async (notificationId: string): Promise<any> => {
+    try {
+      const response = await apiClient.delete<ApiResponse<any>>(`/notifications/${notificationId}`);
+      return response.data;
+    } catch (error) {
+      console.log('Error deleting notification:', error);
+      throw error;
+    }
+  },
 };
 

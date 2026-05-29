@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
@@ -50,6 +51,30 @@ export default function AdminFeesScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     fetchFees();
+  };
+
+  const handleDeleteFee = async (feeId: string) => {
+    Alert.alert(
+      "Xóa khoản học phí",
+      "Bạn có chắc chắn muốn xóa khoản học phí này không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await feeService.deleteFee(feeId);
+              Alert.alert("Thành công", "Xóa khoản học phí thành công!");
+              fetchFees();
+            } catch (err) {
+              console.log(err);
+              Alert.alert("Lỗi", "Không thể xóa khoản học phí.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const filtered = fees.filter((f) => {
@@ -198,18 +223,29 @@ export default function AdminFeesScreen() {
                       </Text>
                     </View>
                   </View>
-                  <View className="flex-row items-center gap-1">
-                    <Text
-                      style={{ fontFamily: "Poppins-Bold", fontSize: 11 }}
-                      className="text-[#136ADA] uppercase tracking-wider"
+                  <View className="flex-row items-center gap-3">
+                    <TouchableOpacity
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleDeleteFee(item.id);
+                      }}
+                      className="p-1"
                     >
-                      Học sinh
-                    </Text>
-                    <Ionicons
-                      name="chevron-forward"
-                      size={14}
-                      color="#136ADA"
-                    />
+                      <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                    </TouchableOpacity>
+                    <View className="flex-row items-center gap-1">
+                      <Text
+                        style={{ fontFamily: "Poppins-Bold", fontSize: 11 }}
+                        className="text-[#136ADA] uppercase tracking-wider"
+                      >
+                        Học sinh
+                      </Text>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={14}
+                        color="#136ADA"
+                      />
+                    </View>
                   </View>
                 </View>
               </TouchableOpacity>
