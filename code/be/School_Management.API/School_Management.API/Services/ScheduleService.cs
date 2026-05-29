@@ -211,5 +211,16 @@ namespace School_Management.API.Services
         {
             return await scheduleRepository.GetActiveScheduleByClassYearId(classYearId, term, schoolYear);
         }
+
+        public async Task<bool> DeleteScheduleDetailById(Guid scheduleDetailId)
+        {
+            var (result, message) = await scheduleRepository.DeleteScheduleDetailById(scheduleDetailId);
+            return message switch
+            {
+                "NOT_FOUND_SCHEDULE_DETAIL" => throw new NotFoundException("Không tìm thấy chi tiết lịch"),
+                "SUCCESS" => true, 
+                _ => throw new Exception("Lỗi không xác định")
+            };
+        }
     }
 }

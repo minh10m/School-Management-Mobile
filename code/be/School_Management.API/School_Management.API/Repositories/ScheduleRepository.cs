@@ -356,5 +356,15 @@ namespace School_Management.API.Repositories
             if (scheduleId == Guid.Empty) return new List<ScheduleDetailResponse>();
             return await GetScheduleDetailByScheduleId(scheduleId);
         }
+
+        public async Task<(bool result, string message)> DeleteScheduleDetailById(Guid scheduleDetailId)
+        {
+            var detail = await context.ScheduleDetail.FirstOrDefaultAsync(x => x.Id == scheduleDetailId);
+            if (detail == null) return (false, "NOT_FOUND_SCHEDULE_DETAIL");
+
+            context.ScheduleDetail.Remove(detail);
+            await context.SaveChangesAsync();
+            return (true, "SUCCESS");
+        }
     }
 }

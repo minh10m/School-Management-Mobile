@@ -17,5 +17,7 @@ namespace School_Management.API.Repositories
         public Task<(List<MyExamScheduleDetailResponse>? data, string? message)> GetMyExamSchedule(MyExamScheduleDetailRequest request, ClaimsPrincipal User);
         public Task<PagedResponse<ExamScheduleResponse>> GetAllExamSchedule(ExamScheduleFilterRequest request);
         public Task<(bool result, string? message)> DeleteExamSchedule(Guid id);
+        public Task<(bool result, string message)> ClearAllDetailsOfExamSchedule(Guid examScheduleId);
+
     }
 }

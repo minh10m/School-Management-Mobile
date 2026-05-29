@@ -16,6 +16,11 @@ namespace School_Management.API.EntityConfigurations
             builder.Property(x => x.RoomName).HasMaxLength(20).IsRequired();
 
             builder.ToTable(x => x.HasCheckConstraint("CK_Time_ExamScheduleDetail", "\"FinishTime\" > \"StartTime\""));
+
+            builder.HasMany(x => x.ExamStudentAssignments)
+                   .WithOne(x => x.ExamScheduleDetail)
+                   .HasForeignKey(x => x.ExamScheduleDetailId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
