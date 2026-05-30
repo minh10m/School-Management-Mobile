@@ -134,7 +134,7 @@ export const examScheduleService = {
    */
   clearScheduleDetails: async (id: string): Promise<boolean> => {
     const response = await apiClient.delete<ApiResponse<boolean>>(`/exam-schedules/${id}/details`);
-    return response.data.data;
+    return response.data.success;
   },
   /**
    * Lấy lịch thi cá nhân (Dành cho Giáo viên gác thi hoặc Học sinh đi thi)

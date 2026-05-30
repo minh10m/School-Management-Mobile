@@ -21,6 +21,13 @@ import {
 import { useAuthStore } from "../store/authStore";
 import { useConfigStore } from "../store/configStore";
 import { useAppPushNotifications } from "@/hooks/useAppPushNotifications";
+import { TextInput } from "react-native";
+
+// Force dark keyboard appearance globally
+if (!(TextInput as any).defaultProps) {
+  (TextInput as any).defaultProps = {};
+}
+(TextInput as any).defaultProps.keyboardAppearance = "dark";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
