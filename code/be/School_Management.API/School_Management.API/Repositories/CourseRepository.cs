@@ -120,7 +120,7 @@ namespace School_Management.API.Repositories
                 var name = request.Status.Trim().ToLower();
                 query = query.Where(x => x.Status.Trim().ToLower().Contains(name));
             }
-            
+
             if (request.SubjectId.HasValue)
             {
                 query = query.Where(x => x.TeacherSubject.SubjectId == request.SubjectId.Value);
@@ -240,7 +240,7 @@ namespace School_Management.API.Repositories
 
             var query = context.Course.IgnoreQueryFilters().AsNoTracking().Where(x => x.EnrollCourses.Any(g => g.StudentId == studentId));
 
-            if(!string.IsNullOrWhiteSpace(request.CourseName))
+            if (!string.IsNullOrWhiteSpace(request.CourseName))
             {
                 var name = request.CourseName.Trim().ToLower();
                 query = query.Where(x => x.CourseName.Trim().ToLower().Contains(name));
@@ -285,7 +285,7 @@ namespace School_Management.API.Repositories
             var query = context.Course.AsNoTracking()
                                       .Where(x => x.TeacherSubject.TeacherId == teacherId)
                                       .AsQueryable();
-            if(!string.IsNullOrWhiteSpace(request.CourseName))
+            if (!string.IsNullOrWhiteSpace(request.CourseName))
             {
                 var name = request.CourseName.Trim().ToLower();
                 query = query.Where(x => x.CourseName.Trim().ToLower().Contains(name));
@@ -336,7 +336,7 @@ namespace School_Management.API.Repositories
 
             await context.SaveChangesAsync();
 
-            var userId = new List<Guid> { course.TeacherSubject.Teacher.UserId};
+            var userId = new List<Guid> { course.TeacherSubject.Teacher.UserId };
             var status = request.Status == "Approved" ? "được duyệt" : "bị từ chối";
 
             try
@@ -383,7 +383,7 @@ namespace School_Management.API.Repositories
                                                      .Select(g => g.Id)
                                                      .FirstOrDefaultAsync();
 
-            if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER"); 
+            if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
 
             var course = await context.Course.Include(x => x.TeacherSubject).FirstOrDefaultAsync(x => x.Id == courseId);
             if (course == null) return (null, "NOT_FOUND_COURSE");

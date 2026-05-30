@@ -24,7 +24,7 @@ namespace School_Management.API.Repositories
                 query = query.Where(x => x.User.FullName.ToLower().Contains(request.FullName.ToLower()));
 
             if (!string.IsNullOrWhiteSpace(request.SubjectName))
-                query = query.Where(x => x.TeacherSubjects.Any(ts => ts.Subject.SubjectName.ToLower().Contains(request.SubjectName.ToLower())));
+                query = query.Where(x => x.TeacherSubjects.Any(ts => ts.IsActive && ts.Subject.SubjectName.ToLower().Contains(request.SubjectName.ToLower())));
 
 
             //sorting
@@ -49,6 +49,7 @@ namespace School_Management.API.Repositories
                 UserId = x.User.Id,
                 AvatarUrl = x.User.AvatarUrl,
                 SubjectNames = x.TeacherSubjects
+                                .Where(x => x.IsActive == true)
                                .Select(x => x.Subject.SubjectName)
                                .ToList()
 
@@ -80,6 +81,7 @@ namespace School_Management.API.Repositories
                                     TeacherId = x.Id,
                                     UserId = x.User.Id,
                                     SubjectNames = x.TeacherSubjects
+                                                    .Where(x => x.IsActive == true)
                                                     .Select(ts => ts.Subject.SubjectName)
                                                     .ToList()
                                 }).FirstOrDefaultAsync();
@@ -103,6 +105,7 @@ namespace School_Management.API.Repositories
                                     AvatarUrl = x.User.AvatarUrl,
                                     TeacherId = x.Id,
                                     SubjectNames = x.TeacherSubjects
+                                                   .Where(x => x.IsActive == true)
                                                    .Select(ts => ts.Subject.SubjectName)
                                                    .ToList()
                                 }).FirstOrDefaultAsync();

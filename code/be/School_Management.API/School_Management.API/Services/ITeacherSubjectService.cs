@@ -7,6 +7,6 @@ namespace School_Management.API.Services
         public Task<TeacherSubjectResponse> AssignSubjectForTeacher(TeacherSubjectRequest request);
         public Task<TeacherSubjectResponse> UpdateSubjectAfterAssignForTeacher(UpdateTeacherSubjectRequest request);
         public Task<List<TeacherSubjectResponse>> GetTeacherSubjects(Guid teacherId);
-        public Task<bool> DeleteTeacherSubject(Guid teacherSubjectId);
+        public Task<bool> DeactivateTeacherSubject(Guid teacherSubjectId);
     }
 }
