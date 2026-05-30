@@ -150,19 +150,20 @@ export default function AddAssignmentScreen() {
               >
                 Mô tả chi tiết
               </Text>
-              <View className="bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm shadow-gray-100">
+              <View className="flex-row items-center bg-white border border-gray-200 rounded-2xl px-4 py-1 shadow-sm shadow-gray-100">
+                <Ionicons
+                  name="information-circle-outline"
+                  size={20}
+                  color="#64748B"
+                  className="mr-2"
+                />
                 <TextInput
                   value={assignmentDescription}
                   onChangeText={setAssignmentDescription}
-                  placeholder="VD: Hoàn thành các câu hỏi trắc nghiệm..."
-                  multiline
-                  numberOfLines={4}
-                  className="text-gray-800 font-medium min-h-[100px]"
+                  placeholder="VD: Hoàn thành câu hỏi trắc nghiệm..."
+                  className="flex-1 py-3.5 text-gray-800 font-medium"
                   style={{ fontFamily: "Poppins-Regular" }}
-                  textAlignVertical="top"
-                  returnKeyType="done"
-                  blurOnSubmit={true}
-                  onSubmitEditing={Keyboard.dismiss}
+                  returnKeyType="next"
                 />
               </View>
             </View>
