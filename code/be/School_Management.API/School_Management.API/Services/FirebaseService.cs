@@ -1,4 +1,4 @@
-﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using Google.Cloud.Firestore.V1;
 using School_Management.API.Models.Domain;
@@ -197,6 +197,7 @@ namespace School_Management.API.Services
             if (isLastMessage)
             {
                 updates["lastMessage.content"] = "Tin nhắn đã được thu hồi";
+                updates["lastMessage.isDeleted"] = true;
             }
 
             await docRef.UpdateAsync(updates);
