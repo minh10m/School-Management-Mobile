@@ -1,25 +1,25 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Pressable,
-  TextInput,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useState, useEffect } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
-import { classYearService } from "../../../services/classYear.service";
-import { teacherService } from "../../../services/teacher.service";
-import { studentService } from "../../../services/student.service";
-import { ClassYearResponse } from "../../../types/classYear";
-import { TeacherListItem } from "../../../types/teacher";
-import { StudentListItem } from "../../../types/student";
 import { FormActionButton } from "../../../components/ui/FormActionButton";
+import { classYearService } from "../../../services/classYear.service";
+import { studentService } from "../../../services/student.service";
+import { teacherService } from "../../../services/teacher.service";
+import { ClassYearResponse } from "../../../types/classYear";
+import { StudentListItem } from "../../../types/student";
+import { TeacherListItem } from "../../../types/teacher";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminClassDetailScreen() {
@@ -45,7 +45,7 @@ export default function AdminClassDetailScreen() {
       const res = await classYearService.getClassYearById(id);
       const [teaRes, studentsRes, allClassesRes] = await Promise.all([
         teacherService.getTeachers({ PageSize: 100 }),
-        studentService.getStudents({ ClassName: res.className, PageSize: 100 }),
+        studentService.getStudents({ ClassYearId: id, PageSize: 100 }),
         classYearService.getClassYears(),
       ]);
       setClassData(res);
@@ -381,7 +381,10 @@ export default function AdminClassDetailScreen() {
                   <TouchableOpacity
                     key={s.studentId}
                     onPress={() =>
-                      router.push(`/admin/students/${s.studentId}` as any)
+                      router.push({
+                                  pathname: `/admin/students/${s.studentId}`,
+                                  params: { currentYear: classData?.schoolYear } // Kẹp thêm năm học hiện tại của lớp vào đây
+                                          } as any)
                     }
                     className="flex-row items-center p-6 bg-white border border-gray-100 rounded-[36px] shadow-sm active:opacity-70"
                   >

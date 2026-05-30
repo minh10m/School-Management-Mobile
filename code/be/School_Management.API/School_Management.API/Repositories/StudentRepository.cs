@@ -97,16 +97,27 @@ namespace School_Management.API.Repositories
                 UserId = x.User.Id,
                 FullName = x.User.FullName,
                 AvatarUrl = x.User.AvatarUrl,
-                ClassName = x.StudentClassYears
-                             .OrderByDescending(x => x.ClassYear.SchoolYear)
-                             .Select(x => x.ClassYear.ClassName)
-                             .FirstOrDefault(),
-                Grade = x.StudentClassYears
-                             .OrderByDescending(x => x.ClassYear.SchoolYear)
-                             .Select(x => x.ClassYear.Grade)
-                             .FirstOrDefault()
+                    ClassName = (request.ClassYearId != null && request.ClassYearId != Guid.Empty)
+            ? x.StudentClassYears
+               .Where(scy => scy.ClassYearId == request.ClassYearId)
+               .Select(scy => scy.ClassYear.ClassName)
+               .FirstOrDefault()
+            : x.StudentClassYears
+               .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+               .Select(scy => scy.ClassYear.ClassName)
+               .FirstOrDefault(),
 
-            }).ToListAsync();
+                    Grade = (request.ClassYearId != null && request.ClassYearId != Guid.Empty)
+            ? x.StudentClassYears
+               .Where(scy => scy.ClassYearId == request.ClassYearId)
+               .Select(scy => scy.ClassYear.Grade)
+               .FirstOrDefault()
+            : x.StudentClassYears
+               .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+               .Select(scy => scy.ClassYear.Grade)
+               .FirstOrDefault()
+
+                }).ToListAsync();
 
             return new PagedResponse<StudentListResponse>
             {
