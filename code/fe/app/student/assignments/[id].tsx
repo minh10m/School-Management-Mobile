@@ -148,7 +148,6 @@ export default function StudentAssignmentDetailScreen() {
               await submissionService.deleteSubmission(submission.submissionId);
               Alert.alert("Thành công", "Đã hủy nộp bài tập thành công!");
               setSubmission(null);
-              fetchData();
             } catch (err) {
               console.log(err);
               Alert.alert("Lỗi", "Không thể hủy nộp bài tập.");

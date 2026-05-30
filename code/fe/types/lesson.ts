@@ -75,6 +75,7 @@ export interface LessonAssignmentFilterRequest {
 export interface LessonAssignmentResponse {
   id: string;
   title: string;
+  description: string;
   fileUrl: string;
   fileTitle: string;
   lessonId: string;
@@ -84,6 +85,7 @@ export interface LessonAssignmentResponse {
 
 export interface CreateLessonAssignmentPayload {
   title: string;
+  description: string;
   fileUrl?: string; // Keeping for backward compatibility or direct URL entry
   fileTitle?: string;
   file?: {
@@ -97,6 +99,7 @@ export interface CreateLessonAssignmentPayload {
 
 export interface UpdateLessonAssignmentPayload {
   title: string;
+  description: string;
   fileUrl?: string;
   fileTitle?: string;
   orderIndex: number;
