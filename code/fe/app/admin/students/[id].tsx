@@ -1,28 +1,29 @@
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
-import { useState, useEffect } from "react";
+import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { studentService } from "../../../services/student.service";
 import { StudentResponse } from "../../../types/student";
-import { FormActionButton } from "../../../components/ui/FormActionButton";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function AdminStudentDetailScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, currentYear } = useLocalSearchParams<{ id: string; currentYear?: string }>();
+  const [displayClass, setDisplayClass] = useState<{ className: string; grade: number } | null>(null);
   const [student, setStudent] = useState<StudentResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,6 +44,16 @@ export default function AdminStudentDetailScreen() {
       setLoading(true);
       const res = await studentService.getStudentById(id);
       setStudent(res);
+      if (res && res.classYearSub && res.classYearSub.length > 0) {
+      if (currentYear) {
+        const matched = res.classYearSub.find(
+      (c: any) => c.schoolYear === parseInt(currentYear, 10)
+      );
+      setDisplayClass(matched || res.classYearSub[0]);
+      } else {
+      setDisplayClass(res.classYearSub[0]);
+  }
+}
       setForm({
         fullName: res.fullName || "",
         email: res.email || "",
@@ -183,14 +194,14 @@ export default function AdminStudentDetailScreen() {
                   color: "#0D9488",
                 }}
               >
-                Lớp {student.classYearSub?.[0]?.className}
+                Lớp {displayClass?.className || "Chưa xếp lớp"}
               </Text>
             </View>
             <Text
               style={{ fontFamily: "Poppins-Regular" }}
               className="text-gray-400 text-xs"
             >
-              Khối {student.classYearSub?.[0]?.grade}
+              Khối {displayClass?.grade || 0}
             </Text>
           </View>
         </View>
