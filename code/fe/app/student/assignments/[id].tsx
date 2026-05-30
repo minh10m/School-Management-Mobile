@@ -18,8 +18,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Linking,
   Platform,
+  TouchableWithoutFeedback,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -32,6 +33,7 @@ export default function StudentAssignmentDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [openMenu, setOpenMenu] = useState(false);
 
   const [fileAsset, setFileAsset] = useState<any>(null);
   const [fileTitle, setFileTitle] = useState("");
@@ -211,8 +213,9 @@ export default function StudentAssignmentDetailScreen() {
   const isExpired = new Date() > new Date(assignment.finishTime);
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar style="dark" />
+    <TouchableWithoutFeedback onPress={() => setOpenMenu(false)}>
+      <View className="flex-1 bg-white">
+        <StatusBar style="dark" />
 
       {/* Custom Header */}
       <View
@@ -380,28 +383,64 @@ export default function StudentAssignmentDetailScreen() {
 
           {submission ? (
             <View className="bg-green-50/50 p-5 rounded-2xl border border-green-100">
-              <View className="flex-row items-center gap-3 mb-4">
-                <View className="bg-green-500/10 w-10 h-10 rounded-lg items-center justify-center">
-                  <Ionicons
-                    name="checkmark-done-circle"
-                    size={24}
-                    color="#10B981"
-                  />
+              <View className="flex-row items-center justify-between mb-4 z-50">
+                <View className="flex-row items-center gap-3">
+                  <View className="bg-green-500/10 w-10 h-10 rounded-lg items-center justify-center">
+                    <Ionicons
+                      name="checkmark-done-circle"
+                      size={24}
+                      color="#10B981"
+                    />
+                  </View>
+                  <View>
+                    <Text
+                      className="text-black text-sm"
+                      style={{ fontFamily: "Poppins-Bold" }}
+                    >
+                      Đã nộp bài thành công
+                    </Text>
+                    <Text
+                      className="text-gray-400 text-xs"
+                      style={{ fontFamily: "Poppins-Regular" }}
+                    >
+                      Nộp lúc: {formatDate(submission.timeSubmit)}
+                    </Text>
+                  </View>
                 </View>
-                <View>
-                  <Text
-                    className="text-black text-sm"
-                    style={{ fontFamily: "Poppins-Bold" }}
-                  >
-                    Đã nộp bài thành công
-                  </Text>
-                  <Text
-                    className="text-gray-400 text-xs"
-                    style={{ fontFamily: "Poppins-Regular" }}
-                  >
-                    Nộp lúc: {formatDate(submission.timeSubmit)}
-                  </Text>
-                </View>
+
+                {submission.score === null && (
+                  <View className="relative">
+                    <TouchableOpacity
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        setOpenMenu(!openMenu);
+                      }}
+                      className="p-2"
+                    >
+                      <Ionicons name="ellipsis-vertical" size={20} color="#9CA3AF" />
+                    </TouchableOpacity>
+
+                    {openMenu && (
+                      <View 
+                        className="absolute right-0 top-8 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
+                        style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, minWidth: 120, zIndex: 100 }}
+                      >
+                        <TouchableOpacity
+                          onPress={() => {
+                            setOpenMenu(false);
+                            handleDeleteSubmission();
+                          }}
+                          className="flex-row items-center px-4 py-3"
+                        >
+                          <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                          <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                            Hủy nộp bài
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                )}
               </View>
 
               <View className="bg-white p-4 rounded-xl border border-gray-100 mb-4">
@@ -416,7 +455,7 @@ export default function StudentAssignmentDetailScreen() {
                 </View>
               </View>
 
-              {submission.score !== null ? (
+              {submission.score !== null && (
                 <View className="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
                   <View className="flex-row justify-between items-center">
                     <Text
@@ -432,19 +471,6 @@ export default function StudentAssignmentDetailScreen() {
                     </View>
                   </View>
                 </View>
-              ) : (
-                <TouchableOpacity
-                  onPress={handleDeleteSubmission}
-                  className="mt-2 bg-rose-50 border border-rose-100 py-3 rounded-xl flex-row items-center justify-center gap-2"
-                >
-                  <Ionicons name="trash-outline" size={16} color="#EF4444" />
-                  <Text
-                    style={{ fontFamily: "Poppins-Bold" }}
-                    className="text-rose-600 text-xs uppercase"
-                  >
-                    Hủy nộp bài (Thu hồi)
-                  </Text>
-                </TouchableOpacity>
               )}
             </View>
           ) : (
@@ -554,6 +580,7 @@ export default function StudentAssignmentDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
-    </View>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }

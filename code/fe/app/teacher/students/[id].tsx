@@ -6,6 +6,8 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,7 +19,7 @@ import { StudentResponse } from "../../../types/student";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function StudentDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, isHomeroom } = useLocalSearchParams<{ id: string; isHomeroom?: string }>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [student, setStudent] = useState<StudentResponse | null>(null);
@@ -115,7 +117,7 @@ export default function StudentDetailScreen() {
         >
           Hồ sơ học sinh
         </Text>
-        {!isEditing && (
+        {!isEditing && isHomeroom === "true" && (
           <TouchableOpacity onPress={() => setIsEditing(true)}>
             <Text
               style={{ fontFamily: "Poppins-SemiBold" }}
@@ -127,7 +129,11 @@ export default function StudentDetailScreen() {
         )}
       </View>
 
-      <ScrollView
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }} 
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
         className="flex-1 px-6 pt-5"
         showsVerticalScrollIndicator={false}
       >
@@ -262,6 +268,7 @@ export default function StudentDetailScreen() {
           )}
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

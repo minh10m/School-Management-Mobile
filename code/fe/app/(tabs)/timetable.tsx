@@ -34,7 +34,7 @@ function subjectColor(subject: string) {
 }
 
 const TERMS = [1, 2];
-const SCHOOL_YEARS = [2025, 2026, 2027];
+const SCHOOL_YEARS = [2025, 2026, 2027, 2028];
 
 export default function TimetableTab() {
   const { schoolYear: storeYear, term: storeTerm } = useConfigStore();

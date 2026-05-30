@@ -85,7 +85,7 @@ export default function TeacherStudentListScreen() {
 
   const renderStudent = ({ item }: { item: StudentListItem }) => (
     <TouchableOpacity
-      onPress={() => router.push(`/teacher/students/${item.studentId}`)}
+      onPress={() => router.push(`/teacher/students/${item.studentId}?isHomeroom=true`)}
       className="bg-white p-4 rounded-2xl mb-3 flex-row items-center border border-gray-100 shadow-sm"
     >
       <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center mr-4 overflow-hidden">

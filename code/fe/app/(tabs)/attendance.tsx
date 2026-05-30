@@ -55,7 +55,9 @@ export default function AttendanceTab() {
 
   const attendanceMap: Record<number, StudentAttendanceRecord> = {};
   data?.studentAttendances?.forEach((rec) => {
-    const day = new Date(rec.date).getDate();
+    // Parse day directly from YYYY-MM-DD string to avoid timezone offset issues (where 31st becomes 1st)
+    const datePart = rec.date.split("T")[0];
+    const day = parseInt(datePart.split("-")[2], 10);
     attendanceMap[day] = rec;
   });
 

@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator,
+  Alert,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, router, useFocusEffect } from "expo-router";
@@ -58,6 +60,7 @@ const formatTime = (dateString: string) => {
 export default function NotificationScreen() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -79,6 +82,29 @@ export default function NotificationScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteNotification = async (notificationId: string) => {
+    Alert.alert(
+      "Xác nhận xóa",
+      "Bạn có chắc chắn muốn xóa thông báo này?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await notificationService.deleteNotification(notificationId);
+              fetchNotifications();
+            } catch (error) {
+              console.log("Error deleting notification", error);
+              Alert.alert("Lỗi", "Không thể xóa thông báo.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -113,8 +139,10 @@ export default function NotificationScreen() {
           </Text>
         </View>
       ) : (
-        <SectionList
-          sections={notifications}
+        <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
+          <View className="flex-1">
+            <SectionList
+              sections={notifications}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View className="flex-row items-center px-6 py-4">
@@ -164,6 +192,43 @@ export default function NotificationScreen() {
                   {item.content}
                 </Text>
               </View>
+
+              {/* Menu / Delete Button */}
+              <View className="relative z-50">
+                <TouchableOpacity
+                  onPress={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
+                  className="p-2"
+                >
+                  <Ionicons name="ellipsis-vertical" size={18} color="#9CA3AF" />
+                </TouchableOpacity>
+
+                {openMenuId === item.id && (
+                  <View 
+                    className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
+                    style={{ 
+                      shadowColor: "#000", 
+                      shadowOffset: { width: 0, height: 2 }, 
+                      shadowOpacity: 0.1, 
+                      shadowRadius: 4, 
+                      elevation: 5,
+                      minWidth: 80
+                    }}
+                  >
+                    <TouchableOpacity
+                      onPress={() => {
+                        setOpenMenuId(null);
+                        handleDeleteNotification(item.id);
+                      }}
+                      className="flex-row items-center px-4 py-3"
+                    >
+                      <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                      <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                        Xóa
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
             </View>
           )}
           renderSectionHeader={({ section: { title } }) => (
@@ -179,6 +244,8 @@ export default function NotificationScreen() {
           stickySectionHeadersEnabled={false}
           contentContainerStyle={{ paddingBottom: 20 }}
         />
+        </View>
+      </TouchableWithoutFeedback>
       )}
     </SafeAreaView>
   );

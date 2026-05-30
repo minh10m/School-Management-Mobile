@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
@@ -24,6 +25,7 @@ export default function AdminFeesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "upcoming" | "overdue">("all");
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const fetchFees = useCallback(async () => {
     try {
@@ -93,8 +95,10 @@ export default function AdminFeesScreen() {
   const formatCurrency = (n: number) => n.toLocaleString("vi-VN") + " VNĐ";
 
   return (
-    <AdminPageWrapper
-      title="Quản lý Học phí"
+    <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
+      <View className="flex-1">
+        <AdminPageWrapper
+          title="Quản lý Học phí"
       rightComponent={
         <TouchableOpacity
           onPress={() => router.push("/admin/fees/create" as any)}
@@ -224,15 +228,37 @@ export default function AdminFeesScreen() {
                     </View>
                   </View>
                   <View className="flex-row items-center gap-3">
-                    <TouchableOpacity
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        handleDeleteFee(item.id);
-                      }}
-                      className="p-1"
-                    >
-                      <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                    </TouchableOpacity>
+                    <View className="relative z-50">
+                      <TouchableOpacity
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === item.id ? null : item.id);
+                        }}
+                        className="p-2"
+                      >
+                        <Ionicons name="ellipsis-vertical" size={18} color="#9CA3AF" />
+                      </TouchableOpacity>
+
+                      {openMenuId === item.id && (
+                        <View 
+                          className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
+                          style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, minWidth: 80 }}
+                        >
+                          <TouchableOpacity
+                            onPress={() => {
+                              setOpenMenuId(null);
+                              handleDeleteFee(item.id);
+                            }}
+                            className="flex-row items-center px-4 py-3"
+                          >
+                            <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                            <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                              Xóa
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
                     <View className="flex-row items-center gap-1">
                       <Text
                         style={{ fontFamily: "Poppins-Bold", fontSize: 11 }}
@@ -275,5 +301,7 @@ export default function AdminFeesScreen() {
         />
       )}
     </AdminPageWrapper>
+    </View>
+  </TouchableWithoutFeedback>
   );
 }

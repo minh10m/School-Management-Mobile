@@ -7,6 +7,7 @@ import {
   RefreshControl,
   FlatList,
   Alert,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,6 +22,7 @@ export default function TeacherLessons() {
   const [lessons, setLessons] = useState<LessonResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const fetchLessons = useCallback(async () => {
     if (!courseId) {
@@ -78,8 +80,9 @@ export default function TeacherLessons() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <StatusBar hidden />
+    <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <StatusBar hidden />
 
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
@@ -162,15 +165,37 @@ export default function TeacherLessons() {
                 </Text>
               </View>
               <View className="flex-row items-center gap-2">
-                <TouchableOpacity
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    handleDeleteLesson(item.id);
-                  }}
-                  className="p-2"
-                >
-                  <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                </TouchableOpacity>
+                <View className="relative z-50">
+                  <TouchableOpacity
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuId(openMenuId === item.id ? null : item.id);
+                    }}
+                    className="p-2"
+                  >
+                    <Ionicons name="ellipsis-vertical" size={18} color="#9CA3AF" />
+                  </TouchableOpacity>
+
+                  {openMenuId === item.id && (
+                    <View 
+                      className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
+                      style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, minWidth: 80 }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => {
+                          setOpenMenuId(null);
+                          handleDeleteLesson(item.id);
+                        }}
+                        className="flex-row items-center px-4 py-3"
+                      >
+                        <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                        <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                          Xóa
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
                 <View className="bg-gray-50 w-8 h-8 rounded-xl items-center justify-center">
                   <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
                 </View>
@@ -201,6 +226,7 @@ export default function TeacherLessons() {
           }
         />
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }

@@ -10,6 +10,7 @@ import {
   Modal,
   TextInput,
   Platform,
+  TouchableWithoutFeedback,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,6 +28,7 @@ export default function ClassAssignments() {
   const [assignments, setAssignments] = useState<
     TeacherAssignmentListResponse[]
   >([]);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // Modal state for creating assignment
   const [modalVisible, setModalVisible] = useState(false);
@@ -155,8 +157,9 @@ export default function ClassAssignments() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar hidden />
+    <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
+      <SafeAreaView className="flex-1 bg-white">
+        <StatusBar hidden />
 
       {/* Header */}
       <View className="flex-row items-center px-6 py-4 border-b border-gray-50">
@@ -231,15 +234,28 @@ export default function ClassAssignments() {
               key={item.assignmentId}
               item={item}
               onDelete={() => handleDelete(item.assignmentId)}
+              openMenuId={openMenuId}
+              setOpenMenuId={setOpenMenuId}
             />
           ))
         )}
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 
-function AssignmentRow({ item, onDelete }: { item: TeacherAssignmentListResponse; onDelete: () => void }) {
+function AssignmentRow({ 
+  item, 
+  onDelete, 
+  openMenuId, 
+  setOpenMenuId 
+}: { 
+  item: TeacherAssignmentListResponse; 
+  onDelete: () => void;
+  openMenuId: string | null;
+  setOpenMenuId: (id: string | null) => void;
+}) {
   const endDate = new Date(item.finishTime);
   const now = new Date();
   const isExpired = endDate < now;
@@ -270,15 +286,37 @@ function AssignmentRow({ item, onDelete }: { item: TeacherAssignmentListResponse
             </Text>
           </View>
         </View>
-        <TouchableOpacity
-          onPress={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          className="bg-rose-50 w-9 h-9 rounded-full items-center justify-center border border-rose-100/50"
-        >
-          <Ionicons name="trash-outline" size={18} color="#E11D48" />
-        </TouchableOpacity>
+        <View className="relative z-50">
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              setOpenMenuId(openMenuId === item.assignmentId ? null : item.assignmentId);
+            }}
+            className="p-2"
+          >
+            <Ionicons name="ellipsis-vertical" size={20} color="#94A3B8" />
+          </TouchableOpacity>
+
+          {openMenuId === item.assignmentId && (
+            <View 
+              className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
+              style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, minWidth: 80 }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  setOpenMenuId(null);
+                  onDelete();
+                }}
+                className="flex-row items-center px-4 py-3"
+              >
+                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                  Xóa
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </View>
 
       <View className="flex-row items-center justify-between pt-5 border-t border-gray-50">

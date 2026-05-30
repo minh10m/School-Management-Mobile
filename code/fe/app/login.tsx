@@ -174,21 +174,11 @@ export default function LoginScreen() {
                 </View>
               </View>
 
-              {/* Forget Password */}
-              <View className="w-full items-end mt-2 mb-8">
-                <TouchableOpacity>
-                  <Text
-                    className="text-bright-blue text-sm"
-                    style={{ fontFamily: "Poppins-Regular" }}
-                  >
-                    Quên mật khẩu?
-                  </Text>
-                </TouchableOpacity>
-              </View>
+
 
               {/* Log In Button */}
               <TouchableOpacity
-                className={`bg-bright-blue w-full py-4 rounded-xl items-center active:opacity-90 mb-10 ${
+                className={`bg-bright-blue w-full py-4 rounded-xl items-center active:opacity-90 mt-8 mb-10 ${
                   loading ? "opacity-70" : ""
                 }`}
                 onPress={handleLogin}
