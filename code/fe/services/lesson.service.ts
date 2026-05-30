@@ -158,8 +158,9 @@ export const lessonAssignmentService = {
     // If a file is provided, use FormData
     if (payload.file) {
       const formData = new FormData();
-      formData.append("title", payload.title);
-      formData.append("lessonId", payload.lessonId);
+      formData.append("Title", payload.title);
+      formData.append("Description", payload.description);
+      formData.append("LessonId", payload.lessonId);
       formData.append("orderIndex", payload.orderIndex.toString());
       
       if (payload.fileTitle) {

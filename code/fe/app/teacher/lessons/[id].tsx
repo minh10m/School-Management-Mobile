@@ -42,6 +42,7 @@ export default function LessonDetailScreen() {
 
   // Assignment Form
   const [assignmentTitle, setAssignmentTitle] = useState("");
+  const [assignmentDescription, setAssignmentDescription] = useState("");
   const [assignmentFileUrl, setAssignmentFileUrl] = useState("");
   const [assignmentFileTitle, setAssignmentFileTitle] = useState("");
   const [selectedFile, setSelectedFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
@@ -132,6 +133,10 @@ export default function LessonDetailScreen() {
       Alert.alert("Lỗi", "Vui lòng nhập Tiêu đề bài tập.");
       return;
     }
+    if (!assignmentDescription.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập Mô tả bài tập.");
+      return;
+    }
     try {
       setSubmitting(true);
       
@@ -140,6 +145,7 @@ export default function LessonDetailScreen() {
       await lessonAssignmentService.createLessonAssignment({
         lessonId: id,
         title: assignmentTitle.trim(),
+        description: assignmentDescription.trim(),
         fileUrl: assignmentFileUrl.trim() || undefined,
         fileTitle: assignmentFileTitle.trim() || undefined,
         orderIndex: assignments.length + 1,
@@ -153,6 +159,7 @@ export default function LessonDetailScreen() {
       setAssignmentModalVisible(false);
       // Reset form
       setAssignmentTitle("");
+      setAssignmentDescription("");
       setAssignmentFileUrl("");
       setAssignmentFileTitle("");
       setSelectedFile(null);
@@ -175,15 +182,12 @@ export default function LessonDetailScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              setLoading(true);
               await lessonVideoService.deleteLessonVideo(videoId);
+              setVideos((prev) => prev.filter((v) => v.id !== videoId));
               Alert.alert("Thành công", "Đã xóa video thành công!");
-              fetchLessonDetails();
             } catch (err) {
               console.log(err);
               Alert.alert("Lỗi", "Không thể xóa video.");
-            } finally {
-              setLoading(false);
             }
           },
         },
@@ -202,15 +206,12 @@ export default function LessonDetailScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              setLoading(true);
               await lessonAssignmentService.deleteLessonAssignment(assignmentId);
+              setAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
               Alert.alert("Thành công", "Đã xóa bài tập thành công!");
-              fetchLessonDetails();
             } catch (err) {
               console.log(err);
               Alert.alert("Lỗi", "Không thể xóa bài tập.");
-            } finally {
-              setLoading(false);
             }
           },
         },
@@ -524,6 +525,11 @@ export default function LessonDetailScreen() {
             <View className="mb-4">
               <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">Tiêu đề</Text>
               <TextInput value={assignmentTitle} onChangeText={setAssignmentTitle} placeholder="VD: Bài tập số 1" className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-black" />
+            </View>
+
+            <View className="mb-4">
+              <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-700 text-sm mb-1.5 ml-1">Mô tả bài tập</Text>
+              <TextInput value={assignmentDescription} onChangeText={setAssignmentDescription} placeholder="VD: Hoàn thành các câu hỏi trắc nghiệm..." multiline numberOfLines={3} className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3.5 text-black" textAlignVertical="top" />
             </View>
 
             <View className="mb-4">

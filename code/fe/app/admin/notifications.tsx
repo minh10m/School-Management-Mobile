@@ -12,6 +12,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, router, useFocusEffect } from "expo-router";
@@ -67,6 +68,7 @@ const formatTime = (dateString: string) => {
 export default function AdminNotificationScreen() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // Form states for creating notifications
   const [createVisible, setCreateVisible] = useState(false);
@@ -254,8 +256,9 @@ export default function AdminNotificationScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        <View className="flex-1">
-          <SectionList
+        <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
+          <View className="flex-1">
+            <SectionList
             sections={notifications}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
@@ -297,13 +300,42 @@ export default function AdminNotificationScreen() {
                   </Text>
                 </View>
 
-                {/* Delete Button */}
-                <TouchableOpacity
-                  onPress={() => handleDeleteNotification(item.id)}
-                  className="p-2"
-                >
-                  <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                </TouchableOpacity>
+                {/* Menu / Delete Button */}
+                <View className="relative z-50">
+                  <TouchableOpacity
+                    onPress={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
+                    className="p-2"
+                  >
+                    <Ionicons name="ellipsis-vertical" size={18} color="#9CA3AF" />
+                  </TouchableOpacity>
+
+                  {openMenuId === item.id && (
+                    <View 
+                      className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
+                      style={{ 
+                        shadowColor: "#000", 
+                        shadowOffset: { width: 0, height: 2 }, 
+                        shadowOpacity: 0.1, 
+                        shadowRadius: 4, 
+                        elevation: 5,
+                        minWidth: 80
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => {
+                          setOpenMenuId(null);
+                          handleDeleteNotification(item.id);
+                        }}
+                        className="flex-row items-center px-4 py-3"
+                      >
+                        <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                        <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                          Xóa
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
               </View>
             )}
             renderSectionHeader={({ section: { title } }) => (
@@ -325,6 +357,7 @@ export default function AdminNotificationScreen() {
             <Ionicons name="add" size={28} color="white" />
           </TouchableOpacity>
         </View>
+      </TouchableWithoutFeedback>
       )}
 
       {/* Create Notification Modal */}
