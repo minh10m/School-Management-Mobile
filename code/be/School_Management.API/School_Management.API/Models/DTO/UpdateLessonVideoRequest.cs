@@ -15,7 +15,7 @@ namespace School_Management.API.Models.DTO
         public string Name { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Thời lượng video là bắt buộc")]
-        [Range(1, 10000000, ErrorMessage = "Thời lượng video là giây và phải lớn hơn 0")]
+        [Range(0, 10000000, ErrorMessage = "Thời lượng video là giây và phải lớn hơn 0")]
         public int Duration { get; set; }
 
         [Required(ErrorMessage = "Thứ tự video là bắt buộc")]
