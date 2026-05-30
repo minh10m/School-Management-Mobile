@@ -14,7 +14,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, Stack } from "expo-router";
+import { useRouter, Stack, useFocusEffect } from "expo-router";
 import { AdminPageWrapper } from "../../../components/ui/AdminPageWrapper";
 import { examScheduleService } from "../../../services/examSchedule.service";
 import {
@@ -61,9 +61,11 @@ const ExamScheduleIndex = () => {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [filter]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [filter])
+  );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);

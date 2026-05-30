@@ -11,6 +11,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -219,6 +221,10 @@ export default function AdminProfileScreen() {
         presentationStyle="pageSheet"
       >
         <SafeAreaView className="flex-1 bg-white">
+          <KeyboardAvoidingView 
+            style={{ flex: 1 }} 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+          >
           <View className="flex-row items-center justify-between px-6 py-4 border-b border-gray-100">
             <TouchableOpacity onPress={() => setEditVisible(false)}>
               <Text
@@ -309,6 +315,7 @@ export default function AdminProfileScreen() {
               />
             </View>
           </ScrollView>
+          </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
     </AdminPageWrapper>
