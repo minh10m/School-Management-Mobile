@@ -62,7 +62,20 @@ export default function SettingsScreen() {
   };
 
   const handleSupport = () => {
-    Linking.openURL("mailto:23520946@gm.uit.edu.vn?subject=Hỗ trợ ứng dụng School Management&body=Chào bạn, tôi cần hỗ trợ về...");
+    Alert.alert(
+      "Trợ giúp & Hỗ trợ",
+      "Vui lòng liên hệ với bộ phận kỹ thuật để được hỗ trợ nhanh nhất.",
+      [
+        {
+          text: "Gửi Email",
+          onPress: () => Linking.openURL("mailto:23520946@gm.uit.edu.vn?subject=Hỗ trợ ứng dụng School Management"),
+        },
+        {
+          text: "Hủy",
+          style: "cancel",
+        },
+      ]
+    );
   };
 
   const SettingItem = ({ icon, label, onPress, value, type = "link" }: any) => (

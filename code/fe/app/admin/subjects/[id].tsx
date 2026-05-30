@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Modal, FlatList, RefreshControl, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Modal, FlatList, RefreshControl, TextInput, TouchableWithoutFeedback } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -23,6 +23,7 @@ export default function AdminSubjectDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [assignLoading, setAssignLoading] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // Edit State
   const [isEditing, setIsEditing] = useState(false);
@@ -144,8 +145,10 @@ export default function AdminSubjectDetailScreen() {
   );
 
   return (
-    <AdminPageWrapper
-      title="Chi tiết Môn học"
+    <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
+      <View className="flex-1">
+        <AdminPageWrapper
+          title="Chi tiết Môn học"
       rightComponent={
         <TouchableOpacity 
           onPress={() => setIsEditing(true)}
@@ -219,12 +222,37 @@ export default function AdminSubjectDetailScreen() {
                      <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-black text-base leading-tight">{t.fullName}</Text>
                      <Text numberOfLines={1} style={{ fontFamily: 'Poppins-Medium' }} className="text-gray-400 text-[10px] uppercase tracking-tighter">{t.email}</Text>
                    </View>
-                   <TouchableOpacity 
-                     onPress={() => handleRemoveTeacher(t.teacherSubjectId, t.fullName)}
-                     className="w-10 h-10 rounded-xl bg-red-50 items-center justify-center border border-red-100"
-                   >
-                     <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                   </TouchableOpacity>
+                   <View className="relative z-50">
+                     <TouchableOpacity 
+                       onPress={(e) => {
+                         e.stopPropagation();
+                         setOpenMenuId(openMenuId === t.teacherSubjectId ? null : t.teacherSubjectId);
+                       }}
+                       className="p-2"
+                     >
+                       <Ionicons name="ellipsis-vertical" size={18} color="#9CA3AF" />
+                     </TouchableOpacity>
+
+                     {openMenuId === t.teacherSubjectId && (
+                       <View 
+                         className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
+                         style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, minWidth: 80 }}
+                       >
+                         <TouchableOpacity
+                           onPress={() => {
+                             setOpenMenuId(null);
+                             handleRemoveTeacher(t.teacherSubjectId, t.fullName);
+                           }}
+                           className="flex-row items-center px-4 py-3"
+                         >
+                           <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                           <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                             Xóa
+                           </Text>
+                         </TouchableOpacity>
+                       </View>
+                     )}
+                   </View>
                  </View>
                ))}
              </View>
@@ -335,5 +363,7 @@ export default function AdminSubjectDetailScreen() {
          </View>
       </Modal>
     </AdminPageWrapper>
+    </View>
+  </TouchableWithoutFeedback>
   );
 }

@@ -11,6 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
@@ -44,6 +45,7 @@ const ExamScheduleIndex = () => {
   const [modalTerm, setModalTerm] = useState("");
   const [modalYear, setModalYear] = useState("");
   const [modalType, setModalType] = useState("");
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const fetchData = async (isRefreshing = false) => {
     try {
@@ -144,8 +146,10 @@ const ExamScheduleIndex = () => {
 
 
   return (
-    <AdminPageWrapper
-      title="Lịch thi"
+    <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
+      <View className="flex-1">
+        <AdminPageWrapper
+          title="Lịch thi"
       rightComponent={
         <TouchableOpacity
           onPress={() => router.push("/admin/exam-schedules/create")}
@@ -243,7 +247,7 @@ const ExamScheduleIndex = () => {
                       TẤT CẢ
                     </Text>
                   </TouchableOpacity>
-                  {["2024", "2025", "2026"].map(y => (
+                  {["2024", "2025", "2026", "2027", "2028"].map(y => (
                     <TouchableOpacity
                       key={y}
                       onPress={() => setModalYear(y)}
@@ -329,9 +333,37 @@ const ExamScheduleIndex = () => {
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-3">
-                   <TouchableOpacity onPress={() => handleDeleteSchedule(item.examScheduleId, item.title)}>
-                      <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                   </TouchableOpacity>
+                   <View className="relative z-50">
+                     <TouchableOpacity 
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === item.examScheduleId ? null : item.examScheduleId);
+                        }}
+                        className="p-2"
+                     >
+                        <Ionicons name="ellipsis-vertical" size={18} color="#9CA3AF" />
+                     </TouchableOpacity>
+
+                     {openMenuId === item.examScheduleId && (
+                       <View 
+                         className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
+                         style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, minWidth: 80 }}
+                       >
+                         <TouchableOpacity
+                           onPress={() => {
+                             setOpenMenuId(null);
+                             handleDeleteSchedule(item.examScheduleId, item.title);
+                           }}
+                           className="flex-row items-center px-4 py-3"
+                         >
+                           <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                           <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                             Xóa
+                           </Text>
+                         </TouchableOpacity>
+                       </View>
+                     )}
+                   </View>
                    <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
                 </View>
               </View>
@@ -349,6 +381,8 @@ const ExamScheduleIndex = () => {
         />
       )}
     </AdminPageWrapper>
+    </View>
+  </TouchableWithoutFeedback>
   );
 };
 

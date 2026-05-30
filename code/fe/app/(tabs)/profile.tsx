@@ -10,6 +10,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -215,31 +219,38 @@ export default function StudentProfileScreen() {
             </TouchableOpacity>
           </View>
 
-          <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
-            <View className="items-center mb-6">
-              <TouchableOpacity onPress={pickImage} className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center border-4 border-white shadow-sm overflow-hidden">
-                {editForm.avatarUri ? (
-                  <Image className="rounded-full" 
-                    source={{ uri: editForm.avatarUri }} 
-                    style={{ width: 96, height: 96, borderRadius: 9999 }}
-                    contentFit="cover"
-                    transition={200}
-                  />
-                ) : (
-                  <Ionicons name="camera-outline" size={32} color="#136ADA" />
-                )}
-              </TouchableOpacity>
-              <Text className="text-blue-600 mt-2 text-xs" style={{ fontFamily: "Poppins-Medium" }}>Thay đổi ảnh đại diện</Text>
-            </View>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : undefined} 
+            className="flex-1"
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+                <View className="items-center mb-6">
+                  <TouchableOpacity onPress={pickImage} className="w-24 h-24 rounded-full bg-blue-50 items-center justify-center border-4 border-white shadow-sm overflow-hidden">
+                    {editForm.avatarUri ? (
+                      <Image className="rounded-full" 
+                        source={{ uri: editForm.avatarUri }} 
+                        style={{ width: 96, height: 96, borderRadius: 9999 }}
+                        contentFit="cover"
+                        transition={200}
+                      />
+                    ) : (
+                      <Ionicons name="camera-outline" size={32} color="#136ADA" />
+                    )}
+                  </TouchableOpacity>
+                  <Text className="text-blue-600 mt-2 text-xs" style={{ fontFamily: "Poppins-Medium" }}>Thay đổi ảnh đại diện</Text>
+                </View>
 
-            <View className="gap-5 pb-20">
-              <EditInput label="Họ tên" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
-              <EditInput label="Email" value={editForm.email} onChangeText={(v: string) => setEditForm({ ...editForm, email: v })} keyboardType="email-address" />
-              <EditInput label="Số điện thoại" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
-              <EditInput label="Địa chỉ" value={editForm.address} onChangeText={(v: string) => setEditForm({ ...editForm, address: v })} />
-              <EditInput label="Ngày sinh (YYYY-MM-DD)" value={editForm.birthday} onChangeText={(v: string) => setEditForm({ ...editForm, birthday: v })} placeholder="2005-10-10" />
-            </View>
-          </ScrollView>
+                <View className="gap-5 pb-20">
+                  <EditInput label="Họ tên" value={editForm.fullName} onChangeText={(v: string) => setEditForm({ ...editForm, fullName: v })} />
+                  <EditInput label="Email" value={editForm.email} onChangeText={(v: string) => setEditForm({ ...editForm, email: v })} keyboardType="email-address" />
+                  <EditInput label="Số điện thoại" value={editForm.phoneNumber} onChangeText={(v: string) => setEditForm({ ...editForm, phoneNumber: v })} keyboardType="phone-pad" />
+                  <EditInput label="Địa chỉ" value={editForm.address} onChangeText={(v: string) => setEditForm({ ...editForm, address: v })} />
+                  <EditInput label="Ngày sinh (YYYY-MM-DD)" value={editForm.birthday} onChangeText={(v: string) => setEditForm({ ...editForm, birthday: v })} placeholder="2005-10-10" />
+                </View>
+              </ScrollView>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
     </SafeAreaView>

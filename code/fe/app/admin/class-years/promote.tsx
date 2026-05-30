@@ -7,6 +7,7 @@ import {
   Alert,
   Modal,
   FlatList,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -30,6 +31,7 @@ export default function AdminPromoteScreen() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showYearModal, setShowYearModal] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // Years
   const [targetYear, setTargetYear] = useState(schoolYear.toString());
@@ -118,9 +120,11 @@ export default function AdminPromoteScreen() {
   };
 
   return (
-    <AdminPageWrapper
-      title="Lên lớp"
-    >
+    <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
+      <View className="flex-1">
+        <AdminPageWrapper
+          title="Lên lớp"
+        >
 
       <ScrollView
         className="flex-1"
@@ -203,13 +207,41 @@ export default function AdminPromoteScreen() {
                     Quy tắc #{index + 1}
                   </Text>
                   {mappings.length > 1 && (
-                    <TouchableOpacity onPress={() => removeMapping(mapping.id)}>
-                      <Ionicons
-                        name="trash-outline"
-                        size={18}
-                        color="#EF4444"
-                      />
-                    </TouchableOpacity>
+                    <View className="relative z-50">
+                      <TouchableOpacity 
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === mapping.id ? null : mapping.id);
+                        }}
+                        className="p-2"
+                      >
+                        <Ionicons
+                          name="ellipsis-vertical"
+                          size={18}
+                          color="#9CA3AF"
+                        />
+                      </TouchableOpacity>
+
+                      {openMenuId === mapping.id && (
+                        <View 
+                          className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
+                          style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, minWidth: 80 }}
+                        >
+                          <TouchableOpacity
+                            onPress={() => {
+                              setOpenMenuId(null);
+                              removeMapping(mapping.id);
+                            }}
+                            className="flex-row items-center px-4 py-3"
+                          >
+                            <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                            <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                              Xóa
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
                   )}
                 </View>
 
@@ -303,6 +335,8 @@ export default function AdminPromoteScreen() {
         </View>
       )}
     </AdminPageWrapper>
+    </View>
+  </TouchableWithoutFeedback>
   );
 }
 
