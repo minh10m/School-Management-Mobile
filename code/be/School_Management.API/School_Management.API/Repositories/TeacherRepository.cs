@@ -24,7 +24,7 @@ namespace School_Management.API.Repositories
                 query = query.Where(x => x.User.FullName.ToLower().Contains(request.FullName.ToLower()));
 
             if (!string.IsNullOrWhiteSpace(request.SubjectName))
-                query = query.Where(x => x.TeacherSubjects.Any(ts => ts.Subject.SubjectName.ToLower().Contains(request.SubjectName.ToLower())));
+                query = query.Where(x => x.TeacherSubjects.Any(ts => ts.IsActive && ts.Subject.SubjectName.ToLower().Contains(request.SubjectName.ToLower())));
 
 
             //sorting
