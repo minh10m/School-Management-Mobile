@@ -208,7 +208,7 @@ namespace School_Management.API.Repositories
                                 && x.Schedule.IsActive == true
                                 && x.Schedule.SchoolYear == classYearInfo.SchoolYear
                                 && x.Schedule.Term == request.Term
-                                && x.TeacherSubject.TeacherId == teacherId);
+                                && x.TeacherSubject.TeacherId == teacherId && x.TeacherSubject.IsActive);
                 if (!isTeachingThisClass) return (null, "NOT_A_TEACHER_OF_THIS_CLASS");
             }
 
@@ -271,18 +271,35 @@ namespace School_Management.API.Repositories
             if (teacherId == Guid.Empty) return (null, "NOT_FOUND_TEACHER");
 
             var classYearInfo = await context.ClassYear.AsNoTracking().Where(x => x.Id == classYearId)
-                                                       .Select(g => new { g.SchoolYear })
+                                                       .Select(g => new { g.SchoolYear, g.HomeRoomId })
                                                        .FirstOrDefaultAsync();
             if (classYearInfo == null) return (null, "NOT_FOUND_CLASS");
 
-            var subjectIdsOfTeacher = await context.ScheduleDetail.AsNoTracking()
-                                                         .Where(x => x.Schedule.ClassYearId == classYearId
-                                                                   && x.Schedule.IsActive == true
-                                                                   && x.Schedule.SchoolYear == classYearInfo.SchoolYear && x.Schedule.Term == request.Term
-                                                                   && x.TeacherSubject.TeacherId == teacherId)
-                                                         .Select(g => g.TeacherSubject.SubjectId)
-                                                         .Distinct()
-                                                         .ToListAsync();
+            bool isHomeroomTeacher = classYearInfo.HomeRoomId == teacherId;
+
+            List<Guid> subjectIdsOfTeacher = new List<Guid>();
+
+            if (isHomeroomTeacher)
+            {
+                subjectIdsOfTeacher = await context.Result.AsNoTracking()
+                                                     .Where(x => x.SchoolYear == classYearInfo.SchoolYear && x.Term == request.Term && x.StudentId == studentId)
+                                                     .Select(g => g.SubjectId)
+                                                     .Distinct()
+                                                     .ToListAsync();
+            }
+            else
+            {
+                // Nếu KHÔNG PHẢI GVCN, giữ nguyên logic cũ: Chỉ lấy những môn mà giáo viên này có lịch dạy ở lớp
+                subjectIdsOfTeacher = await context.ScheduleDetail.AsNoTracking()
+                                                             .Where(x => x.Schedule.ClassYearId == classYearId
+                                                                       && x.Schedule.IsActive == true
+                                                                       && x.Schedule.SchoolYear == classYearInfo.SchoolYear && x.Schedule.Term == request.Term
+                                                                       && x.TeacherSubject.TeacherId == teacherId && x.TeacherSubject.IsActive)
+                                                             .Select(g => g.TeacherSubject.SubjectId)
+                                                             .Distinct()
+                                                             .ToListAsync();
+            }
+
             if (!subjectIdsOfTeacher.Any()) return (null, "NOT_A_TEACHER_OF_THIS_STUDENT");
 
             var listResult = await context.Result.Include(x => x.Subject).AsNoTracking()
@@ -303,7 +320,6 @@ namespace School_Management.API.Repositories
                                            Value = y.Value,
                                            Weight = y.Weight
                                        }).ToList()
-
                                    }).ToList();
 
             var result = new ResultForStudentResponse
@@ -312,8 +328,6 @@ namespace School_Management.API.Repositories
                 Average = null,
                 Rating = null
             };
-
-            
 
             return (result, "SUCCESS");
         }
