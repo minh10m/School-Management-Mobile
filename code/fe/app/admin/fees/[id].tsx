@@ -60,14 +60,6 @@ export default function AdminFeeDetailScreen() {
 
   const formatCurrency = (n: number) => n.toLocaleString('vi-VN') + ' VNĐ';
 
-  if (loading && !refreshing) {
-    return (
-      <View className="flex-1 bg-white items-center justify-center">
-        <ActivityIndicator size="large" color="#136ADA" />
-      </View>
-    );
-  }
-
   const paidCount = details.filter(s => s.status === 'Đã đóng').length;
   const pct = details.length > 0 ? Math.round((paidCount / details.length) * 100) : 0;
 
@@ -111,8 +103,12 @@ export default function AdminFeeDetailScreen() {
         </View>
       </View>
 
-      {/* Student list */}
-      <FlatList
+      {loading && !refreshing ? (
+        <View className="flex-1 bg-white items-center justify-center">
+          <ActivityIndicator size="large" color="#136ADA" />
+        </View>
+      ) : (
+        <FlatList
         data={details}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100, gap: 12 }}
@@ -163,6 +159,7 @@ export default function AdminFeeDetailScreen() {
           </View>
         }
       />
+      )}
     </AdminPageWrapper>
   );
 }

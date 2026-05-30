@@ -10,6 +10,7 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, Stack } from "expo-router";
@@ -26,6 +27,7 @@ export default function AdminEventsScreen() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // Applied Filters
   const [search, setSearch] = useState("");
@@ -141,8 +143,10 @@ export default function AdminEventsScreen() {
   };
 
   return (
-    <AdminPageWrapper
-      title="Sự kiện"
+    <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
+      <View className="flex-1">
+        <AdminPageWrapper
+          title="Sự kiện"
       rightComponent={
         <TouchableOpacity
           onPress={() => router.push("/admin/events/create" as any)}
@@ -223,8 +227,8 @@ export default function AdminEventsScreen() {
               {/* Filter: Year */}
               <View className="mb-4">
                 <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">NĂM HỌC</Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {[2024, 2025, 2026].map((y) => (
+                <View className="flex-row gap-2 flex-wrap">
+                  {[2024, 2025, 2026, 2027, 2028].map((y) => (
                     <TouchableOpacity
                       key={y}
                       onPress={() => setTempYear(y)}
@@ -327,15 +331,37 @@ export default function AdminEventsScreen() {
                     </Text>
                   </View>
                   <View className="flex-row items-center gap-3">
-                    <TouchableOpacity
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        handleDeleteEvent(item.eventId!);
-                      }}
-                      className="p-1"
-                    >
-                      <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                    </TouchableOpacity>
+                    <View className="relative z-50">
+                      <TouchableOpacity
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === item.eventId ? null : item.eventId!);
+                        }}
+                        className="p-2"
+                      >
+                        <Ionicons name="ellipsis-vertical" size={18} color="#9CA3AF" />
+                      </TouchableOpacity>
+
+                      {openMenuId === item.eventId && (
+                        <View 
+                          className="absolute right-8 top-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden" 
+                          style={{ elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, minWidth: 80 }}
+                        >
+                          <TouchableOpacity
+                            onPress={() => {
+                              setOpenMenuId(null);
+                              handleDeleteEvent(item.eventId!);
+                            }}
+                            className="flex-row items-center px-4 py-3"
+                          >
+                            <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                            <Text className="text-red-500 text-xs ml-2" style={{ fontFamily: "Poppins-Medium" }}>
+                              Xóa
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
                     <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
                   </View>
                 </View>
@@ -357,5 +383,7 @@ export default function AdminEventsScreen() {
         />
       )}
     </AdminPageWrapper>
+    </View>
+  </TouchableWithoutFeedback>
   );
 }

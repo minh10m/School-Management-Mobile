@@ -133,7 +133,7 @@ export default function AdminClassYearsScreen() {
               <View className="mb-8">
                 <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-500 text-xs mb-3 ml-1">NĂM HỌC</Text>
                 <View className="flex-row flex-wrap gap-2">
-                  {["2024", "2025", "2026"].map(y => (
+                  {["2024", "2025", "2026", "2027", "2028"].map(y => (
                     <TouchableOpacity
                       key={y}
                       onPress={() => setTempYear(y)}

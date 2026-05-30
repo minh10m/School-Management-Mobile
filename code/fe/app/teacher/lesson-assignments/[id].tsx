@@ -56,15 +56,15 @@ export default function TeacherLessonAssignmentDetailScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-[#FAFAFA]">
       <StatusBar hidden />
       
       {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
-        <TouchableOpacity onPress={() => router.back()} className="p-2">
-          <Ionicons name="arrow-back" size={24} color="black" />
+      <View className="flex-row items-center justify-between px-6 py-4 bg-[#FAFAFA]">
+        <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm shadow-gray-100/50 border border-gray-50">
+          <Ionicons name="arrow-back" size={20} color="#374151" />
         </TouchableOpacity>
-        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-black text-lg">
+        <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-[15px]">
           Chi tiết bài tập
         </Text>
         <View className="w-10" />
@@ -76,85 +76,70 @@ export default function TeacherLessonAssignmentDetailScreen() {
         </View>
       ) : assignment ? (
         <ScrollView 
-          className="flex-1" 
+          className="flex-1 px-5 pt-6" 
           contentContainerStyle={{ paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#136ADA" />}
         >
-          {/* Assignment Info Card */}
-          <View className="px-6 pt-6">
-            <View className="bg-emerald-50/50 p-8 rounded-[40px] border border-emerald-100/50 relative overflow-hidden">
-              {/* Decorative Circle */}
-              <View className="absolute right-[-20] top-[-20] w-32 h-32 bg-emerald-100/30 rounded-full" />
-              
-              <View className="flex-row items-center gap-2 mb-6">
-                 <View className="bg-emerald-100 px-3 py-1.5 rounded-full border border-emerald-200">
-                    <Text style={{ fontFamily: "Poppins-Bold" }} className="text-[#059669] text-[10px] uppercase tracking-widest">
-                      Thứ tự: {assignment.orderIndex}
-                    </Text>
-                 </View>
+          <View className="bg-white rounded-[32px] p-6 border border-gray-100/80 shadow-sm shadow-gray-100/50 mb-6">
+            {/* Header/Title */}
+            <View className="mb-6 flex-row items-start">
+              <View className="w-12 h-12 bg-indigo-50 rounded-2xl items-center justify-center mr-4 mt-1">
+                 <Ionicons name="document-text" size={24} color="#4F46E5" />
               </View>
-
-              <Text style={{ fontFamily: "Poppins-Bold" }} className="text-2xl text-black mb-6 leading-tight">
-                {assignment.title}
-              </Text>
-
-              <View className="flex-row items-center gap-4">
-                 <View className="w-12 h-12 rounded-2xl bg-white items-center justify-center shadow-sm">
-                    <Ionicons name="book" size={24} color="#10B981" />
-                 </View>
-                 <View>
-                    <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-sm">
-                      Nội dung thực hành
-                    </Text>
-                    <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[11px]">
-                      Bài tập đính kèm theo bài giảng
-                    </Text>
-                 </View>
+              <View className="flex-1">
+                <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-indigo-600 text-[10px] uppercase tracking-widest mb-1">
+                  Bài tập {assignment.orderIndex}
+                </Text>
+                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-2xl text-gray-900 leading-tight">
+                  {assignment.title}
+                </Text>
               </View>
             </View>
-          </View>
 
-          {/* File Section */}
-          <View className="px-6 mt-10">
-             <View className="flex-row items-center justify-between mb-5">
-                <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-lg">Tài liệu đính kèm</Text>
-                {assignment.fileUrl && assignment.fileUrl !== "Không có dữ liệu" && (
-                   <View className="w-2 h-2 bg-blue-500 rounded-full" />
-                )}
-             </View>
-             
-             {(!assignment.fileUrl || assignment.fileUrl === "Không có dữ liệu") ? (
-               <View className="bg-white p-10 rounded-[32px] items-center border border-dashed border-gray-200 shadow-sm">
-                  <View className="w-16 h-16 bg-gray-50 rounded-full items-center justify-center mb-4">
-                     <Ionicons name="folder-open-outline" size={32} color="#D1D5DB" />
-                  </View>
-                  <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-300 text-sm text-center">Không có file đính kèm</Text>
-               </View>
-             ) : (
-               <TouchableOpacity 
-                  onPress={openFileLink} 
-                  activeOpacity={0.7}
-                  className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm flex-row items-center"
-               >
-                  <View className="w-14 h-14 bg-blue-50 rounded-2xl items-center justify-center mr-4">
-                     <Ionicons name="cloud-download" size={28} color="#136ADA" />
-                  </View>
-                  <View className="flex-1">
-                     <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-sm leading-tight" numberOfLines={2}>
-                        {assignment.fileTitle && assignment.fileTitle !== "Không có dữ liệu" ? assignment.fileTitle : "Tải tài liệu thực hành"}
-                     </Text>
-                     <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-[10px] mt-1">
-                        Bấm để mở hoặc tải xuống file
-                     </Text>
-                  </View>
-                  <View className="bg-gray-50 w-10 h-10 rounded-2xl items-center justify-center">
-                     <Ionicons name="chevron-forward" size={18} color="#D1D5DB" />
-                  </View>
-               </TouchableOpacity>
-             )}
-          </View>
+            {/* Description */}
+            {!!assignment.description && (
+              <View className="bg-gray-50/70 p-5 rounded-2xl border border-gray-100/50 mb-6">
+                <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-400 text-[11px] uppercase tracking-widest mb-2">
+                  Mô tả
+                </Text>
+                <Text style={{ fontFamily: "Poppins-Regular" }} className="text-gray-700 text-[14px] leading-6">
+                  {assignment.description}
+                </Text>
+              </View>
+            )}
 
+            {/* Attachment */}
+            <View>
+              <Text style={{ fontFamily: "Poppins-SemiBold" }} className="text-gray-400 text-[11px] uppercase tracking-widest mb-3 ml-1">
+                Tài liệu đính kèm
+              </Text>
+              {(!assignment.fileUrl || assignment.fileUrl === "Không có dữ liệu") ? (
+                 <View className="bg-gray-50 py-8 rounded-2xl items-center border border-dashed border-gray-200">
+                    <Ionicons name="folder-open-outline" size={28} color="#D1D5DB" className="mb-2" />
+                    <Text style={{ fontFamily: "Poppins-Medium" }} className="text-gray-400 text-sm text-center">Chưa có tài liệu đính kèm</Text>
+                 </View>
+               ) : (
+                  <TouchableOpacity 
+                    onPress={openFileLink} 
+                    activeOpacity={0.6}
+                    className="bg-blue-50/50 p-4 rounded-2xl flex-row items-center border border-blue-100/50"
+                 >
+                    <View className="w-12 h-12 bg-white rounded-xl items-center justify-center mr-4 shadow-sm shadow-blue-100/50">
+                       <Ionicons name="cloud-download-outline" size={24} color="#3B82F6" />
+                    </View>
+                    <View className="flex-1 pr-2">
+                       <Text style={{ fontFamily: "Poppins-Bold" }} className="text-gray-800 text-[14px] mb-0.5 leading-tight" numberOfLines={2}>
+                          {assignment.fileTitle && assignment.fileTitle !== "Không có dữ liệu" ? assignment.fileTitle : "Tài liệu thực hành"}
+                       </Text>
+                       <Text style={{ fontFamily: "Poppins-Medium" }} className="text-blue-500/80 text-[11px]">
+                          Chạm để xem hoặc tải về
+                       </Text>
+                    </View>
+                 </TouchableOpacity>
+               )}
+            </View>
+          </View>
         </ScrollView>
       ) : (
         <View className="flex-1 items-center justify-center p-10">
