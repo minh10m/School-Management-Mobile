@@ -1,4 +1,4 @@
-﻿using CloudinaryDotNet;
+using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
 using School_Management.API.Exceptions;
@@ -169,8 +169,8 @@ namespace School_Management.API.Repositories
 
             if(!string.IsNullOrWhiteSpace(request.StudentName))
             {
-                var name = request.StudentName.Trim().ToLower();
-                query = query.Where(x => x.Student.User.FullName.Trim().ToLower().Contains(name));
+                var name = request.StudentName.Trim();
+                query = query.Where(x => EF.Functions.ILike(x.Student.User.FullName, $"%{name}%"));
             }
 
             query = query.OrderBy(x => x.Id);
