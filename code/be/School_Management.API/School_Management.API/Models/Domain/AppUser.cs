@@ -11,7 +11,6 @@ namespace School_Management.API.Models.Domain
         public string PublicId { get; set; } = string.Empty;
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
-        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
