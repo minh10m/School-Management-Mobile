@@ -256,9 +256,9 @@ export default function AdminNotificationScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
           <View className="flex-1">
             <SectionList
+            onScrollBeginDrag={() => setOpenMenuId(null)}
             sections={notifications}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
@@ -357,7 +357,6 @@ export default function AdminNotificationScreen() {
             <Ionicons name="add" size={28} color="white" />
           </TouchableOpacity>
         </View>
-      </TouchableWithoutFeedback>
       )}
 
       {/* Create Notification Modal */}

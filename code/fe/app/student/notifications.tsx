@@ -139,9 +139,9 @@ export default function NotificationScreen() {
           </Text>
         </View>
       ) : (
-        <TouchableWithoutFeedback onPress={() => setOpenMenuId(null)}>
           <View className="flex-1">
             <SectionList
+              onScrollBeginDrag={() => setOpenMenuId(null)}
               sections={notifications}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
@@ -245,7 +245,6 @@ export default function NotificationScreen() {
           contentContainerStyle={{ paddingBottom: 20 }}
         />
         </View>
-      </TouchableWithoutFeedback>
       )}
     </SafeAreaView>
   );
