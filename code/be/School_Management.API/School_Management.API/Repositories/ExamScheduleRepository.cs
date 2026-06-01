@@ -170,46 +170,66 @@ namespace School_Management.API.Repositories
 
         public async Task<(bool result, string? message)> CreateExamScheduleDetail(IFormFile file, Guid examScheduleId)
         {
-            var rows = ReadExcelData(file);
+            var (rows, readError) = ReadExcelData(file);
+            if (readError != null) return (false, readError);
             if (!rows.Any()) return (false, "File trống không có dữ liệu");
 
-            var teacherDict = await context.Teacher.Include(x => x.User).ToDictionaryAsync(x => x.User.Email, x => x.Id);
-            var subjectDict = await context.Subject.ToDictionaryAsync(x => x.SubjectName, x => x.Id);
+            var teacherDict = await context.Teacher
+                .Include(x => x.User)
+                .ToDictionaryAsync(x => x.User.Email, x => x.Id);
+
+            var subjectDict = await context.Subject
+                .ToDictionaryAsync(x => x.SubjectName, x => x.Id);
 
             var dateFile = rows.Select(x => x.Date).Distinct().ToList();
-            var existingData = await context.ExamScheduleDetail.AsNoTracking().Where(x => dateFile.Contains(x.Date))
-                                                               .Select(g => new { g.StartTime, g.FinishTime, g.Date, g.RoomName, g.TeacherId })
-                                                               .ToListAsync();
+
+            // Check toàn bộ DB theo ngày — đảm bảo không trùng giữa các lịch thi khác nhau trong cùng trường
+            var existingData = await context.ExamScheduleDetail.AsNoTracking()
+                .Where(x => dateFile.Contains(x.Date))
+                .Select(g => new { g.StartTime, g.FinishTime, g.Date, g.RoomName, g.TeacherId })
+                .ToListAsync();
+
             var overallResult = new List<ExamScheduleDetail>();
             var currentRow = 2;
+
             using var transaction = await context.Database.BeginTransactionAsync();
             try
             {
                 foreach (var row in rows)
                 {
+                    // Validate annotations
                     var validationContext = new ValidationContext(row);
-                    var result = new List<ValidationResult>();
+                    var validationResults = new List<ValidationResult>();
+                    if (!Validator.TryValidateObject(row, validationContext, validationResults, true))
+                        return (false, $"Dòng {currentRow}: {validationResults.First().ErrorMessage}");
 
-                    if (!Validator.TryValidateObject(row, validationContext, result, true))
-                        return (false, $"Dòng {currentRow} : {result.First().ErrorMessage}");
-
+                    // Validate teacher
                     if (!teacherDict.TryGetValue(row.TeacherEmail, out var tId))
-                        return (false, $"Dòng {currentRow} : Giá trị {row.TeacherEmail} không tồn tại");
+                        return (false, $"Dòng {currentRow}: Email giáo viên '{row.TeacherEmail}' không tồn tại");
 
-                    if (row.StartTime > row.FinishTime)
-                        return (false, $"Dòng {currentRow} : Thời gian bắt đầu không được lớn hơn thời gian kết thúc");
-
+                    // Validate subject
                     if (!subjectDict.TryGetValue(row.SubjectName, out var sId))
-                        return (false, $"Dòng {currentRow} : Giá trị {row.SubjectName} không tồn tại");
+                        return (false, $"Dòng {currentRow}: Môn học '{row.SubjectName}' không tồn tại");
 
-                    var isExisted = existingData.Any(x => x.Date == row.Date
-                                                       && (x.StartTime < row.FinishTime && x.FinishTime > row.StartTime)
-                                                       && (x.TeacherId == tId || x.RoomName == row.RoomName))
-                                    ||
-                                    overallResult.Any(x => x.Date == row.Date
-                                                       && (x.StartTime < row.FinishTime && x.FinishTime > row.StartTime)
-                                                       && (x.TeacherId == tId || x.RoomName == row.RoomName));
-                    if (isExisted) return (false, $"Dòng {currentRow} : Lỗi trùng giáo viên hoặc phòng thi");
+                    // Validate thời gian trước khi check conflict
+                    if (row.StartTime >= row.FinishTime)
+                        return (false, $"Dòng {currentRow}: Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc");
+
+                    // Check conflict với DB và với các dòng đã xử lý trong batch này
+                    var isConflict =
+                        existingData.Any(x =>
+                            x.Date == row.Date &&
+                            x.StartTime < row.FinishTime && x.FinishTime > row.StartTime &&
+                            (x.TeacherId == tId || x.RoomName == row.RoomName))
+                        ||
+                        overallResult.Any(x =>
+                            x.Date == row.Date &&
+                            x.StartTime < row.FinishTime && x.FinishTime > row.StartTime &&
+                            (x.TeacherId == tId || x.RoomName == row.RoomName));
+
+                    if (isConflict)
+                        return (false, $"Dòng {currentRow}: Trùng giáo viên hoặc phòng thi");
+
                     overallResult.Add(new ExamScheduleDetail
                     {
                         Id = Guid.NewGuid(),
@@ -223,8 +243,8 @@ namespace School_Management.API.Repositories
                     });
 
                     currentRow++;
-
                 }
+
                 context.ExamScheduleDetail.AddRange(overallResult);
                 await context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -236,8 +256,6 @@ namespace School_Management.API.Repositories
                 await transaction.RollbackAsync();
                 throw;
             }
-            
-
         }
 
         public async Task<PagedResponse<ExamScheduleResponse>> GetAllExamSchedule(ExamScheduleFilterRequest request)
@@ -457,33 +475,85 @@ namespace School_Management.API.Repositories
             }
         }
 
-        public List<ExamScheduleDetailRequest> ReadExcelData(IFormFile file)
+        public (List<ExamScheduleDetailRequest> rows, string? error) ReadExcelData(IFormFile file)
         {
             var list = new List<ExamScheduleDetailRequest>();
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-            using (var stream = file.OpenReadStream())
-            using(var reader = ExcelReaderFactory.CreateReader(stream))
-            {
-                var rowIndex = 0;
-                while (reader.Read())
-                {
-                    rowIndex++;
-                    if (rowIndex == 1) continue;
 
-                    list.Add(new ExamScheduleDetailRequest
-                    {
-                        TeacherEmail = reader.GetValue(0)?.ToString()?.Trim() ?? "",
-                        SubjectName = reader.GetValue(1)?.ToString()?.Trim() ?? "",
-                        RoomName = reader.GetValue(2)?.ToString()?.Trim() ?? "",
-                        StartTime = TimeSpan.Parse(reader.GetValue(3)?.ToString()?.Trim()),
-                        FinishTime = TimeSpan.Parse(reader.GetValue(4)?.ToString()?.Trim()),
-                        Date = DateOnly.FromDateTime(Convert.ToDateTime(reader.GetValue(5)))
-                    });
+            using var stream = file.OpenReadStream();
+            using var reader = ExcelReaderFactory.CreateReader(stream);
+
+            var rowIndex = 0;
+            while (reader.Read())
+            {
+                rowIndex++;
+                if (rowIndex == 1) continue; // bỏ header
+
+                // Bỏ qua dòng trống
+                var emailRaw = reader.GetValue(0)?.ToString()?.Trim();
+                if (string.IsNullOrEmpty(emailRaw)) continue;
+
+                // Parse StartTime an toàn
+                var startRaw = reader.GetValue(3)?.ToString()?.Trim();
+                if (!TryParseExcelTime(startRaw, out var startTime))
+                    return (list, $"Dòng {rowIndex}: Giá trị StartTime không hợp lệ: '{startRaw}'");
+
+                // Parse FinishTime an toàn
+                var finishRaw = reader.GetValue(4)?.ToString()?.Trim();
+                if (!TryParseExcelTime(finishRaw, out var finishTime))
+                    return (list, $"Dòng {rowIndex}: Giá trị FinishTime không hợp lệ: '{finishRaw}'");
+
+                // Parse Date an toàn
+                var dateRaw = reader.GetValue(5);
+                if (dateRaw == null)
+                    return (list, $"Dòng {rowIndex}: Giá trị Date không được để trống");
+
+                DateOnly date;
+                try
+                {
+                    date = DateOnly.FromDateTime(Convert.ToDateTime(dateRaw));
+                }
+                catch
+                {
+                    return (list, $"Dòng {rowIndex}: Giá trị Date không hợp lệ: '{dateRaw}'");
                 }
 
-                return list;
+                list.Add(new ExamScheduleDetailRequest
+                {
+                    TeacherEmail = emailRaw,
+                    SubjectName = reader.GetValue(1)?.ToString()?.Trim() ?? "",
+                    RoomName = reader.GetValue(2)?.ToString()?.Trim() ?? "",
+                    StartTime = startTime,
+                    FinishTime = finishTime,
+                    Date = date
+                });
             }
+
+            return (list, null);
         }
+
+        /// <summary>
+        /// Parse giờ từ Excel — hỗ trợ cả dạng "07:30:00" lẫn số thập phân (0.3125 = 07:30:00).
+        /// </summary>
+        private static bool TryParseExcelTime(string? raw, out TimeSpan result)
+        {
+            result = TimeSpan.Zero;
+            if (string.IsNullOrEmpty(raw)) return false;
+
+            if (TimeSpan.TryParse(raw, out result))
+                return true;
+
+            // Excel đôi khi lưu giờ dạng số thập phân
+            if (double.TryParse(raw, System.Globalization.NumberStyles.Any,
+                                 System.Globalization.CultureInfo.InvariantCulture, out var d))
+            {
+                result = TimeSpan.FromDays(d);
+                return true;
+            }
+
+            return false;
+        }
+
 
         public async Task<(ExamScheduleResponse? data, string? message)> UpdateExamSchedule(ExamScheduleRequest request, Guid examScheduleId)
         {
