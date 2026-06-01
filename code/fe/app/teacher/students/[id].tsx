@@ -1,25 +1,27 @@
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import { useState, useEffect } from "react";
 import { studentService } from "../../../services/student.service";
+import { useConfigStore } from "../../../store/configStore";
 import { StudentResponse } from "../../../types/student";
 import { getErrorMessage } from "../../../utils/error";
 
 export default function StudentDetailScreen() {
   const { id, isHomeroom } = useLocalSearchParams<{ id: string; isHomeroom?: string }>();
+  const { schoolYear } = useConfigStore();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [student, setStudent] = useState<StudentResponse | null>(null);
@@ -31,6 +33,25 @@ export default function StudentDetailScreen() {
     phone: "",
     birthday: "",
   });
+
+  // Helper function to get current class year sub
+  const getCurrentClassYearSub = () => {
+    if (!student?.classYearSub || student.classYearSub.length === 0) return null;
+    
+    // Find class for current school year
+    const currentClass = student.classYearSub.find(
+      (cls) => cls.schoolYear === schoolYear
+    );
+    
+    // Fallback to latest school year if current not found
+    if (!currentClass) {
+      return student.classYearSub.sort(
+        (a, b) => b.schoolYear - a.schoolYear
+      )[0];
+    }
+    
+    return currentClass;
+  };
 
   useEffect(() => {
     if (id) fetchStudent();
@@ -168,15 +189,15 @@ export default function StudentDetailScreen() {
             style={{ fontFamily: "Poppins-Medium" }}
             className="text-gray-500"
           >
-            Khối {student?.classYearSub?.[0]?.grade} •{" "}
-            {student?.classYearSub?.[0]?.className}
+            Khối {getCurrentClassYearSub()?.grade} •{" "}
+            {getCurrentClassYearSub()?.className}
           </Text>
           <View className="bg-gray-100 px-3 py-1 rounded-full mt-2">
             <Text
               style={{ fontFamily: "Poppins-Regular", fontSize: 12 }}
               className="text-gray-600"
             >
-              Năm học: {student?.classYearSub?.[0]?.schoolYear}
+              Năm học: {getCurrentClassYearSub()?.schoolYear}
             </Text>
           </View>
         </View>
