@@ -57,7 +57,7 @@ namespace School_Management.API.Repositories
                     var subjectName = group.Key.SubjectName;
 
                     var roomGroups = group.ToList();
-                    var totalCapicity = roomGroups.Count * 30;
+                    var totalCapicity = roomGroups.Count * 5;
                     if (totalCapicity < studentIds.Count) return (false, $"Môn {subjectName} không đủ chỗ, tổng học sinh là {studentIds.Count} học sinh và số chỗ hiện tại là {totalCapicity}");
 
                     var studentIdx = 0;
@@ -66,7 +66,7 @@ namespace School_Management.API.Repositories
                     foreach(var room in roomGroups)
                     {
                         var studentsInRoom = studentIds.Skip(studentIdx)
-                                                       .Take(30)
+                                                       .Take(5)
                                                        .ToList();
                         if (!studentsInRoom.Any()) break;
                         foreach(var studentId in studentsInRoom)
@@ -80,7 +80,7 @@ namespace School_Management.API.Repositories
                             });
                             idNumberCounter++;
                         }
-                        studentIdx += 30;
+                        studentIdx += 5;
 
                     }
                 }
