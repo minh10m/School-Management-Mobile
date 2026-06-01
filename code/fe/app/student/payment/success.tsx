@@ -94,20 +94,25 @@ export default function PaymentSuccessScreen() {
 
       {/* Bottom Actions */}
       <View 
-        className="px-6 pb-6 gap-4"
+        className="px-6 pb-6 gap-3"
         style={{ paddingBottom: insets.bottom + 10 }}
       >
-        <TouchableOpacity className="bg-white border border-gray-100 py-4 rounded-[20px] flex-row items-center justify-center shadow-sm">
-          <Ionicons name="cloud-download-outline" size={20} color="#64748B" className="mr-2" />
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#64748B] text-sm">TẢI HÓA ĐƠN PDF</Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity 
-          className="bg-blue-600 py-5 rounded-[24px] items-center shadow-xl shadow-blue-200"
-          onPress={() => router.replace('/student/payment')}
-        >
-          <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-sm tracking-widest uppercase">Hoàn tất</Text>
-        </TouchableOpacity>
+        <View className="flex-row gap-3">
+          <TouchableOpacity 
+            className="flex-1 bg-white border border-gray-100 py-5 rounded-[24px] items-center shadow-sm"
+            onPress={() => router.replace('/home')}
+          >
+            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-[#1E293B] text-xs tracking-widest uppercase">Trang chủ</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            className="flex-[1.5] bg-blue-600 py-5 rounded-[24px] items-center shadow-xl shadow-blue-200"
+            onPress={() => router.replace('/student/payment')}
+          >
+            <Text style={{ fontFamily: 'Poppins-Bold' }} className="text-white text-xs tracking-widest uppercase">Hoàn tất</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
