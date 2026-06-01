@@ -80,15 +80,23 @@ builder.Services.Configure<FormOptions>(options =>
 //Cloudinary
 var cloudinaryConfig = builder.Configuration.GetSection("Cloudinary");
 
-var account = new Account(
-    cloudinaryConfig["CloudName"],
-    cloudinaryConfig["ApiKey"],
-    cloudinaryConfig["ApiSecret"]
-);
+if (!string.IsNullOrEmpty(cloudinaryConfig["CloudName"]) &&
+    !string.IsNullOrEmpty(cloudinaryConfig["ApiKey"]) &&
+    !string.IsNullOrEmpty(cloudinaryConfig["ApiSecret"]))
+{
+    var account = new Account(
+        cloudinaryConfig["CloudName"],
+        cloudinaryConfig["ApiKey"],
+        cloudinaryConfig["ApiSecret"]
+    );
 
-Cloudinary cloudinary = new Cloudinary(account);
-
-builder.Services.AddSingleton(cloudinary);
+    Cloudinary cloudinary = new Cloudinary(account);
+    builder.Services.AddSingleton(cloudinary);
+}
+else
+{
+    Console.WriteLine("Warning: Cloudinary configuration is missing or incomplete.");
+}
 
 
 //SignIR
