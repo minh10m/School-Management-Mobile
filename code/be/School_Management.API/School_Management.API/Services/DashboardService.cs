@@ -50,7 +50,7 @@ namespace School_Management.API.Services
             if (attendanceData.Any())
             {
                 var totalSessions = attendanceData.Count;
-                var presentCount = attendanceData.Count(x => x.Status == "Present");
+                var presentCount = attendanceData.Count(x => x.Status == "Có mặt" || x.Status == "Đi trễ");
                 response.Attendance = new AttendanceStats
                 {
                     OverallAttendanceRate = Math.Round((double)presentCount / totalSessions * 100, 2),
@@ -59,7 +59,7 @@ namespace School_Management.API.Services
                         .Select(g => new ClassAttendanceDto
                         {
                             ClassName = g.Key,
-                            AttendanceRate = Math.Round((double)g.Count(x => x.Status == "Present") / g.Count() * 100, 2)
+                            AttendanceRate = Math.Round((double)g.Count(x => x.Status == "Có mặt" || x.Status == "Đi trễ") / g.Count() * 100, 2)
                         })
                         .OrderBy(x => x.AttendanceRate)
                         .Take(5)
@@ -80,7 +80,7 @@ namespace School_Management.API.Services
 
             response.Academic = new AcademicStats
             {
-                AssignmentCompletionRate = await CalculateCompletionRate(),
+                AssignmentCompletionRate = await CalculateCompletionRate(schoolYear),
                 GradeDistribution = studentAverages
                     .GroupBy(v => GetGradeLabel(v))
                     .Select(g => new GradeDistributionDto
@@ -96,11 +96,23 @@ namespace School_Management.API.Services
             return response;
         }
 
-        private async Task<double> CalculateCompletionRate()
+        private async Task<double> CalculateCompletionRate(int schoolYear)
         {
-            var totalSubmissions = await context.Submission.CountAsync();
-            var gradedSubmissions = await context.Submission.CountAsync(x => x.Score != null);
-            return totalSubmissions > 0 ? Math.Round((double)gradedSubmissions / totalSubmissions * 100, 2) : 0;
+            var assignments = await context.Assignment
+                .Include(a => a.ClassYear)
+                .ThenInclude(c => c.StudentClassYears)
+                .Where(a => a.ClassYear != null && a.ClassYear.SchoolYear == schoolYear)
+                .ToListAsync();
+
+            if (!assignments.Any()) return 0;
+
+            var expectedSubmissions = assignments.Sum(a => a.ClassYear!.StudentClassYears.Count);
+            
+            var totalSubmissions = await context.Submission
+                .Where(s => s.Assignment != null && s.Assignment.ClassYear != null && s.Assignment.ClassYear.SchoolYear == schoolYear)
+                .CountAsync();
+
+            return expectedSubmissions > 0 ? Math.Round((double)totalSubmissions / expectedSubmissions * 100, 2) : 0;
         }
 
         private string GetGradeLabel(double score)
