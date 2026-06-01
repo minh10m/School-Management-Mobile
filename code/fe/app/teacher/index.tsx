@@ -97,10 +97,10 @@ export default function TeacherDashboard() {
       setLoadingHomeroom(true);
       setLoadingStats(true);
       const [hrRes, tcRes, schRes] = await Promise.all([
-        classYearService.getHomeroomClass(schoolYear),
+        classYearService.getHomeroomClass(schoolYear).catch(() => null),
         classYearService.getTeachingClasses({
           schoolYear: schoolYear.toString(),
-        }),
+        }).catch(() => []),
         scheduleService
           .getMyTeachingSchedule({
             Term: term,

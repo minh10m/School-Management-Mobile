@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Stack, router } from 'expo-router';
+import { Stack, router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect, useCallback } from 'react';
 import { feeDetailService } from '../../../services/fee.service';
@@ -29,9 +29,11 @@ export default function StudentFeesScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    loadFees();
-  }, [loadFees]);
+  useFocusEffect(
+    useCallback(() => {
+      loadFees();
+    }, [loadFees])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
