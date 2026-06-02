@@ -6,6 +6,7 @@ using School_Management.API.Models.Domain;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
+using Serilog.Enrichers.Span;
 using School_Management.API.Middlewares;
 using School_Management.API.Mappings;
 using School_Management.API.Services;
@@ -282,7 +283,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 // Health Checks
 builder.Services.AddHealthChecks()
-    .AddNpgsql(builder.Configuration.GetConnectionString("NeonConnectionString") ?? string.Empty);
+    .AddNpgSql(builder.Configuration.GetConnectionString("NeonConnectionString") ?? string.Empty);
 
 // OpenTelemetry Setup
 builder.Services.AddOpenTelemetry()
