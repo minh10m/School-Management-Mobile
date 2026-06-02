@@ -1,0 +1,25 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: "API Alerts"
+    folder: "Backend Alerts"
+    interval: 1m
+    rules:
+      - uid: api_high_error_rate
+        title: "High HTTP 5xx Error Rate"
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              expr: sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[1m])) > 10
+              refId: A
+        for: 2m
+        annotations:
+          summary: "High API Error Rate detected (more than 10 errors per sec)"
+          description: "The API is experiencing a high volume of 5xx server errors."
+        labels:
+          severity: critical
