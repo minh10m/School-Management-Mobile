@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'fe/**'
+      - 'code/fe/**'
   pull_request:
     branches:
       - main
     paths:
-      - 'fe/**'
+      - 'code/fe/**'
 
 jobs:
   lint-and-typecheck:
@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: fe
+        working-directory: code/fe
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: fe/package-lock.json
+          cache-dependency-path: code/fe/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -47,7 +47,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     defaults:
       run:
-        working-directory: fe
+        working-directory: code/fe
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: fe/package-lock.json
+          cache-dependency-path: code/fe/package-lock.json
 
       - name: Setup EAS CLI
         uses: expo/expo-github-action@v8
