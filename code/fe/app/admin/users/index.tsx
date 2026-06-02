@@ -25,7 +25,7 @@ const ROLE_COLORS: Record<string, { bg: string; text: string; label: string }> =
     Student: { bg: "#F0FDF4", text: "#22C55E", label: "Học sinh" },
   };
 
-const TABS = ["Tất cả", "Admin", "Teacher", "Student"];
+const TABS = ["All", "Admin", "Teacher", "Student"];
 const TAB_LABELS: Record<string, string> = {
   All: "Tất cả",
   Admin: "Quản trị",
