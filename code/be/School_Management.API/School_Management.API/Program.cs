@@ -23,7 +23,7 @@ using Google.Apis.Auth.OAuth2;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-
+using Npgsql;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -282,7 +282,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 // Health Checks
 builder.Services.AddHealthChecks()
-    .AddNpgsql(builder.Configuration.GetConnectionString("NeonConnectionString") ?? string.Empty, name: "database");
+    .AddNpgsql(builder.Configuration.GetConnectionString("NeonConnectionString") ?? string.Empty);
 
 // OpenTelemetry Setup
 builder.Services.AddOpenTelemetry()
