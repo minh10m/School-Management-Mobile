@@ -6,6 +6,7 @@ using School_Management.API.Models.Domain;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
+using Serilog.Enrichers.Span;
 using School_Management.API.Middlewares;
 using School_Management.API.Mappings;
 using School_Management.API.Services;
@@ -20,7 +21,10 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.Google;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
-
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using Npgsql;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -159,8 +163,10 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Add logger into our project
 var logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .Enrich.WithSpan()
     .WriteTo.Console()
-    //.WriteTo.File("Logs/School_Management.txt", rollingInterval: RollingInterval.Minute)
+    .WriteTo.File("Logs/School_Management.txt", rollingInterval: RollingInterval.Day)
     .MinimumLevel.Debug()
     .CreateLogger();
 
@@ -283,6 +289,30 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 
+// Health Checks
+builder.Services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("NeonConnectionString") ?? string.Empty);
+
+// OpenTelemetry Setup
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("School_Management.API"))
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddNpgsql()
+            .AddOtlpExporter();
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddRuntimeInstrumentation()
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter();
+    });
+
 var app = builder.Build();
 
 // Tự động chạy Migration khi khởi chạy ứng dụng để đồng bộ database
@@ -316,6 +346,7 @@ app.UseAuthorization();
 app.MapHub<PaymentHub>("/paymentHub");
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
 

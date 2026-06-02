@@ -1,0 +1,77 @@
+name: Frontend CI/CD (Expo)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'code/fe/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'code/fe/**'
+
+jobs:
+  lint-and-typecheck:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: code/fe
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: code/fe/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
+        continue-on-error: true # Optional: adjust based on strictness
+
+      - name: Type Check (TypeScript)
+        run: npx tsc --noEmit
+
+  eas-build:
+    name: Build via EAS
+    needs: lint-and-typecheck
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: code/fe
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: code/fe/package-lock.json
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Android App (APK)
+        run: eas build --platform android --profile preview --non-interactive
+        # Note: You need an eas.json file configured for "preview" profile.
+
+      # Uncomment to enable iOS build (requires Apple Developer account configured in Expo)
+      # - name: Build iOS App
+      #   run: eas build --platform ios --profile preview --non-interactive
