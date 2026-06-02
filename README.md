@@ -105,6 +105,11 @@ A scalable mobile application for managing students, courses, enrollments, and a
 - **Automated Billing:** Real-time tuition payment processing via SePay Webhooks.
 - **Optimized Media:** Profile pictures and documents managed via Cloudinary with on-the-fly resizing.
 
+### 5. Monitoring & Observability
+- **Logging:** Centralized structured logging implemented with **Serilog** for context enrichment and request tracking.
+- **Tracing & Metrics:** Deep integration with **OpenTelemetry** for full-stack observability (HTTP requests, Npgsql database queries, and runtime metrics).
+- **Health Checks:** Automated ASP.NET Core Health Checks to continuously monitor the PostgreSQL database and API availability.
+
 ---
 
 ## 🏗️ System Architecture
@@ -126,8 +131,27 @@ A scalable mobile application for managing students, courses, enrollments, and a
 ### 1. Backend
 The backend system is fully automated and deployed on **Azure App Service** via **GitHub Actions (CI/CD)**. No manual setup is required for the production environment.
 
+**Run Backend Locally (Development):**
+```bash
+cd code/be/School_Management.API/School_Management.API
+dotnet run
+```
 
-### 2. Mobile (Frontend)
+### 2. Monitoring & Observability (Local Stack)
+To monitor the system locally, we provide a complete observability stack using Docker (Prometheus, Grafana, Jaeger, and OTel Collector).
+
+**Prerequisites:** Docker & Docker Compose installed.
+
+```bash
+cd code/be
+docker-compose up -d
+```
+- **Grafana UI**: [http://localhost:3000](http://localhost:3000) (Credentials: `admin` / `admin`)
+- **Prometheus UI**: [http://localhost:9090](http://localhost:9090)
+- **Jaeger Tracing UI**: [http://localhost:16686](http://localhost:16686)
+
+
+### 3. Mobile (Frontend)
 Follow these steps to run the mobile application on your local machine:
 
 
