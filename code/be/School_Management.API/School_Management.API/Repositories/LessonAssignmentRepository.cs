@@ -1,4 +1,4 @@
-﻿using CloudinaryDotNet.Actions;
+using CloudinaryDotNet.Actions;
 using CloudinaryDotNet;
 using Microsoft.EntityFrameworkCore;
 using School_Management.API.Data;
@@ -23,9 +23,6 @@ namespace School_Management.API.Repositories
 
         public async Task<(LessonAssignmentResponse? data, string message)> CreateLessonAssignment(LessonAssignmentRequest request)
         {
-            using var transaction = await context.Database.BeginTransactionAsync();
-            try
-            {
                 var lesson = await context.Lesson.AsNoTracking().Where(x => x.Id == request.LessonId)
                                                             .Select(g => new { g.Id, g.LessonName })
                                                             .FirstOrDefaultAsync();
@@ -33,15 +30,6 @@ namespace School_Management.API.Repositories
 
                 var isExisted = await context.LessonAssignment.AnyAsync(x => x.LessonId == request.LessonId && x.Title.Trim().ToLower() == request.Title.Trim().ToLower());
                 if (isExisted) return (null, "CONFLICT_TITLE");
-
-                var maxOrder = await context.LessonAssignment.Where(x => x.LessonId == request.LessonId)
-                                                             .MaxAsync(x => (int?)x.OrderIndex) ?? 0;
-
-                if (request.OrderIndex > maxOrder + 1)
-                    request.OrderIndex = maxOrder + 1;
-
-                await context.LessonAssignment.Where(x => x.LessonId == request.LessonId && x.OrderIndex >= request.OrderIndex)
-                                              .ExecuteUpdateAsync(g => g.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
 
                 string fileUrl = "Không có dữ liệu";
                 string? fileTitle = request.FileTitle?.Trim() ?? null;
@@ -67,8 +55,21 @@ namespace School_Management.API.Repositories
                     fileUrl = uploadResult.SecureUrl.ToString();
                     if (string.IsNullOrEmpty(fileTitle)) fileTitle = request.File.FileName;
                     publicId = uploadResult.PublicId;
-
                 }
+
+                using var transaction = await context.Database.BeginTransactionAsync();
+                try
+                {
+                    var maxOrder = await context.LessonAssignment.Where(x => x.LessonId == request.LessonId)
+                                                                 .MaxAsync(x => (int?)x.OrderIndex) ?? 0;
+
+                    if (request.OrderIndex > maxOrder + 1)
+                        request.OrderIndex = maxOrder + 1;
+
+                    await context.LessonAssignment.Where(x => x.LessonId == request.LessonId && x.OrderIndex >= request.OrderIndex)
+                                                  .ExecuteUpdateAsync(g => g.SetProperty(l => l.OrderIndex, l => l.OrderIndex + 1));
+
+                    // File upload has been moved outside transaction
 
                 var lessonAssignment = new LessonAssignment
                 {
@@ -103,6 +104,20 @@ namespace School_Management.API.Repositories
             catch (Exception)
             {
                 await transaction.RollbackAsync();
+                
+                // Rollback uploaded file if DB save failed
+                if (!string.IsNullOrWhiteSpace(publicId))
+                {
+                    try
+                    {
+                        await cloudinary.DestroyAsync(new DeletionParams(publicId) { ResourceType = ResourceType.Raw });
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to delete uploaded assignment file from Cloudinary after DB transaction rollback");
+                    }
+                }
+
                 throw;
             }
             
