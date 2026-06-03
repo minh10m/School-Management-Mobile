@@ -65,7 +65,8 @@ TestResults/
 ScaffoldingReadMe.txt
 
 # Local secrets
-appsettings.Development.json
+appsettings.json
+appsettings.*.json
 
 # Firebase sdk
 firebase.json
