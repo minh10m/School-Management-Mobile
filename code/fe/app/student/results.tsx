@@ -288,7 +288,7 @@ function ResultRow({
   });
 
   const avgValue = useMemo(() => {
-    if (item.average !== undefined && item.average !== null) return item.average;
+    if (item.averageSubject !== undefined && item.averageSubject !== null) return item.averageSubject;
     
     let totalScore = 0;
     let totalWeight = 0;
@@ -299,7 +299,7 @@ function ResultRow({
     });
     
     return totalWeight > 0 ? totalScore / totalWeight : 0;
-  }, [item.average, item.detailResults]);
+  }, [item.averageSubject, item.detailResults]);
 
   const avgColor =
     avgValue >= 8
