@@ -57,8 +57,13 @@ apiClient.interceptors.response.use(
     const customStatus = response.data?.statusCode;
     // Handle enveloped error responses
     if (customStatus && customStatus >= 50400) {
+      console.log('Backend error response data:', JSON.stringify(response.data, null, 2));
+      
+      // The message could be in response.data.message or response.data.data.message
+      const errorMessage = response.data?.message || response.data?.data?.message || "Lỗi API";
+      
       // Create a fake AxiosError to trigger the catch block below or in services
-      const error: any = new Error(response.data?.data?.message || "Lỗi API");
+      const error: any = new Error(errorMessage);
       error.response = {
         ...response,
         status: customStatus - 50000, // Revert back to original HTTP code e.g. 401, 404, 500
