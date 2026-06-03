@@ -54,6 +54,24 @@ apiClient.interceptors.request.use(
 // Response Interceptor: Handle 401 & Refresh Token
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
+    const customStatus = response.data?.statusCode;
+    // Handle enveloped error responses
+    if (customStatus && customStatus >= 50400) {
+      // Create a fake AxiosError to trigger the catch block below or in services
+      const error: any = new Error(response.data?.data?.message || "Lỗi API");
+      error.response = {
+        ...response,
+        status: customStatus - 50000, // Revert back to original HTTP code e.g. 401, 404, 500
+        data: response.data.data
+      };
+      error.config = response.config;
+      return Promise.reject(error);
+    }
+    
+    // Return only the inner data if it's enveloped
+    if (response.data && response.data.hasOwnProperty('statusCode')) {
+       response.data = response.data.data;
+    }
     return response;
   },
   async (error: AxiosError) => {
