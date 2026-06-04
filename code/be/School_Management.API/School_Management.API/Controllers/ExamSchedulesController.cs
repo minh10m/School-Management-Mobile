@@ -43,6 +43,12 @@ namespace School_Management.API.Controllers
             {
                 return BadRequest(new { success = false, message = "Vui lòng chọn file Excel để upload." });
             }
+
+            var fileExtension = System.IO.Path.GetExtension(file.FileName).ToLower();
+            if (fileExtension != ".xls" && fileExtension != ".xlsx")
+            {
+                return BadRequest(new { success = false, message = "Định dạng file không hợp lệ. Vui lòng chọn file Excel (.xls, .xlsx)." });
+            }
             var result = await examScheduleService.CreateExamScheduleDetail(file, examScheduleId);
             return StatusCode(201, new
             {

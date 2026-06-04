@@ -13,11 +13,11 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState, useEffect, useCallback } from "react";
 import { submissionService } from "../../../services/submission.service";
-import { TeacherSubmissionListResponse } from "../../../types/submission";
+import { SubmissionResponse } from "../../../types/submission";
 
 export default function TeacherSubmissions() {
   const { assignmentId } = useLocalSearchParams<{ assignmentId: string }>();
-  const [submissions, setSubmissions] = useState<TeacherSubmissionListResponse[]>([]);
+  const [submissions, setSubmissions] = useState<SubmissionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -28,8 +28,8 @@ export default function TeacherSubmissions() {
     }
     try {
       setLoading(true);
-      const data = await submissionService.getSubmissionsByAssignment({
-        assignmentId,
+      const data = await submissionService.getSubmissions({
+        AssignmentId: assignmentId,
       });
       setSubmissions(data);
     } catch (error) {

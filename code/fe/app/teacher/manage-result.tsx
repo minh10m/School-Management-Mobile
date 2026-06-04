@@ -167,7 +167,7 @@ export default function ManageStudentResult() {
     return totalWeight > 0 ? totalScore / totalWeight : undefined;
   }, [results?.detailResults]);
 
-  const averageValue = results?.average ?? calculatedAverage;
+  const averageValue = results?.averageSubject ?? calculatedAverage;
   const averageGradeMeta = getAverageGradeMeta(averageValue);
   const scoreCount = results?.detailResults?.length ?? 0;
 

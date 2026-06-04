@@ -1,4 +1,4 @@
-﻿using FirebaseAdmin.Auth;
+using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Identity;
 using School_Management.API.Exceptions;
 using School_Management.API.Models.Domain;
@@ -66,7 +66,7 @@ namespace School_Management.API.Services
             if(!await userManager.CheckPasswordAsync(user, loginRequest.PassWord))
             {
                 await userManager.AccessFailedAsync(user);
-                throw new UnauthorizedException("Người dùng không tồn tại");
+                throw new UnauthorizedException("Tên đăng nhập hoặc mật khẩu không chính xác");
             }
 
             await userManager.ResetAccessFailedCountAsync(user);

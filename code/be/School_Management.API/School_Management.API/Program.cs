@@ -332,6 +332,7 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseMiddleware<ResponseWrapperMiddleware>();
 app.UseMiddleware<ExceptionHandlerMiddlewares>();
 
 app.UseHttpsRedirection();

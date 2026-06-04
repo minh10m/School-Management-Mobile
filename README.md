@@ -63,7 +63,7 @@ A scalable mobile application for managing students, courses, enrollments, and a
 - **AI Integration:** Context-aware chatbot using Google Gemini API and Semantic Kernel with Retrieval-Augmented Generation (RAG) to query system data.
 - **Payment Integration:** SePay gateway with automated webhook verification for tuition payments.
 - **Media Management:** Integrated Cloudinary for optimized image storage and processing.
-- **Security & DevOps:** JWT authentication, RBAC, Cloudflare WAF, and automated CI/CD via GitHub Actions deployed on Azure.
+- **Security & DevOps:** JWT authentication, RBAC, Cloudflare WAF, Envelope Response Pattern (Obfuscated HTTP Status Codes), and automated CI/CD via GitHub Actions deployed on Azure.
 
 ---
 
@@ -109,6 +109,10 @@ A scalable mobile application for managing students, courses, enrollments, and a
 - **Logging:** Centralized structured logging implemented with **Serilog** for context enrichment and request tracking.
 - **Tracing & Metrics:** Deep integration with **OpenTelemetry** for full-stack observability (HTTP requests, Npgsql database queries, and runtime metrics).
 - **Health Checks:** Automated ASP.NET Core Health Checks to continuously monitor the PostgreSQL database and API availability.
+
+### 6. Security & Environment Architecture
+- **Environment Separation:** Strict separation of Development and Production configurations (`appsettings.Development.json` vs `appsettings.Production.json`) with corresponding Docker Compose overrides.
+- **Status Code Obfuscation (Envelope Pattern):** To mitigate automated API vulnerability scanning and profiling, all API endpoints return `HTTP 200 OK` at the network layer. The actual application status codes are mapped and embedded securely inside the JSON payload (e.g., `200` &rarr; `50200`, `404` &rarr; `50404`). The frontend Axios client is configured via interceptors to transparently unwrap and handle these custom codes without affecting application logic.
 
 ---
 
