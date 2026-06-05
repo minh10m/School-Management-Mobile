@@ -12,7 +12,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "rate(http_server_request_duration_seconds_count[1m])",
+          "expr": "rate(school_api_http_server_request_duration_seconds_count[1m])",
           "legendFormat": "Requests / sec",
           "refId": "A"
         }
@@ -20,24 +20,24 @@
     },
     {
       "type": "timeseries",
-      "title": "HTTP 5xx Errors",
+      "title": "HTTP 50xxx Custom Errors",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "targets": [
         {
-          "expr": "rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[1m])",
-          "legendFormat": "Errors / sec",
+          "expr": "rate(school_api_custom_error_count_total{custom_status_code=~\"50...\"}[1m])",
+          "legendFormat": "Errors / sec ({{custom_status_code}})",
           "refId": "A"
         }
       ]
     },
     {
+      "title": "Thread Pool Threads",
       "type": "timeseries",
-      "title": "CPU Usage",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "targets": [
         {
-          "expr": "process_cpu_seconds_total",
-          "legendFormat": "CPU Time",
+          "expr": "school_api_process_runtime_dotnet_thread_pool_threads_count",
+          "legendFormat": "Threads Count",
           "refId": "A"
         }
       ]
@@ -48,7 +48,7 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "targets": [
         {
-          "expr": "process_memory_working_set",
+          "expr": "school_api_process_runtime_dotnet_gc_heap_size_bytes",
           "legendFormat": "Working Set",
           "refId": "A"
         }

@@ -48,6 +48,13 @@ namespace School_Management.API.Middlewares
                 // Create custom status code (e.g., 200 -> 50200, 404 -> 50404)
                 var customStatusCode = 50000 + originalStatusCode;
 
+                if (originalStatusCode >= 400)
+                {
+                    _logger.LogInformation($"Adding custom metric for status code: {customStatusCode}");
+                    School_Management.API.AppMetrics.CustomErrors.Add(1, 
+                        new KeyValuePair<string, object>("custom_status_code", customStatusCode.ToString()));
+                }
+
                 object data = null;
                 if (!string.IsNullOrWhiteSpace(responseBody))
                 {

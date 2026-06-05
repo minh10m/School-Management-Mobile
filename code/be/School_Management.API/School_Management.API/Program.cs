@@ -307,6 +307,9 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics =>
     {
         metrics
+            .AddMeter("Microsoft.AspNetCore.Hosting")
+            .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
+            .AddMeter("School_Management.API")
             .AddRuntimeInstrumentation()
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
