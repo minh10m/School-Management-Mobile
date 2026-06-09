@@ -5,6 +5,10 @@
   "timezone": "browser",
   "schemaVersion": 36,
   "refresh": "5s",
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
   "panels": [
     {
       "type": "timeseries",
