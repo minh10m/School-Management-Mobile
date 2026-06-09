@@ -26,7 +26,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000" # Web UI
+      - "3005:3000" # Web UI
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
