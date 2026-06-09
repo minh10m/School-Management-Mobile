@@ -11,6 +11,7 @@ using School_Management.API.Middlewares;
 using School_Management.API.Mappings;
 using School_Management.API.Services;
 using School_Management.API.Repositories;
+using School_Management.API.Logging;
 using Microsoft.OpenApi.Models;
 using School_Management.API.ErrorMessageConfiguration;
 using CloudinaryDotNet;
@@ -167,6 +168,10 @@ var logger = new LoggerConfiguration()
     .Enrich.WithSpan()
     .WriteTo.Console()
     .WriteTo.File("Logs/School_Management.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.Sink(new S0larMonitoringSink(
+        builder.Configuration["SolarMonitor:ApiUrl"] ?? "http://localhost:3000/api/v1/logs", 
+        builder.Configuration["SolarMonitor:ApiKey"] ?? "d04378c282342c3fd408978c6a4897ef533b541cbe3d0e306799f0f975024a7f"
+    ))
     .MinimumLevel.Debug()
     .CreateLogger();
 
