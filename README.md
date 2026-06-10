@@ -4,6 +4,8 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ---
 
+## Link demo : https://www.youtube.com/watch?v=UiBqcc9TUSE
+
 ## 📱 Demo Screenshots
 ### Admin screen 
 <p align="left">
