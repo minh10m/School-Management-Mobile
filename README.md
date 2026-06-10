@@ -4,7 +4,8 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ---
 
-## Link demo : https://www.youtube.com/watch?v=UiBqcc9TUSE
+## <img src="https://github.com/user-attachments/assets/754c2489-7627-465b-b67f-96d20d98b228" width="26" height="26" align="center">  Demo Video:
+https://www.youtube.com/watch?v=UiBqcc9TUSE
 
 ## 📱 Demo Screenshots
 ### Admin screen 
