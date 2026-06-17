@@ -1,32 +1,54 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
   Alert,
   Animated,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import * as DocumentPicker from "expo-document-picker";
 import { aiChatService } from "../services/aiChat.service";
-import { useAuthStore } from "../store/authStore";
 
-// Inline types to avoid stale module resolution
 const AI_AVATAR = require("../assets/images/AI-Assist.png");
+const STREAM_TICK_MS = 12;
+const STREAM_SCROLL_EVERY_TICKS = 6;
+
+const ADMIN_CHARS_PER_TICK = 25; // cố định, ~6666 chars/giây
+
+const USER_MIN_STREAM_CHARS_PER_TICK = 2;
+const USER_MAX_STREAM_CHARS_PER_TICK = 20;
+const USER_TARGET_STREAM_DURATION_MS = 2500;
+
+function getStreamCharsPerTick(contentLength: number, role: "Student" | "Teacher" | "Admin") {
+  if (role === "Admin") return ADMIN_CHARS_PER_TICK;
+
+  const targetTicks = USER_TARGET_STREAM_DURATION_MS / STREAM_TICK_MS;
+  return Math.min(
+    USER_MAX_STREAM_CHARS_PER_TICK,
+    Math.max(USER_MIN_STREAM_CHARS_PER_TICK, Math.ceil(contentLength / targetTicks)),
+  );
+}
 
 interface ChatMessage {
   id: string;
   content: string;
   role: "USER" | "AI";
+  createdAt: string;
+}
+
+interface ActiveStream {
+  id: string;
+  content: string;
   createdAt: string;
 }
 
@@ -86,7 +108,6 @@ function formatMessage(content: string) {
     const trimmed = line.trim();
     if (!trimmed) return <View key={i} style={{ height: 8 }} />;
 
-    // Bullet points
     if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
       return (
         <View key={i} style={{ flexDirection: "row", marginBottom: 4, paddingLeft: 4 }}>
@@ -145,12 +166,38 @@ export default function AIChatScreen({ role }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [streamingMessage, setStreamingMessage] = useState<ChatMessage | null>(null);
   const flatListRef = useRef<FlatList>(null);
   const dot1 = useRef(new Animated.Value(0.3)).current;
   const dot2 = useRef(new Animated.Value(0.3)).current;
   const dot3 = useRef(new Animated.Value(0.3)).current;
+  const streamIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const activeStreamRef = useRef<ActiveStream | null>(null);
 
-  // Animated typing dots
+  const clearActiveStream = useCallback((complete = false) => {
+    if (streamIntervalRef.current) {
+      clearInterval(streamIntervalRef.current);
+      streamIntervalRef.current = null;
+    }
+
+    if (complete && activeStreamRef.current) {
+      const { id, content, createdAt } = activeStreamRef.current;
+      setMessages((prev) => [
+        ...prev,
+        { id, content, createdAt, role: "AI" },
+      ]);
+    }
+
+    activeStreamRef.current = null;
+    setStreamingMessage(null);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearActiveStream();
+    };
+  }, [clearActiveStream]);
+
   useEffect(() => {
     if (!isLoading) return;
     const animate = (dot: Animated.Value, delay: number) =>
@@ -208,6 +255,7 @@ export default function AIChatScreen({ role }: Props) {
 
   useEffect(() => {
     if (messages.length > 0 && !isLoadingHistory) {
+      if (activeStreamRef.current) return;
       setTimeout(
         () => flatListRef.current?.scrollToEnd({ animated: true }),
         100,
@@ -225,6 +273,8 @@ export default function AIChatScreen({ role }: Props) {
         return;
       }
 
+      clearActiveStream(true);
+
       const userMsg: ChatMessage = {
         id: `user-${Date.now()}`,
         content: question,
@@ -237,15 +287,43 @@ export default function AIChatScreen({ role }: Props) {
 
       try {
         const res = await aiChatService.chat({ userQuestion: question });
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `ai-${Date.now()}`,
-            content: res.aiResponse,
-            role: "AI",
-            createdAt: new Date().toISOString(),
-          },
-        ]);
+        const aiMessageId = `ai-${Date.now()}`;
+        const fullContent = res.aiResponse || "";
+        const createdAt = new Date().toISOString();
+        const initialStreamingMessage: ChatMessage = {
+          id: aiMessageId,
+          content: "",
+          role: "AI",
+          createdAt,
+        };
+
+        let currentIdx = 0;
+        let tickCount = 0;
+        const charsPerTick = getStreamCharsPerTick(fullContent.length, role);
+        activeStreamRef.current = {
+          id: aiMessageId,
+          content: fullContent,
+          createdAt,
+        };
+        setStreamingMessage(initialStreamingMessage);
+
+        streamIntervalRef.current = setInterval(() => {
+          currentIdx += charsPerTick;
+          tickCount++;
+          setStreamingMessage({
+            ...initialStreamingMessage,
+            content: fullContent.slice(0, currentIdx),
+          });
+
+          if (tickCount % STREAM_SCROLL_EVERY_TICKS === 0) {
+            flatListRef.current?.scrollToEnd({ animated: false });
+          }
+
+          if (currentIdx >= fullContent.length) {
+            clearActiveStream(true);
+            flatListRef.current?.scrollToEnd({ animated: true });
+          }
+        }, STREAM_TICK_MS);
       } catch {
         setMessages((prev) => [
           ...prev,
@@ -261,7 +339,7 @@ export default function AIChatScreen({ role }: Props) {
         setIsLoading(false);
       }
     },
-    [input, isLoading, role],
+    [clearActiveStream, input, isLoading, role],
   );
 
   const handleUpload = async () => {
@@ -337,7 +415,7 @@ export default function AIChatScreen({ role }: Props) {
       return (
         <View style={styles.aiBubbleWrap}>
           <View style={styles.aiAvatar}>
-            <Image className="rounded-full"
+            <Image
               source={AI_AVATAR}
               style={{ width: "100%", height: "100%", borderRadius: 9999 }}
               contentFit="cover"
@@ -364,7 +442,7 @@ export default function AIChatScreen({ role }: Props) {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <View style={styles.headerAvatar}>
-            <Image className="rounded-full"
+            <Image
               source={AI_AVATAR}
               style={{ width: "100%", height: "100%" }}
               contentFit="cover"
@@ -378,7 +456,7 @@ export default function AIChatScreen({ role }: Props) {
             </View>
           </View>
         </View>
-        
+
         {messages.length > 0 && (
           <TouchableOpacity
             onPress={handleDeleteHistory}
@@ -429,13 +507,16 @@ export default function AIChatScreen({ role }: Props) {
               styles.messageList,
               showEmpty && { flex: 1, justifyContent: "center" },
             ]}
-            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            onContentSizeChange={() => {
+              if (activeStreamRef.current) return;
+              flatListRef.current?.scrollToEnd({ animated: true });
+            }}
             showsVerticalScrollIndicator={true}
             showsHorizontalScrollIndicator={true}
             ListEmptyComponent={
               <View style={styles.emptyState}>
                 <View style={styles.emptyIcon}>
-                  <Image className="rounded-full"
+                  <Image
                     source={AI_AVATAR}
                     style={{ width: "100%", height: "100%", borderRadius: 9999 }}
                     contentFit="cover"
@@ -467,10 +548,30 @@ export default function AIChatScreen({ role }: Props) {
               </View>
             }
             ListFooterComponent={
-              isLoading ? (
+              streamingMessage ? (
                 <View style={styles.aiBubbleWrap}>
                   <View style={styles.aiAvatar}>
-                    <Image className="rounded-full"
+                    <Image
+                      source={AI_AVATAR}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: 9999,
+                      }}
+                      contentFit="cover"
+                    />
+                  </View>
+                  <View style={styles.aiBubble}>
+                    {formatMessage(streamingMessage.content)}
+                    <Text style={styles.timeAI}>
+                      {timeStr(streamingMessage.createdAt)}
+                    </Text>
+                  </View>
+                </View>
+              ) : isLoading ? (
+                <View style={styles.aiBubbleWrap}>
+                  <View style={styles.aiAvatar}>
+                    <Image
                       source={AI_AVATAR}
                       style={{
                         width: "100%",
@@ -507,7 +608,7 @@ export default function AIChatScreen({ role }: Props) {
         )}
 
         {/* Quick suggestions when chat has messages */}
-        {messages.length > 0 && !isLoading && (
+        {messages.length > 0 && !isLoading && !streamingMessage && (
           <View style={styles.quickSuggest}>
             <FlatList
               data={config.suggestions}
@@ -600,7 +701,6 @@ export default function AIChatScreen({ role }: Props) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFFFF" },
-  // Header
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -654,12 +754,9 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
   uploadBtn: { padding: 8 },
-  // Center loading
   center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 8 },
   loadingText: { fontFamily: "Poppins-Regular", fontSize: 13 },
-  // Messages
   messageList: { padding: 16, paddingBottom: 8, gap: 12 },
-  // User bubble
   userBubbleWrap: { alignItems: "flex-end", marginBottom: 4 },
   userBubble: {
     maxWidth: "80%",
@@ -681,7 +778,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: "right",
   },
-  // AI bubble
   aiBubbleWrap: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -712,9 +808,7 @@ const styles = StyleSheet.create({
     color: "#AAAAAA",
     marginTop: 6,
   },
-  // Typing dots
   typingDot: { width: 8, height: 8, borderRadius: 4 },
-  // Empty state
   emptyState: { alignItems: "center", paddingHorizontal: 24, paddingTop: 20 },
   emptyIcon: {
     width: 72,
@@ -742,7 +836,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   chipText: { fontFamily: "Poppins-Medium", fontSize: 12 },
-  // Quick suggest bar
   quickSuggest: {
     paddingVertical: 8,
     borderTopWidth: 1,
@@ -755,7 +848,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   quickChipText: { fontFamily: "Poppins-Medium", fontSize: 11 },
-  // Input bar
   inputBar: {
     flexDirection: "row",
     alignItems: "center",
