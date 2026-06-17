@@ -175,7 +175,7 @@ Follow these steps to run the mobile application on your local machine:
 
 ```bash
 # Backend API URL
-API_URL=[https://api.tuan-minh-dev-soc.io.vn/api](https://api.tuan-minh-dev-soc.io.vn/api)
+API_URL=[https://student-management-api-bbfdh3f8agg0gehg.indonesiacentral-01.azurewebsites.net/api](https://student-management-api-bbfdh3f8agg0gehg.indonesiacentral-01.azurewebsites.net/api)
 
 # Payment Integration
 SEPAY_API_KEY=YOUR_SEPAY_API_KEY_HERE
