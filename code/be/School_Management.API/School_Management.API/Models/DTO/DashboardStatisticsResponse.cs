@@ -9,6 +9,8 @@ namespace School_Management.API.Models.DTO
         public int TotalTeachers { get; set; }
         public int TotalClasses { get; set; }
         public int TotalSubjects { get; set; }
+        public int TotalUsers { get; set; }
+        public int TotalEvents { get; set; }
         
         public FinanceStats Finance { get; set; }
         public AttendanceStats Attendance { get; set; }

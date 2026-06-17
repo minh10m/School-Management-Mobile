@@ -15,11 +15,11 @@ groups:
               from: 300
               to: 0
             model:
-              expr: sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[1m])) > 10
+              expr: sum(rate(school_api_custom_error_count_total{custom_status_code=~"50..."}[1m])) > 10
               refId: A
         for: 2m
         annotations:
-          summary: "High API Error Rate detected (more than 10 errors per sec)"
-          description: "The API is experiencing a high volume of 5xx server errors."
+          summary: "High API Error Rate detected (more than 10 custom 50xxx errors per sec)"
+          description: "The API is experiencing a high volume of custom 50xxx server errors."
         labels:
           severity: critical

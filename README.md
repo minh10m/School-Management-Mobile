@@ -4,6 +4,9 @@ A scalable mobile application for managing students, courses, enrollments, and a
 
 ---
 
+## <img src="https://github.com/user-attachments/assets/754c2489-7627-465b-b67f-96d20d98b228" width="26" height="26" align="center">  Demo Video:
+https://www.youtube.com/watch?v=UiBqcc9TUSE
+
 ## 📱 Demo Screenshots
 ### Admin screen 
 <p align="left">
@@ -172,7 +175,7 @@ Follow these steps to run the mobile application on your local machine:
 
 ```bash
 # Backend API URL
-API_URL=[https://api.tuan-minh-dev-soc.io.vn/api](https://api.tuan-minh-dev-soc.io.vn/api)
+API_URL=[https://student-management-api-bbfdh3f8agg0gehg.indonesiacentral-01.azurewebsites.net/api](https://student-management-api-bbfdh3f8agg0gehg.indonesiacentral-01.azurewebsites.net/api)
 
 # Payment Integration
 SEPAY_API_KEY=YOUR_SEPAY_API_KEY_HERE

@@ -21,36 +21,54 @@ namespace School_Management.API.Services
         {
             var response = new DashboardStatisticsResponse();
 
-            // 1. Basic Counts
+            // 1. Basic Counts (global — not filtered by year)
             response.TotalStudents = await context.Student.CountAsync();
             response.TotalTeachers = await context.Teacher.CountAsync();
-            response.TotalClasses = await context.ClassYear.Where(x => x.SchoolYear == schoolYear).CountAsync();
             response.TotalSubjects = await context.Subject.CountAsync();
+            response.TotalUsers    = await context.Users.CountAsync();
+            response.TotalEvents   = await context.Event.CountAsync();
+
+            // Classes: try current year first, fall back to all if none found
+            response.TotalClasses = await context.ClassYear
+                .Where(x => x.SchoolYear == schoolYear).CountAsync();
+            if (response.TotalClasses == 0)
+                response.TotalClasses = await context.ClassYear.CountAsync();
 
             // 2. Finance Stats
             var feeDetails = await context.FeeDetail
                 .Where(x => x.SchoolYear == schoolYear)
                 .ToListAsync();
 
+            // Fallback: if no fee data for this year, pull all years
+            if (!feeDetails.Any())
+                feeDetails = await context.FeeDetail.ToListAsync();
+
             response.Finance = new FinanceStats
             {
-                TotalExpectedRevenue = feeDetails.Sum(x => x.AmountDue),
-                TotalCollectedRevenue = feeDetails.Sum(x => x.AmountPaid),
-                TotalPendingRevenue = feeDetails.Sum(x => x.AmountDue - x.AmountPaid),
+                TotalExpectedRevenue    = feeDetails.Sum(x => x.AmountDue),
+                TotalCollectedRevenue   = feeDetails.Sum(x => x.AmountPaid),
+                TotalPendingRevenue     = feeDetails.Sum(x => x.AmountDue - x.AmountPaid),
                 StudentsWithOverdueFees = feeDetails.Count(x => x.Status != "Paid" && x.AmountDue > x.AmountPaid)
             };
 
             // 3. Attendance Stats
             var attendanceData = await context.Attendance
                 .Include(x => x.StudentClassYear)
-                .ThenInclude(scy => scy.ClassYear)
+                    .ThenInclude(scy => scy.ClassYear)
                 .Where(x => x.StudentClassYear.SchoolYear == schoolYear)
                 .ToListAsync();
+
+            // Fallback: if empty for this year, use all records
+            if (!attendanceData.Any())
+                attendanceData = await context.Attendance
+                    .Include(x => x.StudentClassYear)
+                        .ThenInclude(scy => scy.ClassYear)
+                    .ToListAsync();
 
             if (attendanceData.Any())
             {
                 var totalSessions = attendanceData.Count;
-                var presentCount = attendanceData.Count(x => x.Status == "Có mặt" || x.Status == "Đi trễ");
+                var presentCount  = attendanceData.Count(x => x.Status == "Có mặt" || x.Status == "Đi trễ");
                 response.Attendance = new AttendanceStats
                 {
                     OverallAttendanceRate = Math.Round((double)presentCount / totalSessions * 100, 2),
@@ -58,7 +76,7 @@ namespace School_Management.API.Services
                         .GroupBy(x => x.StudentClassYear.ClassYear.ClassName)
                         .Select(g => new ClassAttendanceDto
                         {
-                            ClassName = g.Key,
+                            ClassName      = g.Key,
                             AttendanceRate = Math.Round((double)g.Count(x => x.Status == "Có mặt" || x.Status == "Đi trễ") / g.Count() * 100, 2)
                         })
                         .OrderBy(x => x.AttendanceRate)
@@ -68,7 +86,11 @@ namespace School_Management.API.Services
             }
             else
             {
-                response.Attendance = new AttendanceStats { OverallAttendanceRate = 0, TopAbsentClasses = new List<ClassAttendanceDto>() };
+                response.Attendance = new AttendanceStats
+                {
+                    OverallAttendanceRate = 0,
+                    TopAbsentClasses = new List<ClassAttendanceDto>()
+                };
             }
 
             // 4. Academic Stats
@@ -78,6 +100,13 @@ namespace School_Management.API.Services
                 .Select(g => (double)g.Average(x => x.Value))
                 .ToListAsync();
 
+            // Fallback
+            if (!studentAverages.Any())
+                studentAverages = await context.Result
+                    .GroupBy(x => x.StudentId)
+                    .Select(g => (double)g.Average(x => x.Value))
+                    .ToListAsync();
+
             response.Academic = new AcademicStats
             {
                 AssignmentCompletionRate = await CalculateCompletionRate(schoolYear),
@@ -86,7 +115,7 @@ namespace School_Management.API.Services
                     .Select(g => new GradeDistributionDto
                     {
                         GradeLabel = g.Key,
-                        Count = g.Count()
+                        Count      = g.Count()
                     }).ToList()
             };
 
@@ -104,13 +133,27 @@ namespace School_Management.API.Services
                 .Where(a => a.ClassYear != null && a.ClassYear.SchoolYear == schoolYear)
                 .ToListAsync();
 
+            // Fallback to all years if no assignments found for this school year
+            if (!assignments.Any())
+                assignments = await context.Assignment
+                    .Include(a => a.ClassYear)
+                    .ThenInclude(c => c.StudentClassYears)
+                    .Where(a => a.ClassYear != null)
+                    .ToListAsync();
+
             if (!assignments.Any()) return 0;
 
             var expectedSubmissions = assignments.Sum(a => a.ClassYear!.StudentClassYears.Count);
-            
+
             var totalSubmissions = await context.Submission
                 .Where(s => s.Assignment != null && s.Assignment.ClassYear != null && s.Assignment.ClassYear.SchoolYear == schoolYear)
                 .CountAsync();
+
+            // Fallback total submissions
+            if (totalSubmissions == 0)
+                totalSubmissions = await context.Submission
+                    .Where(s => s.Assignment != null && s.Assignment.ClassYear != null)
+                    .CountAsync();
 
             return expectedSubmissions > 0 ? Math.Round((double)totalSubmissions / expectedSubmissions * 100, 2) : 0;
         }

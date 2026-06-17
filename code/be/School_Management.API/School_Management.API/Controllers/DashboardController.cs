@@ -18,8 +18,10 @@ namespace School_Management.API.Controllers
         }
 
         [HttpGet("stats")]
-        public async Task<IActionResult> GetDashboardStats([FromQuery] int schoolYear)
+        public async Task<IActionResult> GetDashboardStats([FromQuery] int schoolYear = 0)
         {
+            if (schoolYear == 0)
+                schoolYear = DateTime.Now.Year;
             var result = await dashboardService.GetAdminDashboardStatsAsync(schoolYear);
             return Ok(result);
         }
