@@ -64,10 +64,12 @@ namespace School_Management.API.Repositories
                 {
                     query = (request.IsAscending)
                         ? query.OrderBy(x => x.StudentClassYears
+                            .Where(scy => (request.SchoolYear.HasValue && request.SchoolYear != 0) ? scy.ClassYear.SchoolYear == request.SchoolYear : true)
                             .OrderByDescending(scy => scy.ClassYear.SchoolYear)
                             .Select(scy => scy.ClassYear.ClassName)
                             .FirstOrDefault())
                         : query.OrderByDescending(x => x.StudentClassYears
+                            .Where(scy => (request.SchoolYear.HasValue && request.SchoolYear != 0) ? scy.ClassYear.SchoolYear == request.SchoolYear : true)
                             .OrderByDescending(scy => scy.ClassYear.SchoolYear)
                             .Select(scy => scy.ClassYear.ClassName)
                             .FirstOrDefault());
@@ -76,10 +78,12 @@ namespace School_Management.API.Repositories
                 {
                     query = (request.IsAscending)
                         ? query.OrderBy(x => x.StudentClassYears
+                            .Where(scy => (request.SchoolYear.HasValue && request.SchoolYear != 0) ? scy.ClassYear.SchoolYear == request.SchoolYear : true)
                             .OrderByDescending(scy => scy.ClassYear.SchoolYear)
                             .Select(scy => scy.ClassYear.Grade)
                             .FirstOrDefault())
                         : query.OrderByDescending(x => x.StudentClassYears
+                            .Where(scy => (request.SchoolYear.HasValue && request.SchoolYear != 0) ? scy.ClassYear.SchoolYear == request.SchoolYear : true)
                             .OrderByDescending(scy => scy.ClassYear.SchoolYear)
                             .Select(scy => scy.ClassYear.Grade)
                             .FirstOrDefault());
@@ -102,20 +106,30 @@ namespace School_Management.API.Repositories
                .Where(scy => scy.ClassYearId == request.ClassYearId)
                .Select(scy => scy.ClassYear.ClassName)
                .FirstOrDefault()
-            : x.StudentClassYears
-               .OrderByDescending(scy => scy.ClassYear.SchoolYear)
-               .Select(scy => scy.ClassYear.ClassName)
-               .FirstOrDefault(),
+            : (request.SchoolYear.HasValue && request.SchoolYear != 0)
+               ? x.StudentClassYears
+                  .Where(scy => scy.ClassYear.SchoolYear == request.SchoolYear)
+                  .Select(scy => scy.ClassYear.ClassName)
+                  .FirstOrDefault()
+               : x.StudentClassYears
+                  .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+                  .Select(scy => scy.ClassYear.ClassName)
+                  .FirstOrDefault(),
 
                     Grade = (request.ClassYearId != null && request.ClassYearId != Guid.Empty)
             ? x.StudentClassYears
                .Where(scy => scy.ClassYearId == request.ClassYearId)
                .Select(scy => scy.ClassYear.Grade)
                .FirstOrDefault()
-            : x.StudentClassYears
-               .OrderByDescending(scy => scy.ClassYear.SchoolYear)
-               .Select(scy => scy.ClassYear.Grade)
-               .FirstOrDefault()
+            : (request.SchoolYear.HasValue && request.SchoolYear != 0)
+               ? x.StudentClassYears
+                  .Where(scy => scy.ClassYear.SchoolYear == request.SchoolYear)
+                  .Select(scy => scy.ClassYear.Grade)
+                  .FirstOrDefault()
+               : x.StudentClassYears
+                  .OrderByDescending(scy => scy.ClassYear.SchoolYear)
+                  .Select(scy => scy.ClassYear.Grade)
+                  .FirstOrDefault()
 
                 }).ToListAsync();
 
