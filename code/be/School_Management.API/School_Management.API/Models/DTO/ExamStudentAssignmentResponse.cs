@@ -1,4 +1,4 @@
-﻿namespace School_Management.API.Models.DTO
+namespace School_Management.API.Models.DTO
 {
     public class ExamStudentAssignmentResponse
     {
@@ -6,5 +6,9 @@
         public Guid StudentId { get; set; }
         public string IdentificationNumber { get; set; } = string.Empty;
         public Guid ExamStudentAssignmentId { get; set; }
+        public string? Email { get; set; }
+        public string? ClassName { get; set; }
+        public int? Grade { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 }
