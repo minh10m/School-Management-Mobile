@@ -21,12 +21,27 @@ namespace School_Management.API.Services
         {
             var response = new DashboardStatisticsResponse();
 
-            // 1. Basic Counts (global — not filtered by year)
-            response.TotalStudents = await context.Student.CountAsync();
-            response.TotalTeachers = await context.Teacher.CountAsync();
-            response.TotalSubjects = await context.Subject.CountAsync();
-            response.TotalUsers    = await context.Users.CountAsync();
-            response.TotalEvents   = await context.Event.CountAsync();
+            // 1. Basic Counts (filtered by year where applicable)
+            response.TotalStudents = await context.StudentClassYear
+                .Where(x => x.SchoolYear == schoolYear)
+                .Select(x => x.StudentId)
+                .Distinct()
+                .CountAsync();
+
+            response.TotalTeachers = await context.Teacher
+                .Where(t => context.ClassYear.Any(c => c.SchoolYear == schoolYear && c.HomeRoomId == t.Id) ||
+                            context.ScheduleDetail.Any(sd => sd.Schedule!.SchoolYear == schoolYear && sd.TeacherSubject!.TeacherId == t.Id))
+                .CountAsync();
+
+            response.TotalSubjects = await context.Subject
+                .Where(s => context.ScheduleDetail.Any(sd => sd.Schedule!.SchoolYear == schoolYear && sd.TeacherSubject!.SubjectId == s.Id))
+                .CountAsync();
+
+            response.TotalUsers    = await context.Users.CountAsync(); // Keep global for system accounts
+            
+            response.TotalEvents   = await context.Event
+                .Where(e => e.SchoolYear == schoolYear)
+                .CountAsync();
 
             // Classes: filtered by school year
             response.TotalClasses = await context.ClassYear
