@@ -28,20 +28,16 @@ namespace School_Management.API.Services
             response.TotalUsers    = await context.Users.CountAsync();
             response.TotalEvents   = await context.Event.CountAsync();
 
-            // Classes: try current year first, fall back to all if none found
+            // Classes: filtered by school year
             response.TotalClasses = await context.ClassYear
                 .Where(x => x.SchoolYear == schoolYear).CountAsync();
-            if (response.TotalClasses == 0)
-                response.TotalClasses = await context.ClassYear.CountAsync();
 
             // 2. Finance Stats
             var feeDetails = await context.FeeDetail
                 .Where(x => x.SchoolYear == schoolYear)
                 .ToListAsync();
 
-            // Fallback: if no fee data for this year, pull all years
-            if (!feeDetails.Any())
-                feeDetails = await context.FeeDetail.ToListAsync();
+
 
             response.Finance = new FinanceStats
             {
@@ -58,12 +54,7 @@ namespace School_Management.API.Services
                 .Where(x => x.StudentClassYear.SchoolYear == schoolYear)
                 .ToListAsync();
 
-            // Fallback: if empty for this year, use all records
-            if (!attendanceData.Any())
-                attendanceData = await context.Attendance
-                    .Include(x => x.StudentClassYear)
-                        .ThenInclude(scy => scy.ClassYear)
-                    .ToListAsync();
+
 
             if (attendanceData.Any())
             {
@@ -100,12 +91,7 @@ namespace School_Management.API.Services
                 .Select(g => (double)g.Average(x => x.Value))
                 .ToListAsync();
 
-            // Fallback
-            if (!studentAverages.Any())
-                studentAverages = await context.Result
-                    .GroupBy(x => x.StudentId)
-                    .Select(g => (double)g.Average(x => x.Value))
-                    .ToListAsync();
+
 
             response.Academic = new AcademicStats
             {
@@ -120,7 +106,7 @@ namespace School_Management.API.Services
             };
 
             // 5. Recent Activities
-            response.RecentActivities = await GetRecentActivities();
+            response.RecentActivities = await GetRecentActivities(schoolYear);
 
             return response;
         }
@@ -133,13 +119,7 @@ namespace School_Management.API.Services
                 .Where(a => a.ClassYear != null && a.ClassYear.SchoolYear == schoolYear)
                 .ToListAsync();
 
-            // Fallback to all years if no assignments found for this school year
-            if (!assignments.Any())
-                assignments = await context.Assignment
-                    .Include(a => a.ClassYear)
-                    .ThenInclude(c => c.StudentClassYears)
-                    .Where(a => a.ClassYear != null)
-                    .ToListAsync();
+
 
             if (!assignments.Any()) return 0;
 
@@ -149,11 +129,7 @@ namespace School_Management.API.Services
                 .Where(s => s.Assignment != null && s.Assignment.ClassYear != null && s.Assignment.ClassYear.SchoolYear == schoolYear)
                 .CountAsync();
 
-            // Fallback total submissions
-            if (totalSubmissions == 0)
-                totalSubmissions = await context.Submission
-                    .Where(s => s.Assignment != null && s.Assignment.ClassYear != null)
-                    .CountAsync();
+
 
             return expectedSubmissions > 0 ? Math.Round((double)totalSubmissions / expectedSubmissions * 100, 2) : 0;
         }
@@ -166,12 +142,14 @@ namespace School_Management.API.Services
             return "Yếu";
         }
 
-        private async Task<List<RecentActivityDto>> GetRecentActivities()
+        private async Task<List<RecentActivityDto>> GetRecentActivities(int schoolYear)
         {
             var activities = new List<RecentActivityDto>();
 
             // Recent Payments
             var recentPayments = await context.Payment
+                .Include(p => p.FeeDetail)
+                .Where(p => p.FeeDetail != null && p.FeeDetail.SchoolYear == schoolYear)
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(5)
                 .Select(x => new RecentActivityDto
@@ -184,8 +162,11 @@ namespace School_Management.API.Services
 
             // Recent Submissions
             var recentSubmissions = await context.Submission
+                .Include(x => x.Assignment)
+                    .ThenInclude(a => a.ClassYear)
                 .Include(x => x.Student)
                 .ThenInclude(s => s.User)
+                .Where(x => x.Assignment != null && x.Assignment.ClassYear != null && x.Assignment.ClassYear.SchoolYear == schoolYear)
                 .OrderByDescending(x => x.TimeSubmit)
                 .Take(5)
                 .Select(x => new RecentActivityDto
