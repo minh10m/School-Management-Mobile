@@ -367,7 +367,7 @@ namespace School_Management.API.Repositories
 
         public async Task<(PagedResponse<ExamStudentAssignmentResponse>? data, string? message)> GetAllExamStudentAssignment(ExamStudentAssignmentFilterRequest request, Guid examScheduleDetailId)
         {
-            var examScheduleDetail = await context.ExamScheduleDetail.FirstOrDefaultAsync(x => x.Id == examScheduleDetailId);
+            var examScheduleDetail = await context.ExamScheduleDetail.Include(x => x.ExamSchedule).FirstOrDefaultAsync(x => x.Id == examScheduleDetailId);
             if (examScheduleDetail == null) return (null, "NOT_FOUND_EXAM_SCHEDULE_DETAIL");
 
             var query = context.ExamStudentAssignment.AsNoTracking().Where(x => x.ExamScheduleDetailId == examScheduleDetailId);
@@ -393,7 +393,11 @@ namespace School_Management.API.Repositories
                                             StudentId = x.StudentId,
                                             StudentName = x.Student.User.FullName,
                                             ExamStudentAssignmentId = x.Id,
-                                            IdentificationNumber = x.IdentificationNumber
+                                            IdentificationNumber = x.IdentificationNumber,
+                                            Email = x.Student.User.Email,
+                                            AvatarUrl = x.Student.User.AvatarUrl,
+                                            ClassName = x.Student.StudentClassYears.Where(sc => sc.ClassYear.SchoolYear == examScheduleDetail.ExamSchedule.SchoolYear).Select(sc => sc.ClassYear.ClassName).FirstOrDefault(),
+                                            Grade = x.Student.StudentClassYears.Where(sc => sc.ClassYear.SchoolYear == examScheduleDetail.ExamSchedule.SchoolYear).Select(sc => sc.ClassYear.Grade).FirstOrDefault()
                                         }).ToListAsync();
 
             return (new PagedResponse<ExamStudentAssignmentResponse>
